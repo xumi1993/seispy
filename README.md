@@ -4,7 +4,7 @@ Python module of seismology and  receiver functions
 
 Installation
 -------------
-###Dependencies:
+###Dependencies
   * [obspy](http://docs.obspy.org)<br />
   
 ###Installation
