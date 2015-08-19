@@ -8,7 +8,7 @@ Installation
   * [obspy](http://docs.obspy.org)<br />
   
 ###Installation
-    Python setyp.py install
+    Python setup.py install
 
 Inclusion
 --------------
