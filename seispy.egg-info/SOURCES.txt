@@ -1,11 +1,9 @@
 setup.py
 seispy/PlotR.py
-seispy/PsRF2depth.py
 seispy/__init__.py
 seispy/bootstrap.py
 seispy/decov.py
 seispy/distaz.py
-seispy/example.py
 seispy/geo.py
 seispy/makeRF4station.py
 seispy.egg-info/PKG-INFO

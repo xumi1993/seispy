@@ -11,12 +11,10 @@ import glob
 import getopt
 import sys
 import datetime
-import distaz
-import geo
+import seispy
 from obspy.taup import TauPyModel
 from scipy.signal import detrend
 from obspy.signal.filter import bandpass
-import decov
 from scipy.signal import resample
 try:
     import configparser
@@ -115,8 +113,8 @@ for evt in fid_evtlist.readlines():
     sec_evt = int(evt.split()[6])
     lat_evt = float(evt.split()[7])
     lon_evt = float(evt.split()[8])
-    dis_evt = distaz.distaz(stalat, stalon, lat_evt, lon_evt).delta
-    bazi_evt = distaz.distaz(stalat, stalon, lat_evt, lon_evt).getBaz()
+    dis_evt = seispy.distaz(stalat, stalon, lat_evt, lon_evt).delta
+    bazi_evt = seispy.distaz(stalat, stalon, lat_evt, lon_evt).getBaz()
     dep_evt = float(evt.split()[9])
     mw_evt = float(evt.split()[10])
     date_evt = datetime.datetime(year_evt, mon_evt, day_evt, hour_evt, min_evt, sec_evt)
@@ -203,7 +201,7 @@ for thiseq in eq:
         E = this_seis[0].data
         N = this_seis[1].data
         Z = this_seis[2].data
-    (this_seis[0].data, this_seis[1].data, this_seis[2].data) = geo.rotateSeisENZtoTRZ(E, N, Z, bazi)
+    (this_seis[0].data, this_seis[1].data, this_seis[2].data) = seispy.geo.rotateSeisENZtoTRZ(E, N, Z, bazi)
     this_seis[0].stats.channel = "R"
     this_seis[1].stats.channel = "T"
     this_seis[2].stats.channel = "Z"
@@ -214,7 +212,7 @@ for thiseq in eq:
 # ------- Calculate P arrival time ---#
     arrivals = model.get_travel_times(source_depth_in_km=dep, distance_in_degree=dis, phase_list=["P"])
     ttime_P = arrivals[0].time - O
-    rayp = geo.srad2skm(arrivals[0].ray_param)
+    rayp = seispy.geo.srad2skm(arrivals[0].ray_param)
     # this_seis[0].stats.sac.t1 = ttime_P
     # this_seis[1].stats.sac.t1 = ttime_P
     # this_seis[2].stats.sac.t1 = ttime_P
@@ -222,9 +220,9 @@ for thiseq in eq:
     snrbegin = np.floor((ttime_P-50)/dt)
     snrend = np.floor((ttime_P+50)/dt)
     snro = np.floor(ttime_P/dt)
-    snr_R = geo.snr(R_filter[snro:snrend], R_filter[snrbegin:snro])
-    snr_T = geo.snr(T_filter[snro:snrend], T_filter[snrbegin:snro])
-    snr_Z = geo.snr(Z_filter[snro:snrend], Z_filter[snrbegin:snro])
+    snr_R = seispy.geo.snr(R_filter[snro:snrend], R_filter[snrbegin:snro])
+    snr_T = seispy.geo.snr(T_filter[snro:snrend], T_filter[snrbegin:snro])
+    snr_Z = seispy.geo.snr(Z_filter[snro:snrend], Z_filter[snrbegin:snro])
     print(date_name, snr_R, snr_Z, ttime_P, O)
     if snr_R > gate_noise and snr_Z > gate_noise:
         extbegin = np.floor((ttime_P-time_before)/dt)
@@ -234,7 +232,7 @@ for thiseq in eq:
         Z = Z_filter[extbegin:extend+1]
         RFlength = R.shape[0]
 # --- calculate receiver functions ----#
-        (RF, RMS, it) = decov.decovit(R, Z, dt, RFlength, time_before, gauss, 400, 0.001)
+        (RF, RMS, it) = seispy.decov.decovit(R, Z, dt, RFlength, time_before, gauss, 400, 0.001)
         max_deep = np.max(np.abs(RF[np.floor((25+time_before)/dt):-1]))
         time_P1 = np.floor((-2+time_before)/dt)
         time_P2 = np.floor((2+time_before)/dt)
