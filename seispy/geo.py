@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi, mod
 from seispy import distaz
+from scipy import interpolate
 import math
 
 def sind(deg):
@@ -82,4 +83,25 @@ def latlon_from(lat1,lon1,azimuth,gcarc_dist):
     else:
         lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2)) + 180
     return lat2, lon2
+
+def extrema(x, opt='max'):
+    if opt == 'max':
+        idx = np.intersect1d(np.where(np.diff(x) > 0)[0]+1, np.where(np.diff(x) < 0)[0])
+    elif opt == 'min':
+        idx = np.intersect1d(np.where(np.diff(x) < 0)[0]+1, np.where(np.diff(x) > 0)[0])
+    else:
+        raise ImportError('Wrong Options!!!')
+    return idx
+
+def slantstack(seis, timeaxis, rayp_range, tau_range, ref_dis, dis):
+    EV_num = seis.shape()[1]
+    tmp = np.zeros([EV_num, tau_range.shape()[0]])
+    amp = np.zeros([rayp_range.shape()[0], tau_range.shape()[0]])
+    for j in range(rayp_range.shape()[0]):
+        for i in range(EV_num):
+            seis[:,i] = seis[:,i] / np.max(np.abs(seis[:,i]))
+            tps = tau_range - rayp_range[j] * (dis[i] - ref_dis)
+            tmp[i,:] = interpolate.interp1d(timeaxis, seis[:,i].T)(tps)
+        amp[j,:] = np.mean(tmp)
+    return amp
 

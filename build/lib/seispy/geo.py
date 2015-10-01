@@ -83,3 +83,12 @@ def latlon_from(lat1,lon1,azimuth,gcarc_dist):
         lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2)) + 180
     return lat2, lon2
 
+def extrema(x, opt='max'):
+    if opt == 'max':
+        idx = np.intersect1d(np.where(np.diff(x) > 0)[0]+1, np.where(np.diff(x) < 0)[0])
+    elif opt == 'min':
+        idx = np.intersect1d(np.where(np.diff(x) < 0)[0]+1, np.where(np.diff(x) > 0)[0])
+    else:
+        raise ImportError('Wrong Options!!!')
+    return idx
+

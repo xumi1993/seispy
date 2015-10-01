@@ -5,8 +5,8 @@ from scipy import interpolate
 import os
 import sys
 import getopt
-import distaz
-import scikits.bootstrap as boot
+import seispy
+import seispy.bootstrap as boot
 try:
     import configparser
     config = configparser.ConfigParser()
@@ -40,19 +40,17 @@ lat2 = float(line.split('/')[2])
 lon2 = float(line.split('/')[3])
 depthdat = config.get('FileIO', 'depthdat')
 stackfile = config.get('FileIO', 'stackfile')
-Velmod = config.get('FileIO', 'Velmod')
-stalist = config.get('FileIO', 'stalist')
 domperiod = float(config.get('para', 'domperiod'))
 Profile_width = float(config.get('para', 'Profile_width'))
 bin_radius = float(config.get('para', 'bin_radius'))
 Stack_range = np.arange(350, 751)
-azi = distaz.distaz(lat1, lon1, lat2, lon2).baz
-dis = distaz.distaz(lat1, lon1, lat2, lon2).delta
-Profile_range = np.arange(0, distaz.deg2km(dis), Profile_width)
+azi = seispy.distaz(lat1, lon1, lat2, lon2).baz
+dis = seispy.distaz(lat1, lon1, lat2, lon2).delta
+Profile_range = np.arange(0, seispy.geo.deg2km(dis), Profile_width)
 Profile_lat = []
 Profile_lon = []
 for Profile_loca in Profile_range:
-    (lat_loca, lon_loca) = distaz.latlon_from(lat1, lon1, azi, distaz.km2deg(Profile_loca))
+    (lat_loca, lon_loca) = seispy.geo.latlon_from(lat1, lon1, azi, seispy.geo.km2deg(Profile_loca))
     Profile_lat = np.append(Profile_lat, [lat_loca], axis=1)
     Profile_lon = np.append(Profile_lon, [lon_loca], axis=1)
 
@@ -70,10 +68,10 @@ for i in range(stalon_all.shape[0]):
     stalat_full = np.append(stalat_full, stalat_all[i][0])
     stalon_full = np.append(stalon_full, stalon_all[i][0])
 for i in range(stalon_all.shape[0]):
-    azi_sta = distaz.distaz(lat1, lon1, stalat_full[i], stalon_full[i]).baz
-    dis_sta = distaz.distaz(lat1, lon1, stalat_full[i], stalon_full[i]).delta
-    sta_dis = dis_sta * distaz.sind(np.abs(azi - azi_sta))
-    if sta_dis < distaz.km2deg(bin_radius+310):
+    azi_sta = seispy.distaz(lat1, lon1, stalat_full[i], stalon_full[i]).baz
+    dis_sta = seispy.distaz(lat1, lon1, stalat_full[i], stalon_full[i]).delta
+    sta_dis = dis_sta * seispy.geo.sind(np.abs(azi - azi_sta))
+    if sta_dis < seispy.geo.km2deg(bin_radius+310):
         print(RFdepth[0, i]['Station'][0], stalat_full[i], stalon_full[i])
         staidx = np.append(staidx, [i])
 
@@ -94,14 +92,13 @@ for i in range(Profile_range.shape[0]):
         for k in staidx:
             for l in range(RFdepth[0, k]['Piercelat'].shape[1]):
                 # azi_event = distaz.distaz(Profile_lat[i], Profile_lon[i], RFdepth[0, k]['Piercelat'][l, 0], RFdepth[0, k]['Piercelon'][l, 0]).baz
-                dis_event = distaz.distaz(Profile_lat[i], Profile_lon[i], RFdepth[0, k]['Piercelat'][2*Stack_range[j] + 1, l], RFdepth[0, k]['Piercelon'][2*Stack_range[j] + 1, l]).delta
+                dis_event = seispy.distaz(Profile_lat[i], Profile_lon[i], RFdepth[0, k]['Piercelat'][2*Stack_range[j], l], RFdepth[0, k]['Piercelon'][2*Stack_range[j], l]).delta
                 # pierce_interval = distaz.deg2km(dis_event) * np.abs(distaz.cosd(azi - azi_event))
-                if dis_event < distaz.km2deg(bin_radius):
-                    Amp_bin = np.append(Amp_bin, RFdepth[0, k]['moveout_correct'][2*Stack_range[j] + 1, l])
+                if dis_event < seispy.geo.km2deg(bin_radius):
+                    Amp_bin = np.append(Amp_bin, RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l])
                     Event_count = Event_count + 1
         if Event_count > 1:
-            straptimes = np.round(Event_count*1.5)
-            print(Event_count,straptimes)
+            straptimes = int(Event_count*2)
             ci = boot.ci(Amp_bin, n_samples=straptimes, method='pi')
             mu = np.average(Amp_bin)
         else:
