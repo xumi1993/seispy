@@ -7,6 +7,7 @@ import sys
 import getopt
 import seispy
 import seispy.bootstrap as boot
+import statsmodels.api as sm
 try:
     import configparser
     config = configparser.ConfigParser()
@@ -40,10 +41,11 @@ lat2 = float(line.split('/')[2])
 lon2 = float(line.split('/')[3])
 depthdat = config.get('FileIO', 'depthdat')
 stackfile = config.get('FileIO', 'stackfile')
-domperiod = float(config.get('para', 'domperiod'))
+# domperiod = float(config.get('para', 'domperiod'))
 Profile_width = float(config.get('para', 'Profile_width'))
 bin_radius = float(config.get('para', 'bin_radius'))
-Stack_range = np.arange(350, 751)
+Stack_range = np.arange(300, 751)
+smooth_para = 0.02
 azi = seispy.distaz(lat1, lon1, lat2, lon2).baz
 dis = seispy.distaz(lat1, lon1, lat2, lon2).delta
 Profile_range = np.arange(0, seispy.geo.deg2km(dis), Profile_width)
@@ -51,8 +53,11 @@ Profile_lat = []
 Profile_lon = []
 for Profile_loca in Profile_range:
     (lat_loca, lon_loca) = seispy.geo.latlon_from(lat1, lon1, azi, seispy.geo.km2deg(Profile_loca))
-    Profile_lat = np.append(Profile_lat, [lat_loca], axis=1)
-    Profile_lon = np.append(Profile_lon, [lon_loca], axis=1)
+#    Profile_lat = np.append(Profile_lat, [lat_loca], axis=1)
+#    Profile_lon = np.append(Profile_lon, [lon_loca], axis=1)
+    Profile_lat = np.append(Profile_lat, lat_loca)
+    Profile_lon = np.append(Profile_lon, lon_loca)
+
 
 # ----- Read depth .mat file -----#
 depthmat = sio.loadmat(depthdat)
@@ -76,19 +81,26 @@ for i in range(stalon_all.shape[0]):
         staidx = np.append(staidx, [i])
 
 # stacking
-fid = open(stackfile, 'w+')
+Stack_data = np.zeros([Profile_range.shape[0],7], dtype=np.object)
+#fid = open(stackfile, 'w+')
 for i in range(Profile_range.shape[0]):
-    fid.write('>\n')
+#    fid.write('>\n')
     print('calculate the RF stacks at the distance of '+str(Profile_range[i])+' km along the profile-------')
+    mu_arr = np.zeros([Stack_range.shape[0],1])
+    ci_arr = np.zeros([Stack_range.shape[0],2])
+    Event_count_arr = np.zeros([Stack_range.shape[0],1])
     for j in range(Stack_range.shape[0]):
         print('No.'+str(i)+'/'+str(Profile_range.shape[0])+'---- at '+str(Stack_range[j])+'km depth.')
         Event_count = 0
         Amp_bin = []
-        if j == 0:
-            mu = np.nan
-            ci = np.array([np.nan, np.nan])
-            fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.5f %-8.5f %-8.5f %d\n' % (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
-            continue
+#        if j == 0:
+#            mu = np.nan
+#            ci = np.array([np.nan, np.nan])
+#            fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.5f %-8.5f %-8.5f %d\n' % (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
+#            mu_arr[j][0] = np.nan
+#            ci_arr[j] = np.array([np.nan, np.nan])
+#            Event_count_arr[j][0] = 0
+#            continue
         for k in staidx:
             for l in range(RFdepth[0, k]['Piercelat'].shape[1]):
                 # azi_event = distaz.distaz(Profile_lat[i], Profile_lon[i], RFdepth[0, k]['Piercelat'][l, 0], RFdepth[0, k]['Piercelon'][l, 0]).baz
@@ -104,4 +116,18 @@ for i in range(Profile_range.shape[0]):
         else:
             mu = 0
             ci = np.zeros(2)
-        fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.5f %-8.5f %-8.5f %d\n' % (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
+#        fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.5f %-8.5f %-8.5f %d\n' % (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
+        mu_arr[j][0] = mu
+        ci_arr[j] = ci
+        Event_count_arr[j][0] = Event_count
+    mu_arr = sm.nonparametric.lowess(mu_arr[:, 0], Stack_range, frac=smooth_para)[:, 1]
+    ci_arr[:, 0] = sm.nonparametric.lowess(ci_arr[:, 0], Stack_range, frac=smooth_para)[:, 1]
+    ci_arr[:, 1] = sm.nonparametric.lowess(ci_arr[:, 1], Stack_range, frac=smooth_para)[:, 1]
+    Stack_data[i][0] = Profile_lat[i]
+    Stack_data[i][1] = Profile_lon[i]
+    Stack_data[i][2] = Profile_range[i]
+    Stack_data[i][3] = Stack_range
+    Stack_data[i][4] = mu_arr
+    Stack_data[i][5] = ci_arr
+    Stack_data[i][6] = Event_count_arr
+sio.savemat(stackfile,{'Stack_data':Stack_data})
