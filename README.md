@@ -8,8 +8,9 @@ Installation
   * [obspy](http://docs.obspy.org)<br />
   
 ###Installation
-    Python setup.py install
-
+```Python
+Python setup.py install
+```
 Inclusion
 --------------
   * seispy.distaz: Calculate distance and azimuth (by [the lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/)).<br />
