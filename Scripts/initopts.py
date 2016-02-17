@@ -12,3 +12,5 @@ class opts:
         self.idx_bazi = []
         self.baz = []
         self.filenames = []
+        self.path = ""
+        self.staname = ""

@@ -2,7 +2,7 @@ __author__ = 'xumj'
 
 
 import matplotlib.pyplot as plt
-import os, sys, glob
+import os, sys, glob, re
 import obspy
 import numpy as np
 from matplotlib.widgets import Button
@@ -14,14 +14,14 @@ def get_pos():
     return screen_width, screen_height
 
 def get_sac():
-    path = '../53047'
+    path = sys.argv[1]
     filesnames = glob.glob(path+'/*_R.sac')
     rffiles = obspy.read(path+'/*_R.sac')
-    return rffiles.sort(['starttime']), filesnames
+    return rffiles.sort(['starttime']), filesnames, path
 
 def indexpags(maxidx, evt_num):
     axpages = int(np.floor(evt_num/maxidx)+1)
-    print(evt_num)
+    print('A total of '+str(evt_num)+' PRFs')
     rfidx = []
     for i in range(axpages-1):
         rfidx.append(range(maxidx*i, maxidx*(i+1)))
@@ -80,7 +80,22 @@ class plotrffig():
         opts = self.opts
         badidx = np.where(self.goodrf == 0)[0]
         for i in badidx:
-            print(opts.filenames[int(i)])
+            print("Reject PRF of "+opts.filenames[int(i)])
+        with open(os.path.join(opts.path, opts.staname+"finiallist.dat"), 'w+') as fid:
+            for i in range(opts.evt_num):
+                if self.goodrf[i] == 0:
+                    continue
+                evtname = os.path.basename(opts.filenames[i])
+                evtname = re.split('[_|.]\w[_|.]',evtname)[0]
+                evla = opts.rffiles[i].stats.sac.evla
+                evlo = opts.rffiles[i].stats.sac.evlo
+                evdp = opts.rffiles[i].stats.sac.evdp
+                dist = opts.rffiles[i].stats.sac.gcarc
+                baz = opts.rffiles[i].stats.sac.baz
+                rayp = opts.rffiles[i].stats.sac.user0
+                mag = opts.rffiles[i].stats.sac.mag
+                gauss = opts.rffiles[i].stats.sac.user1
+                fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (evtname, 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
         sys.exit(0)
 
     def onclick(self, event):
@@ -102,7 +117,7 @@ class plotrffig():
         opts = self.opts
         bound = np.zeros(opts.RFlength)
         time_axis = np.linspace(opts.b, opts.e, opts.RFlength)
-        for i in opts.idx_bazi:
+        for i in range(opts.evt_num):
             rf = opts.rffiles[i]
             amp_axis = rf.data*opts.enf+i+1
             self.lines[i], = ax.plot(time_axis, amp_axis, color="black", linewidth=0.2)
@@ -153,9 +168,10 @@ def main():
     opts.enf = 5
     opts.xlim = [-2, 30]
     opts.ylim = [0, 22]
-    opts.rffiles, opts.filenames = get_sac()
+    opts.rffiles, opts.filenames, opts.path = get_sac()
     opts.evt_num = len(opts.rffiles)
     rf = opts.rffiles[0]
+    opts.staname = rf.stats.station
     dt = rf.stats.delta
     opts.b = rf.stats.sac.b
     opts.e = rf.stats.sac.e
@@ -166,6 +182,7 @@ def main():
     opts.filenames = [file[0] for file in tmp_filenames]
     opts.baz = np.sort(bazi)
     opts.idx_bazi = np.argsort(bazi)
+    opts.rffiles = [opts.rffiles[i] for i in opts.idx_bazi]
     plotrf = plotrffig(opts)
 
 

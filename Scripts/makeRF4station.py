@@ -252,7 +252,10 @@ for thiseq in eq:
                 this_seis[i].stats.sac.baz = bazi
                 this_seis[i].stats.sac.gcarc = dis
                 this_seis[i].stats.sac.user0 = rayp
-                this_seis[i].stats.sac.t1 = time_before
+                this_seis[i].stats.sac.user1 = gauss
+                this_seis[i].stats.sac.user2 = freqmin
+                this_seis[i].stats.sac.user3 = freqmax
+                this_seis[i].stats.sac.a = time_before
             if not os.path.exists(out_path):
                 os.makedirs(out_path)
             this_seis[0].write(os.path.join(out_path, date_name+'.'+staname+'.R.SAC'), 'SAC')
