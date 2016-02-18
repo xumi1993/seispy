@@ -175,8 +175,8 @@ class plotrffig():
         print('Plotting Figure of '+opts.staname)
         for i in range(opts.evt_num):
             if self.goodrf[i] == 0:
-                filenames.remove(filenames[i])
-                st.remove(st[i])
+                filenames.remove(opts.filenames[i])
+                st.remove(opts.rffiles[i])
         plotrf.plot_R(st, filenames, opts.image_path, opts.staname)
         print("Figure has saved into %s" % opts.image_path)
         
