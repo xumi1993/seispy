@@ -2,23 +2,51 @@ __author__ = 'xumj'
 
 
 import matplotlib.pyplot as plt
-import os, sys, glob, re
+import os, sys, glob, re, shutil
 import obspy
 import numpy as np
+import getopt
 from matplotlib.widgets import Button
 from operator import itemgetter
 import initopts
+import plotrf
+try:
+    import configparser
+    config = configparser.ConfigParser()
+except:
+    import ConfigParser
+    config = ConfigParser.ConfigParser()
 
 def get_pos():
     (screen_width, screen_height) = plt.get_current_fig_manager().canvas.get_width_height()
     return screen_width, screen_height
 
 def get_sac():
-    path = sys.argv[1]
-    filesnames = glob.glob(path+'/*_R.sac')
-    rffiles = obspy.read(path+'/*_R.sac')
-    trffiles = obspy.read(path+'/*_T.sac')
-    return rffiles.sort(['starttime']), trffiles.sort(['starttime']), filesnames, path
+    for o in sys.argv[1:]:
+        if os.path.isfile(o):
+            head = o
+            break
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "S:")
+    except:
+        print("invalid argument")
+        sys.exit(1)
+    for op, value in opts:
+        if op == "-S":
+            staname = value
+        else:
+            print("invalid argument")
+            sys.exit(1)
+    config.read(head)
+    image_path = config.get('path', 'image_path')
+    path = config.get('path', 'RF_path')
+    cut_path = config.get('path', 'out_path')
+    path = os.path.join(path, staname)
+    cut_path = os.path.join(cut_path, staname)
+    filesnames = glob.glob(os.path.join(path, '*_R.sac'))
+    rffiles = obspy.read(os.path.join(path, '*_R.sac'))
+    trffiles = obspy.read(os.path.join(path, '*_T.sac'))
+    return rffiles.sort(['starttime']), trffiles.sort(['starttime']), filesnames, path, image_path, cut_path, staname
 
 def indexpags(maxidx, evt_num):
     axpages = int(np.floor(evt_num/maxidx)+1)
@@ -31,9 +59,6 @@ def indexpags(maxidx, evt_num):
 
 class plotrffig():    
     fig = plt.figure(figsize=(20, 11), dpi=60)
-#    swidth, sheight = plt.get_current_fig_manager().canvas.get_width_height()
-#    fig.canvas._master.geometry('%dx%d+%d+0' % (int(swidth/1.7), sheight, int((swidth-int(swidth/1.7))/2)))
-#    fig.set_size_inches(int(swidth/1.7), sheight)
     axnext = plt.axes([0.81, 0.92, 0.07, 0.03])
     axprevious = plt.axes([0.71, 0.92, 0.07, 0.03])
     axfinish = plt.axes([0.91, 0.92, 0.07, 0.03])
@@ -53,7 +78,7 @@ class plotrffig():
     bnext = Button(axnext, 'Next')
     bprevious = Button(axprevious, 'Previous')
     bfinish = Button(axfinish, 'Finish')
-    bplot = Button(axPlot, 'Plot')
+    bplot = Button(axPlot, 'Plot RFs')
 
     def __init__(self, opts):
         self.opts = opts
@@ -86,7 +111,7 @@ class plotrffig():
         self.bnext.on_clicked(self.butnext)
         self.bprevious.on_clicked(self.butprevious)
         self.bfinish.on_clicked(self.finish)
-#        self.bplot.on_clicked(self.plot)
+        self.bplot.on_clicked(self.plot)
         self.fig.canvas.mpl_connect('button_press_event', self.onclick)
         ax.plot([0, 0], [0, axpages*opts.maxidx], color="black")
         axt.plot([0, 0], [0, axpages*opts.maxidx], color="black")
@@ -100,14 +125,16 @@ class plotrffig():
     def finish(self, event):
         opts = self.opts
         badidx = np.where(self.goodrf == 0)[0]
-        for i in badidx:
-            print("Reject PRF of "+opts.filenames[int(i)])
+        print("%d RFs are rejected" % len(badidx))
         with open(os.path.join(opts.path, opts.staname+"finallist.dat"), 'w+') as fid:
             for i in range(opts.evt_num):
-                if self.goodrf[i] == 0:
-                    continue
                 evtname = os.path.basename(opts.filenames[i])
                 evtname = re.split('[_|.]\w[_|.]',evtname)[0]
+                if self.goodrf[i] == 0:
+                    os.system("rm -f %s" % os.path.join(opts.path, evtname+'*.sac'))
+                    os.system("rm -f %s" % os.path.join(opts.cut_path, evtname+'*.SAC'))
+                    print("Reject PRF of "+evtname)
+                    continue
                 evla = opts.rffiles[i].stats.sac.evla
                 evlo = opts.rffiles[i].stats.sac.evlo
                 evdp = opts.rffiles[i].stats.sac.evdp
@@ -117,6 +144,7 @@ class plotrffig():
                 mag = opts.rffiles[i].stats.sac.mag
                 gauss = opts.rffiles[i].stats.sac.user1
                 fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (evtname, 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
+        shutil.copy(os.path.join(opts.path, opts.staname+"finallist.dat"), os.path.join(opts.cut_path, opts.staname+"finallist.dat"))
         sys.exit(0)
 
     def onclick(self, event):
@@ -126,12 +154,14 @@ class plotrffig():
         if click_idx > self.opts.evt_num:
             return
         if self.goodrf[click_idx-1] == 1:
+            print("Selected "+os.path.basename(self.opts.filenames[click_idx-1]))
             self.goodrf[click_idx-1] = 0
             self.wvfillpos[click_idx-1].set_facecolor('gray')
             self.wvfillnag[click_idx-1].set_facecolor('gray')
             self.twvfillpos[click_idx-1].set_facecolor('gray')
             self.twvfillnag[click_idx-1].set_facecolor('gray')
         else:
+            print("Canceled "+os.path.basename(self.opts.filenames[click_idx-1]))
             self.goodrf[click_idx-1] = 1
             self.wvfillpos[click_idx-1].set_facecolor('red')
             self.wvfillnag[click_idx-1].set_facecolor('blue')
@@ -160,7 +190,19 @@ class plotrffig():
     def plotbaz(self):
         self.ax_baz.scatter(self.opts.baz, np.arange(self.opts.evt_num)+1)
     
-#    def plot(self):
+    def plot(self, event):
+        opts = self.opts
+        rst = opts.rffiles.copy()
+        tst = opts.trffiles.copy()
+        filenames = opts.filenames.copy()
+        print('Plotting Figure of '+opts.staname)
+        for i in range(opts.evt_num):
+            if self.goodrf[i] == 0:
+                filenames.remove(filenames[i])
+                rst.remove(rst[i])
+                tst.remove(tst[i])
+        plotrf.plot_RT(rst, tst, filenames, opts.image_path, opts.staname)
+        print("Figure has saved into %s" % opts.image_path)
         
 
     def butprevious(self, event):
@@ -215,10 +257,9 @@ def main():
     opts.enf = 5
     opts.xlim = [-2, 30]
     opts.ylim = [0, 22]
-    opts.rffiles, opts.trffiles, opts.filenames, opts.path = get_sac()
+    opts.rffiles, opts.trffiles, opts.filenames, opts.path, opts.image_path, opts.cut_path, opts.staname = get_sac()
     opts.evt_num = len(opts.rffiles)
     rf = opts.rffiles[0]
-    opts.staname = rf.stats.station
     dt = rf.stats.delta
     opts.b = rf.stats.sac.b
     opts.e = rf.stats.sac.e

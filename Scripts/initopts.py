@@ -16,3 +16,4 @@ class opts:
         self.path = ""
         self.staname = ""
         image_path = ""
+        cut_path = ""
