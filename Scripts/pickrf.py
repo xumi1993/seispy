@@ -123,6 +123,8 @@ class plotrffig():
         if event.inaxes != self.ax and event.inaxes != self.axt:
             return
         click_idx = int(np.round(event.ydata))
+        if click_idx > self.opts.evt_num:
+            return
         if self.goodrf[click_idx-1] == 1:
             self.goodrf[click_idx-1] = 0
             self.wvfillpos[click_idx-1].set_facecolor('gray')

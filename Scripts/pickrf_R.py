@@ -8,16 +8,33 @@ import numpy as np
 from matplotlib.widgets import Button
 from operator import itemgetter
 import initopts
+import plotrf
+try:
+    import configparser
+    config = configparser.ConfigParser()
+except:
+    import ConfigParser
+    config = ConfigParser.ConfigParser()
+
 
 def get_pos():
     (screen_width, screen_height) = plt.get_current_fig_manager().canvas.get_width_height()
     return screen_width, screen_height
 
 def get_sac():
-    path = sys.argv[1]
+    for op in sys.argv[1:]:
+        if os.path.isdir(op):
+            path = op
+        elif os.path.isfile(op):
+            head = op
+        else:
+            print("Error: No such file or directory")
+            sys.exit(1)
     filesnames = glob.glob(path+'/*_R.sac')
     rffiles = obspy.read(path+'/*_R.sac')
-    return rffiles.sort(['starttime']), filesnames, path
+    config.read(head)
+    image_path = config.get('path', 'image_path')
+    return rffiles.sort(['starttime']), filesnames, path, image_path
 
 def indexpags(maxidx, evt_num):
     axpages = int(np.floor(evt_num/maxidx)+1)
@@ -34,16 +51,19 @@ class plotrffig():
     axnext = plt.axes([0.81, 0.92, 0.07, 0.03])
     axprevious = plt.axes([0.71, 0.92, 0.07, 0.03])
     axfinish = plt.axes([0.91, 0.92, 0.07, 0.03])
+    axPlot = plt.axes([0.1, 0.92, 0.07, 0.03])
     ax = plt.axes([0.1, 0.05, 0.6, 0.85])
     ax_baz = plt.axes([0.75, 0.05, 0.2, 0.85])
     ax.grid()
     ax_baz.grid()
     ax.set_ylabel("Event")
     ax.set_xlabel("Time after P (s)")
+    ax.set_title("R component")
     ax_baz.set_xlabel("Backazimuth (\N{DEGREE SIGN})")
     bnext = Button(axnext, 'Next')
     bprevious = Button(axprevious, 'Previous')
     bfinish = Button(axfinish, 'Finish')
+    bplot = Button(axPlot, 'Plot RFs')
 
     def __init__(self, opts):
         self.opts = opts
@@ -70,6 +90,7 @@ class plotrffig():
         self.bnext.on_clicked(self.butnext)
         self.bprevious.on_clicked(self.butprevious)
         self.bfinish.on_clicked(self.finish)
+        self.bplot.on_clicked(self.plot)
         self.fig.canvas.mpl_connect('button_press_event', self.onclick)
         ax.plot([0, 0], [0, opts.evt_num], color="black")
         ax.set_xlim(opts.xlim[0], opts.xlim[1])
@@ -100,9 +121,12 @@ class plotrffig():
         sys.exit(0)
 
     def onclick(self, event):
-        if not self.ax == event.inaxes:
+        if event.inaxes != self.ax:
             return
         click_idx = int(np.round(event.ydata))
+        if click_idx > self.opts.evt_num:
+            return
+        print("Selected "+self.opts.filenames[click_idx-1])
         if self.goodrf[click_idx-1] == 1:
             self.goodrf[click_idx-1] = 0
             self.wvfillpos[click_idx-1].set_facecolor('gray')
@@ -128,7 +152,18 @@ class plotrffig():
     def plotbaz(self):
         self.ax_baz.scatter(self.opts.baz, np.arange(self.opts.evt_num)+1)
 
-
+    def plot(self, event):
+        opts = self.opts
+        st = opts.rffiles.copy()
+        filenames = opts.filenames.copy()
+        print('Plotting Figure of '+opts.staname)
+        for i in range(opts.evt_num):
+            if self.goodrf[i] == 0:
+                filenames.remove(filenames[i])
+                st.remove(st[i])
+        plotrf.plot_R(st, filenames, opts.image_path)
+        print("FIgure has saved into %s" % opts.image_path)
+        
     def butprevious(self, event):
         opts = self.opts
         ax = self.ax
@@ -175,7 +210,7 @@ def main():
     opts.enf = 5
     opts.xlim = [-2, 30]
     opts.ylim = [0, 22]
-    opts.rffiles, opts.filenames, opts.path = get_sac()
+    opts.rffiles, opts.filenames, opts.path, opts.image_path = get_sac()
     opts.evt_num = len(opts.rffiles)
     rf = opts.rffiles[0]
     opts.staname = rf.stats.station

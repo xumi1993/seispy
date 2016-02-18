@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 def Usage():
-   print('./makeRF4station -Sstation/slat/slon -Yyear1/month1/day1/year2/month2/day2 -Ccomp -T+N+E para.cfg')
+   print('./makeRF4station -Sstation/slat/slon -Yyear1/month1/day1/year2/month2/day2 -Ccomp [-M] [-T+N+E] [-r] para.cfg')
 
 import numpy as np
 import obspy
@@ -27,7 +27,7 @@ except:
 # ------- Get arguments --------#
 #################################
 try:
-   opts, args = getopt.getopt(sys.argv[1:], "S:Y:C:T:")
+   opts, args = getopt.getopt(sys.argv[1:], "S:Y:C:T:Mr")
 except:
     print('Arguments are not found!')
     Usage()
@@ -42,7 +42,8 @@ ismtz = 0
 ist = 1
 for op, value in opts:
     if op == "-S":
-       station = value
+       staname = value
+#       station = value
     elif op == "-M":
        ismtz = 1
     elif op == "-Y":
@@ -53,7 +54,7 @@ for op, value in opts:
         change_chan = value
         change_E = change_chan.find("E")
         change_N = change_chan.find("N")
-    elif op == "r":
+    elif op == "-r":
         ist = 0
     else:
        Usage()
@@ -69,9 +70,9 @@ for o in sys.argv[1:]:
 # --------- Get Para -----------#
 #################################
 model = TauPyModel(model="iasp91")
-staname = station.split('/')[0]
-stalat = float(station.split('/')[1])
-stalon = float(station.split('/')[2])
+#staname = station.split('/')[0]
+#stalat = float(station.split('/')[1])
+#stalon = float(station.split('/')[2])
 yearrange1 = int(date_str.split('/')[0])
 monthrange1 = int(date_str.split('/')[1])
 dayrange1 = int(date_str.split('/')[2])
@@ -109,6 +110,9 @@ fid_evtlist = open(evt_list, 'r')
 # --------- Search eq ----------#
 #################################
 eq_lst = []
+ex_sac = obspy.read(glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*.[Ss][Aa][Cc]'))[0])[0]
+stalat = ex_sac.stats.sac.stla
+stalon = ex_sac.stats.sac.stlo
 for evt in fid_evtlist.readlines():
     evt = evt.strip('\n')
     year_evt = int(evt.split()[0])
@@ -251,7 +255,7 @@ for thiseq in eq:
            cti = RMS[-1] < 0.2 and max_deep < max_P*0.3 and max_P == np.max(np.abs(RF)) and max_P < 1
         if cti:
             print("----"+staname+"-----"+date_name+"-----")
-            tRF, = seispy.decov.decovit(T, Z, dt, RFlength, time_before, gauss, 400, 0.001)
+            tRF, tRMS, tit = seispy.decov.decovit(T, Z, dt, RFlength, time_before, gauss, 400, 0.001)
             if RFlength != newlength:
                 RF = resample(RF, newlength)
                 tRF = resample(tRF, newlength)
@@ -281,7 +285,7 @@ for thiseq in eq:
             RF_R.data = RF
             RF_R.write(os.path.join(RF_path,  date_name+'_P_R.sac'), 'SAC')
             if ist:
-                RF_T = this_seis[0].copy()
+                RF_T = this_seis[1].copy()
                 RF_T.stats.sac.user1 = gauss
                 RF_T.stats.sac.b = -time_before
                 RF_T.data = tRF

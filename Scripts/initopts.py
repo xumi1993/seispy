@@ -15,3 +15,4 @@ class opts:
         self.filenames = []
         self.path = ""
         self.staname = ""
+        image_path = ""

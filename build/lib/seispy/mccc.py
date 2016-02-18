@@ -24,8 +24,8 @@ def mccc(seis, dt, twin=0):
         for j in np.arange(i+1, ns):
             ffjs = fft_all[j]
 #            ffjs = np.fft.fft(seis[j].data, nt)
-            ccf = np.fft.ifft(ffis*ffjs, nt)
-            tcc[i, j] = np.argmax(ccf.real*mask)
+            ccf = np.fft.ifft(ffis*ffjs, nt).real*mask
+            tcc[i, j] = np.argmax(ccf)
 
     (row, col) = np.where(tcc > nt/2)
     for i in range(row.shape[0]):
