@@ -38,9 +38,13 @@ if opts == []:
 
 change_E = 0
 change_N = 0
+ismtz = 0
+ist = 1
 for op, value in opts:
     if op == "-S":
        station = value
+    elif op == "-M":
+       ismtz = 1
     elif op == "-Y":
        date_str = value
     elif op == "-C":
@@ -49,6 +53,8 @@ for op, value in opts:
         change_chan = value
         change_E = change_chan.find("E")
         change_N = change_chan.find("N")
+    elif op == "r":
+        ist = 0
     else:
        Usage()
        sys.exit(1)
@@ -145,6 +151,7 @@ for nowevt in eq_lst:
             date_sac = datetime.datetime(year_sac, mon_sac, day_sac, hour_sac, min_sac, sec_sac) + datetime.timedelta(seconds=60)
         else:
             date_sac = datetime.datetime(year_sac, mon_sac, day_sac, hour_sac, min_sac, sec_sac)
+        
         # if nowevt[0] + datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=searchchdt) <= date_sac <= nowevt[0] + datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=searchchdt):
         if date_sac - datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=searchchdt) <= nowevt[0] <= date_sac - datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=searchchdt):
             print(date_sac, nowevt[0])
@@ -166,6 +173,7 @@ for thiseq in eq:
     bazi = thiseq[6]
     dis = thiseq[5]
     dep = thiseq[4]
+    mag = thiseq[7]
     O = thiseq[-1]
     try:
         this_seis = obspy.core.read(os.path.join(data_path, staname, '*'+date_name+'*.[Ss][Aa][Cc]'))
@@ -237,10 +245,16 @@ for thiseq in eq:
         time_P1 = np.floor((-2+time_before)/dt)
         time_P2 = np.floor((2+time_before)/dt)
         max_P = np.max(RF[time_P1:time_P2])
-        if RMS[-1] < 0.2 and max_deep < max_P*0.3 and max_P == np.max(np.abs(RF)) and max_P < 1:
+        if ismtz == 0:
+           cti = max_P == np.max(np.abs(RF)) and max_P < 1
+        else:
+           cti = RMS[-1] < 0.2 and max_deep < max_P*0.3 and max_P == np.max(np.abs(RF)) and max_P < 1
+        if cti:
             print("----"+staname+"-----"+date_name+"-----")
+            tRF, = seispy.decov.decovit(T, Z, dt, RFlength, time_before, gauss, 400, 0.001)
             if RFlength != newlength:
                 RF = resample(RF, newlength)
+                tRF = resample(tRF, newlength)
             this_seis[0].data = this_seis[0].data[extbegin:extend+1]
             this_seis[1].data = this_seis[1].data[extbegin:extend+1]
             this_seis[2].data = this_seis[2].data[extbegin:extend+1]
@@ -252,17 +266,29 @@ for thiseq in eq:
                 this_seis[i].stats.sac.baz = bazi
                 this_seis[i].stats.sac.gcarc = dis
                 this_seis[i].stats.sac.user0 = rayp
-                this_seis[i].stats.sac.user1 = gauss
                 this_seis[i].stats.sac.user2 = freqmin
                 this_seis[i].stats.sac.user3 = freqmax
                 this_seis[i].stats.sac.a = time_before
+                this_seis[i].stats.sac.mag = mag
             if not os.path.exists(out_path):
                 os.makedirs(out_path)
             this_seis[0].write(os.path.join(out_path, date_name+'.'+staname+'.R.SAC'), 'SAC')
             this_seis[1].write(os.path.join(out_path, date_name+'.'+staname+'.T.SAC'), 'SAC')
             this_seis[2].write(os.path.join(out_path, date_name+'.'+staname+'.Z.SAC'), 'SAC')
-            np.savetxt(os.path.join(RF_path, date_name+'_P_R.dat'), RF, fmt='%10.8f')
-            fid_filallist.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (date_name, 'P', thiseq[2], thiseq[3], dep, dis, bazi, rayp, thiseq[7], gauss))
+            RF_R = this_seis[0].copy()
+            RF_R.stats.sac.user1 = gauss
+            RF_R.stats.sac.b = -time_before
+            RF_R.data = RF
+            RF_R.write(os.path.join(RF_path,  date_name+'_P_R.sac'), 'SAC')
+            if ist:
+                RF_T = this_seis[0].copy()
+                RF_T.stats.sac.user1 = gauss
+                RF_T.stats.sac.b = -time_before
+                RF_T.data = tRF
+                RF_T.write(os.path.join(RF_path,  date_name+'_P_T.sac'), 'SAC')
+
+#            np.savetxt(os.path.join(RF_path, date_name+'_P_R.dat'), RF, fmt='%10.8f')
+#            fid_filallist.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (date_name, 'P', thiseq[2], thiseq[3], dep, dis, bazi, rayp, thiseq[7], gauss))
 fid_filallist.close()
 # os.popen('cp '+os.path.join(RF_path, staname+'finallist.dat')+' '+out_path)
 # os.popen('python /Users/xumj/Researches/PyCCP/PlotR.py -S%s -I%s -O%s -N%d -A80 -T%5.2f/%5.2f' % (staname, RF_path, image_path, newlength, time_before, time_after))

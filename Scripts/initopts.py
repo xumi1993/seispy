@@ -5,6 +5,7 @@ class opts:
         self.xlim = [-2, 30]
         self.ylim = [0, 22]
         self.rffiles = []
+        self.trffiles = []
         self.b = 0
         self.e = 0
         self.RFlength = 0

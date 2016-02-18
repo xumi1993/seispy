@@ -64,8 +64,8 @@ def srad2skm(srad):
 
 def rotateSeisENZtoTRZ( E, N, Z, BAZ ):
     angle = mod(BAZ+180, 360)
-    R = N*distaz.cosd(angle) + E*distaz.sind(angle)
-    T = E*distaz.cosd(angle) - N*distaz.sind(angle)
+    R = N*cosd(angle) + E*sind(angle)
+    T = E*cosd(angle) - N*sind(angle)
     return R, T, Z
 
 def rssq(x):
