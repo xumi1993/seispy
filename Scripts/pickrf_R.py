@@ -179,6 +179,12 @@ class plotrffig():
                 st.remove(opts.rffiles[i])
         plotrf.plot_R(st, filenames, opts.image_path, opts.staname)
         print("Figure has saved into %s" % opts.image_path)
+        if sys.platform == 'darwin':
+            os.system('open %s' % os.path.join(opts.image_path, opts.staname+'_R.ps'))
+        elif sys.platform == 'linux':
+            os.system('xdg-open %s' % os.path.join(opts.image_path, opts.staname+'_R.ps'))
+        else:
+            print('Cannot open the .ps file')
         
     def butprevious(self, event):
         opts = self.opts
