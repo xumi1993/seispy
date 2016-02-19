@@ -110,7 +110,7 @@ fid_evtlist = open(evt_list, 'r')
 # --------- Search eq ----------#
 #################################
 eq_lst = []
-ex_sac = obspy.read(glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*.[Ss][Aa][Cc]'))[0])[0]
+ex_sac = obspy.read(glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*[Ss][Aa][Cc]'))[0])[0]
 stalat = ex_sac.stats.sac.stla
 stalon = ex_sac.stats.sac.stlo
 for evt in fid_evtlist.readlines():
@@ -138,7 +138,7 @@ for evt in fid_evtlist.readlines():
 eq = []
 for nowevt in eq_lst:
     find_result = []
-    for sac in glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*.[Ss][Aa][Cc]')):
+    for sac in glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*[Ss][Aa][Cc]')):
         sacname = os.path.basename(sac)
         date_name = re.search("\d{4}\D\d{3}\D\d{2}\D\d{2}\D\d{2}", sacname).group()
         date_name_sp = re.split('\D', date_name)
