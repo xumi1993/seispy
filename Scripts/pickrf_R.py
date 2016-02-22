@@ -1,3 +1,4 @@
+#!/usr/bib/env python
 __author__ = 'xumj'
 
 
