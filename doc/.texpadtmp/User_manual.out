@@ -2,3 +2,15 @@
 \BOOKMARK [0][-]{chapter.2}{Installation}{}% 2
 \BOOKMARK [1][-]{section.2.1}{Dependencies}{chapter.2}% 3
 \BOOKMARK [1][-]{section.2.2}{Installation}{chapter.2}% 4
+\BOOKMARK [0][-]{chapter.3}{Tutorial\040of\040calculating\040receiver\040functions}{}% 5
+\BOOKMARK [1][-]{section.3.1}{A\040function\040of\040iterative\040deconvolution}{chapter.3}% 6
+\BOOKMARK [2][-]{subsection.3.1.1}{decovit}{section.3.1}% 7
+\BOOKMARK [2][-]{subsection.3.1.2}{gaussFilter}{section.3.1}% 8
+\BOOKMARK [1][-]{section.3.2}{Calculating\040receiver\040function\040in\040a\040batch}{chapter.3}% 9
+\BOOKMARK [2][-]{subsection.3.2.1}{Usage}{section.3.2}% 10
+\BOOKMARK [2][-]{subsection.3.2.2}{Synopsis}{section.3.2}% 11
+\BOOKMARK [2][-]{subsection.3.2.3}{Example}{section.3.2}% 12
+\BOOKMARK [1][-]{section.3.3}{Filter\040receiver\040functions\040manually}{chapter.3}% 13
+\BOOKMARK [2][-]{subsection.3.3.1}{Usage}{section.3.3}% 14
+\BOOKMARK [2][-]{subsection.3.3.2}{Synopsis}{section.3.3}% 15
+\BOOKMARK [2][-]{subsection.3.3.3}{Interface}{section.3.3}% 16

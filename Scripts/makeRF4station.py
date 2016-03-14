@@ -95,7 +95,7 @@ gate_dis1 = float(config.get('para', 'gate_dis1'))
 gate_dis2 = float(config.get('para', 'gate_dis2'))
 time_before = float(config.get('para', 'time_before'))
 time_after = float(config.get('para', 'time_after'))
-searchchdt = float(config.get('para', 'searchchdt'))
+tolerance = float(config.get('para', 'tolerance'))
 offset = float(config.get('para', 'offset'))
 gate_noise = float(config.get('para', 'gate_noise'))
 gauss = float(config.get('para', 'gauss'))
@@ -156,8 +156,8 @@ for nowevt in eq_lst:
         else:
             date_sac = datetime.datetime(year_sac, mon_sac, day_sac, hour_sac, min_sac, sec_sac)
         
-        # if nowevt[0] + datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=searchchdt) <= date_sac <= nowevt[0] + datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=searchchdt):
-        if date_sac - datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=searchchdt) <= nowevt[0] <= date_sac - datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=searchchdt):
+        # if nowevt[0] + datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=tolerance) <= date_sac <= nowevt[0] + datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=tolerance):
+        if date_sac - datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=tolerance) <= nowevt[0] <= date_sac - datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=tolerance):
             print(date_sac, nowevt[0])
             ocr = (date_sac - nowevt[0])
             ocr = ocr.total_seconds()

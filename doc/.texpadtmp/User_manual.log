@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.14159265-2.6-0.99991 (TeX Live 2014) (preloaded format=xelatex 2014.9.9)  14 MAR 2016 13:47
+This is XeTeX, Version 3.14159265-2.6-0.99991 (TeX Live 2014) (preloaded format=xelatex 2014.9.9)  14 MAR 2016 17:14
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -516,9 +516,20 @@ Package: titlesec 2011/12/15 v2.10.0 Sectioning titles
 \titlewidth=\dimen170
 \titlewidthlast=\dimen171
 \titlewidthfirst=\dimen172
+) (/usr/local/texlive/2014/texmf-dist/tex/latex/changepage/chngpage.sty
+Package: chngpage 2009/10/20 v1.2b change page layout
+\c@cp@cnt=\count154
+\c@cp@tempcnt=\count155
+) (/usr/local/texlive/2014/texmf-dist/tex/latex/tools/array.sty
+Package: array 2008/09/09 v2.4c Tabular extension package (FMi)
+\col@sep=\dimen173
+\extrarowheight=\dimen174
+\NC@list=\toks20
+\extratabsurround=\skip54
+\backup@length=\skip55
 )
 \g__file_internal_ior=\read1
-\g_fontspec_family_Times New Roman_int=\count154
+\g_fontspec_family_Times New Roman_int=\count156
 .................................................
 . fontspec info: "defining-font"
 . 
@@ -539,7 +550,7 @@ Package: titlesec 2011/12/15 v2.10.0 Sectioning titles
 . * 'bold italic' with NFSS spec.:
 . <->"Times New Roman/BI/ICU:script=latn;language=DFLT;"
 .................................................
-\g_fontspec_family_Consolas_int=\count155
+\g_fontspec_family_Consolas_int=\count157
 .................................................
 . fontspec info: "defining-font"
 . 
@@ -559,8 +570,8 @@ Package: titlesec 2011/12/15 v2.10.0 Sectioning titles
 . * 'bold italic' with NFSS spec.:
 . <->"Consolas/BI/ICU:script=latn;language=DFLT;"
 .................................................
-LaTeX Info: Redefining \C on input line 16.
-\g_fontspec_family_Times New Roman Bold_int=\count156
+LaTeX Info: Redefining \C on input line 17.
+\g_fontspec_family_Times New Roman Bold_int=\count158
 .................................................
 . fontspec info: "no-font-shape"
 . 
@@ -583,7 +594,7 @@ LaTeX Info: Redefining \C on input line 16.
 . * 'bold italic' with NFSS spec.:
 . <->"Times New Roman Bold/BI/ICU:script=latn;language=DFLT;"
 .................................................
-\g_fontspec_family_Times New Roman Italic_int=\count157
+\g_fontspec_family_Times New Roman Italic_int=\count159
 .................................................
 . fontspec info: "defining-font"
 . 
@@ -607,30 +618,30 @@ LaTeX Info: Redefining \C on input line 16.
  (/Users/xumj/Researches/seispy/doc/.texpadtmp/User_manual.aux)
 \openout1 = `User_manual.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for EU1/lmr/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for T3/cmr/m/n on input line 33.
-LaTeX Font Info:    Try loading font information for T3+cmr on input line 33.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for EU1/lmr/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for T3/cmr/m/n on input line 34.
+LaTeX Font Info:    Try loading font information for T3+cmr on input line 34.
  (/usr/local/texlive/2014/texmf-dist/tex/latex/tipa/t3cmr.fd
 File: t3cmr.fd 2001/12/31 TIPA font definitions
 )
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 33.
-LaTeX Font Info:    ... okay on input line 33.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 34.
+LaTeX Font Info:    ... okay on input line 34.
 
 *geometry* driver: auto-detecting
 *geometry* detected driver: xetex
@@ -640,14 +651,14 @@ LaTeX Font Info:    ... okay on input line 33.
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(99.58464pt, 398.3386pt, 99.58464pt)
+* h-part:(L,W,R)=(85.35826pt, 426.79135pt, 85.35826pt)
 * v-part:(T,H,B)=(85.35826pt, 702.78308pt, 56.9055pt)
 * \paperwidth=597.50787pt
 * \paperheight=845.04684pt
-* \textwidth=398.3386pt
+* \textwidth=426.79135pt
 * \textheight=702.78308pt
-* \oddsidemargin=27.31465pt
-* \evensidemargin=27.31465pt
+* \oddsidemargin=13.08827pt
+* \evensidemargin=13.08827pt
 * \topmargin=-23.91173pt
 * \headheight=12.0pt
 * \headsep=25.0pt
@@ -673,61 +684,61 @@ LaTeX Font Info:    ... okay on input line 33.
 .................................................
 \symlegacymaths=\mathgroup4
 LaTeX Font Info:    Overwriting symbol font `legacymaths' in version `bold'
-(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 33.
-LaTeX Font Info:    Redeclaring math accent \acute on input line 33.
-LaTeX Font Info:    Redeclaring math accent \grave on input line 33.
-LaTeX Font Info:    Redeclaring math accent \ddot on input line 33.
-LaTeX Font Info:    Redeclaring math accent \tilde on input line 33.
-LaTeX Font Info:    Redeclaring math accent \bar on input line 33.
-LaTeX Font Info:    Redeclaring math accent \breve on input line 33.
-LaTeX Font Info:    Redeclaring math accent \check on input line 33.
-LaTeX Font Info:    Redeclaring math accent \hat on input line 33.
-LaTeX Font Info:    Redeclaring math accent \dot on input line 33.
-LaTeX Font Info:    Redeclaring math accent \mathring on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \colon on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Delta on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Theta on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Xi on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Pi on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Phi on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Psi on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \Omega on input line 33.
-LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 33.
-LaTeX Font Info:    Redeclaring symbol font `operators' on input line 33.
+(Font)                  OT1/cmr/m/n --> OT1/cmr/bx/n on input line 34.
+LaTeX Font Info:    Redeclaring math accent \acute on input line 34.
+LaTeX Font Info:    Redeclaring math accent \grave on input line 34.
+LaTeX Font Info:    Redeclaring math accent \ddot on input line 34.
+LaTeX Font Info:    Redeclaring math accent \tilde on input line 34.
+LaTeX Font Info:    Redeclaring math accent \bar on input line 34.
+LaTeX Font Info:    Redeclaring math accent \breve on input line 34.
+LaTeX Font Info:    Redeclaring math accent \check on input line 34.
+LaTeX Font Info:    Redeclaring math accent \hat on input line 34.
+LaTeX Font Info:    Redeclaring math accent \dot on input line 34.
+LaTeX Font Info:    Redeclaring math accent \mathring on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \colon on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Gamma on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Delta on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Theta on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Lambda on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Xi on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Pi on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Sigma on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Upsilon on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Phi on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Psi on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \Omega on input line 34.
+LaTeX Font Info:    Redeclaring math symbol \mathdollar on input line 34.
+LaTeX Font Info:    Redeclaring symbol font `operators' on input line 34.
 LaTeX Font Info:    Encoding `OT1' has changed to `EU1' for symbol font
-(Font)              `operators' in the math version `normal' on input line 33.
+(Font)              `operators' in the math version `normal' on input line 34.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  OT1/cmr/m/n --> EU1/TimesNewRoman(0)/m/n on input line 33.
+(Font)                  OT1/cmr/m/n --> EU1/TimesNewRoman(0)/m/n on input line 34.
 LaTeX Font Info:    Encoding `OT1' has changed to `EU1' for symbol font
-(Font)              `operators' in the math version `bold' on input line 33.
+(Font)              `operators' in the math version `bold' on input line 34.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  OT1/cmr/bx/n --> EU1/TimesNewRoman(0)/m/n on input line 33.
+(Font)                  OT1/cmr/bx/n --> EU1/TimesNewRoman(0)/m/n on input line 34.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `normal'
-(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/m/n on input line 33.
+(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/m/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `normal'
-(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/m/n on input line 33.
+(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/m/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `normal'
-(Font)                  OT1/cmr/m/it --> EU1/TimesNewRoman(0)/m/it on input line 33.
+(Font)                  OT1/cmr/m/it --> EU1/TimesNewRoman(0)/m/it on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathbf' in version `normal'
-(Font)                  OT1/cmr/bx/n --> EU1/TimesNewRoman(0)/bx/n on input line 33.
+(Font)                  OT1/cmr/bx/n --> EU1/TimesNewRoman(0)/bx/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `normal'
-(Font)                  OT1/cmss/m/n --> EU1/lmss/m/n on input line 33.
+(Font)                  OT1/cmss/m/n --> EU1/lmss/m/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `normal'
-(Font)                  OT1/cmtt/m/n --> EU1/lmtt/m/n on input line 33.
+(Font)                  OT1/cmtt/m/n --> EU1/lmtt/m/n on input line 34.
 LaTeX Font Info:    Overwriting symbol font `operators' in version `bold'
-(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/bx/n on input line 33.
+(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/bx/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathrm' in version `bold'
-(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/bx/n on input line 33.
+(Font)                  EU1/TimesNewRoman(0)/m/n --> EU1/TimesNewRoman(0)/bx/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathit' in version `bold'
-(Font)                  OT1/cmr/bx/it --> EU1/TimesNewRoman(0)/bx/it on input line 33.
+(Font)                  OT1/cmr/bx/it --> EU1/TimesNewRoman(0)/bx/it on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathsf' in version `bold'
-(Font)                  OT1/cmss/bx/n --> EU1/lmss/bx/n on input line 33.
+(Font)                  OT1/cmss/bx/n --> EU1/lmss/bx/n on input line 34.
 LaTeX Font Info:    Overwriting math alphabet `\mathtt' in version `bold'
-(Font)                  OT1/cmtt/m/n --> EU1/lmtt/bx/n on input line 33.
+(Font)                  OT1/cmtt/m/n --> EU1/lmtt/bx/n on input line 34.
 \AtBeginShipoutBox=\box45
 (/usr/local/texlive/2014/texmf-dist/tex/latex/graphics/color.sty
 Package: color 2014/04/23 v1.1a Standard LaTeX Color (DPC)
@@ -737,32 +748,32 @@ File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
 Package color Info: Driver file: xetex.def on input line 137.
 )
-Package hyperref Info: Link coloring ON on input line 33.
+Package hyperref Info: Link coloring ON on input line 34.
  (/usr/local/texlive/2014/texmf-dist/tex/latex/hyperref/nameref.sty
 Package: nameref 2012/10/27 v2.43 Cross-referencing by name of section
  (/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/gettitlestring.sty
 Package: gettitlestring 2010/12/03 v1.4 Cleanup title references (HO)
 )
-\c@section@level=\count158
+\c@section@level=\count160
 )
-LaTeX Info: Redefining \ref on input line 33.
-LaTeX Info: Redefining \pageref on input line 33.
-LaTeX Info: Redefining \nameref on input line 33.
+LaTeX Info: Redefining \ref on input line 34.
+LaTeX Info: Redefining \pageref on input line 34.
+LaTeX Info: Redefining \nameref on input line 34.
  (/Users/xumj/Researches/seispy/doc/.texpadtmp/User_manual.out) (/Users/xumj/Researches/seispy/doc/.texpadtmp/User_manual.out)
 \@outlinefile=\write3
 \openout3 = `User_manual.out'.
 
-\c@lstlisting=\count159
+\c@lstlisting=\count161
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <14.4> on input line 35.
+(Font)              <14.4> on input line 36.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <7> on input line 35.
+(Font)              <7> on input line 36.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <10.95> on input line 35.
+(Font)              <10.95> on input line 36.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <8> on input line 35.
+(Font)              <8> on input line 36.
 LaTeX Font Info:    External font `cmex10' loaded for size
-(Font)              <6> on input line 35.
+(Font)              <6> on input line 36.
  (/usr/local/texlive/2014/texmf-dist/tex/generic/oberdiek/se-ascii-print.def
 File: se-ascii-print.def 2011/12/02 v1.10 stringenc: Printable ASCII characters
 ) [1
@@ -778,7 +789,7 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 
 ]
 Chapter 1.
-LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 41.
+LaTeX Font Info:    Try loading font information for EU1+lmtt on input line 42.
 (/usr/local/texlive/2014/texmf-dist/tex/latex/euenc/eu1lmtt.fd
 File: eu1lmtt.fd 2009/10/30 v1.6 Font defs for Latin Modern
 ) [2
@@ -789,24 +800,52 @@ Chapter 2.
 File: lstlang1.sty 2014/03/04 1.5c listings language file
 ) (/usr/local/texlive/2014/texmf-dist/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2014/03/04 1.5c listings language file
-)
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 62.
- [3
+) [3
 
 ]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 62.
+Chapter 3.
+
+LaTeX Font Warning: Font shape `EU1/TimesNewRomanBold(0)/bx/n' undefined
+(Font)              using `EU1/TimesNewRomanBold(0)/m/n' instead on input line 78.
+
+[4
+
+]
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (62.81363pt too wide) in paragraph at lines 158--159
+[][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+
+Overfull \hbox (98.814pt too wide) in paragraph at lines 159--160
+[][][][][][][][][][][][][][][][][][][][][][][][][][][] 
+ []
+
+[5]
+File: ./snapshot.png Graphic file (type QTm)
+ <use  "./snapshot.png" >
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 183.
+ [6] [7]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 183.
  (/Users/xumj/Researches/seispy/doc/.texpadtmp/User_manual.aux)
-Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 62.
-Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 62.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 62.
+Package atveryend Info: Empty hook `AtVeryEndDocument' on input line 183.
+Package atveryend Info: Empty hook `AtEndAfterFileList' on input line 183.
+
+
+LaTeX Font Warning: Some font shapes were not available, defaults substituted.
+
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 183.
  ) 
 Here is how much of TeX's memory you used:
- 22051 strings out of 493734
- 404433 string characters out of 6146349
- 476525 words of memory out of 5000000
- 25197 multiletter control sequences out of 15000+600000
- 8853 words of font info for 66 fonts, out of 8000000 for 9000
+ 22214 strings out of 493734
+ 406656 string characters out of 6146349
+ 493059 words of memory out of 5000000
+ 25348 multiletter control sequences out of 15000+600000
+ 8869 words of font info for 68 fonts, out of 8000000 for 9000
  1328 hyphenation exceptions out of 8191
- 46i,5n,51p,10401b,1069s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 46i,12n,51p,10401b,1069s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on /Users/xumj/Researches/seispy/doc/.texpadtmp/User_manual.pdf (4 pages).
+Output written on /Users/xumj/Researches/seispy/doc/.texpadtmp/User_manual.pdf (8 pages).
