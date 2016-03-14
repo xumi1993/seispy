@@ -6,6 +6,7 @@ Installation
 -------------
 ###Dependencies
   * [obspy](http://docs.obspy.org)<br />
+  * [GMT 5.x](http://gmt.soest.hawaii.edu)<br />
   
 ###Installation
 ```Python
