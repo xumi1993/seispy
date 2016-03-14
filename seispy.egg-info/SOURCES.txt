@@ -4,7 +4,6 @@ seispy/bootstrap.py
 seispy/decov.py
 seispy/distaz.py
 seispy/geo.py
-seispy/makeRF4station.py
 seispy/mccc.py
 seispy/rmresp.py
 seispy.egg-info/PKG-INFO
