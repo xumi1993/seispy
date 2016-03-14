@@ -1,0 +1,67 @@
+\documentclass[12pt, a4paper]{report}
+%%%%%%%%%% Load Package %%%%%%%%%%%
+\usepackage[top=3.0cm,bottom=2.0cm,left=3.5cm,right=3.5cm]{geometry}
+\usepackage{fontspec}
+\usepackage[noblocks,affil-it]{authblk}
+\usepackage[colorlinks = true,
+	    	linkcolor = cyan,
+            citecolor = blue,
+            anchorcolor = blue]{hyperref}
+\usepackage{listings}
+\usepackage{booktabs}
+\usepackage{titlesec}
+\usepackage{geometry}
+%%%%%%%%%% Set Format %%%%%%%%%%%%%%
+\setmainfont{Times New Roman}
+\newfontfamily{\C}{Consolas}
+\newfontfamily{\tb}{Times New Roman Bold}
+\newfontfamily{\ti}{Times New Roman Italic}
+
+\lstset{basicstyle=\C,
+  showstringspaces=false,
+  commentstyle=\color{red},
+  keywordstyle=\color{blue},
+  backgroundcolor=\color[rgb]{1.0,1.0,0.95},
+}
+\titleformat{\chapter}{\Huge\bfseries}{\thechapter}{1em}{}
+%%%%%%%%%% First Page %%%%%%%%%%%%%%
+\title{Seispy\\User Manual}
+\author[1,*]{Mijian Xu}
+\affil[1]{\small School of Earth Science and Engineering, Nanjing University}
+\affil[*]{\small Email: gomijianxu@gmail.com}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+%===================================%
+%------------ Chapter 1 ------------%
+%===================================%
+\chapter{Introduction}
+Seispy is a Python package to process Seismic waveform and receiver functions. This package not only provide a python module but also include scripts to batch receiver functions. This package can only support Linux and Mac OSX platform with Python 3.x (I am not sure the compatibility with the Python 3.5.x+). It is distributed under the GNU General Public License Version 3 (GPLv3) as published by the Free Software Foundation (\url{http://www.gnu.org/licenses/gpl.html}).
+
+%===================================%
+%------------ Chapter 2 ------------%
+%===================================%
+\chapter{Installation}
+
+%----------- Section 2.1 -----------%
+\section{Dependencies}
+Seispy depends on standard libraries of Python 3.x and the Obspy module (\url{http://docs.obspy.org}). Moreover, This package require GMT 5.x (\url{http://gmt.soest.hawaii.edu}) in plotting receiver functions.
+
+%----------- Section 2.1 -----------%
+\section{Installation}
+\begin{enumerate}
+\item Install Obspy and GMT.
+\item Download Seispy. Opening terminal, run the following commands:
+\begin{lstlisting}[language=bash]
+git clone 
+\end{lstlisting}
+
+\end{enumerate}
+\end{document}
+
+
+
+
+

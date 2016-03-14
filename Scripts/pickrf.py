@@ -66,13 +66,13 @@ def indexpags(maxidx, evt_num):
 
 class plotrffig():    
     fig = plt.figure(figsize=(20, 11), dpi=60)
-    axnext = plt.axes([0.81, 0.92, 0.07, 0.03])
-    axprevious = plt.axes([0.71, 0.92, 0.07, 0.03])
-    axfinish = plt.axes([0.91, 0.92, 0.07, 0.03])
-    axPlot = plt.axes([0.05, 0.92, 0.07, 0.03])
-    ax = plt.axes([0.1, 0.05, 0.35, 0.85])
-    axt = plt.axes([0.47, 0.05, 0.35, 0.85])
-    ax_baz = plt.axes([0.855, 0.05, 0.12, 0.85])
+    axnext = plt.axes([0.81, 0.91, 0.07, 0.03])
+    axprevious = plt.axes([0.71, 0.91, 0.07, 0.03])
+    axfinish = plt.axes([0.91, 0.91, 0.07, 0.03])
+    axPlot = plt.axes([0.05, 0.91, 0.07, 0.03])
+    ax = plt.axes([0.1, 0.05, 0.35, 0.84])
+    axt = plt.axes([0.47, 0.05, 0.35, 0.84])
+    ax_baz = plt.axes([0.855, 0.05, 0.12, 0.84])
     ax.grid()
     axt.grid()
     ax_baz.grid()
@@ -105,7 +105,7 @@ class plotrffig():
         self.twvfillnag = [[] for i in range(opts.evt_num)]
         self.plotwave()
         self.plotbaz()
-        self.fig.suptitle("%s (Latitude: %5.2f, Longitude: %5.2f)" % (opts.staname, opts.stla, opts.stlo), fontsize=20)
+        self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (opts.staname, opts.stla, opts.stlo), fontsize=20)
         ax.set_ylim(rfidx[self.ipage][0], rfidx[self.ipage][-1]+1)
         ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
         ylabels = opts.filenames[rfidx[self.ipage][0]::]
