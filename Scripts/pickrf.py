@@ -69,7 +69,7 @@ class plotrffig():
     axnext = plt.axes([0.81, 0.91, 0.07, 0.03])
     axprevious = plt.axes([0.71, 0.91, 0.07, 0.03])
     axfinish = plt.axes([0.91, 0.91, 0.07, 0.03])
-    axPlot = plt.axes([0.05, 0.91, 0.07, 0.03])
+    axPlot = plt.axes([0.028, 0.91, 0.07, 0.03])
     ax = plt.axes([0.1, 0.05, 0.35, 0.84])
     axt = plt.axes([0.47, 0.05, 0.35, 0.84])
     ax_baz = plt.axes([0.855, 0.05, 0.12, 0.84])
@@ -221,7 +221,6 @@ class plotrffig():
             print('Cannot open the .ps file')
 
         
-
     def butprevious(self, event):
         opts = self.opts
         ax = self.ax
