@@ -27,6 +27,9 @@ def Usage():
     print("Usage:  python pickrf.py -Sstation_name para.cfg")
 
 def get_sac():
+    if  sys.argv[1:] == []:
+        Usage()
+        sys.exit(1)
     for o in sys.argv[1:]:
         if os.path.isfile(o):
             head = o
