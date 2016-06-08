@@ -23,6 +23,9 @@ def get_pos():
     return screen_width, screen_height
 
 def get_sac():
+    if sys.argv[1:] == []:
+        Usage()
+        sys.exit(1)
     for o in sys.argv[1:]:
         if os.path.isfile(o):
             head = o
