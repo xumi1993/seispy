@@ -27,11 +27,7 @@ def Usage():
     print("Usage:  python pickrf.py -Sstation_name para.cfg")
 
 def get_sac():
-<<<<<<< HEAD
-    if sys.argv[1:] == []:
-=======
     if  sys.argv[1:] == []:
->>>>>>> a683c98515ba6a58968483e850bc46b75417c885
         Usage()
         sys.exit(1)
     for o in sys.argv[1:]:
