@@ -17,7 +17,6 @@ def mccc(seis, dt, twin=0):
         mask = np.zeros(nt)
         mask[0:itw] = 1.0
         mask[nt-itw-1:nt] = 1.0
-    print('********')
     for i in range(ns-1):
         ffis = np.conj(fft_conj[i])
 #        ffis = np.conj(np.fft.fft(seis[i].data, nt))

@@ -10,10 +10,12 @@ class opts:
         self.e = 0
         self.RFlength = 0
         self.evt_num = 0
+        self.stla = 0
+        self.stlo = 0
         self.idx_bazi = []
         self.baz = []
         self.filenames = []
         self.path = ""
         self.staname = ""
-        image_path = ""
-        cut_path = ""
+        self.image_path = ""
+        self.cut_path = ""

@@ -5,18 +5,6 @@ import numpy
 from scipy.signal import detrend
 
 
-<<<<<<< HEAD
-
-def remt(st):
-    '''
-    rmean and retrend
-    '''
-    st.data = detrend(st.data, type='linear')
-    st.data = detrend(st.data, type='constant')
-    return st
-
-=======
->>>>>>> a683c98515ba6a58968483e850bc46b75417c885
 class rmrespf:
     '''
     remove resp of seismic signal

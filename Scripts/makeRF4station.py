@@ -95,7 +95,7 @@ gate_dis1 = float(config.get('para', 'gate_dis1'))
 gate_dis2 = float(config.get('para', 'gate_dis2'))
 time_before = float(config.get('para', 'time_before'))
 time_after = float(config.get('para', 'time_after'))
-searchchdt = float(config.get('para', 'searchchdt'))
+tolerance = float(config.get('para', 'tolerance'))
 offset = float(config.get('para', 'offset'))
 gate_noise = float(config.get('para', 'gate_noise'))
 gauss = float(config.get('para', 'gauss'))
@@ -156,8 +156,8 @@ for nowevt in eq_lst:
         else:
             date_sac = datetime.datetime(year_sac, mon_sac, day_sac, hour_sac, min_sac, sec_sac)
         
-        # if nowevt[0] + datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=searchchdt) <= date_sac <= nowevt[0] + datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=searchchdt):
-        if date_sac - datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=searchchdt) <= nowevt[0] <= date_sac - datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=searchchdt):
+        # if nowevt[0] + datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=tolerance) <= date_sac <= nowevt[0] + datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=tolerance):
+        if date_sac - datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=tolerance) <= nowevt[0] <= date_sac - datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=tolerance):
             print(date_sac, nowevt[0])
             ocr = (date_sac - nowevt[0])
             ocr = ocr.total_seconds()
@@ -171,7 +171,6 @@ print(len(eq))
 #################################
 if not os.path.exists(RF_path):
     os.makedirs(RF_path)
-fid_filallist = open(os.path.join(RF_path, staname+'finallist.dat'), 'w+')
 for thiseq in eq:
     date_name = thiseq[1]
     bazi = thiseq[6]
@@ -273,6 +272,7 @@ for thiseq in eq:
                 this_seis[i].stats.sac.user2 = freqmin
                 this_seis[i].stats.sac.user3 = freqmax
                 this_seis[i].stats.sac.a = time_before
+                this_seis[i].stats.sac.ka = 'P'
                 this_seis[i].stats.sac.mag = mag
             if not os.path.exists(out_path):
                 os.makedirs(out_path)
@@ -282,17 +282,13 @@ for thiseq in eq:
             RF_R = this_seis[0].copy()
             RF_R.stats.sac.user1 = gauss
             RF_R.stats.sac.b = -time_before
+            RF_R.stats.sac.a = 0
             RF_R.data = RF
             RF_R.write(os.path.join(RF_path,  date_name+'_P_R.sac'), 'SAC')
             if ist:
                 RF_T = this_seis[1].copy()
                 RF_T.stats.sac.user1 = gauss
                 RF_T.stats.sac.b = -time_before
+                RF_T.stats.sac.a = 0
                 RF_T.data = tRF
                 RF_T.write(os.path.join(RF_path,  date_name+'_P_T.sac'), 'SAC')
-
-#            np.savetxt(os.path.join(RF_path, date_name+'_P_R.dat'), RF, fmt='%10.8f')
-#            fid_filallist.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (date_name, 'P', thiseq[2], thiseq[3], dep, dis, bazi, rayp, thiseq[7], gauss))
-fid_filallist.close()
-# os.popen('cp '+os.path.join(RF_path, staname+'finallist.dat')+' '+out_path)
-# os.popen('python /Users/xumj/Researches/PyCCP/PlotR.py -S%s -I%s -O%s -N%d -A80 -T%5.2f/%5.2f' % (staname, RF_path, image_path, newlength, time_before, time_after))

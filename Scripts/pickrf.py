@@ -1,6 +1,11 @@
 #!/usr/bin/env python
-__author__ = 'xumj'
-
+'''
+This is a script to select receiver functions in GUI.
+Usage:      python pickrf.py -Sstation_name para.cfg
+Functions:  Click waveform to select good/bad RFs.
+            Click "plotRF" to plot good RFs in a .ps file.
+            Click "finish" to delete bad RFs and close the window.
+'''
 
 import matplotlib.pyplot as plt
 import os, sys, glob, re, shutil
@@ -18,12 +23,15 @@ except:
     import ConfigParser
     config = ConfigParser.ConfigParser()
 
-def get_pos():
-    (screen_width, screen_height) = plt.get_current_fig_manager().canvas.get_width_height()
-    return screen_width, screen_height
+def Usage():
+    print("Usage:  python pickrf.py -Sstation_name para.cfg")
 
 def get_sac():
+<<<<<<< HEAD
     if sys.argv[1:] == []:
+=======
+    if  sys.argv[1:] == []:
+>>>>>>> a683c98515ba6a58968483e850bc46b75417c885
         Usage()
         sys.exit(1)
     for o in sys.argv[1:]:
@@ -47,10 +55,12 @@ def get_sac():
     cut_path = config.get('path', 'out_path')
     path = os.path.join(path, staname)
     cut_path = os.path.join(cut_path, staname)
-    filesnames = glob.glob(os.path.join(path, '*_R.sac'))
+    files = glob.glob(os.path.join(path, '*_R.sac'))
+    filenames = [re.match('\d{4}\D\d{3}\D\d{2}\D\d{2}\D\d{2}', os.path.basename(fl)).group() for fl in files]
+    filenames.sort()
     rffiles = obspy.read(os.path.join(path, '*_R.sac'))
     trffiles = obspy.read(os.path.join(path, '*_T.sac'))
-    return rffiles.sort(['starttime']), trffiles.sort(['starttime']), filesnames, path, image_path, cut_path, staname
+    return rffiles.sort(['starttime']), trffiles.sort(['starttime']), filenames, path, image_path, cut_path, staname
 
 def indexpags(maxidx, evt_num):
     axpages = int(np.floor(evt_num/maxidx)+1)
@@ -63,17 +73,17 @@ def indexpags(maxidx, evt_num):
 
 class plotrffig():    
     fig = plt.figure(figsize=(20, 11), dpi=60)
-    axnext = plt.axes([0.81, 0.92, 0.07, 0.03])
-    axprevious = plt.axes([0.71, 0.92, 0.07, 0.03])
-    axfinish = plt.axes([0.91, 0.92, 0.07, 0.03])
-    axPlot = plt.axes([0.05, 0.92, 0.07, 0.03])
-    ax = plt.axes([0.05, 0.05, 0.35, 0.85])
-    axt = plt.axes([0.45, 0.05, 0.35, 0.85])
-    ax_baz = plt.axes([0.85, 0.05, 0.12, 0.85])
+    axnext = plt.axes([0.81, 0.91, 0.07, 0.03])
+    axprevious = plt.axes([0.71, 0.91, 0.07, 0.03])
+    axfinish = plt.axes([0.91, 0.91, 0.07, 0.03])
+    axPlot = plt.axes([0.028, 0.91, 0.07, 0.03])
+    ax = plt.axes([0.1, 0.05, 0.35, 0.84])
+    axt = plt.axes([0.47, 0.05, 0.35, 0.84])
+    ax_baz = plt.axes([0.855, 0.05, 0.12, 0.84])
     ax.grid()
     axt.grid()
     ax_baz.grid()
-    ax.set_ylabel("Event")
+    ax.set_ylabel("Event", fontsize=20)
     ax.set_xlabel("Time after P (s)")
     ax.set_title("R component")
     axt.set_xlabel("Time after P (s)")
@@ -102,9 +112,12 @@ class plotrffig():
         self.twvfillnag = [[] for i in range(opts.evt_num)]
         self.plotwave()
         self.plotbaz()
-        self.fig.suptitle(opts.staname, fontsize=20)
-        ax.set_ylim(rfidx[self.ipage][0], rfidx[self.ipage][-1]+2)
-        ax.set_yticks(np.arange(rfidx[self.ipage][0], rfidx[self.ipage][-1]+2))
+        self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (opts.staname, opts.stla, opts.stlo), fontsize=20)
+        ax.set_ylim(rfidx[self.ipage][0], rfidx[self.ipage][-1]+1)
+        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
+        ylabels = opts.filenames[rfidx[self.ipage][0]::]
+        ylabels.insert(0, '')
+        ax.set_yticklabels(ylabels)
         axt.set_ylim(ax.get_ylim())
         axt.set_yticks(ax.get_yticks())
         ax_baz.set_ylim(ax.get_ylim())
@@ -215,7 +228,6 @@ class plotrffig():
             print('Cannot open the .ps file')
 
         
-
     def butprevious(self, event):
         opts = self.opts
         ax = self.ax
@@ -225,11 +237,14 @@ class plotrffig():
         if self.ipage < 0:
             self.ipage = 0
             return
-        ax.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
-        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
+        ax.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1)
+        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
+        ylabels = opts.filenames[self.rfidx[self.ipage][0]::]
+        ylabels.insert(0, '')
+        ax.set_yticklabels(ylabels)
         axt.set_ylim(ax.get_ylim())
         axt.set_yticks(ax.get_yticks())
-        ax_baz.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
+        ax_baz.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1)
         ax_baz.set_yticks(ax.get_yticks())
         self.azi_label = ['%5.2f' % opts.baz[i] for i in self.rfidx[self.ipage]]
         self.azi_label.insert(0, "")
@@ -249,10 +264,16 @@ class plotrffig():
             ymax = (self.ipage+1)*opts.maxidx
             ax.set_ylim(self.rfidx[self.ipage][0], ymax)
             ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
+            ylabels = opts.filenames[self.rfidx[self.ipage][0]::]
+            ylabels.insert(0, '')
+            ax.set_yticklabels(ylabels)
             self.azi_label = ['%5.2f' % opts.baz[i] for i in self.rfidx[self.ipage]]
         else:
             ax.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
-            ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
+            ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
+            ylabels = opts.filenames[self.rfidx[self.ipage][0]::]
+            ylabels.insert(0, '')
+            ax.set_yticklabels(ylabels)
             self.azi_label = ['%5.2f' % opts.baz[i] for i in self.rfidx[self.ipage]]
         axt.set_ylim(ax.get_ylim())
         axt.set_yticks(ax.get_yticks())
@@ -271,9 +292,10 @@ def main():
     opts.rffiles, opts.trffiles, opts.filenames, opts.path, opts.image_path, opts.cut_path, opts.staname = get_sac()
     opts.evt_num = len(opts.rffiles)
     rf = opts.rffiles[0]
-    dt = rf.stats.delta
     opts.b = rf.stats.sac.b
     opts.e = rf.stats.sac.e
+    opts.stla = rf.stats.sac.stla
+    opts.stlo = rf.stats.sac.stlo
     opts.RFlength = rf.data.shape[0]
     bazi = [tr.stats.sac.baz for tr in opts.rffiles]
     tmp_filenames = [[opts.filenames[i], bazi[i]] for i in range(opts.evt_num)]
@@ -283,7 +305,7 @@ def main():
     opts.idx_bazi = np.argsort(bazi)
     opts.rffiles = [opts.rffiles[i] for i in opts.idx_bazi]
     opts.trffiles = [opts.trffiles[i] for i in opts.idx_bazi]
-    plotrf = plotrffig(opts)
+    plotrffig(opts)
 
 
 if __name__ == "__main__":
