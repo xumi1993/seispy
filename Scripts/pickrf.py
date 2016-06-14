@@ -109,8 +109,8 @@ class plotrffig():
         self.plotwave()
         self.plotbaz()
         self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (opts.staname, opts.stla, opts.stlo), fontsize=20)
-        ax.set_ylim(rfidx[self.ipage][0], rfidx[self.ipage][-1]+1)
-        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
+        ax.set_ylim(rfidx[self.ipage][0], rfidx[self.ipage][-1]+2)
+        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
         ylabels = opts.filenames[rfidx[self.ipage][0]::]
         ylabels.insert(0, '')
         ax.set_yticklabels(ylabels)
@@ -233,14 +233,14 @@ class plotrffig():
         if self.ipage < 0:
             self.ipage = 0
             return
-        ax.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1)
-        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
+        ax.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
+        ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
         ylabels = opts.filenames[self.rfidx[self.ipage][0]::]
         ylabels.insert(0, '')
         ax.set_yticklabels(ylabels)
         axt.set_ylim(ax.get_ylim())
         axt.set_yticks(ax.get_yticks())
-        ax_baz.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1)
+        ax_baz.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
         ax_baz.set_yticks(ax.get_yticks())
         self.azi_label = ['%5.2f' % opts.baz[i] for i in self.rfidx[self.ipage]]
         self.azi_label.insert(0, "")
