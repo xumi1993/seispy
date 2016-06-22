@@ -72,6 +72,8 @@ class plotrffig():
     axnext = plt.axes([0.81, 0.91, 0.07, 0.03])
     axprevious = plt.axes([0.71, 0.91, 0.07, 0.03])
     axfinish = plt.axes([0.91, 0.91, 0.07, 0.03])
+    axenlarge = plt.axes([0.15, 0.91, 0.07, 0.03])
+    axreduce = plt.axes([0.25, 0.91, 0.07, 0.03])
     axPlot = plt.axes([0.028, 0.91, 0.07, 0.03])
     ax = plt.axes([0.1, 0.05, 0.35, 0.84])
     axt = plt.axes([0.47, 0.05, 0.35, 0.84])
@@ -89,6 +91,8 @@ class plotrffig():
     bprevious = Button(axprevious, 'Previous')
     bfinish = Button(axfinish, 'Finish')
     bplot = Button(axPlot, 'Plot RFs')
+    benlarge = Button(axenlarge, 'Amp enlarge')
+    breduce = Button(axreduce, 'Amp reduce')
 
     def __init__(self, opts):
         self.opts = opts
@@ -125,6 +129,8 @@ class plotrffig():
         self.bprevious.on_clicked(self.butprevious)
         self.bfinish.on_clicked(self.finish)
         self.bplot.on_clicked(self.plot)
+        self.benlarge.on_clicked(self.enlarge)
+        self.breduce.on_clicked(self.reduce)
         self.fig.canvas.mpl_connect('button_press_event', self.onclick)
         ax.plot([0, 0], [0, axpages*opts.maxidx], color="black")
         axt.plot([0, 0], [0, axpages*opts.maxidx], color="black")
@@ -222,6 +228,7 @@ class plotrffig():
             os.system('xdg-open %s' % os.path.join(opts.image_path, opts.staname+'_RT.ps'))
         else:
             print('Cannot open the .ps file')
+            return
 
         
     def butprevious(self, event):
@@ -278,6 +285,69 @@ class plotrffig():
         ax_baz.set_yticklabels(self.azi_label)
         ax_baz.set_yticks(ax.get_yticks())
         plt.draw()
+
+    def enlarge(self, event):
+        ylim = self.ax.get_ylim()
+        ytick_R = self.ax.get_yticks()
+        ytick_T = self.axt.get_yticks()
+        xlim = self.ax.get_xlim()
+        xtick = self.ax.get_xticks()
+        xlabel = self.ax.get_xlabel()
+        ylabel_R = self.ax.get_ylabel()
+        yticklabel_R = self.ax.get_yticklabels()
+        title_R = self.ax.get_title()
+        title_T = self.axt.get_title()
+        self.ax.cla()
+        self.axt.cla()
+        self.opts.enf += 1
+        self.plotwave()
+        self.ax.set_title(title_R)
+        self.ax.set_xlim(xlim)
+        self.ax.set_xticks(xtick)
+        self.ax.set_xlabel(xlabel)
+        self.ax.set_ylim(ylim)
+        self.ax.set_yticks(ytick_R)
+        self.ax.set_yticklabels(yticklabel_R)
+        self.ax.set_ylabel(ylabel_R)
+        self.axt.set_title(title_T)
+        self.axt.set_xlim(xlim)
+        self.axt.set_xticks(xtick)
+        self.axt.set_xlabel(xlabel)
+        self.axt.set_ylim(ylim)
+        self.axt.set_yticks(ytick_T)
+
+    def reduce(self, event):
+        ylim = self.ax.get_ylim()
+        ytick_R = self.ax.get_yticks()
+        ytick_T = self.axt.get_yticks()
+        xlim = self.ax.get_xlim()
+        xtick = self.ax.get_xticks()
+        xlabel = self.ax.get_xlabel()
+        ylabel_R = self.ax.get_ylabel()
+        yticklabel_R = self.ax.get_yticklabels()
+        title_R = self.ax.get_title()
+        title_T = self.axt.get_title()
+        self.ax.cla()
+        self.axt.cla()
+        if self.opts.enf > 1:
+            self.opts.enf -= 1
+        else:
+            self.opts.enf = 1/(1/self.opts.enf + 1)
+        self.plotwave()
+        self.ax.set_title(title_R)
+        self.ax.set_xlim(xlim)
+        self.ax.set_xticks(xtick)
+        self.ax.set_xlabel(xlabel)
+        self.ax.set_ylim(ylim)
+        self.ax.set_yticks(ytick_R)
+        self.ax.set_yticklabels(yticklabel_R)
+        self.ax.set_ylabel(ylabel_R)
+        self.axt.set_title(title_T)
+        self.axt.set_xlim(xlim)
+        self.axt.set_xticks(xtick)
+        self.axt.set_xlabel(xlabel)
+        self.axt.set_ylim(ylim)
+        self.axt.set_yticks(ytick_T)
 
 def main():
     opts = initopts.opts()
