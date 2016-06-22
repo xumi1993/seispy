@@ -24,7 +24,11 @@ except:
     config = ConfigParser.ConfigParser()
 
 def Usage():
-    print("Usage:  python pickrf.py -Sstation_name para.cfg")
+    print("Usage: python pickrf.py -S<station_name> para.cfg\n"
+          "    -S<station> Specify station name as a directory name in specified \"RF_path\"\n"
+          "                in \"para.cfg\"")
+    print("     para.cfg The configuration file including out_path (the path of cut out data),\n"
+          "              RF_path (the path of receiver functions), image_path (the path of out figure)")
 
 def get_sac():
     if  sys.argv[1:] == []:
@@ -35,13 +39,16 @@ def get_sac():
             head = o
             break
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "S:")
+        opts, args = getopt.getopt(sys.argv[1:], "S:h")
     except:
         print("invalid argument")
         sys.exit(1)
     for op, value in opts:
         if op == "-S":
             staname = value
+        elif op == "-h":
+            Usage()
+            sys.exit(1)
         else:
             print("invalid argument")
             sys.exit(1)
