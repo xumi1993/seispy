@@ -322,6 +322,10 @@ class plotrffig():
         self.axt.set_xlabel(xlabel)
         self.axt.set_ylim(ylim)
         self.axt.set_yticks(ytick_T)
+        ax.grid()
+        axt.grid()
+        ax_baz.grid()
+        plt.draw()
 
     def reduce(self, event):
         ylim = self.ax.get_ylim()
@@ -355,6 +359,10 @@ class plotrffig():
         self.axt.set_xlabel(xlabel)
         self.axt.set_ylim(ylim)
         self.axt.set_yticks(ytick_T)
+        ax.grid()
+        axt.grid()
+        ax_baz.grid()
+        plt.draw()
 
 def main():
     opts = initopts.opts()
