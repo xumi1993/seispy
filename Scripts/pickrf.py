@@ -294,6 +294,7 @@ class plotrffig():
         plt.draw()
 
     def enlarge(self, event):
+        opts = self.opts
         ylim = self.ax.get_ylim()
         ytick_R = self.ax.get_yticks()
         ytick_T = self.axt.get_yticks()
@@ -328,6 +329,7 @@ class plotrffig():
         plt.draw()
 
     def reduce(self, event):
+        opts = self.opts
         ylim = self.ax.get_ylim()
         ytick_R = self.ax.get_yticks()
         ytick_T = self.axt.get_yticks()
