@@ -280,7 +280,7 @@ class plotrffig():
             self.azi_label = ['%5.2f' % opts.baz[i] for i in self.rfidx[self.ipage]]
         else:
             ax.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
-            ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+1))
+            ax.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
             ylabels = opts.filenames[self.rfidx[self.ipage][0]::]
             ylabels.insert(0, '')
             ax.set_yticklabels(ylabels)
