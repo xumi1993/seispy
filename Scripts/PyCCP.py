@@ -7,6 +7,7 @@ import os
 import sys
 import getopt
 import seispy
+import seispy.bootstrap as boot
 try:
     import configparser
     config = configparser.ConfigParser()
@@ -110,11 +111,23 @@ for i in range(Profile_range.shape[0]):
                 # pierce_interval = distaz.deg2km(dis_event) * np.abs(distaz.cosd(azi - azi_event))
                 if np.abs(dis_along - Profile_range[i]) < bin_radius:
 #                    print(pierce_interval, azi - azi_event, bin_radius)
-                    Stack_RF = Stack_RF + RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l]
+#                    Stack_RF = Stack_RF + RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l]
+                    Stack_RF = np.append(Stack_RF, RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l])
                     Event_count = Event_count + 1
-        if Event_count > 0:
-            Stack_RF = Stack_RF / Event_count
-        fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.3f %d\n' % (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], Stack_RF, Event_count))
+        if Event_count > 1:
+            straptimes = int(Event_count * 2)
+            ci = boot.ci(Stack_RF, n_samples=straptimes, method='pi')
+            mu = np.average(Stack_RF)
+        else:
+            mu = 0
+            ci = np.zeros(2)
+        if j == 1:
+            mu = np.nan
+            ci = np.array([np.nan, np.nan])
+        # if Event_count > 0:
+        #     Stack_RF = Stack_RF / Event_count
+        fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.3f %-8.3f %-8.3f %d\n' %
+                  (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
 
 
 
