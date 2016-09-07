@@ -17,14 +17,17 @@ except:
 
 # get options of line location
 try:
-    opts, args = getopt.getopt(sys.argv[1:], "l:")
+    opts, args = getopt.getopt(sys.argv[1:], "l:B")
 except:
     print('Arguments are not found!')
     sys.exit(1)
 
+isboot = False
 for op, value in opts:
     if op == "-l":
         line = value
+    elif op == "-B":
+        isboot = True
     else:
         sys.exit(1)
 
@@ -59,7 +62,7 @@ for Profile_loca in Profile_range:
 
 # read depth data
 depthmat = sio.loadmat(depthdat)
-RFdepth = depthmat['YN_RFdepth']
+RFdepth = depthmat['RFdepth']
 
 # find stations beside the profile
 stalat_all = RFdepth[0, 0::]['stalat']
@@ -72,21 +75,20 @@ for i in range(stalon_all.shape[0]):
     stalon_full = np.append(stalon_full, stalon_all[i][0])
 STA = open(stalist, 'w+')
 for i in range(stalon_all.shape[0]):
-    azi_sta = seispy.distaz(lat1, lon1, stalat_full[i], stalon_full[i]).baz
-    dis_sta = seispy.distaz(lat1, lon1, stalat_full[i], stalon_full[i]).delta
-    if -90 <= azi - azi_sta <= 90:
-        sta_dis = dis_sta * seispy.geo.sind(np.abs(azi - azi_sta))
-        if sta_dis < 0.5:
-            print(RFdepth[0, i]['Station'][0], stalat_full[i], stalon_full[i])
-            STA.write(RFdepth[0, i]['Station'][0]+' '+str(stalat_full[i])+' '+str(stalon_full[i])+'\n')
-            staidx = np.append(staidx, [i])
-
+    (projstla, projstlo) = seispy.geo.geoproject(stalat_all[i][0], stalon_all[i][0],
+                                                 lat1, lon1, lat2, lon2)
+    sta_dis = seispy.distaz(projstla, projstlo, stalat_all[i][0], stalon_all[i][0]).delta
+    if sta_dis < 0.5:
+        print(RFdepth[0, i]['Station'][0], projstla, projstlo)
+        STA.write('%s %-6.3f %-6.3f\n' % (RFdepth[0, i]['Station'][0], projstla, projstlo))
+        staidx = np.append(staidx, [i])
+STA.close()
 
 # Model information
 YAxisRange = RFdepth[0, 1]['Depthrange'][0]
 VelocityModel = np.loadtxt(Velmod)
 Depths = VelocityModel[:, 0]
-Vs = VelocityModel[:, 2]
+Vs = VelocityModel[:, 1]
 Vs = interpolate.interp1d(Depths, Vs, kind='linear')(YAxisRange)
 
 # stacking
@@ -97,8 +99,9 @@ for i in range(Profile_range.shape[0]):
     dis_center = seispy.distaz(lat1, lon1, Profile_lat[i], Profile_lon[i]).degreesToKilometers()
     for j in range(Stack_range.shape[0]):
         bin_radius = np.sqrt(0.5*domperiod*Vs[2*Stack_range[j]]*Stack_range[j])
-        Stack_RF = 0
+        Stack_RF = []
         Event_count = 0
+        mu = 0
         for k in staidx:
             for l in range(RFdepth[0, k]['Piercelat'].shape[1]):
                 pier_lat = RFdepth[0, k]['Piercelat'][2*Stack_range[j], l]
@@ -114,20 +117,21 @@ for i in range(Profile_range.shape[0]):
 #                    Stack_RF = Stack_RF + RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l]
                     Stack_RF = np.append(Stack_RF, RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l])
                     Event_count = Event_count + 1
-        if Event_count > 1:
-            straptimes = int(Event_count * 2)
-            ci = boot.ci(Stack_RF, n_samples=straptimes, method='pi')
-            mu = np.average(Stack_RF)
+
+        if isboot:
+            if Event_count > 1:
+                straptimes = int(Event_count * 2)
+                ci = boot.ci(Stack_RF, n_samples=straptimes, method='pi')
+                mu = np.average(Stack_RF)
+            else:
+                ci = np.zeros(2)
+            if j == 0:
+                mu = np.nan
+                ci = np.array([np.nan, np.nan])
+            fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.3f %-8.3f %-8.3f %d\n' %
+                     (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
         else:
-            mu = 0
-            ci = np.zeros(2)
-        if j == 1:
-            mu = np.nan
-            ci = np.array([np.nan, np.nan])
-        # if Event_count > 0:
-        #     Stack_RF = Stack_RF / Event_count
-        fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.3f %-8.3f %-8.3f %d\n' %
-                  (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, ci[0], ci[1], Event_count))
-
-
-
+            if Event_count > 0:
+                mu = np.mean(Stack_RF)
+            fid.write('%-8.3f %-8.3f %-6.3f %-6.3f %-8.3f %d\n' %
+                    (Profile_lat[i], Profile_lon[i], Profile_range[i], Stack_range[j], mu, Event_count))
