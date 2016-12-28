@@ -49,6 +49,7 @@ Velmod = config.get('FileIO', 'Velmod')
 stalist = config.get('FileIO', 'stalist')
 domperiod = float(config.get('para', 'domperiod'))
 Profile_width = float(config.get('para', 'Profile_width'))
+proj_width = float(config.get('para', 'proj_width'))
 Stack_range = np.arange(1, 101)
 azi = seispy.distaz(lat1, lon1, lat2, lon2).baz
 dis = seispy.distaz(lat1, lon1, lat2, lon2).delta
@@ -57,8 +58,9 @@ Profile_lat = []
 Profile_lon = []
 for Profile_loca in Profile_range:
     (lat_loca, lon_loca) = seispy.geo.latlon_from(lat1, lon1, azi, seispy.geo.km2deg(Profile_loca))
-    Profile_lat = np.append(Profile_lat, [lat_loca], axis=1)
-    Profile_lon = np.append(Profile_lon, [lon_loca], axis=1)
+    print(lat_loca, lon_loca)
+    Profile_lat = np.append(Profile_lat, [lat_loca])
+    Profile_lon = np.append(Profile_lon, [lon_loca])
 
 # read depth data
 depthmat = sio.loadmat(depthdat)
@@ -88,7 +90,7 @@ STA.close()
 YAxisRange = RFdepth[0, 1]['Depthrange'][0]
 VelocityModel = np.loadtxt(Velmod)
 Depths = VelocityModel[:, 0]
-Vs = VelocityModel[:, 1]
+Vs = VelocityModel[:, 2]
 Vs = interpolate.interp1d(Depths, Vs, kind='linear')(YAxisRange)
 
 # stacking
@@ -109,10 +111,11 @@ for i in range(Profile_range.shape[0]):
                 pier_azi = seispy.distaz(lat1, lon1, pier_lat, pier_lon).baz
                 pier_dis = seispy.distaz(lat1, lon1, pier_lat, pier_lon).degreesToKilometers()
                 dis_along = pier_dis * seispy.geo.cosd(azi - pier_azi)
+                dis_proj = pier_dis * np.abs(seispy.geo.sind(azi - pier_azi))
                 # (pro_lat, pro_lon) = seispy.geo.latlon_from(lat1, lon1, azi, seispy.geo.km2deg(dis_along))
                 # dis_event = seispy.distaz(Profile_lat[i], Profile_lon[i], RFdepth[0, k]['Piercelat'][2*Stack_range[j], l], RFdepth[0, k]['Piercelon'][2*Stack_range[j], l]).degreesToKilometers()
                 # pierce_interval = distaz.deg2km(dis_event) * np.abs(distaz.cosd(azi - azi_event))
-                if np.abs(dis_along - Profile_range[i]) < bin_radius:
+                if np.abs(dis_along - Profile_range[i]) < bin_radius and dis_proj < prog_width:
 #                    print(pierce_interval, azi - azi_event, bin_radius)
 #                    Stack_RF = Stack_RF + RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l]
                     Stack_RF = np.append(Stack_RF, RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l])
