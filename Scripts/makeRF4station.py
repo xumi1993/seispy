@@ -2,6 +2,10 @@
 
 def Usage():
    print('./makeRF4station -Sstation/slat/slon -Yyear1/month1/day1/year2/month2/day2 -Ccomp [-M] [-T+N+E] [-r] para.cfg')
+   print("    -S Specified station name, station latitude, station longitude")
+   print("        Note: station name must be same as folder name")
+   print("    -Y Set date range when search earthquake from GMCT Catalog")
+   print("    -C Specified componet formats separated by dot in sac-file name, such as \"BHZ\"")
 
 import numpy as np
 import obspy
@@ -40,6 +44,7 @@ change_E = 0
 change_N = 0
 ismtz = 0
 ist = 1
+isdat = False
 for op, value in opts:
     if op == "-S":
        staname = value
@@ -217,9 +222,9 @@ for thiseq in eq:
     this_seis[1].stats.channel = "T"
     this_seis[2].stats.channel = "Z"
 # ------- Bandpass Filter ------------#
-    R_filter = bandpass(this_seis[0].data, freqmin, freqmax, 1/dt, corners=3, zerophase=True)
-    T_filter = bandpass(this_seis[1].data, freqmin, freqmax, 1/dt, corners=3, zerophase=True)
-    Z_filter = bandpass(this_seis[2].data, freqmin, freqmax, 1/dt, corners=3, zerophase=True)
+    R_filter = bandpass(this_seis[0].data, freqmin, freqmax, 1/dt, corners=4, zerophase=True)
+    T_filter = bandpass(this_seis[1].data, freqmin, freqmax, 1/dt, corners=4, zerophase=True)
+    Z_filter = bandpass(this_seis[2].data, freqmin, freqmax, 1/dt, corners=4, zerophase=True)
 # ------- Calculate P arrival time ---#
     arrivals = model.get_travel_times(source_depth_in_km=dep, distance_in_degree=dis, phase_list=["P"])
     ttime_P = arrivals[0].time - O
@@ -276,14 +281,14 @@ for thiseq in eq:
                 this_seis[i].stats.sac.mag = mag
             if not os.path.exists(out_path):
                 os.makedirs(out_path)
-            this_seis[0].write(os.path.join(out_path, date_name+'.'+staname+'.R.SAC'), 'SAC')
-            this_seis[1].write(os.path.join(out_path, date_name+'.'+staname+'.T.SAC'), 'SAC')
-            this_seis[2].write(os.path.join(out_path, date_name+'.'+staname+'.Z.SAC'), 'SAC')
             RF_R = this_seis[0].copy()
             RF_R.stats.sac.user1 = gauss
             RF_R.stats.sac.b = -time_before
             RF_R.stats.sac.a = 0
             RF_R.data = RF
+            this_seis[0].write(os.path.join(out_path, date_name+'.'+staname+'.R.SAC'), 'SAC')
+            this_seis[1].write(os.path.join(out_path, date_name+'.'+staname+'.T.SAC'), 'SAC')
+            this_seis[2].write(os.path.join(out_path, date_name+'.'+staname+'.Z.SAC'), 'SAC')
             RF_R.write(os.path.join(RF_path,  date_name+'_P_R.sac'), 'SAC')
             if ist:
                 RF_T = this_seis[1].copy()
