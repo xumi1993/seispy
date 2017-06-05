@@ -2,18 +2,17 @@ seispy
 =============
 Python module of seismology and  receiver functions
 
-Installation
--------------
-###Dependencies
+# Installation
+## Dependencies
   * [obspy](http://docs.obspy.org)<br />
   * [GMT 5.x](http://gmt.soest.hawaii.edu)<br />
   
-###Installation
+## Installation
 ```Python
 python setup.py install
 ```
 Add the ```seispy/Scripts``` to environment	variables.
-Inclusion
+# Inclusion
 --------------
   * seispy.distaz: Calculate distance and azimuth (by [the lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/)).<br />
   * seispy.geo: Tiny codes of geophysics.
