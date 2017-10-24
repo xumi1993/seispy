@@ -56,6 +56,8 @@ def get_sac():
     image_path = config.get('path', 'image_path')
     path = config.get('path', 'RF_path')
     cut_path = config.get('path', 'out_path')
+    time_before = config.getint('para', 'time_before') * -1
+    time_after = config.getint('para', 'time_after')
     path = os.path.join(path, staname)
     cut_path = os.path.join(cut_path, staname)
     files = glob.glob(os.path.join(path, '*_R.sac'))
@@ -63,7 +65,7 @@ def get_sac():
     filenames.sort()
     rffiles = obspy.read(os.path.join(path, '*_R.sac'))
     trffiles = obspy.read(os.path.join(path, '*_T.sac'))
-    return rffiles.sort(['starttime']), trffiles.sort(['starttime']), filenames, path, image_path, cut_path, staname
+    return rffiles.sort(['starttime']), trffiles.sort(['starttime']), filenames, path, image_path, cut_path, staname, time_before, time_after
 
 def indexpags(maxidx, evt_num):
     axpages = int(np.floor(evt_num/maxidx)+1)
@@ -372,11 +374,11 @@ def main():
     opts.enf = 5
     opts.xlim = [-2, 30]
     opts.ylim = [0, 22]
-    opts.rffiles, opts.trffiles, opts.filenames, opts.path, opts.image_path, opts.cut_path, opts.staname = get_sac()
+    opts.rffiles, opts.trffiles, opts.filenames, opts.path, opts.image_path, opts.cut_path, opts.staname, opts.b, opts.e = get_sac()
     opts.evt_num = len(opts.rffiles)
     rf = opts.rffiles[0]
-    opts.b = rf.stats.sac.b
-    opts.e = rf.stats.sac.e
+    # opts.b = rf.stats.sac.b
+    # opts.e = rf.stats.sac.e
     opts.stla = rf.stats.sac.stla
     opts.stlo = rf.stats.sac.stlo
     opts.RFlength = rf.data.shape[0]
