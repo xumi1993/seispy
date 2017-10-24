@@ -9,7 +9,7 @@ except:
     config = ConfigParser.ConfigParser()
 
 
-def plot_R(rffiles, filenames, image_path, staname):
+def plot_R(rffiles, filenames, image_path, staname, time_before):
     fid_label = open("tmp_label", "w+")
     fid_baz = open("tmp_baz", "w+")
     fid_rf = open("tmp_rf", "w+")
@@ -26,7 +26,7 @@ def plot_R(rffiles, filenames, image_path, staname):
     for i in range(evt_num):
         evtname = os.path.basename(filenames[i])
         evtname = re.split('[_|.]\w[_|.]',evtname)[0]
-        timeaxis = rffiles[i].times()+rffiles[i].stats.sac.b
+        timeaxis = rffiles[i].times()+time_before
         bazi.append(rffiles[i].stats.sac.baz)
         fid_label.write('%d a %s\n' % (i+1, evtname))
         fid_baz.write('%d a %5.2f\n' % (i+1, bazi[i]))

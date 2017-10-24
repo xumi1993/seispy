@@ -229,7 +229,7 @@ class plotrffig():
                 filenames.remove(opts.filenames[i])
                 rst.remove(opts.rffiles[i])
                 tst.remove(opts.trffiles[i])
-        plotrf.plot_RT(rst, tst, filenames, opts.image_path, opts.staname)
+        plotrf.plot_RT(rst, tst, filenames, opts.image_path, opts.staname, opts.b)
         print("Figure has saved into %s" % opts.image_path)
         if sys.platform == 'darwin':
             os.system('open %s' % os.path.join(opts.image_path, opts.staname+'_RT.ps'))
