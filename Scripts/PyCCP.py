@@ -49,7 +49,7 @@ Velmod = config.get('FileIO', 'Velmod')
 stalist = config.get('FileIO', 'stalist')
 domperiod = float(config.get('para', 'domperiod'))
 Profile_width = float(config.get('para', 'Profile_width'))
-proj_width = float(config.get('para', 'proj_width'))
+# proj_width = float(config.get('para', 'proj_width'))
 Stack_range = np.arange(1, 101)
 azi = seispy.distaz(lat1, lon1, lat2, lon2).baz
 dis = seispy.distaz(lat1, lon1, lat2, lon2).delta
@@ -58,13 +58,13 @@ Profile_lat = []
 Profile_lon = []
 for Profile_loca in Profile_range:
     (lat_loca, lon_loca) = seispy.geo.latlon_from(lat1, lon1, azi, seispy.geo.km2deg(Profile_loca))
-    print(lat_loca, lon_loca)
+    #print(lat_loca, lon_loca)
     Profile_lat = np.append(Profile_lat, [lat_loca])
     Profile_lon = np.append(Profile_lon, [lon_loca])
 
 # read depth data
 depthmat = sio.loadmat(depthdat)
-RFdepth = depthmat['RFdepth']
+RFdepth = depthmat['YN_RFdepth']
 
 # find stations beside the profile
 stalat_all = RFdepth[0, 0::]['stalat']
@@ -83,7 +83,7 @@ for i in range(stalon_all.shape[0]):
     if sta_dis < 0.5:
         print(RFdepth[0, i]['Station'][0], projstla, projstlo)
         STA.write('%s %-6.3f %-6.3f\n' % (RFdepth[0, i]['Station'][0], projstla, projstlo))
-        staidx = np.append(staidx, [i])
+        staidx.append(i)
 STA.close()
 
 # Model information
@@ -105,7 +105,7 @@ for i in range(Profile_range.shape[0]):
         Event_count = 0
         mu = 0
         for k in staidx:
-            for l in range(RFdepth[0, k]['Piercelat'].shape[1]):
+            for l in np.arange(RFdepth[0, k]['Piercelat'].shape[1]):
                 pier_lat = RFdepth[0, k]['Piercelat'][2*Stack_range[j], l]
                 pier_lon = RFdepth[0, k]['Piercelon'][2*Stack_range[j], l]
                 pier_azi = seispy.distaz(lat1, lon1, pier_lat, pier_lon).baz
@@ -115,7 +115,7 @@ for i in range(Profile_range.shape[0]):
                 # (pro_lat, pro_lon) = seispy.geo.latlon_from(lat1, lon1, azi, seispy.geo.km2deg(dis_along))
                 # dis_event = seispy.distaz(Profile_lat[i], Profile_lon[i], RFdepth[0, k]['Piercelat'][2*Stack_range[j], l], RFdepth[0, k]['Piercelon'][2*Stack_range[j], l]).degreesToKilometers()
                 # pierce_interval = distaz.deg2km(dis_event) * np.abs(distaz.cosd(azi - azi_event))
-                if np.abs(dis_along - Profile_range[i]) < bin_radius and dis_proj < prog_width:
+                if np.abs(dis_along - Profile_range[i]) < bin_radius and dis_proj < seispy.geo.deg2km(bin_radius):
 #                    print(pierce_interval, azi - azi_event, bin_radius)
 #                    Stack_RF = Stack_RF + RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l]
                     Stack_RF = np.append(Stack_RF, RFdepth[0, k]['moveout_correct'][2*Stack_range[j], l])
