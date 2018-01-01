@@ -56,6 +56,7 @@ def plot_R(rffiles, filenames, image_path, staname, time_before):
     os.system('bash Plot_gmt.sh')
     os.system("rm Plot_gmt.sh")
 
+
 def plot_RT(rst, tst, filenames, image_path, staname, time_before):
     fid_label = open("tmp_label", "w+")
     fid_baz = open("tmp_baz", "w+")

@@ -16,6 +16,7 @@ from obspy.taup import TauPyModel
 from scipy.signal import detrend
 from obspy.signal.filter import bandpass
 from scipy.signal import resample
+import matplotlib.pyplot as plt
 try:
     import configparser
     config = configparser.ConfigParser()
@@ -102,7 +103,7 @@ gauss = float(config.get('para', 'gauss'))
 freqmin = float(config.get('para', 'freqmin'))
 freqmax = float(config.get('para', 'freqmax'))
 sampling = float(config.get('para', 'sampling'))
-newlength = ((time_before+time_after)/sampling)+1
+newlength = int(((time_before+time_after)/sampling)+1)
 image_path = os.path.join(image_path, staname+'_R_gauss'+str(gauss)+'.ps')
 fid_evtlist = open(evt_list, 'r')
 
@@ -110,7 +111,7 @@ fid_evtlist = open(evt_list, 'r')
 # --------- Search eq ----------#
 #################################
 eq_lst = []
-ex_sac = obspy.read(glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*[Ss][Aa][Cc]'))[0])[0]
+ex_sac = obspy.read(glob.glob(os.path.join(data_path, staname, '*.'+comp+'*'))[0])[0]
 stalat = ex_sac.stats.sac.stla
 stalon = ex_sac.stats.sac.stlo
 for evt in fid_evtlist.readlines():
@@ -136,26 +137,16 @@ for evt in fid_evtlist.readlines():
 # -------- Assign Files --------#
 #################################
 eq = []
+sacevt = []
+for sac in glob.glob(os.path.join(data_path, staname, '*.'+comp+'*')):
+    sacname = os.path.basename(sac)
+    date_name = re.search("\d{4}\d{3}\d{2}\d{2}\d{2}", sacname).group()
+    tr = obspy.read(sac)[0]
+    date_sac = (tr.stats.starttime + datetime.timedelta(seconds=int(tr.stats.sac.o))).datetime
+    sacevt.append((date_name, date_sac))
 for nowevt in eq_lst:
     find_result = []
-    for sac in glob.glob(os.path.join(data_path, staname, '*.'+comp+'.*[Ss][Aa][Cc]')):
-        sacname = os.path.basename(sac)
-        date_name = re.search("\d{4}\D\d{3}\D\d{2}\D\d{2}\D\d{2}", sacname).group()
-        date_name_sp = re.split('\D', date_name)
-        year_sac = int(date_name_sp[0])
-        jday_sac = int(date_name_sp[1])
-        foo = datetime.datetime(year_sac, 1, 1) + datetime.timedelta(jday_sac - 1)
-        mon_sac = foo.month
-        day_sac = foo.day
-        hour_sac = int(date_name_sp[2])
-        min_sac = int(date_name_sp[3])
-        sec_sac = int(date_name_sp[4])
-        if sec_sac == 60:
-            sec_sac = 0
-            date_sac = datetime.datetime(year_sac, mon_sac, day_sac, hour_sac, min_sac, sec_sac) + datetime.timedelta(seconds=60)
-        else:
-            date_sac = datetime.datetime(year_sac, mon_sac, day_sac, hour_sac, min_sac, sec_sac)
-        
+    for date_name, date_sac in sacevt:
         # if nowevt[0] + datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=tolerance) <= date_sac <= nowevt[0] + datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=tolerance):
         if date_sac - datetime.timedelta(seconds=offset) - datetime.timedelta(seconds=tolerance) <= nowevt[0] <= date_sac - datetime.timedelta(seconds=offset) + datetime.timedelta(seconds=tolerance):
             print(date_sac, nowevt[0])
@@ -172,14 +163,15 @@ print(len(eq))
 if not os.path.exists(RF_path):
     os.makedirs(RF_path)
 for thiseq in eq:
-    date_name = thiseq[1]
+    date_file_name = thiseq[1]
+    date_name = thiseq[0].strftime('%Y.%j.%H.%M.%S')
     bazi = thiseq[6]
     dis = thiseq[5]
     dep = thiseq[4]
     mag = thiseq[7]
     O = thiseq[-1]
     try:
-        this_seis = obspy.core.read(os.path.join(data_path, staname, '*'+date_name+'*.[Ss][Aa][Cc]'))
+        this_seis = obspy.core.read(os.path.join(data_path, staname, '*'+date_file_name+'*'))
     except:
         continue
 # --------- Calculate dt -----------#
@@ -222,31 +214,34 @@ for thiseq in eq:
     Z_filter = bandpass(this_seis[2].data, freqmin, freqmax, 1/dt, corners=3, zerophase=True)
 # ------- Calculate P arrival time ---#
     arrivals = model.get_travel_times(source_depth_in_km=dep, distance_in_degree=dis, phase_list=["P"])
-    ttime_P = arrivals[0].time - O
+    ttime_P = arrivals[0].time - O + this_seis[2].stats.sac.o
     rayp = seispy.geo.srad2skm(arrivals[0].ray_param)
     # this_seis[0].stats.sac.t1 = ttime_P
     # this_seis[1].stats.sac.t1 = ttime_P
     # this_seis[2].stats.sac.t1 = ttime_P
+    # plt.plot(this_seis[2].times(), Z_filter)
+    # plt.axvline(ttime_P)
+    # # plt.show()
 # ----------- filter by snr ----------#
-    snrbegin = np.floor((ttime_P-50)/dt)
-    snrend = np.floor((ttime_P+50)/dt)
-    snro = np.floor(ttime_P/dt)
+    snrbegin = int(np.floor((ttime_P-50)/dt))
+    snrend = int(np.floor((ttime_P+50)/dt))
+    snro = int(np.floor(ttime_P/dt))
     snr_R = seispy.geo.snr(R_filter[snro:snrend], R_filter[snrbegin:snro])
     snr_T = seispy.geo.snr(T_filter[snro:snrend], T_filter[snrbegin:snro])
     snr_Z = seispy.geo.snr(Z_filter[snro:snrend], Z_filter[snrbegin:snro])
     print(date_name, snr_R, snr_Z, ttime_P, O)
     if snr_R > gate_noise and snr_Z > gate_noise:
-        extbegin = np.floor((ttime_P-time_before)/dt)
-        extend = np.floor((ttime_P+time_after)/dt)
+        extbegin = int(np.floor((ttime_P-time_before)/dt))
+        extend = int(np.floor((ttime_P+time_after)/dt))
         R = R_filter[extbegin:extend+1]
         T = T_filter[extbegin:extend+1]
         Z = Z_filter[extbegin:extend+1]
         RFlength = R.shape[0]
 # --- calculate receiver functions ----#
         (RF, RMS, it) = seispy.decov.decovit(R, Z, dt, RFlength, time_before, gauss, 400, 0.001)
-        max_deep = np.max(np.abs(RF[np.floor((25+time_before)/dt):-1]))
-        time_P1 = np.floor((-2+time_before)/dt)
-        time_P2 = np.floor((2+time_before)/dt)
+        max_deep = np.max(np.abs(RF[int(np.floor((25+time_before)/dt)):-1]))
+        time_P1 = int(np.floor((-2+time_before)/dt))
+        time_P2 = int(np.floor((2+time_before)/dt))
         max_P = np.max(RF[time_P1:time_P2])
         if ismtz == 0:
            cti = max_P == np.max(np.abs(RF)) and max_P < 1
@@ -265,6 +260,7 @@ for thiseq in eq:
             this_seis[2].data = this_seis[2].data[extbegin:extend+1]
             timeaxis = np.linspace(-time_before, time_after, RFlength)
             for i in range(3):
+                this_seis[i].stats.sac.delta = sampling
                 this_seis[i].stats.sac.evla = thiseq[2]
                 this_seis[i].stats.sac.evlo = thiseq[3]
                 this_seis[i].stats.sac.evdp = dep
