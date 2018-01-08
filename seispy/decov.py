@@ -23,6 +23,8 @@ RMS = Root mean square error for predicting numerator after each iteration
 import numpy as np
 from obspy.signal.util import next_pow_2
 from math import pi
+from scipy.fftpack import fft, ifft
+
 
 def gaussFilter( dt, nft, f0 ):
 	df = 1.0/(nft*dt)
@@ -40,22 +42,22 @@ def gaussFilter( dt, nft, f0 ):
 	return gauss
 
 def gfilter(x, nfft, gauss, dt):
-	Xf = np.fft.fft(x, nfft)
+	Xf = fft(x, nfft)
 	Xf = Xf*gauss*dt
-	xnew =  np.fft.ifft(Xf, nfft).real
+	xnew =  ifft(Xf, nfft).real
 	return xnew
 
 def correl( R, W, nfft ):
-	x = np.fft.ifft(np.fft.fft(R,nfft)*np.conj(np.fft.fft(W,nfft)), nfft)
+	x = ifft(fft(R,nfft)*np.conj(fft(W,nfft)), nfft)
 	x = x.real
 	return x
 
 def phaseshift( x, nfft, DT, TSHIFT ):
-	Xf = np.fft.fft(x, nfft)
+	Xf = fft(x, nfft)
 	shift_i = int(TSHIFT/DT)
 	p = 2*pi*np.arange(1,nfft+1)*shift_i/(nfft);
 	Xf = Xf*np.vectorize(complex)(np.cos(p),-np.sin(p))
-	x = np.fft.ifft(Xf, nfft)/np.cos(2*pi*shift_i/nfft)
+	x = ifft(Xf, nfft)/np.cos(2*pi*shift_i/nfft)
 	x = x.real
 	return x
 
@@ -78,7 +80,7 @@ def decovit(UIN,WIN,DT,NT,TSHIFT,F0,ITMAX,MINDERR):
 	U = gfilter( U0, nfft, gaussF , DT)
 	W = gfilter( W0, nfft, gaussF , DT)
 
-	Wf = np.fft.fft( W0, nfft )
+	Wf = fft( W0, nfft )
 	R = U
 
 	powerU = np.sum(U**2)

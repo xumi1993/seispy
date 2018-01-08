@@ -260,7 +260,6 @@ for thiseq in eq:
             this_seis[2].data = this_seis[2].data[extbegin:extend+1]
             timeaxis = np.linspace(-time_before, time_after, RFlength)
             for i in range(3):
-                this_seis[i].stats.sac.delta = sampling
                 this_seis[i].stats.sac.evla = thiseq[2]
                 this_seis[i].stats.sac.evlo = thiseq[3]
                 this_seis[i].stats.sac.evdp = dep
@@ -278,6 +277,7 @@ for thiseq in eq:
             this_seis[1].write(os.path.join(out_path, date_name+'.'+staname+'.T.SAC'), 'SAC')
             this_seis[2].write(os.path.join(out_path, date_name+'.'+staname+'.Z.SAC'), 'SAC')
             RF_R = this_seis[0].copy()
+            RF_R.stats.delta = sampling
             RF_R.stats.sac.user1 = gauss
             RF_R.stats.sac.b = -time_before
             RF_R.stats.sac.a = 0
@@ -285,6 +285,7 @@ for thiseq in eq:
             RF_R.write(os.path.join(RF_path,  date_name+'_P_R.sac'), 'SAC')
             if ist:
                 RF_T = this_seis[1].copy()
+                RF_T.stats.delta = sampling
                 RF_T.stats.sac.user1 = gauss
                 RF_T.stats.sac.b = -time_before
                 RF_T.stats.sac.a = 0
