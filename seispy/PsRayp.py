@@ -11,7 +11,15 @@ def PsRayp(layers, dist, dep):
     model = TauPyModel(model="iasp91")
     ph_list = makepheaselist(layers)
     arrs = model.get_ray_paths(dist, dep, ph_list)
-    return [(srad2skm(arr.ray_param), arr.name) for arr in arrs]
+    arr_num = len(arrs)
+    print(arr_num, len(ph_list))
+    rayp_list = np.zeros([arr_num, 2])
+    for i in range(arr_num):
+        rayp_list[i][0] = srad2skm(arrs[i].ray_param)
+        rayp_list[i][1] = int(arrs[i].name.strip('Ps'))
+    rayp_list.sort(axis=0)
+    return(rayp_list)
+
 
 if __name__ == '__main__':
     layers = np.arange(1,700)
