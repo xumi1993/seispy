@@ -1,5 +1,6 @@
 README.md
 setup.py
+seispy/PsRayp.py
 seispy/__init__.py
 seispy/bootstrap.py
 seispy/decov.py
