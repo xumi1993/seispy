@@ -62,6 +62,31 @@ def srad2skm(srad):
     sdeg = srad * ((2*pi)/360)
     return sdeg / deg2km(1)
 
+
+def rot3D(bazi, inc):
+    """
+    :param bazi:
+    :param inc:
+    :return:
+    M = [cos(inc)     -sin(inc)*sin(bazi)    -sin(inc)*cos(bazi);
+        sin(inc)      cos(inc)*sin(bazi)     cos(inc)*cos(bazi);
+        0              -cos(bazi)             sin(bazi)];
+    """
+    inc = inc / 180 * pi
+    bazi = bazi / 180 * pi
+    M = np.array([[np.cos(inc), -np.sin(inc)*np.sin(bazi), -np.sin(inc)*np.cos(bazi)],
+                   np.sin(inc), np.cos(inc)*np.sin(bazi), np.cos(inc)*np.cos(bazi),
+                   0, -np.cos(bazi), np.sin(bazi)])
+    return M
+
+
+def rotateSeisZENtoLQT(Z, E, N, bazi, inc):
+    M = rot3D(bazi, inc)
+    ZEN = np.array([Z, E, N])
+    LQT = np.dot(M, ZEN)
+    return LQT[0, :], LQT[1, :], LQT[2, :]
+
+
 def rotateSeisENZtoTRZ( E, N, Z, BAZ ):
     angle = mod(BAZ+180, 360)
     R = N*cosd(angle) + E*sind(angle)
