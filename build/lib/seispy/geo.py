@@ -72,11 +72,20 @@ def rot3D(bazi, inc):
         sin(inc)      cos(inc)*sin(bazi)     cos(inc)*cos(bazi);
         0              -cos(bazi)             sin(bazi)];
     """
+
+    if isinstance(inc, float) or isinstance(inc, int):
+        value31 = 0
+    elif isinstance(inc, np.ndarray):
+        value31 = np.repeat(0, len(inc))
+    else:
+        raise TypeError('Input args sould be in \'float\', \'int\', or \'numpy.ndarray\'')
+
     inc = inc / 180 * pi
     bazi = bazi / 180 * pi
+
     M = np.array([[np.cos(inc), -np.sin(inc)*np.sin(bazi), -np.sin(inc)*np.cos(bazi)],
                   [np.sin(inc), np.cos(inc)*np.sin(bazi), np.cos(inc)*np.cos(bazi)],
-                  [np.repeat(0, len(bazi)), -np.cos(bazi), np.sin(bazi)]])
+                  [value31, -np.cos(bazi), np.sin(bazi)]])
     return M
 
 
