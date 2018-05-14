@@ -76,7 +76,7 @@ def rot3D(bazi, inc):
     bazi = bazi / 180 * pi
     M = np.array([[np.cos(inc), -np.sin(inc)*np.sin(bazi), -np.sin(inc)*np.cos(bazi)],
                   [np.sin(inc), np.cos(inc)*np.sin(bazi), np.cos(inc)*np.cos(bazi)],
-                  [0, -np.cos(bazi), np.sin(bazi)]])
+                  [np.repeat(0, len(bazi)), -np.cos(bazi), np.sin(bazi)]])
     return M
 
 
