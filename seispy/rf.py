@@ -8,36 +8,37 @@ import seispy
 import glob
 from datetime import timedelta
 import pandas as pd
-from obspy.taup import import TauPyModel
+from obspy.taup import TauPyModel
 
 
 def datestr2regex(datestr):
-    patten = datestr.replace('%Y', r'\d{4}')
-    patten = patten.replace('%m', r'\d{2}')
-    patten = patten.replace('%d', r'\d{2}')
-    patten = patten.replace('%j', r'\d{2}')
-    patten = patten.replace('%H', r'\d{2}')
-    patten = patten.replace('%M', r'\d{2}')
-    patten = patten.replace('%S', r'\d{2}')
-    return patten
+    pattern = datestr.replace('%Y', r'\d{4}')
+    pattern = pattern.replace('%m', r'\d{2}')
+    pattern = pattern.replace('%d', r'\d{2}')
+    pattern = pattern.replace('%j', r'\d{3}')
+    pattern = pattern.replace('%H', r'\d{2}')
+    pattern = pattern.replace('%M', r'\d{2}')
+    pattern = pattern.replace('%S', r'\d{2}')
+    return pattern
 
 
-def read_catalog(logpath, b_time, e_time, stla, stlo):
+def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
     col = ['date', 'evla', 'evlo', 'evdp', 'mag', 'dis', 'bazi']
     eq_lst = pd.DataFrame(columns=col)
     with open(logpath) as f:
         lines = f.readlines()
         for line in lines:
-            line = line.strip()
-            date_now = obspy.UTCDateTime(''.join(line.split()[0:7]))
-            evla = float(line.split()[7])
-            evlo = float(line.split()[8])
-            evdp = float(line.split()[9])
-            mw = float(line.split()[10])
+            line_sp = line.strip().split()
+            date_now = obspy.UTCDateTime.strptime('.'.join(line_sp[0:3])+'T'+'.'.join(line_sp[4:7]), '%Y.%m.%dT%H.%M.%S')
+            evla = float(line_sp[7])
+            evlo = float(line_sp[8])
+            evdp = float(line_sp[9])
+            mw = float(line_sp[10])
             dis = seispy.distaz(stla, stlo, evla, evlo).delta
             bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
-            if b_time <= date_now <= e_time:
-                eq_lst = eq_lst.append([[date_now, evla, evlo, evdp, mw, dis, bazi]], columns=col, ignore_index=True)
+            if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
+                this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw, dis, bazi]], columns=col)
+                eq_lst = eq_lst.append(this_data, ignore_index=True)
     return eq_lst
 
 
@@ -50,32 +51,30 @@ def load_station_info(pathname, ref_comp, suffix):
 def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))
-    eq_match = pd.DataFrame(column=eq_lst.columns)
-    for i, evt in eq_lst:
-        for ref_sac in ref_eqs:
-            datestr = re.findall(pattern, ref_sac)[0]
-            tr = obspy.read(ref_sac)[0]
+    sac_files = []
+    for ref_sac in ref_eqs:
+        datestr = re.findall(pattern, ref_sac)[0]
+        tr = obspy.read(ref_sac)[0]
+        sac_files.append([datestr, tr])
+    new_col = ['data']
+    eq_match = pd.DataFrame(columns=new_col)
+    for i, evt in eq_lst.iterrows():
+        tmp_datestr = []
+        print(evt['date'])
+        for datestr, tr in sac_files:
             if tr.stats.starttime - timedelta(seconds=offset+tolerance) <= evt['date'] <= tr.stats.starttime + timedelta(seconds=-offset+tolerance):
-                eqs.append(eq(pathname, datestr, evt))
-                eq_match = eq_match.append(evt, ignore_index=True)
+                tmp_datestr.append(datestr)
+        if len(tmp_datestr) == 1:
+            this_eq = eq(pathname, tmp_datestr[0])
+            this_df = pd.DataFrame([[this_eq]], columns=new_col, index=[i])
+            eq_match = eq_match.append(this_df)
+    return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
 
 class eq(object):
-    def __init__(self, pathname, datestr, evtinfo):
+    def __init__(self, pathname, datestr):
         self.st = obspy.read(join(pathname, '*'+datestr+'.*.SAC'))
-        self.otime = evtinfo[0]
-        self.evla = evtinfo[1]
-        self.evlo = evtinfo[2]
-        self.evdp = evtinfo[3]
-        self.mw = evtinfo[4]
-        self.dis = evtinfo[5]
-        self.bazi = evtinfo[6]
-
-    def raypara(model):
-        """
-        model: TauPyModel form obspy
-        """
-
+        self.rf = obspy.Stream()
 
 
 class para():
@@ -87,6 +86,10 @@ class para():
         self.dateformat = '%Y.%j.%H.%M.%S'
         self.date_begin = obspy.UTCDateTime('19700101')
         self.date_end = obspy.UTCDateTime.now()
+        self.magmin = 5.5
+        self.magmax = 10
+        self.dismin = 30
+        self.dismax = 90
 
 
 class stainfo():
@@ -113,19 +116,41 @@ class rf(object):
         self.ref_comp = ref_comp
         self.suffix = suffix
         self.eq_lst = pd.DataFrame()
+        self.eqs = pd.DataFrame()
         
-        self.stainfo.load_stainfo(self.pathname, ref_comp, suffix)
+        self.stainfo.load_stainfo(self.para.datapath, ref_comp, suffix)
         
         self.model = TauPyModel('iasp91')
 
     def search_eq(self, logpath):
-        self.eq_lst = read_catalog(logpath, self.date_begin, self.date_end, self.stainfo.stla, self.stainfo.stlo)
+        self.eq_lst = read_catalog(logpath, self.para.date_begin, self.para.date_end,
+                                   self.stainfo.stla, self.stainfo.stlo,
+                                   magmin=self.para.magmin, magmax=self.para.magmax,
+                                   dismin=self.para.dismin, dismax=self.para.dismax)
+
+    def match_eq(self):
+        self.eqs = match_eq(eq_lst, self.para.datapath, ref_comp=self.ref_comp, suffix=self.suffix,
+                            offset=self.para.offset, tolerance=self.para.tolerance,
+                            dateformat=self.para.dateformat)
 
     def retrend(self):
-        self.st.detrend(type='linear')
-        self.st.detrend(type='constant')
+        for i, row in self.eqs:
+            row['data'].st.detrend(type='linear')
+            row['data'].st.detrend(type='constant')
 
     def filter(self, freqmin=0.05, freqmax=1, order=4):
-        self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order)
+        for i, row in self.eqs:
+            row['data'].st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order)
 
-    def 
+
+if __name__ == '__main__':
+    date_begin = obspy.UTCDateTime('20130101')
+    date_end = obspy.UTCDateTime('20140101')
+    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    datapath = '/Users/xumj/Researches/test4seispy'
+    net, sta, stla, stlo = load_station_info(datapath, 'BHZ', 'SAC')
+    eq_lst = read_catalog(logpath, date_begin, date_end, stla, stlo)
+    print('******')
+    eqs = match_eq(eq_lst, datapath)
+    for i, row in eqs.iterrows():
+        print(row.date, row['data'].st[0].stats.starttime)
