@@ -58,9 +58,9 @@ def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=2
         sac_files.append([datestr, tr])
     new_col = ['data']
     eq_match = pd.DataFrame(columns=new_col)
+    print('Matching SAC files')
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
-        print(evt['date'])
         for datestr, tr in sac_files:
             if tr.stats.starttime - timedelta(seconds=offset+tolerance) <= evt['date'] <= tr.stats.starttime + timedelta(seconds=-offset+tolerance):
                 tmp_datestr.append(datestr)
@@ -99,9 +99,10 @@ class para():
         self.dismax = 90
         self.ref_comp = 'BHZ'
         self.suffix = 'SAC'
-        
+
     def get_para(self):
         return self.__dict__
+
 
 class stainfo():
     def __init__(self):
@@ -206,21 +207,22 @@ def InitRfProj():
 if __name__ == '__main__':
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
-    # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
-    logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    # datapath = '/Users/xumj/Researches/test4seispy'
-    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    rfsta = rf(datapath, date_begin, date_end)
-    rfsta.search_eq(logpath)
-    rfsta.match_eq()
-    rfsta.save(proj_file)
+    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
+    datapath = '/Users/xumj/Researches/test4seispy/data'
+    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
+    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
 
-    # net, sta, stla, stlo = load_station_info(datapath, 'BHZ', 'SAC')
-    # eq_lst = read_catalog(logpath, date_begin, date_end, stla, stlo)
-    # print('******')
-    # eqs = match_eq(eq_lst, datapath)
-    # for i, row in eqs.iterrows():
-    #    print(row.date, row['data'].st[0].stats.starttime)
-    
+    rfproj = rf()
+    rfproj.load(proj_file)
+    # rfproj.date_begin = date_begin
+    # rfproj.date_end = date_end
+    # rfproj.datapath = datapath
+    # rfproj.load_stainfo()
+    # rfproj.search_eq(logpath)
+    # rfproj.match_eq()
+    # rfproj.save(proj_file)
+
+
 

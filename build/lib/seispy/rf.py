@@ -206,15 +206,21 @@ def InitRfProj():
 if __name__ == '__main__':
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
-    # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
-    logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    # datapath = '/Users/xumj/Researches/test4seispy'
-    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    rfsta = rf(datapath, date_begin, date_end)
-    rfsta.search_eq(logpath)
-    rfsta.match_eq()
-    rfsta.save(proj_file)
+    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
+    datapath = '/Users/xumj/Researches/test4seispy/data'
+    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
+    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
+
+    rfproj = rf()
+    rfproj.date_begin = date_begin
+    rfproj.date_end = date_end
+    rfproj.datapath = datapath
+    rfproj.load_stainfo()
+    rfproj.search_eq(logpath)
+    rfproj.match_eq()
+    rfproj.save(proj_file)
 
     # net, sta, stla, stlo = load_station_info(datapath, 'BHZ', 'SAC')
     # eq_lst = read_catalog(logpath, date_begin, date_end, stla, stlo)
