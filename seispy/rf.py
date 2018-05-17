@@ -5,11 +5,14 @@ import obspy
 import re
 from os.path import dirname, join, expanduser
 import seispy
+from seispy.setuplog import setuplog
 import glob
 from datetime import timedelta
 import pandas as pd
 from obspy.taup import TauPyModel
 import deepdish as dd
+import configparser
+
 
 def datestr2regex(datestr):
     pattern = datestr.replace('%Y', r'\d{4}')
@@ -75,6 +78,10 @@ class eq(object):
     def __init__(self, pathname, datestr):
         self.st = obspy.read(join(pathname, '*'+datestr+'.*.SAC'))
         self.rf = obspy.Stream()
+        self.PArrival = None
+        self.PRaypara = None
+        self.SArrival = None
+        self.SRaypara = None
     
     def detrend(self):
         self.st.detrend(type='linear')
@@ -83,11 +90,23 @@ class eq(object):
     def filter(self, freqmin=0.05, freqmax=1, order=4):
         self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order)
 
+    def get_arrival(self, model, evdp, dis):
+        arrivals = model.get_travel_times(evdp, dis, phase_list=['P', 'S'])
+        self.PArrival = arrivals[0]
+        self.SArrival = arrivals[1]
+
+    def get_raypara(self, model, evdp, dis):
+        raypara = model.get_ray_paths(evdp, dis, phase_list=['P', 'S'])
+        self.PRaypara = raypara[0]
+        self.SRaypara = raypara[1]
+
 
 class para():
     def __init__(self):
         self.datapath = expanduser('~')
         self.RFpath = expanduser('~')
+        self.imagepath = expanduser('~')
+        self.catalogpath = join(expanduser('~'), 'EventCMT.dat')
         self.offset = 0
         self.tolerance = 210
         self.dateformat = '%Y.%j.%H.%M.%S'
@@ -99,6 +118,9 @@ class para():
         self.dismax = 90
         self.ref_comp = 'BHZ'
         self.suffix = 'SAC'
+        self.noiseget = 7
+        self.gauss = 2
+        self.target_dt = 0.01
 
     def get_para(self):
         return self.__dict__
@@ -118,6 +140,29 @@ class stainfo():
         (self.network, self.station, self.stla, self.stlo) = load_station_info(pathname, ref_comp, suffix)
 
 
+def CfgParser(cfg_file):
+    cf = configparser.ConfigParser()
+    pa = para()
+    try:
+        cf.read(cfg_file)
+    except Exception as e:
+        raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
+
+    for key, value in cf.items('path'):
+        pa.__dict__[key] = value
+    for key, value in cf.items('para'):
+        if key == 'date_begin':
+            pa.__dict__[key] = obspy.UTCDateTime(date_begin)
+        elif key == 'date_end':
+            pa.__dict__[key] = obspy.UTCDateTime(date_end)
+        else:
+            try:
+                pa.__dict__[key] = float(value)
+            except ValueError:
+                pa.__dict__[key] = value
+    return pa
+
+
 class rf(object):
     def __init__(self):
         self.para = para()
@@ -125,6 +170,7 @@ class rf(object):
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()   
         self.model = TauPyModel('iasp91')
+        self.logger = setuplog()
     
     @property
     def date_begin(self):
@@ -151,36 +197,56 @@ class rf(object):
         self.para.datapath = value
 
     def load_stainfo(self):
-        self.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
+        try:
+            self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
+            self.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
+        except Exception as e:
+            self.logger.RFlog.error('{0}'.format(e))
+            raise e
 
-    def search_eq(self, logpath):
-        self.eq_lst = read_catalog(logpath, self.para.date_begin, self.para.date_end,
-                                   self.stainfo.stla, self.stainfo.stlo,
-                                   magmin=self.para.magmin, magmax=self.para.magmax,
-                                   dismin=self.para.dismin, dismax=self.para.dismax)
+    def search_eq(self, logpath=''):
+        if logpath == '':
+            logpath = self.para.catalogpath
+        try:
+            self.logger.RFlog.info('Search earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
+                                                                               self.date_end.strftime('%Y.%m.%dT%H:%M:%S')))
+            self.eq_lst = read_catalog(logpath, self.para.date_begin, self.para.date_end,
+                                       self.stainfo.stla, self.stainfo.stlo,
+                                       magmin=self.para.magmin, magmax=self.para.magmax,
+                                       dismin=self.para.dismin, dismax=self.para.dismax)
+        except Exception as e:
+            self.logger.RFlog.error('{0}'.format(e))
+            raise e
 
     def match_eq(self):
-        self.eqs = match_eq(self.eq_lst, self.para.datapath, ref_comp=self.para.ref_comp, suffix=self.para.suffix,
-                            offset=self.para.offset, tolerance=self.para.tolerance,
-                            dateformat=self.para.dateformat)
+        try:
+            self.logger.RFlog.info('Match SAC files')
+            self.eqs = match_eq(self.eq_lst, self.para.datapath, ref_comp=self.para.ref_comp, suffix=self.para.suffix,
+                                offset=self.para.offset, tolerance=self.para.tolerance,
+                                dateformat=self.para.dateformat)
+        except Exception as e:
+            self.logger.RFlog.error('{0}'.format(e))
+            raise e
+        self.logger.RFlog.info('{0} earthquakes matched'.format(self.eqs.shape[0]))
 
     def save(self, path=''):
         if path == '':
-            path = '{0}.{1}.npz'.format(self.stainfo.network, self.stainfo.station)
+            path = '{0}.{1}.h5'.format(self.stainfo.network, self.stainfo.station)
         
-        para = self.para.__dict__
-        stainfo = self.stainfo.__dict__
-        
-        d = {'para':para, 'stainfo':stainfo, 'eq_lst':self.eq_lst, 'eqs':self.eqs}
+        d = {'para': self.para.__dict__, 'stainfo': self.stainfo.__dict__, 'eq_lst': self.eq_lst, 'eqs': self.eqs}
         try:
+            self.logger.RFlog.info('Saving project to {0}'.format(path))
             dd.io.save(path, d)
         except Exception as e:
+            self.logger.RFlog.error('{0}'.format(e))
             raise IOError(e)
 
     def load(self, path):
         try:
+            self.logger.RFlog.info('Loading {0}'.format(path))
             fdd = dd.io.load(path)
         except Exception as e:
+            self.logger.RFlog.error('{0}'.format(e))
             raise IOError('Cannot read {0}'.format(path))
         
         try:
@@ -191,17 +257,27 @@ class rf(object):
         except Exception as e:
             raise ValueError(e)
 
-    def retrend(self):
-        for i, row in self.eqs:
+    def detrend(self):
+        self.logger.RFlog.info('Detrend all data')
+        for _, row in self.eqs.iterrows():
             row['data'].detrend()
 
     def filter(self, freqmin=0.05, freqmax=1, order=4):
-        for i, row in self.eqs:
-            row['data'].filter(freqmin=freqmin, freqmax=freqmax, corners=order)
+        self.logger.RFlog.info('Filter all data from {0} to {1}'.format(freqmin, freqmax))
+        for _, row in self.eqs.iterrows():
+            row['data'].filter(freqmin=freqmin, freqmax=freqmax, order=order)
+
+    def phase(self):
+        self.logger.RFlog.info('Calculate arrivals and ray parameters for all data')
+        for _, row in self.eqs.iterrows():
+            row['data'].get_arrival(self.model, row['evdp'], row['dis'])
+            row['data'].get_raypara(self.model, row['evdp'], row['dis'])
 
 
-def InitRfProj():
-    rfproj = rf()
+def InitRfProj(cfg_path):
+    pjt = rf()
+    pjt.para = CfgParser(cfg_path)
+    return pjt
 
 
 if __name__ == '__main__':
@@ -216,6 +292,9 @@ if __name__ == '__main__':
 
     rfproj = rf()
     rfproj.load(proj_file)
+    # rfproj.detrend()
+    # rfproj.filter()
+    rfproj.phase()
     # rfproj.date_begin = date_begin
     # rfproj.date_end = date_end
     # rfproj.datapath = datapath
