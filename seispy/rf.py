@@ -61,7 +61,6 @@ def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=2
         sac_files.append([datestr, tr])
     new_col = ['data']
     eq_match = pd.DataFrame(columns=new_col)
-    print('Matching SAC files')
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
         for datestr, tr in sac_files:
@@ -291,17 +290,17 @@ if __name__ == '__main__':
     proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
 
     rfproj = rf()
-    rfproj.load(proj_file)
-    # rfproj.detrend()
-    # rfproj.filter()
-    rfproj.phase()
-    # rfproj.date_begin = date_begin
-    # rfproj.date_end = date_end
-    # rfproj.datapath = datapath
-    # rfproj.load_stainfo()
-    # rfproj.search_eq(logpath)
-    # rfproj.match_eq()
+    # rfproj.load(proj_file)
+    rfproj.date_begin = date_begin
+    rfproj.date_end = date_end
+    rfproj.datapath = datapath
+    rfproj.load_stainfo()
+    rfproj.search_eq(logpath)
+    rfproj.match_eq()
     # rfproj.save(proj_file)
+    rfproj.detrend()
+    rfproj.filter()
+    rfproj.phase()
 
 
 
