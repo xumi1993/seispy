@@ -7,6 +7,7 @@ seispy/decov.py
 seispy/distaz.py
 seispy/geo.py
 seispy/mccc.py
+seispy/rf.py
 seispy.egg-info/PKG-INFO
 seispy.egg-info/SOURCES.txt
 seispy.egg-info/dependency_links.txt
