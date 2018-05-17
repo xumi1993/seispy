@@ -1,26 +1,16 @@
 
-.idea/.name
+.idea/
 
-.idea/dictionaries/xumj.xml
-
-.idea/encodings.xml
-
-.idea/misc.xml
-
-.idea/modules.xml
-
-.idea/PyCCP.iml
-
-.idea/scopes/scope_settings.xml
-
-.idea/vcs.xml
-
-.idea/workspace-NSConflict-xumi1993.xml
-
-.idea/workspace.xml
-
-seispy/.idea/.name
+seispy/.idea/
 
 *.xml
 
-seispy/.idea/seispy.iml
+build/
+
+dist/
+
+seeispy/__pycache__/
+
+*.egg
+
+*.egg-info
