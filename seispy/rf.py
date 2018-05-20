@@ -30,10 +30,12 @@ def datestr2regex(datestr):
 def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
     starttime = b_time.strftime('%Y-%m-%dT%H:%M:%S')
     endtime = e_time.strftime('%Y-%m-%dT%H:%M:%S')
-    use_cols = ['Time', 'Latitude', 'Longitude',  'Depth', 'Magnitude']
+    use_cols = ['Time', 'Latitude', 'Longitude', 'Depth', 'Magnitude']
     url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
-          'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&orderby=time-asc&format=geocsv'.format(starttime, endtime, stla,
-                                                                                  stlo, dismin, dismax, magmin, magmax)
+          'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&orderby=time-asc&format=geocsv'.format(starttime, endtime,
+                                                                                                   stla,
+                                                                                                   stlo, dismin, dismax,
+                                                                                                   magmin, magmax)
     try:
         response = rq.urlopen(url)
     except Exception as e:
@@ -49,7 +51,8 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
         lines = f.readlines()
         for line in lines:
             line_sp = line.strip().split()
-            date_now = obspy.UTCDateTime.strptime('.'.join(line_sp[0:3])+'T'+'.'.join(line_sp[4:7]), '%Y.%m.%dT%H.%M.%S')
+            date_now = obspy.UTCDateTime.strptime('.'.join(line_sp[0:3]) + 'T' + '.'.join(line_sp[4:7]),
+                                                  '%Y.%m.%dT%H.%M.%S')
             evla = float(line_sp[7])
             evlo = float(line_sp[8])
             evdp = float(line_sp[9])
@@ -81,7 +84,8 @@ def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=2
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
         for datestr, tr in sac_files:
-            if tr.stats.starttime - timedelta(seconds=offset+tolerance) <= evt['date'] <= tr.stats.starttime + timedelta(seconds=-offset+tolerance):
+            if tr.stats.starttime - timedelta(seconds=offset + tolerance) <= evt['date'] \
+                    <= tr.stats.starttime + timedelta(seconds=-offset + tolerance):
                 tmp_datestr.append(datestr)
         if len(tmp_datestr) == 1:
             this_eq = eq(pathname, tmp_datestr[0])
@@ -92,13 +96,13 @@ def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=2
 
 class eq(object):
     def __init__(self, pathname, datestr):
-        self.st = obspy.read(join(pathname, '*'+datestr+'.*.SAC'))
+        self.st = obspy.read(join(pathname, '*' + datestr + '.*.SAC'))
         self.rf = obspy.Stream()
         self.PArrival = None
         self.PRaypara = None
         self.SArrival = None
         self.SRaypara = None
-    
+
     def detrend(self):
         self.st.detrend(type='linear')
         self.st.detrend(type='constant')
@@ -195,7 +199,7 @@ def CfgParser(cfg_file):
     pa = para()
     try:
         cf.read(cfg_file)
-    except Exception as e:
+    except Exception:
         raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
 
     for key, value in cf.items('path'):
@@ -218,10 +222,10 @@ class rf(object):
         self.para = para()
         self.stainfo = stainfo()
         self.eq_lst = pd.DataFrame()
-        self.eqs = pd.DataFrame()   
+        self.eqs = pd.DataFrame()
         self.model = TauPyModel('iasp91')
         self.logger = setuplog()
-    
+
     @property
     def date_begin(self):
         return self.para.date_begin
@@ -237,7 +241,7 @@ class rf(object):
     @date_end.setter
     def date_end(self, value):
         self.para.date_end = value
-    
+
     @property
     def datapath(self):
         return self.para.datapath
@@ -258,8 +262,9 @@ class rf(object):
         if logpath == '':
             logpath = self.para.catalogpath
         try:
-            self.logger.RFlog.info('Search earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
-                                                                               self.date_end.strftime('%Y.%m.%dT%H:%M:%S')))
+            self.logger.RFlog.info(
+                'Search earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
+                                                            self.date_end.strftime('%Y.%m.%dT%H:%M:%S')))
             self.eq_lst = read_catalog(logpath, self.para.date_begin, self.para.date_end,
                                        self.stainfo.stla, self.stainfo.stlo,
                                        magmin=self.para.magmin, magmax=self.para.magmax,
@@ -282,7 +287,7 @@ class rf(object):
     def save(self, path=''):
         if path == '':
             path = '{0}.{1}.h5'.format(self.stainfo.network, self.stainfo.station)
-        
+
         d = {'para': self.para.__dict__, 'stainfo': self.stainfo.__dict__, 'eq_lst': self.eq_lst, 'eqs': self.eqs}
         try:
             self.logger.RFlog.info('Saving project to {0}'.format(path))
@@ -298,7 +303,7 @@ class rf(object):
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise IOError('Cannot read {0}'.format(path))
-        
+
         try:
             self.para.__dict__.update(fdd['para'])
             self.stainfo.__dict__.update(fdd['stainfo'])
@@ -368,4 +373,3 @@ def get_events_test():
 
 if __name__ == '__main__':
     get_events_test()
-
