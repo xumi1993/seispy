@@ -1,42 +1,50 @@
 import math
 
+
 def sind(deg):
     rad = math.radians(deg)
     return math.sin(rad)
+
 
 def cosd(deg):
     rad = math.radians(deg)
     return math.cos(rad)
 
+
 def tand(deg):
     rad = math.radians(deg)
     return math.tan(rad)
+
 
 def cotd(deg):
     rad = math.radians(deg)
     return math.cos(rad) / math.sin(rad)
 
+
 def asind(x):
     rad = math.asin(x)
     return math.degrees(rad)
+
 
 def acosd(x):
     rad = math.acos(x)
     return math.degrees(rad)
 
+
 def atand(x):
     rad = math.atan(x)
     return math.degrees(rad)
 
+
 def km2deg(kilometers):
     return kilometers / 111.19
-    
+
+
 def deg2km(degree):
     return degree * 111.19
 
 
 class distaz:
-    
     """
     c Subroutine to calculate the Great Circle Arc distance
     c    between two sets of geographic coordinates
@@ -63,8 +71,8 @@ class distaz:
     and I vaguely remember a perl port. Long live distaz! 
     """
 
-    def __init__(self,  lat1,  lon1,  lat2,  lon2):
-       
+    def __init__(self, lat1, lon1, lat2, lon2):
+
         self.stalat = lat1
         self.stalon = lon1
         self.evtlat = lat2
@@ -74,8 +82,8 @@ class distaz:
             self.az = 0.0
             self.baz = 0.0
             return
-        
-        rad=2.*math.pi/360.0
+
+        rad = 2. * math.pi / 360.0
         """
 	c
 	c scolat and ecolat are the geocentric colatitudes
@@ -84,46 +92,46 @@ class distaz:
 	c Earth Flattening of 1/298.257 take from Bott (pg. 3)
 	c
         """
-        sph=1.0/298.257
+        sph = 1.0 / 298.257
 
-        scolat=math.pi/2.0 - math.atan((1.-sph)*(1.-sph)*math.tan(lat1*rad))
-        ecolat=math.pi/2.0 - math.atan((1.-sph)*(1.-sph)*math.tan(lat2*rad))
-        slon=lon1*rad
-        elon=lon2*rad
+        scolat = math.pi / 2.0 - math.atan((1. - sph) * (1. - sph) * math.tan(lat1 * rad))
+        ecolat = math.pi / 2.0 - math.atan((1. - sph) * (1. - sph) * math.tan(lat2 * rad))
+        slon = lon1 * rad
+        elon = lon2 * rad
         """
 	c
 	c  a - e are as defined by Bullen (pg. 154, Sec 10.2)
 	c     These are defined for the pt. 1
 	c
         """
-        a=math.sin(scolat)*math.cos(slon)
-        b=math.sin(scolat)*math.sin(slon)
-        c=math.cos(scolat)
-        d=math.sin(slon)
-        e=-math.cos(slon)
-        g=-c*e
-        h=c*d
-        k=-math.sin(scolat)
+        a = math.sin(scolat) * math.cos(slon)
+        b = math.sin(scolat) * math.sin(slon)
+        c = math.cos(scolat)
+        d = math.sin(slon)
+        e = -math.cos(slon)
+        g = -c * e
+        h = c * d
+        k = -math.sin(scolat)
         """
 	c
 	c  aa - ee are the same as a - e, except for pt. 2
 	c
         """
-        aa=math.sin(ecolat)*math.cos(elon)
-        bb=math.sin(ecolat)*math.sin(elon)
-        cc=math.cos(ecolat)
-        dd=math.sin(elon)
-        ee=-math.cos(elon)
-        gg=-cc*ee
-        hh=cc*dd
-        kk=-math.sin(ecolat)
+        aa = math.sin(ecolat) * math.cos(elon)
+        bb = math.sin(ecolat) * math.sin(elon)
+        cc = math.cos(ecolat)
+        dd = math.sin(elon)
+        ee = -math.cos(elon)
+        gg = -cc * ee
+        hh = cc * dd
+        kk = -math.sin(ecolat)
         """
 	c
 	c  Bullen, Sec 10.2, eqn. 4
 	c
         """
-        delrad=math.acos(a*aa + b*bb + c*cc)
-        self.delta=delrad/rad
+        delrad = math.acos(a * aa + b * bb + c * cc)
+        self.delta = delrad / rad
         """
 	c
 	c  Bullen, Sec 10.2, eqn 7 / eqn 8
@@ -133,13 +141,13 @@ class distaz:
 	c  Calculate baz this way to avoid quadrant problems
 	c
         """
-        rhs1=(aa-d)*(aa-d)+(bb-e)*(bb-e)+cc*cc - 2.
-        rhs2=(aa-g)*(aa-g)+(bb-h)*(bb-h)+(cc-k)*(cc-k) - 2.
-        dbaz=math.atan2(rhs1,rhs2)
-        if (dbaz<0.0):
-            dbaz=dbaz+2*math.pi
-        
-        self.baz=dbaz/rad
+        rhs1 = (aa - d) * (aa - d) + (bb - e) * (bb - e) + cc * cc - 2.
+        rhs2 = (aa - g) * (aa - g) + (bb - h) * (bb - h) + (cc - k) * (cc - k) - 2.
+        dbaz = math.atan2(rhs1, rhs2)
+        if (dbaz < 0.0):
+            dbaz = dbaz + 2 * math.pi
+
+        self.baz = dbaz / rad
         """
 	c
 	c  Bullen, Sec 10.2, eqn 7 / eqn 8
@@ -147,22 +155,22 @@ class distaz:
 	c    pt. 2 is unprimed, so this is technically the az
 	c
 	"""
-        rhs1=(a-dd)*(a-dd)+(b-ee)*(b-ee)+c*c - 2.
-        rhs2=(a-gg)*(a-gg)+(b-hh)*(b-hh)+(c-kk)*(c-kk) - 2.
-        daz=math.atan2(rhs1,rhs2)
-        if daz<0.0:
-            daz=daz+2*math.pi
-        
-        self.az=daz/rad
+        rhs1 = (a - dd) * (a - dd) + (b - ee) * (b - ee) + c * c - 2.
+        rhs2 = (a - gg) * (a - gg) + (b - hh) * (b - hh) + (c - kk) * (c - kk) - 2.
+        daz = math.atan2(rhs1, rhs2)
+        if daz < 0.0:
+            daz = daz + 2 * math.pi
+
+        self.az = daz / rad
         """
 	c
 	c   Make sure 0.0 is always 0.0, not 360.
 	c
 	"""
-        if (abs(self.baz-360.) < .00001):
-            self.baz=0.0
-        if (abs(self.az-360.) < .00001):
-            self.az=0.0
+        if (abs(self.baz - 360.) < .00001):
+            self.baz = 0.0
+        if (abs(self.az - 360.) < .00001):
+            self.az = 0.0
 
     def getDelta(self):
         return self.delta
@@ -174,7 +182,7 @@ class distaz:
         return self.baz
 
     def degreesToKilometers(self):
-        return  self.delta * 111.19
-    
-#distaz = DistAz(0, 0, 1,1)
-#print "%f  %f  %f" % (distaz.getDelta(), distaz.getAz(), distaz.getBaz())
+        return self.delta * 111.19
+
+# distaz = DistAz(0, 0, 1,1)
+# print "%f  %f  %f" % (distaz.getDelta(), distaz.getAz(), distaz.getBaz())
