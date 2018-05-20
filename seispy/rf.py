@@ -3,6 +3,7 @@
 import numpy as np
 import obspy
 import re
+import io
 from os.path import dirname, join, expanduser
 import seispy
 from seispy.setuplog import setuplog
@@ -11,6 +12,7 @@ from datetime import timedelta
 import pandas as pd
 from obspy.taup import TauPyModel
 import deepdish as dd
+import urllib.request as rq
 import configparser
 
 
@@ -23,6 +25,21 @@ def datestr2regex(datestr):
     pattern = pattern.replace('%M', r'\d{2}')
     pattern = pattern.replace('%S', r'\d{2}')
     return pattern
+
+
+def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
+    starttime = b_time.strftime('%Y-%m-%dT%H:%M:%S')
+    endtime = e_time.strftime('%Y-%m-%dT%H:%M:%S')
+    use_cols = ['Time', 'Latitude', 'Longitude',  'Depth', 'Magnitude']
+    url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
+          'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&orderby=time-asc&format=geocsv'.format(starttime, endtime, stla,
+                                                                                  stlo, dismin, dismax, magmin, magmax)
+    try:
+        response = rq.urlopen(url)
+    except Exception as e:
+        raise ConnectionError('{0}'.format(e))
+    evt_csv = io.StringIO(response.read().decode())
+    return pd.read_csv(evt_csv, sep='|', comment='#', parse_dates=[2], usecols=use_cols)
 
 
 def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
@@ -185,9 +202,9 @@ def CfgParser(cfg_file):
         pa.__dict__[key] = value
     for key, value in cf.items('para'):
         if key == 'date_begin':
-            pa.__dict__[key] = obspy.UTCDateTime(date_begin)
+            pa.__dict__[key] = obspy.UTCDateTime(value)
         elif key == 'date_end':
-            pa.__dict__[key] = obspy.UTCDateTime(date_end)
+            pa.__dict__[key] = obspy.UTCDateTime(value)
         else:
             try:
                 pa.__dict__[key] = float(value)
@@ -318,7 +335,7 @@ def InitRfProj(cfg_path):
     return pjt
 
 
-if __name__ == '__main__':
+def rf_test():
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
     logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
@@ -343,4 +360,12 @@ if __name__ == '__main__':
     rfproj.rotate()
 
 
+def get_events_test():
+    date_begin = obspy.UTCDateTime('20130101')
+    date_end = obspy.UTCDateTime('20140101')
+    print(get_events(date_begin, date_end, 32.051701, 118.8544))
+
+
+if __name__ == '__main__':
+    get_events_test()
 
