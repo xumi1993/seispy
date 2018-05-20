@@ -96,11 +96,11 @@ def rotateSeisZENtoLQT(Z, E, N, bazi, inc):
     return LQT[0, :], LQT[1, :], LQT[2, :]
 
 
-def rotateSeisENZtoTRZ( E, N, Z, BAZ ):
+def rotateSeisENtoTR(E, N, BAZ):
     angle = mod(BAZ+180, 360)
     R = N*cosd(angle) + E*sind(angle)
     T = E*cosd(angle) - N*sind(angle)
-    return R, T, Z
+    return T, R
 
 def rssq(x):
     return np.sqrt(np.sum(np.abs(x)**2))

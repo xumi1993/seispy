@@ -99,6 +99,40 @@ class eq(object):
         self.PRaypara = raypara[0]
         self.SRaypara = raypara[1]
 
+    def rotate(self, bazi, inc=None, method='NE->RT', phase='P', inv=None):
+        if phase not in ('P', 'S'):
+            raise ValueError('phase must be in [\'P\', \'S\']')
+
+        if inc is None:
+            if self.PRaypara is None or self.SRaypara is None:
+                raise ValueError('inc must be specified')
+            elif phase == 'P':
+                inc = self.PRaypara.incident_angle
+            elif phase == 'S':
+                inc = self.SRaypara.incident_angle
+            else:
+                pass
+
+        if inv is not None:
+            self.st.rotate('->ZNE', inventory=inv)
+
+        if method == 'NE->RT':
+            self.st.rotate('NE->RT', back_azimuth=bazi)
+        elif method == 'RT->NE':
+            self.st.rotate('RT->NE', back_azimuth=bazi)
+        elif method == 'ZNE->LQT':
+            self.st.rotate('ZNE->LQT', back_azimuth=bazi, inclination=inc)
+        elif method == 'LQT->ZNE':
+            self.st.rotate('LQT->ZNE', back_azimuth=bazi, inclination=inc)
+        else:
+            pass
+
+    def snr(self, length=50):
+        pass
+
+    def trim(self):
+        pass
+
 
 class para():
     def __init__(self):
@@ -272,6 +306,11 @@ class rf(object):
             row['data'].get_arrival(self.model, row['evdp'], row['dis'])
             row['data'].get_raypara(self.model, row['evdp'], row['dis'])
 
+    def rotate(self, method='NE->RT', phase='P'):
+        self.logger.RFlog.info('Rotate {0} phase {1}'.format(phase, method))
+        for _, row in self.eqs.iterrows():
+            row['data'].rotate(row['bazi'], method='NE->RT', phase='P')
+
 
 def InitRfProj(cfg_path):
     pjt = rf()
@@ -298,9 +337,10 @@ if __name__ == '__main__':
     rfproj.search_eq(logpath)
     rfproj.match_eq()
     # rfproj.save(proj_file)
-    rfproj.detrend()
-    rfproj.filter()
+    # rfproj.detrend()
+    # rfproj.filter()
     rfproj.phase()
+    rfproj.rotate()
 
 
 
