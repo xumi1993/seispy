@@ -185,7 +185,20 @@ class distaz:
                 self.baz = 0.0
             else:
                 self.baz[idx] = 0.0
+        idx = np.where(np.abs(self.baz) < .00001)[0]
+        if len(idx) != 0:
+            if isinstance(self.baz, float):
+                self.baz = 0.0
+            else:
+                self.baz[idx] = 0.0
+
         idx = np.where(np.abs(self.az - 360.) < .00001)[0]
+        if len(idx) != 0:
+            if isinstance(self.az, float):
+                self.az = 0.0
+            else:
+                self.az[idx] = 0.0
+        idx = np.where(np.abs(self.az) < .00001)[0]
         if len(idx) != 0:
             if isinstance(self.az, float):
                 self.az = 0.0
@@ -224,9 +237,9 @@ class distaz:
 # distaz = DistAz(0, 0, 1,1)
 # print "%f  %f  %f" % (distaz.getDelta(), distaz.getAz(), distaz.getBaz())
 if __name__ == '__main__':
-    ela = np.arange(10)
-    elo = np.arange(10)
-    sla = np.arange(1, 11)
-    slo = np.arange(1, 11)
+    ela = 1
+    elo = 1
+    sla = 2
+    slo = 1
     da = distaz(ela, elo, sla, slo)
     print(da.baz)
