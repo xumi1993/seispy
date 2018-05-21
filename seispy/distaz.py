@@ -1,5 +1,5 @@
 import math
-
+import numpy as np
 
 def sind(deg):
     rad = math.radians(deg)
@@ -72,30 +72,32 @@ class distaz:
     """
 
     def __init__(self, lat1, lon1, lat2, lon2):
-
+        
         self.stalat = lat1
         self.stalon = lon1
         self.evtlat = lat2
         self.evtlon = lon2
+        '''
         if (lat1 == lat2) and (lon1 == lon2):
             self.delta = 0.0
             self.az = 0.0
             self.baz = 0.0
             return
+        '''
 
         rad = 2. * math.pi / 360.0
         """
-	c
-	c scolat and ecolat are the geocentric colatitudes
-	c as defined by Richter (pg. 318)
-	c
-	c Earth Flattening of 1/298.257 take from Bott (pg. 3)
-	c
+        c
+        c scolat and ecolat are the geocentric colatitudes
+        c as defined by Richter (pg. 318)
+        c
+        c Earth Flattening of 1/298.257 take from Bott (pg. 3)
+        c
         """
         sph = 1.0 / 298.257
 
-        scolat = math.pi / 2.0 - math.atan((1. - sph) * (1. - sph) * math.tan(lat1 * rad))
-        ecolat = math.pi / 2.0 - math.atan((1. - sph) * (1. - sph) * math.tan(lat2 * rad))
+        scolat = math.pi / 2.0 - np.arctan((1. - sph) * (1. - sph) * np.tan(lat1 * rad))
+        ecolat = math.pi / 2.0 - np.arctan((1. - sph) * (1. - sph) * np.tan(lat2 * rad))
         slon = lon1 * rad
         elon = lon2 * rad
         """
@@ -104,33 +106,33 @@ class distaz:
 	c     These are defined for the pt. 1
 	c
         """
-        a = math.sin(scolat) * math.cos(slon)
-        b = math.sin(scolat) * math.sin(slon)
-        c = math.cos(scolat)
-        d = math.sin(slon)
-        e = -math.cos(slon)
+        a = np.sin(scolat) * np.cos(slon)
+        b = np.sin(scolat) * np.sin(slon)
+        c = np.cos(scolat)
+        d = np.sin(slon)
+        e = -np.cos(slon)
         g = -c * e
         h = c * d
-        k = -math.sin(scolat)
+        k = -np.sin(scolat)
         """
 	c
 	c  aa - ee are the same as a - e, except for pt. 2
 	c
         """
-        aa = math.sin(ecolat) * math.cos(elon)
-        bb = math.sin(ecolat) * math.sin(elon)
-        cc = math.cos(ecolat)
-        dd = math.sin(elon)
-        ee = -math.cos(elon)
+        aa = np.sin(ecolat) * np.cos(elon)
+        bb = np.sin(ecolat) * np.sin(elon)
+        cc = np.cos(ecolat)
+        dd = np.sin(elon)
+        ee = -np.cos(elon)
         gg = -cc * ee
         hh = cc * dd
-        kk = -math.sin(ecolat)
+        kk = -np.sin(ecolat)
         """
 	c
 	c  Bullen, Sec 10.2, eqn. 4
 	c
         """
-        delrad = math.acos(a * aa + b * bb + c * cc)
+        delrad = np.arccos(a * aa + b * bb + c * cc)
         self.delta = delrad / rad
         """
 	c
@@ -143,9 +145,14 @@ class distaz:
         """
         rhs1 = (aa - d) * (aa - d) + (bb - e) * (bb - e) + cc * cc - 2.
         rhs2 = (aa - g) * (aa - g) + (bb - h) * (bb - h) + (cc - k) * (cc - k) - 2.
-        dbaz = math.atan2(rhs1, rhs2)
-        if (dbaz < 0.0):
-            dbaz = dbaz + 2 * math.pi
+        dbaz = np.arctan2(rhs1, rhs2)
+
+        dbaz_idx = np.where(dbaz < 0.0)[0]
+        if len(dbaz_idx) != 0:
+            if isinstance(dbaz, (int, float)):
+                dbaz += 2 * math.pi
+            else:
+                dbaz[dbaz_idx] += 2 * math.pi
 
         self.baz = dbaz / rad
         """
@@ -157,9 +164,14 @@ class distaz:
 	"""
         rhs1 = (a - dd) * (a - dd) + (b - ee) * (b - ee) + c * c - 2.
         rhs2 = (a - gg) * (a - gg) + (b - hh) * (b - hh) + (c - kk) * (c - kk) - 2.
-        daz = math.atan2(rhs1, rhs2)
-        if daz < 0.0:
-            daz = daz + 2 * math.pi
+        daz = np.arctan2(rhs1, rhs2)
+
+        daz_idx = np.where(daz < 0.0)[0]
+        if len(daz_idx) != 0:
+            if isinstance(daz, (int, float)):
+                daz += 2 * math.pi
+            else:
+                daz[daz_idx] += 2 * math.pi
 
         self.az = daz / rad
         """
@@ -167,10 +179,35 @@ class distaz:
 	c   Make sure 0.0 is always 0.0, not 360.
 	c
 	"""
-        if (abs(self.baz - 360.) < .00001):
-            self.baz = 0.0
-        if (abs(self.az - 360.) < .00001):
-            self.az = 0.0
+        idx = np.where(np.abs(self.baz - 360.) < .00001)[0]
+        if len(idx) != 0:
+            if isinstance(self.baz, float):
+                self.baz = 0.0
+            else:
+                self.baz[idx] = 0.0
+        idx = np.where(np.abs(self.az - 360.) < .00001)[0]
+        if len(idx) != 0:
+            if isinstance(self.az, float):
+                self.az = 0.0
+            else:
+                self.az[idx] = 0.0
+        
+        la_idx = np.where(lat1 == lat2)[0]
+        lo_idx = np.where(lon1 == lon2)[0]
+        idx = la_idx[np.where(la_idx == lo_idx)[0]]
+        if len(idx) != 0:
+            if isinstance(self.delta, float):
+                self.delta = 0.
+            else:
+                self.delta[idx] = 0.
+            if isinstance(self.az, float):
+                self.az = 0.
+            else:
+                self.az[idx] = 0.
+            if isinstance(self.baz, float):
+                self.baz = 0.
+            else:
+                self.baz[idx] = 0.
 
     def getDelta(self):
         return self.delta
@@ -186,3 +223,10 @@ class distaz:
 
 # distaz = DistAz(0, 0, 1,1)
 # print "%f  %f  %f" % (distaz.getDelta(), distaz.getAz(), distaz.getBaz())
+if __name__ == '__main__':
+    ela = np.arange(10)
+    elo = np.arange(10)
+    sla = np.arange(1, 11)
+    slo = np.arange(1, 11)
+    da = distaz(ela, elo, sla, slo)
+    print(da.baz)
