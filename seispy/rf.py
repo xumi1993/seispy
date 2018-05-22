@@ -8,7 +8,7 @@ from os.path import dirname, join, expanduser
 import seispy
 from seispy.setuplog import setuplog
 import glob
-from datetime import timedelta
+from datetime import timedelta, datetime
 import pandas as pd
 from obspy.taup import TauPyModel
 import deepdish as dd
@@ -31,28 +31,28 @@ def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dis
     starttime = b_time.strftime('%Y-%m-%dT%H:%M:%S')
     endtime = e_time.strftime('%Y-%m-%dT%H:%M:%S')
     use_cols = ['Time', 'Latitude', 'Longitude', 'Depth', 'Magnitude']
-    names = ['', 'date', 'evla', 'evlo', 'evdp', '', '', '', '', '', 'mag', '', '']
     real_cols = ['date', 'evla', 'evlo', 'evdp', 'mag']
-    url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
-          'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&orderby=time-asc&format=geocsv'.format(starttime, endtime,
-                                                                                                   stla,
-                                                                                                   stlo, dismin, dismax,
-                                                                                                   magmin, magmax)
+    dateparse = lambda x: obspy.UTCDateTime.strptime(x, '%Y-%m-%dT%H:%M:%SZ')
+    url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}' \
+          '&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
+          'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&' \
+          'orderby=time-asc&format=geocsv'.format(starttime, endtime, stla, stlo, dismin, dismax, magmin, magmax)
     try:
         response = rq.urlopen(url)
     except Exception as e:
         raise ConnectionError('{0}'.format(e))
     evt_csv = io.StringIO(response.read().decode())
-    df = pd.read_csv(evt_csv, sep='|', comment='#', parse_dates=[0], usecols=use_cols)
-    daz = seispy.distaz(stla, stlo, df['Latitude'].values, df['Longitude'].values)
-    df['dis'] = pd.Series(daz.delta, index=df.index)
-    df['bazi'] = pd.Series(daz.baz, index=df.index)
+    df = pd.read_csv(evt_csv, sep='|', comment='#', parse_dates=[0], date_parser=dateparse, usecols=use_cols)
+    # daz = seispy.distaz(stla, stlo, df['Latitude'].values, df['Longitude'].values)
+    # df['dis'] = pd.Series(daz.delta, index=df.index)
+    # df['bazi'] = pd.Series(daz.baz, index=df.index)
     col_dict = dict(zip(use_cols, real_cols))
     df.rename(columns=col_dict, inplace=True)
     return df
 
+
 def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
-    col = ['date', 'evla', 'evlo', 'evdp', 'mag', 'dis', 'bazi']
+    col = ['date', 'evla', 'evlo', 'evdp', 'mag']
     eq_lst = pd.DataFrame(columns=col)
     with open(logpath) as f:
         lines = f.readlines()
@@ -65,9 +65,9 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
             evdp = float(line_sp[9])
             mw = float(line_sp[10])
             dis = seispy.distaz(stla, stlo, evla, evlo).delta
-            bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
+            # bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
             if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
-                this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw, dis, bazi]], columns=col)
+                this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw]], columns=col)
                 eq_lst = eq_lst.append(this_data, ignore_index=True)
     return eq_lst
 
@@ -78,7 +78,8 @@ def load_station_info(pathname, ref_comp, suffix):
     return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo
 
 
-def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
+def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
+             tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))
     sac_files = []
@@ -86,7 +87,7 @@ def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=2
         datestr = re.findall(pattern, ref_sac)[0]
         tr = obspy.read(ref_sac)[0]
         sac_files.append([datestr, tr])
-    new_col = ['data']
+    new_col = ['dis', 'bazi', 'data']
     eq_match = pd.DataFrame(columns=new_col)
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
@@ -95,20 +96,25 @@ def match_eq(eq_lst, pathname, ref_comp='Z', suffix='SAC', offset=0, tolerance=2
                     <= tr.stats.starttime + timedelta(seconds=-offset + tolerance):
                 tmp_datestr.append(datestr)
         if len(tmp_datestr) == 1:
-            this_eq = eq(pathname, tmp_datestr[0])
-            this_df = pd.DataFrame([[this_eq]], columns=new_col, index=[i])
+            this_eq = eq(pathname, tmp_datestr[0], suffix)
+            daz = seispy.distaz(stla, stlo, evt['evla'], evt['evlo'])
+            this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=[i])
             eq_match = eq_match.append(this_df)
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
 
 class eq(object):
-    def __init__(self, pathname, datestr):
-        self.st = obspy.read(join(pathname, '*' + datestr + '.*.SAC'))
+    def __init__(self, pathname, datestr, suffix):
+        self._datastr = datestr
+        self.st = obspy.read(join(pathname, '*' + datestr + '.*.' + suffix))
         self.rf = obspy.Stream()
         self.PArrival = None
         self.PRaypara = None
         self.SArrival = None
         self.SRaypara = None
+
+    def __str__(self):
+        return('Event data class {0}'.format(self._datastr))
 
     def detrend(self):
         self.st.detrend(type='linear')
@@ -265,25 +271,33 @@ class rf(object):
             self.logger.RFlog.error('{0}'.format(e))
             raise e
 
-    def search_eq(self, logpath=''):
-        if logpath == '':
-            logpath = self.para.catalogpath
-        try:
-            self.logger.RFlog.info(
-                'Search earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
-                                                            self.date_end.strftime('%Y.%m.%dT%H:%M:%S')))
-            self.eq_lst = read_catalog(logpath, self.para.date_begin, self.para.date_end,
-                                       self.stainfo.stla, self.stainfo.stlo,
-                                       magmin=self.para.magmin, magmax=self.para.magmax,
-                                       dismin=self.para.dismin, dismax=self.para.dismax)
-        except Exception as e:
-            self.logger.RFlog.error('{0}'.format(e))
-            raise e
+    def search_eq(self, local=False):
+        if not local:
+            try:
+                self.logger.RFlog.info('Searching earthquakes from IRIS-WS')
+                self.eq_lst = get_events(self.para.date_begin, self.para.date_end, self.stainfo.stla,
+                                         self.stainfo.stlo, magmin=self.para.magmin, magmax=self.para.magmax,
+                                         dismin=self.para.dismin, dismax=self.para.dismax)
+            except Exception as e:
+                raise ConnectionError(e)
+        else:
+            try:
+                self.logger.RFlog.info(
+                    'Searching earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
+                                                                   self.date_end.strftime('%Y.%m.%dT%H:%M:%S')))
+                self.eq_lst = read_catalog(self.para.catalogpath, self.para.date_begin, self.para.date_end,
+                                           self.stainfo.stla, self.stainfo.stlo,
+                                           magmin=self.para.magmin, magmax=self.para.magmax,
+                                           dismin=self.para.dismin, dismax=self.para.dismax)
+            except Exception as e:
+                self.logger.RFlog.error('{0}'.format(e))
+                raise e
 
     def match_eq(self):
         try:
             self.logger.RFlog.info('Match SAC files')
-            self.eqs = match_eq(self.eq_lst, self.para.datapath, ref_comp=self.para.ref_comp, suffix=self.para.suffix,
+            self.eqs = match_eq(self.eq_lst, self.para.datapath, self.stainfo.stla, self.stainfo.stlo,
+                                ref_comp=self.para.ref_comp, suffix=self.para.suffix,
                                 offset=self.para.offset, tolerance=self.para.tolerance,
                                 dateformat=self.para.dateformat)
         except Exception as e:
@@ -362,14 +376,17 @@ def rf_test():
     rfproj.date_begin = date_begin
     rfproj.date_end = date_end
     rfproj.datapath = datapath
+    rfproj.para.catalogpath = logpath
     rfproj.load_stainfo()
-    rfproj.search_eq(logpath)
+    rfproj.search_eq()
     rfproj.match_eq()
     # rfproj.save(proj_file)
     # rfproj.detrend()
     # rfproj.filter()
-    rfproj.phase()
-    rfproj.rotate()
+    # rfproj.phase()
+    # rfproj.rotate()
+
+    print(rfproj.eqs)
 
 
 def get_events_test():
@@ -379,4 +396,5 @@ def get_events_test():
 
 
 if __name__ == '__main__':
-    get_events_test()
+    # get_events_test()
+    rf_test()
