@@ -31,6 +31,8 @@ def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dis
     starttime = b_time.strftime('%Y-%m-%dT%H:%M:%S')
     endtime = e_time.strftime('%Y-%m-%dT%H:%M:%S')
     use_cols = ['Time', 'Latitude', 'Longitude', 'Depth', 'Magnitude']
+    names = ['', 'date', 'evla', 'evlo', 'evdp', '', '', '', '', '', 'mag', '', '']
+    real_cols = ['date', 'evla', 'evlo', 'evdp', 'mag']
     url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
           'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&orderby=time-asc&format=geocsv'.format(starttime, endtime,
                                                                                                    stla,
@@ -41,8 +43,13 @@ def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dis
     except Exception as e:
         raise ConnectionError('{0}'.format(e))
     evt_csv = io.StringIO(response.read().decode())
-    return pd.read_csv(evt_csv, sep='|', comment='#', parse_dates=[2], usecols=use_cols)
-
+    df = pd.read_csv(evt_csv, sep='|', comment='#', parse_dates=[0], usecols=use_cols)
+    daz = seispy.distaz(stla, stlo, df['Latitude'].values, df['Longitude'].values)
+    df['dis'] = pd.Series(daz.delta, index=df.index)
+    df['bazi'] = pd.Series(daz.baz, index=df.index)
+    col_dict = dict(zip(use_cols, real_cols))
+    df.rename(columns=col_dict, inplace=True)
+    return df
 
 def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
     col = ['date', 'evla', 'evlo', 'evdp', 'mag', 'dis', 'bazi']
