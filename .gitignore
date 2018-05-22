@@ -8,7 +8,7 @@ build/
 
 dist/
 
-seeispy/__pycache__/
+seispy/__pycache__/
 
 *.egg
 
