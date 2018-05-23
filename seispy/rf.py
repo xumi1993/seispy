@@ -163,9 +163,39 @@ class eq(object):
 
     def snr(self, length=50):
         pass
+    
+    def time_correct(self, offset=0, write_to_sac=True):
+        """
+        offset = sac.b - real o
+        """
+        Parr_time = self.PArrival.time
+        Sarr_time = self.SArrival.time
 
-    def trim(self):
-        pass
+        Pcorrect_time = Parr_time - offset
+        Scorrect_time = Sarr_time - offset
+
+        if write_to_sac:
+            for tr in self.st:
+                tr.stats.sac.t0 = Pcorrect_time
+                tr.stats.sac.kt0 = 'P'
+                tr.stats.sac.t1 = Scorrect_time
+                tr.stats.sac.kt1 = 'S'
+
+        return Pcorrect_time, Scorrect_time
+
+    def trim(self, time_before, time_after, phase='P', offset=0):
+        """
+        offset = sac.b - real o
+        """
+        if phase not in ['P', 'S']:
+            raise ValueError('Phase must in \'P\' or \'S\'')
+        dt = self.st[0].stats.delta
+        P_arr, S_arr = self.time_correct(offset=offset, write_to_sac=False)
+        time_dict = dict(zip(['P', 'S'], [P_arr, S_arr]))
+        
+        t1 = self.st[2].stats.starttime + (time_dict[phase] - time_before)
+        t2 = self.st[2].stats.starttime + (time_dict[phase] + time_after)
+        return self.st.copy().trim(t1, t2)
 
 
 class para():
