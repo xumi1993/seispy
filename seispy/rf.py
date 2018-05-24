@@ -97,6 +97,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
                 tmp_datestr.append(datestr)
         if len(tmp_datestr) == 1:
             this_eq = eq(pathname, tmp_datestr[0], suffix)
+            this_eq.get_time_offset(evt['date'])
             daz = seispy.distaz(stla, stlo, evt['evla'], evt['evlo'])
             this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=[i])
             eq_match = eq_match.append(this_df)
@@ -108,6 +109,7 @@ class eq(object):
         self._datastr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '.*.' + suffix))
         self.rf = obspy.Stream()
+        self.timeoffset = 0
         self.PArrival = None
         self.PRaypara = None
         self.SArrival = None
@@ -161,18 +163,26 @@ class eq(object):
         else:
             pass
 
-    def snr(self, length=50):
-        pass
+    def snr(self, length=50, phase='P'):
+        st_noise = self.trim(50, 0, phase=phase)
+        st_signal = self.trim(0, 50, phase=phase)
+        snr_R = seispy.geo.snr(st_noise[1].data, st_signal[1].data)
+        return snr_R
     
-    def time_correct(self, offset=0, write_to_sac=True):
+    def get_time_offset(self, event_time):
+        if not isinstance(event_time, obspy.core.utcdatetime.UTCDateTime):
+            raise TypeError('Event time should be UTCDateTime type in obspy')
+        self.timeoffset = self.st[3].stats.starttime - event_time
+
+    def arr_correct(self, write_to_sac=True):
         """
         offset = sac.b - real o
         """
         Parr_time = self.PArrival.time
         Sarr_time = self.SArrival.time
 
-        Pcorrect_time = Parr_time - offset
-        Scorrect_time = Sarr_time - offset
+        Pcorrect_time = Parr_time - self.timeoffset
+        Scorrect_time = Sarr_time - self.timeoffset
 
         if write_to_sac:
             for tr in self.st:
@@ -183,14 +193,14 @@ class eq(object):
 
         return Pcorrect_time, Scorrect_time
 
-    def trim(self, time_before, time_after, phase='P', offset=0):
+    def trim(self, time_before, time_after, phase='P'):
         """
         offset = sac.b - real o
         """
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
         dt = self.st[0].stats.delta
-        P_arr, S_arr = self.time_correct(offset=offset, write_to_sac=False)
+        P_arr, S_arr = self.arr_correct(write_to_sac=False)
         time_dict = dict(zip(['P', 'S'], [P_arr, S_arr]))
         
         t1 = self.st[2].stats.starttime + (time_dict[phase] - time_before)
@@ -384,6 +394,9 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].rotate(row['bazi'], method='NE->RT', phase='P')
 
+    def drop_eq_snr(self, length=50):
+        for i, row in self.eqs.iterrows():
+            snr_R = row['data'].snr(length=50, offset=row['data'].timeoffset)
 
 def InitRfProj(cfg_path):
     pjt = rf()
