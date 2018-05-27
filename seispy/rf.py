@@ -2,6 +2,7 @@
 
 import numpy as np
 import obspy
+from obspy.io.sac import SACTrace
 import re
 import io
 from os.path import dirname, join, expanduser
@@ -106,7 +107,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
 
 class eq(object):
     def __init__(self, pathname, datestr, suffix):
-        self._datastr = datestr
+        self.datastr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '.*.' + suffix))
         self.rf = obspy.Stream()
         self.timeoffset = 0
@@ -116,7 +117,7 @@ class eq(object):
         self.SRaypara = None
 
     def __str__(self):
-        return('Event data class {0}'.format(self._datastr))
+        return('Event data class {0}'.format(self.datastr))
 
     def detrend(self):
         self.st.detrend(type='linear')
@@ -164,8 +165,8 @@ class eq(object):
             pass
 
     def snr(self, length=50, phase='P'):
-        st_noise = self.trim(50, 0, phase=phase)
-        st_signal = self.trim(0, 50, phase=phase)
+        st_noise = self.trim(length, 0, phase=phase)
+        st_signal = self.trim(0, length, phase=phase)
         snr_R = seispy.geo.snr(st_signal[1].data, st_noise[1].data)
         return snr_R
     
@@ -392,14 +393,13 @@ class rf(object):
     def rotate(self, method='NE->RT', phase='P'):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(phase, method))
         for _, row in self.eqs.iterrows():
-            row['data'].rotate(row['bazi'], method='NE->RT', phase='P')
+            row['data'].rotate(row['bazi'], method=method, phase=phase)
 
     def drop_eq_snr(self, length=50):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
             snr_R = row['data'].snr(length=length)
-            print(snr_R, row['mag'])
             if snr_R < self.para.noisegate:
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
@@ -407,6 +407,18 @@ class rf(object):
     def trim(self, time_before=10, time_after=120, phase='P'):
         for _, row in self.eqs.iterrows():
             row['data'].rf = row['data'].trim(time_before, time_after, phase)
+            for i in range(3):
+                row['data'].rf[i].stats.sac.e = time_after
+
+    def deconv(self):
+        for i, row in self.eqs.iterrows():
+            filename = join(self.para.RFpath, row['data'].datastr)
+
+            for j in range(3):
+                tr = SACTrace.from_obspy_trace(row['data'].rf[j])
+                tr.b = 0
+                tr.write(filename + '_{0}.sac'.format(tr.kcmpnm))
+
 
 def InitRfProj(cfg_path):
     pjt = rf()
@@ -419,10 +431,11 @@ def rf_test():
     date_end = obspy.UTCDateTime('20140101')
     # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
     logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    # datapath = '/Users/xumj/Researches/test4seispy/data'
-    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    datapath = '/Users/xumj/Researches/test4seispy/data'
+    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
     proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
     # proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
+    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
 
     rfproj = rf()
     # rfproj.load(proj_file)
@@ -430,6 +443,7 @@ def rf_test():
     rfproj.date_end = date_end
     rfproj.datapath = datapath
     rfproj.para.catalogpath = logpath
+    rfproj.para.RFpath = RFpath
     rfproj.load_stainfo()
     rfproj.search_eq()
     rfproj.match_eq()
@@ -439,7 +453,8 @@ def rf_test():
     rfproj.phase()
     rfproj.rotate()
     rfproj.drop_eq_snr()
-    print(rfproj.eqs)
+    rfproj.trim()
+    rfproj.deconv()
 
 
 def get_events_test():
