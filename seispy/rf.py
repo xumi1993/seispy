@@ -7,6 +7,7 @@ import re
 import io
 from os.path import dirname, join, expanduser
 import seispy
+from seispy.eq import eq
 from seispy.setuplog import setuplog
 import glob
 from datetime import timedelta, datetime
@@ -97,116 +98,15 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
                     <= tr.stats.starttime + timedelta(seconds=-offset + tolerance):
                 tmp_datestr.append(datestr)
         if len(tmp_datestr) == 1:
-            this_eq = eq(pathname, tmp_datestr[0], suffix)
+            try:
+                this_eq = eq(pathname, tmp_datestr[0], suffix)
+            except:
+                continue
             this_eq.get_time_offset(evt['date'])
             daz = seispy.distaz(stla, stlo, evt['evla'], evt['evlo'])
             this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=[i])
             eq_match = eq_match.append(this_df)
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
-
-
-class eq(object):
-    def __init__(self, pathname, datestr, suffix):
-        self.datastr = datestr
-        self.st = obspy.read(join(pathname, '*' + datestr + '.*.' + suffix))
-        self.rf = obspy.Stream()
-        self.timeoffset = 0
-        self.PArrival = None
-        self.PRaypara = None
-        self.SArrival = None
-        self.SRaypara = None
-
-    def __str__(self):
-        return('Event data class {0}'.format(self.datastr))
-
-    def detrend(self):
-        self.st.detrend(type='linear')
-        self.st.detrend(type='constant')
-
-    def filter(self, freqmin=0.05, freqmax=1, order=4):
-        self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order)
-
-    def get_arrival(self, model, evdp, dis):
-        arrivals = model.get_travel_times(evdp, dis, phase_list=['P', 'S'])
-        self.PArrival = arrivals[0]
-        self.SArrival = arrivals[1]
-
-    def get_raypara(self, model, evdp, dis):
-        raypara = model.get_ray_paths(evdp, dis, phase_list=['P', 'S'])
-        self.PRaypara = raypara[0]
-        self.SRaypara = raypara[1]
-
-    def rotate(self, bazi, inc=None, method='NE->RT', phase='P', inv=None):
-        if phase not in ('P', 'S'):
-            raise ValueError('phase must be in [\'P\', \'S\']')
-
-        if inc is None:
-            if self.PRaypara is None or self.SRaypara is None:
-                raise ValueError('inc must be specified')
-            elif phase == 'P':
-                inc = self.PRaypara.incident_angle
-            elif phase == 'S':
-                inc = self.SRaypara.incident_angle
-            else:
-                pass
-
-        if inv is not None:
-            self.st.rotate('->ZNE', inventory=inv)
-
-        if method == 'NE->RT':
-            self.st.rotate('NE->RT', back_azimuth=bazi)
-        elif method == 'RT->NE':
-            self.st.rotate('RT->NE', back_azimuth=bazi)
-        elif method == 'ZNE->LQT':
-            self.st.rotate('ZNE->LQT', back_azimuth=bazi, inclination=inc)
-        elif method == 'LQT->ZNE':
-            self.st.rotate('LQT->ZNE', back_azimuth=bazi, inclination=inc)
-        else:
-            pass
-
-    def snr(self, length=50, phase='P'):
-        st_noise = self.trim(length, 0, phase=phase)
-        st_signal = self.trim(0, length, phase=phase)
-        snr_R = seispy.geo.snr(st_signal[1].data, st_noise[1].data)
-        return snr_R
-    
-    def get_time_offset(self, event_time):
-        if not isinstance(event_time, obspy.core.utcdatetime.UTCDateTime):
-            raise TypeError('Event time should be UTCDateTime type in obspy')
-        self.timeoffset = self.st[2].stats.starttime - event_time
-
-    def arr_correct(self, write_to_sac=True):
-        """
-        offset = sac.b - real o
-        """
-        Parr_time = self.PArrival.time
-        Sarr_time = self.SArrival.time
-
-        Pcorrect_time = Parr_time - self.timeoffset
-        Scorrect_time = Sarr_time - self.timeoffset
-
-        if write_to_sac:
-            for tr in self.st:
-                tr.stats.sac.t0 = Pcorrect_time
-                tr.stats.sac.kt0 = 'P'
-                tr.stats.sac.t1 = Scorrect_time
-                tr.stats.sac.kt1 = 'S'
-
-        return Pcorrect_time, Scorrect_time
-
-    def trim(self, time_before, time_after, phase='P'):
-        """
-        offset = sac.b - real o
-        """
-        if phase not in ['P', 'S']:
-            raise ValueError('Phase must in \'P\' or \'S\'')
-        dt = self.st[0].stats.delta
-        P_arr, S_arr = self.arr_correct(write_to_sac=False)
-        time_dict = dict(zip(['P', 'S'], [P_arr, S_arr]))
-        
-        t1 = self.st[2].stats.starttime + (time_dict[phase] - time_before)
-        t2 = self.st[2].stats.starttime + (time_dict[phase] + time_after)
-        return self.st.copy().trim(t1, t2)
 
 
 class para():
@@ -406,18 +306,12 @@ class rf(object):
 
     def trim(self, time_before=10, time_after=120, phase='P'):
         for _, row in self.eqs.iterrows():
-            row['data'].rf = row['data'].trim(time_before, time_after, phase)
-            for i in range(3):
-                row['data'].rf[i].stats.sac.e = time_after
+            row['data'].trim(time_before, time_after, phase)
 
-    def deconv(self):
+    def deconv(self, only_r=False):
         for i, row in self.eqs.iterrows():
             filename = join(self.para.RFpath, row['data'].datastr)
-
-            for j in range(3):
-                tr = SACTrace.from_obspy_trace(row['data'].rf[j])
-                tr.b = 0
-                tr.write(filename + '_{0}.sac'.format(tr.kcmpnm))
+            row['data'].saverf(self.para.RFpath, only_r)
 
 
 def InitRfProj(cfg_path):
@@ -429,13 +323,14 @@ def InitRfProj(cfg_path):
 def rf_test():
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
-    # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    #logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
     logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    datapath = '/Users/xumj/Researches/test4seispy/data'
-    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    #datapath = '/Users/xumj/Researches/test4seispy/data'
+    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    #proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
     proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    # proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
-    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    # RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
 
     rfproj = rf()
     # rfproj.load(proj_file)
@@ -451,7 +346,7 @@ def rf_test():
     rfproj.detrend()
     rfproj.filter()
     rfproj.phase()
-    rfproj.rotate()
+    rfproj.rotate(method='ZNE->LQT')
     rfproj.drop_eq_snr()
     rfproj.trim()
     rfproj.deconv()
