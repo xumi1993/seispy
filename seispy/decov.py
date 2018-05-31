@@ -65,9 +65,9 @@ def decovit(UIN, WIN, DT, NT, TSHIFT, F0, ITMAX, MINDERR):
 
     @author: xumj
     """
-    print('Iterative Decon (Ligorria & Ammon):\n')
+    # print('Iterative Decon (Ligorria & Ammon):\n')
 
-    RMS = np.zeros([ITMAX, 1])
+    RMS = np.zeros(ITMAX)
     nfft = next_pow_2(NT)
     P0 = np.zeros(nfft)
 
@@ -91,7 +91,7 @@ def decovit(UIN, WIN, DT, NT, TSHIFT, F0, ITMAX, MINDERR):
     sumsq_i = 1
     d_error = 100 * powerU + MINDERR
     maxlag = 0.5 * nfft
-    print('\tMax Spike Display is ' + str((maxlag) * DT))
+    # print('\tMax Spike Display is ' + str((maxlag) * DT))
 
     while np.abs(d_error) > MINDERR and it < ITMAX:
         RW = correl(R, W, nfft)
@@ -118,7 +118,7 @@ def decovit(UIN, WIN, DT, NT, TSHIFT, F0, ITMAX, MINDERR):
     RFI = P[0:NT]
     RMS = RMS[0:it - 1]
 
-    print('\t# iterations: ', it, '\n')
-    print('\tFinal RMS: ', float(RMS[it - 2]), '\n')
+    # print('\t# iterations: ', it, '\n')
+    # print('\tFinal RMS: ', float(RMS[it - 2]), '\n')
 
     return RFI, RMS, it

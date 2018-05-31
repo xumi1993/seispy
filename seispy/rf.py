@@ -126,9 +126,13 @@ class para():
         self.dismax = 90
         self.ref_comp = 'BHZ'
         self.suffix = 'SAC'
-        self.noisegate = 7
+        self.noisegate = 5
         self.gauss = 2
         self.target_dt = 0.01
+        self.phase = 'P'
+        self.time_before = 10
+        self.time_after = 120
+        self.only_r = False
 
     def get_para(self):
         return self.__dict__
@@ -174,6 +178,8 @@ def CfgParser(cfg_file):
 class rf(object):
     def __init__(self):
         self.para = para()
+        if not isinstance(self.para, para):
+            raise TypeError('Input value should be class seispy.rf.para')
         self.stainfo = stainfo()
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()
@@ -195,14 +201,6 @@ class rf(object):
     @date_end.setter
     def date_end(self, value):
         self.para.date_end = value
-
-    @property
-    def datapath(self):
-        return self.para.datapath
-
-    @datapath.setter
-    def datapath(self, value):
-        self.para.datapath = value
 
     def load_stainfo(self):
         try:
@@ -284,16 +282,16 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].filter(freqmin=freqmin, freqmax=freqmax, order=order)
 
-    def phase(self):
+    def cal_phase(self):
         self.logger.RFlog.info('Calculate arrivals and ray parameters for all data')
         for _, row in self.eqs.iterrows():
             row['data'].get_arrival(self.model, row['evdp'], row['dis'])
             row['data'].get_raypara(self.model, row['evdp'], row['dis'])
 
-    def rotate(self, method='NE->RT', phase='P'):
-        self.logger.RFlog.info('Rotate {0} phase {1}'.format(phase, method))
+    def rotate(self, method='NE->RT'):
+        self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
         for _, row in self.eqs.iterrows():
-            row['data'].rotate(row['bazi'], method=method, phase=phase)
+            row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
 
     def drop_eq_snr(self, length=50):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
@@ -303,15 +301,26 @@ class rf(object):
             if snr_R < self.para.noisegate:
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
+        self.logger.RFlog.info('{0} events left after SNR calculation'.format(self.eqs.shape[0]))
 
-    def trim(self, time_before=10, time_after=120, phase='P'):
+    def trim(self):
         for _, row in self.eqs.iterrows():
-            row['data'].trim(time_before, time_after, phase)
+            row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
 
-    def deconv(self, only_r=False):
+    def deconv(self):
+        drop_lst = []
         for i, row in self.eqs.iterrows():
-            filename = join(self.para.RFpath, row['data'].datastr)
-            row['data'].saverf(self.para.RFpath, only_r)
+            row['data'].deconvolute(self.para.time_before, self.para.gauss, phase=self.para.phase,
+                                    only_r=self.para.only_r, itmax=400, minderr=0.001)
+            if not row['data'].judge_rf(self.para.time_before):
+                drop_lst.append(i)
+                continue
+            else:
+                self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
+                                       ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
+                                                                row['data'].rms[-1]))
+                row['data'].saverf(self.para.RFpath, self.para.only_r)
+        self.eqs.drop(drop_lst, inplace=True)
 
 
 def InitRfProj(cfg_path):
@@ -323,33 +332,39 @@ def InitRfProj(cfg_path):
 def rf_test():
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
-    #logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
-    logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    #datapath = '/Users/xumj/Researches/test4seispy/data'
-    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    #proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
-    proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    # RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
-    RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
+    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
+    datapath = '/Users/xumj/Researches/test4seispy/data'
+    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
+    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
+    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
 
     rfproj = rf()
     # rfproj.load(proj_file)
+    #
+    # '''
     rfproj.date_begin = date_begin
     rfproj.date_end = date_end
-    rfproj.datapath = datapath
+    rfproj.para.datapath = datapath
     rfproj.para.catalogpath = logpath
     rfproj.para.RFpath = RFpath
     rfproj.load_stainfo()
     rfproj.search_eq()
     rfproj.match_eq()
-    # rfproj.save(proj_file)
     rfproj.detrend()
     rfproj.filter()
-    rfproj.phase()
-    rfproj.rotate(method='ZNE->LQT')
+    rfproj.cal_phase()
     rfproj.drop_eq_snr()
+    rfproj.save(proj_file)
     rfproj.trim()
+    rfproj.rotate()
+    rfproj.save(proj_file)
+    # '''
+
     rfproj.deconv()
+    # rfproj.save(proj_file)
 
 
 def get_events_test():

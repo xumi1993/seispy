@@ -22,6 +22,8 @@ class eq(object):
         self.st.sort()
         self.rf = obspy.Stream()
         self.timeoffset = 0
+        self.rms = np.array([0])
+        self.it = 0
         self.PArrival = None
         self.PRaypara = None
         self.SArrival = None
@@ -51,6 +53,9 @@ class eq(object):
         if phase not in ('P', 'S'):
             raise ValueError('phase must be in [\'P\', \'S\']')
 
+        if self.rf == obspy.Stream():
+            raise ValueError('Please cut out 3 components before')
+
         if inc is None:
             if self.PRaypara is None or self.SRaypara is None:
                 raise ValueError('inc must be specified')
@@ -62,16 +67,16 @@ class eq(object):
                 pass
 
         if inv is not None:
-            self.st.rotate('->ZNE', inventory=inv)
+            self.rf.rotate('->ZNE', inventory=inv)
 
         if method == 'NE->RT':
-            self.st.rotate('NE->RT', back_azimuth=bazi)
+            self.rf.rotate('NE->RT', back_azimuth=bazi)
         elif method == 'RT->NE':
-            self.st.rotate('RT->NE', back_azimuth=bazi)
+            self.rf.rotate('RT->NE', back_azimuth=bazi)
         elif method == 'ZNE->LQT':
-            self.st.rotate('ZNE->LQT', back_azimuth=bazi, inclination=inc)
+            self.rf.rotate('ZNE->LQT', back_azimuth=bazi, inclination=inc)
         elif method == 'LQT->ZNE':
-            self.st.rotate('LQT->ZNE', back_azimuth=bazi, inclination=inc)
+            self.rf.rotate('LQT->ZNE', back_azimuth=bazi, inclination=inc)
         else:
             pass
 
@@ -111,7 +116,6 @@ class eq(object):
         """
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
-        dt = self.st[0].stats.delta
         P_arr, S_arr = self.arr_correct(write_to_sac=False)
         time_dict = dict(zip(['P', 'S'], [P_arr, S_arr]))
         
@@ -128,18 +132,20 @@ class eq(object):
         if self.rf == obspy.Stream():
             raise ValueError('Please run eq.trim at first')
         if phase == 'P':
-            self.rf[1].data, _, _ = seispy.decov.decovit(self.rf[1].data, self.rf[2].data, self.rf[1].stats.delta,
+            self.rf[1].data, self.rms, self.it = seispy.decov.decovit(self.rf[1].data, self.rf[2].data, self.rf[1].stats.delta,
                                  self.rf[1].data.shape[0], shift, f0, itmax, minderr)
             if not only_r:
-                self.rf[1].data, _, _ = seispy.decov.decovit(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta,
+                self.rf[0].data, self.rms, self.it = seispy.decov.decovit(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta,
                                      self.rf[1].data.shape[0], shift, f0, itmax, minderr)
         elif phase == 'S':
             if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
                 raise ValueError('Please rotate component to \'LQT\'')
             Q = np.flip(self.rf[1].data, axis=0)
             L = np.flip(self.rf[2].data, axis=0)
-            self.rf[1].data, _, _ = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta, self.rf[1].shape[0], shift,
+            self.rf[2].data,self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta, self.rf[1].shape[0], shift,
                                                          f0, itmax, minderr)
+        else:
+            pass
 
     def saverf(self, path, only_r=False):
         if only_r:
@@ -152,6 +158,38 @@ class eq(object):
             tr = SACTrace.from_obspy_trace(self.rf[i])
             tr.b = 0
             tr.write(filename + '_{0}.sac'.format(tr.kcmpnm[-1]))
+
+    def judge_rf(self, shift, criterion='crust'):
+        if not isinstance(criterion, str):
+            raise TypeError('criterion should be string in [\'crust\', \'mtz\', \'lab\']')
+        elif criterion.lower() not in ['crust', 'mtz', 'lab']:
+            raise ValueError('criterion should be string in [\'crust\', \'mtz\', \'lab\']')
+        else:
+            criterion = criterion.lower()
+
+        if criterion == 'crust':
+            time_P1 = int(np.floor((-2+shift)/self.rf[1].stats.delta))
+            time_P2 = int(np.floor((2+shift)/self.rf[1].stats.delta))
+            max_P = np.max(self.rf[1].data[time_P1:time_P2])
+            if max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
+                return True
+            else:
+                return False
+        elif criterion == 'mtz':
+            max_deep = np.max(np.abs(self.rf[1].data[int((25 + shift) / self.rf[1].stats.delta):]))
+            time_P1 = int(np.floor((-2 + shift) / self.rf[1].stats.delta))
+            time_P2 = int(np.floor((2 + shift) / self.rf[1].stats.delta))
+            max_P = np.max(self.rf[1].data[time_P1:time_P2])
+            if self.rms[-1] < 0.2 and max_deep < max_P * 0.3 and \
+                  max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
+                return True
+            else:
+                return False
+        elif criterion == 'lab':
+            pass
+        else:
+            pass
+
 
 if __name__ == '__main__':
     pass
