@@ -37,7 +37,7 @@ class eq(object):
         self.st.detrend(type='constant')
 
     def filter(self, freqmin=0.05, freqmax=1, order=4):
-        self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order)
+        self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order, zerophase=True)
 
     def get_arrival(self, model, evdp, dis):
         arrivals = model.get_travel_times(evdp, dis, phase_list=['P', 'S'])

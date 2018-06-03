@@ -2,7 +2,6 @@
 
 import numpy as np
 import obspy
-from obspy.io.sac import SACTrace
 import re
 import io
 from os.path import dirname, join, expanduser
@@ -12,6 +11,7 @@ from seispy.setuplog import setuplog
 import glob
 from datetime import timedelta, datetime
 import pandas as pd
+from pandas.errors import PerformanceWarning
 from obspy.taup import TauPyModel
 import deepdish as dd
 import urllib.request as rq
@@ -126,7 +126,7 @@ class para():
         self.dismax = 90
         self.ref_comp = 'BHZ'
         self.suffix = 'SAC'
-        self.noisegate = 5
+        self.noisegate = 3
         self.gauss = 2
         self.target_dt = 0.01
         self.phase = 'P'
@@ -252,6 +252,8 @@ class rf(object):
         try:
             self.logger.RFlog.info('Saving project to {0}'.format(path))
             dd.io.save(path, d)
+        except PerformanceWarning:
+            pass
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise IOError(e)
@@ -351,19 +353,19 @@ def rf_test():
     rfproj.para.catalogpath = logpath
     rfproj.para.RFpath = RFpath
     rfproj.load_stainfo()
-    rfproj.search_eq()
+    rfproj.search_eq(local=True)
     rfproj.match_eq()
     rfproj.detrend()
     rfproj.filter()
     rfproj.cal_phase()
-    rfproj.drop_eq_snr()
+    rfproj.drop_eq_snr(length=50)
     rfproj.save(proj_file)
     rfproj.trim()
     rfproj.rotate()
-    rfproj.save(proj_file)
+    # rfproj.save(proj_file)
     # '''
 
-    rfproj.deconv()
+    # rfproj.deconv()
     # rfproj.save(proj_file)
 
 
