@@ -103,7 +103,7 @@ def rotateSeisENtoTR(E, N, BAZ):
     return T, R
 
 def rssq(x):
-    return np.sqrt(np.sum(np.abs(x)**2))
+    return np.sqrt(np.sum(x**2)/len(x))
 
 def snr(x, y):
     spow = rssq(x)**2
