@@ -186,7 +186,7 @@ class eq(object):
             else:
                 return False
         elif criterion == 'lab':
-            pass
+            return True
         else:
             pass
 

@@ -77,7 +77,7 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
 def load_station_info(pathname, ref_comp, suffix):
     ex_sac = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))[0]
     ex_tr = obspy.read(ex_sac)[0]
-    return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo
+    return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo, ex_tr.stats.sac.stel
 
 
 def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
@@ -126,7 +126,7 @@ class para():
         self.dismax = 90
         self.ref_comp = 'BHZ'
         self.suffix = 'SAC'
-        self.noisegate = 3
+        self.noisegate = 5
         self.gauss = 2
         self.target_dt = 0.01
         self.phase = 'P'
@@ -144,12 +144,13 @@ class stainfo():
         self.station = ''
         self.stla = 0.
         self.stlo = 0.
+        self.stel = 0.
 
     def get_stainfo(self):
         return self.__dict__
 
     def load_stainfo(self, pathname, ref_comp, suffix):
-        (self.network, self.station, self.stla, self.stlo) = load_station_info(pathname, ref_comp, suffix)
+        (self.network, self.station, self.stla, self.stlo, self.stel) = load_station_info(pathname, ref_comp, suffix)
 
 
 def CfgParser(cfg_file):
@@ -356,13 +357,54 @@ def rf_test():
     rfproj.search_eq(local=True)
     rfproj.match_eq()
     rfproj.detrend()
-    rfproj.filter()
+    rfproj.filter(freqmin=0.03, freqmax=0.5)
     rfproj.cal_phase()
     rfproj.drop_eq_snr(length=50)
     rfproj.save(proj_file)
     rfproj.trim()
     rfproj.rotate()
     # rfproj.save(proj_file)
+    # '''
+
+    # rfproj.deconv()
+    # rfproj.save(proj_file)
+
+
+def srf_test():
+    date_begin = obspy.UTCDateTime('20130101')
+    date_end = obspy.UTCDateTime('20140101')
+    # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
+    # datapath = '/Users/xumj/Researches/test4seispy/data'
+    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    # proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
+    proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
+    # RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
+
+    rfproj = rf()
+    # rfproj.load(proj_file)
+    #
+    # '''
+    rfproj.date_begin = date_begin
+    rfproj.date_end = date_end
+    rfproj.para.datapath = datapath
+    rfproj.para.catalogpath = logpath
+    rfproj.para.RFpath = RFpath
+    rfproj.para.time_before = 100
+    rfproj.para.time_after = 30
+    rfproj.para.phase = 'S'
+    rfproj.load_stainfo()
+    rfproj.search_eq(local=True)
+    rfproj.match_eq()
+    rfproj.detrend()
+    rfproj.filter(freqmin=0.03, freqmax=0.5)
+    rfproj.cal_phase()
+    rfproj.drop_eq_snr(length=50)
+    rfproj.save(proj_file)
+    rfproj.trim()
+    rfproj.rotate(method='ZNE->LQT')
+    rfproj.save(proj_file)
     # '''
 
     # rfproj.deconv()
@@ -377,4 +419,4 @@ def get_events_test():
 
 if __name__ == '__main__':
     # get_events_test()
-    rf_test()
+    srf_test()
