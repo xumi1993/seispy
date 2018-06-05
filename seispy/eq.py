@@ -1,6 +1,7 @@
 import numpy as np
 import obspy
 from obspy.io.sac import SACTrace
+from obspy.signal.rotate import rotate_zne_lqt
 import re
 import io
 from os.path import dirname, join, expanduser
@@ -48,6 +49,25 @@ class eq(object):
         raypara = model.get_ray_paths(evdp, dis, phase_list=['P', 'S'])
         self.PRaypara = raypara[0]
         self.SRaypara = raypara[1]
+
+    def search_inc(self, bazi):
+        inc_range = np.arange(0.1, 90, 0.1)
+        # bazi_range = np.repeat(bazi, len(inc_range))
+        # M_all = seispy.geo.rot3D(bazi=bazi_range, inc=inc_range)
+        # ZEN = np.array([self.rf[2].data, self.rf[0].data, self.rf[1].data])
+
+        # LQT_all = np.zeros([ZEN.shape[0], ZEN.shape[1], M_all.shape[2]])
+        power = np.zeros(inc_range.shape[0])
+        for i in range(len(inc_range)):
+            # LQT_all[:, :, i] = M_all[:, :, i].dot(ZEN)
+            l_comp, _, _ = rotate_zne_lqt(self.rf[2].data, self.rf[1].data, self.rf[0].data, bazi, inc_range[i])
+            power[i] = np.mean(l_comp ** 2)
+
+        # real_inc_idx = seispy.geo.extrema(power, opt='min')
+        real_inc_idx = np.argmin(power)
+        print(real_inc_idx)
+        real_inc = inc_range[real_inc_idx]
+        return real_inc
 
     def rotate(self, bazi, inc=None, method='NE->RT', phase='P', inv=None):
         if phase not in ('P', 'S'):
@@ -142,28 +162,35 @@ class eq(object):
                 raise ValueError('Please rotate component to \'LQT\'')
             Q = np.flip(self.rf[1].data, axis=0)
             L = np.flip(self.rf[2].data, axis=0)
-            self.rf[2].data,self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta, self.rf[1].shape[0], shift,
+            self.rf[2].data, self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta, self.rf[1].data.shape[0], shift,
                                                          f0, itmax, minderr)
         else:
             pass
 
-    def saverf(self, path, only_r=False):
-        if only_r:
-            loop_lst = (1)
+    def saverf(self, path, phase='P', only_r=False):
+        if phase == 'P':
+            if only_r:
+                loop_lst = [1]
+            else:
+                loop_lst = [0, 1]
+        elif phase == 'S':
+            loop_lst = [2]
         else:
-            loop_lst = (0, 1)
+            raise ValueError('Phase must be in \'P\' or \'S\'')
 
         filename = join(path, self.datastr)
         for i in loop_lst:
             tr = SACTrace.from_obspy_trace(self.rf[i])
             tr.b = 0
-            tr.write(filename + '_{0}.sac'.format(tr.kcmpnm[-1]))
+            tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
     def judge_rf(self, shift, criterion='crust'):
-        if not isinstance(criterion, str):
-            raise TypeError('criterion should be string in [\'crust\', \'mtz\', \'lab\']')
+        if not isinstance(criterion, (str, type(None))):
+            raise TypeError('criterion should be string in [\'crust\', \'mtz\']')
+        elif criterion is None:
+            pass
         elif criterion.lower() not in ['crust', 'mtz', 'lab']:
-            raise ValueError('criterion should be string in [\'crust\', \'mtz\', \'lab\']')
+            raise ValueError('criterion should be string in [\'crust\', \'mtz\']')
         else:
             criterion = criterion.lower()
 
@@ -185,7 +212,7 @@ class eq(object):
                 return True
             else:
                 return False
-        elif criterion == 'lab':
+        elif criterion is None:
             return True
         else:
             pass

@@ -75,7 +75,10 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
 
 
 def load_station_info(pathname, ref_comp, suffix):
-    ex_sac = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))[0]
+    try:
+        ex_sac = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))[0]
+    except Exception:
+        raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
     ex_tr = obspy.read(ex_sac)[0]
     return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo, ex_tr.stats.sac.stel
 
@@ -280,7 +283,7 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].detrend()
 
-    def filter(self, freqmin=0.05, freqmax=1, order=4):
+    def filter(self, freqmin=0.05, freqmax=1., order=4):
         self.logger.RFlog.info('Filter all data from {0} to {1}'.format(freqmin, freqmax))
         for _, row in self.eqs.iterrows():
             row['data'].filter(freqmin=freqmin, freqmax=freqmax, order=order)
@@ -310,19 +313,27 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
 
-    def deconv(self):
+    def deconv(self, criterion='crust'):
         drop_lst = []
+        if self.para.phase == 'P':
+            shift = self.para.time_before
+        elif self.para.phase == 'S':
+            shift = self.para.time_after
+            criterion = None
+        else:
+            pass
+
         for i, row in self.eqs.iterrows():
-            row['data'].deconvolute(self.para.time_before, self.para.gauss, phase=self.para.phase,
+            row['data'].deconvolute(shift, self.para.gauss, phase=self.para.phase,
                                     only_r=self.para.only_r, itmax=400, minderr=0.001)
-            if not row['data'].judge_rf(self.para.time_before):
+            if not row['data'].judge_rf(self.para.time_before, criterion=criterion):
                 drop_lst.append(i)
                 continue
             else:
                 self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
                                        ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
                                                                 row['data'].rms[-1]))
-                row['data'].saverf(self.para.RFpath, self.para.only_r)
+                row['data'].saverf(self.para.RFpath, phase=self.para.phase, only_r=self.para.only_r)
         self.eqs.drop(drop_lst, inplace=True)
 
 
@@ -333,44 +344,6 @@ def InitRfProj(cfg_path):
 
 
 def rf_test():
-    date_begin = obspy.UTCDateTime('20130101')
-    date_end = obspy.UTCDateTime('20140101')
-    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
-    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    datapath = '/Users/xumj/Researches/test4seispy/data'
-    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
-    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
-    # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
-
-    rfproj = rf()
-    # rfproj.load(proj_file)
-    #
-    # '''
-    rfproj.date_begin = date_begin
-    rfproj.date_end = date_end
-    rfproj.para.datapath = datapath
-    rfproj.para.catalogpath = logpath
-    rfproj.para.RFpath = RFpath
-    rfproj.load_stainfo()
-    rfproj.search_eq(local=True)
-    rfproj.match_eq()
-    rfproj.detrend()
-    rfproj.filter(freqmin=0.03, freqmax=0.5)
-    rfproj.cal_phase()
-    rfproj.drop_eq_snr(length=50)
-    rfproj.save(proj_file)
-    rfproj.trim()
-    rfproj.rotate()
-    # rfproj.save(proj_file)
-    # '''
-
-    # rfproj.deconv()
-    # rfproj.save(proj_file)
-
-
-def srf_test():
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
     # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
@@ -391,9 +364,8 @@ def srf_test():
     rfproj.para.datapath = datapath
     rfproj.para.catalogpath = logpath
     rfproj.para.RFpath = RFpath
-    rfproj.para.time_before = 100
-    rfproj.para.time_after = 30
-    rfproj.para.phase = 'S'
+    rfproj.para.gauss = 1.
+    rfproj.para.only_r = True
     rfproj.load_stainfo()
     rfproj.search_eq(local=True)
     rfproj.match_eq()
@@ -403,12 +375,52 @@ def srf_test():
     rfproj.drop_eq_snr(length=50)
     rfproj.save(proj_file)
     rfproj.trim()
-    rfproj.rotate(method='ZNE->LQT')
+    rfproj.rotate()
     rfproj.save(proj_file)
     # '''
 
     # rfproj.deconv()
     # rfproj.save(proj_file)
+
+
+def srf_test():
+    date_begin = obspy.UTCDateTime('20130101')
+    date_end = obspy.UTCDateTime('20140101')
+    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
+    datapath = '/Users/xumj/Researches/test4seispy/data'
+    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
+    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
+    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
+
+    rfproj = rf()
+    # rfproj.load(proj_file)
+    #
+    # '''
+    rfproj.date_begin = date_begin
+    rfproj.date_end = date_end
+    rfproj.para.datapath = datapath
+    rfproj.para.catalogpath = logpath
+    rfproj.para.RFpath = RFpath
+    rfproj.para.time_before = 100
+    rfproj.para.time_after = 30
+    rfproj.para.only_r = True
+    rfproj.para.phase = 'S'
+    rfproj.load_stainfo()
+    rfproj.search_eq(local=True)
+    rfproj.match_eq()
+    rfproj.detrend()
+    rfproj.filter(freqmin=0.03, freqmax=0.5)
+    rfproj.cal_phase()
+    rfproj.drop_eq_snr(length=50)
+    rfproj.trim()
+    rfproj.rotate(method='ZNE->LQT')
+    rfproj.save(proj_file)
+    # '''
+
+    rfproj.deconv()
 
 
 def get_events_test():
