@@ -157,7 +157,7 @@ class stainfo():
 
 
 def CfgParser(cfg_file):
-    cf = configparser.ConfigParser()
+    cf = configparser.RawConfigParser()
     pa = para()
     try:
         cf.read(cfg_file)
@@ -180,15 +180,20 @@ def CfgParser(cfg_file):
 
 
 class rf(object):
-    def __init__(self):
-        self.para = para()
+    def __init__(self, cfg=None):
+        if cfg is None:
+            self.para = para()
+        elif isinstance(cfg, str):
+            self.para = CfgParser(cfg)
+        else:
+            raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg)))
         if not isinstance(self.para, para):
             raise TypeError('Input value should be class seispy.rf.para')
-        self.stainfo = stainfo()
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()
         self.model = TauPyModel('iasp91')
         self.logger = setuplog()
+        self.stainfo = stainfo()
 
     @property
     def date_begin(self):
@@ -434,4 +439,6 @@ def get_events_test():
 
 if __name__ == '__main__':
     # get_events_test()
-    srf_test()
+    # srf_test()
+    rfp = rf('/home/xumj/Codes/seispy/Scripts/paraRF.cfg')
+    print(rfp.para.get_para())

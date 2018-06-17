@@ -10,7 +10,7 @@ setup(name='seispy',
       license='GNU',
       packages=find_packages(),
       package_dir={'seispy': 'seispy'},
-      install_requires=['obspy', 'deepdish'],
+      install_requires=['obspy', 'deepdish', 'pandas'],
       include_package_data=True,
       zip_safe=False
       )
