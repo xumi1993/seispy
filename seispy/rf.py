@@ -135,14 +135,17 @@ def CfgParser(cfg_file):
         cf.read(cfg_file)
     except Exception:
         raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
-
-    for key, value in cf.items('path'):
-        pa.__dict__[key] = value
+    pa.datapath = cf.get('path', 'datapath')
+    pa.rfpath = cf.get('path', 'rfpath')
+    pa.imagepath = cf.get('path', 'imagepath')
+    pa.catalogpath = cf.get('path', 'catalogpath')
     for key, value in cf.items('para'):
         if key == 'date_begin':
             pa.__dict__[key] = obspy.UTCDateTime(value)
         elif key == 'date_end':
             pa.__dict__[key] = obspy.UTCDateTime(value)
+        elif key == 'only_r':
+            pa.only_r = cf.getboolean('para', 'only_r')
         else:
             try:
                 pa.__dict__[key] = float(value)
@@ -417,6 +420,6 @@ def para_test():
 if __name__ == '__main__':
     # get_events_test()
     # srf_test()
-    # rfp = rf('/home/xumj/Codes/seispy/Scripts/paraRF.cfg')
-    # print(rfp.para.get_para())
-    para_test()
+    rfp = rf('/home/xumj/Codes/seispy/Scripts/paraRF.cfg')
+    print(rfp.para.get_para())
+    # para_test()

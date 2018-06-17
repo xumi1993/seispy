@@ -43,8 +43,9 @@ class para(object):
             try:
                 os.makedirs(value)
             except Exception as e:
-                raise e
-            self._datapath = value
+                Warning('Cannot create datapath of {0}'.format(value))
+            finally:
+                self._datapath = value
         else:
             self._datapath = value
 
@@ -60,8 +61,9 @@ class para(object):
             try:
                 os.makedirs(value)
             except Exception as e:
-                raise e
-            self._rfpath = value
+                Warning('Cannot create rfpath of {0}\n with error: {1}'.format(value, e))
+            finally:
+                self._rfpath = value
         else:
             self._rfpath = value
 
@@ -77,8 +79,9 @@ class para(object):
             try:
                 os.makedirs(value)
             except Exception as e:
-                raise e
-            self._imagepath = value
+                Warning('Cannot create rfpath of {0}\n with error: {1}'.format(value, e))
+            finally:
+                self._imagepath = value
         else:
             self._imagepath = value
 
