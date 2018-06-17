@@ -4,7 +4,8 @@ import numpy as np
 import obspy
 import re
 import io
-from os.path import dirname, join, expanduser
+from os.path import dirname, join, expanduser, exists
+from seispy import para
 import seispy
 from seispy.eq import eq
 from seispy.setuplog import setuplog
@@ -110,35 +111,6 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
             this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=[i])
             eq_match = eq_match.append(this_df)
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
-
-
-class para():
-    def __init__(self):
-        self.datapath = expanduser('~')
-        self.rfpath = expanduser('~')
-        self.imagepath = expanduser('~')
-        self.catalogpath = join(expanduser('~'), 'EventCMT.dat')
-        self.offset = 0
-        self.tolerance = 210
-        self.dateformat = '%Y.%j.%H.%M.%S'
-        self.date_begin = obspy.UTCDateTime('19760101')
-        self.date_end = obspy.UTCDateTime.now()
-        self.magmin = 5.5
-        self.magmax = 10
-        self.dismin = 30
-        self.dismax = 90
-        self.ref_comp = 'BHZ'
-        self.suffix = 'SAC'
-        self.noisegate = 5
-        self.gauss = 2
-        self.target_dt = 0.01
-        self.phase = 'P'
-        self.time_before = 10
-        self.time_after = 120
-        self.only_r = False
-
-    def get_para(self):
-        return self.__dict__
 
 
 class stainfo():
@@ -437,8 +409,14 @@ def get_events_test():
     print(get_events(date_begin, date_end, 32.051701, 118.8544))
 
 
+def para_test():
+    pa = para()
+    pa.rfpath = '/home/xumj/rftest'
+
+
 if __name__ == '__main__':
     # get_events_test()
     # srf_test()
-    rfp = rf('/home/xumj/Codes/seispy/Scripts/paraRF.cfg')
-    print(rfp.para.get_para())
+    # rfp = rf('/home/xumj/Codes/seispy/Scripts/paraRF.cfg')
+    # print(rfp.para.get_para())
+    para_test()
