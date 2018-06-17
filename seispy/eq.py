@@ -55,17 +55,17 @@ class eq(object):
         # bazi_range = np.repeat(bazi, len(inc_range))
         # M_all = seispy.geo.rot3D(bazi=bazi_range, inc=inc_range)
         # ZEN = np.array([self.rf[2].data, self.rf[0].data, self.rf[1].data])
-
+        s_range = self.trim(10, 10, phase='S', isreturn=True)
         # LQT_all = np.zeros([ZEN.shape[0], ZEN.shape[1], M_all.shape[2]])
         power = np.zeros(inc_range.shape[0])
         for i in range(len(inc_range)):
             # LQT_all[:, :, i] = M_all[:, :, i].dot(ZEN)
-            l_comp, _, _ = rotate_zne_lqt(self.rf[2].data, self.rf[1].data, self.rf[0].data, bazi, inc_range[i])
+            l_comp, _, _ = rotate_zne_lqt(s_range[2].data, s_range[1].data, s_range[0].data, bazi, inc_range[i])
             power[i] = np.mean(l_comp ** 2)
 
         # real_inc_idx = seispy.geo.extrema(power, opt='min')
         real_inc_idx = np.argmin(power)
-        print(real_inc_idx)
+        # print(real_inc_idx)
         real_inc = inc_range[real_inc_idx]
         return real_inc
 
@@ -83,6 +83,7 @@ class eq(object):
                 inc = self.PRaypara.incident_angle
             elif phase == 'S':
                 inc = self.SRaypara.incident_angle
+                # inc = self.search_inc(bazi)
             else:
                 pass
 
@@ -167,7 +168,7 @@ class eq(object):
         else:
             pass
 
-    def saverf(self, path, phase='P', only_r=False):
+    def saverf(self, path, phase='P', evla=-12345., evlo=-12345., evdp=-12345., gauss=0, only_r=False):
         if phase == 'P':
             if only_r:
                 loop_lst = [1]
@@ -182,6 +183,10 @@ class eq(object):
         for i in loop_lst:
             tr = SACTrace.from_obspy_trace(self.rf[i])
             tr.b = 0
+            tr.evla = evla
+            tr.evlo = evlo
+            tr.evdp = evdp
+            tr.user0 = gauss
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
     def judge_rf(self, shift, criterion='crust'):

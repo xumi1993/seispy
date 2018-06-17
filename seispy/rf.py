@@ -115,7 +115,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
 class para():
     def __init__(self):
         self.datapath = expanduser('~')
-        self.RFpath = expanduser('~')
+        self.rfpath = expanduser('~')
         self.imagepath = expanduser('~')
         self.catalogpath = join(expanduser('~'), 'EventCMT.dat')
         self.offset = 0
@@ -333,7 +333,9 @@ class rf(object):
                 self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
                                        ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
                                                                 row['data'].rms[-1]))
-                row['data'].saverf(self.para.RFpath, phase=self.para.phase, only_r=self.para.only_r)
+                row['data'].saverf(self.para.RFpath, phase=self.para.phase,
+                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'],
+                                   gauss=self.para.gauss, only_r=self.para.only_r)
         self.eqs.drop(drop_lst, inplace=True)
 
 
@@ -406,6 +408,7 @@ def srf_test():
     rfproj.para.RFpath = RFpath
     rfproj.para.time_before = 100
     rfproj.para.time_after = 30
+    rfproj.para.gauss = 1
     rfproj.para.only_r = True
     rfproj.para.phase = 'S'
     rfproj.load_stainfo()
