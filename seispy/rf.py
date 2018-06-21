@@ -313,7 +313,7 @@ class rf(object):
                 self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
                                        ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
                                                                 row['data'].rms[-1]))
-                row['data'].saverf(self.para.RFpath, phase=self.para.phase,
+                row['data'].saverf(self.para.rfpath, phase=self.para.phase,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'],
                                    gauss=self.para.gauss, only_r=self.para.only_r)
         self.eqs.drop(drop_lst, inplace=True)
@@ -345,7 +345,7 @@ def rf_test():
     rfproj.date_end = date_end
     rfproj.para.datapath = datapath
     rfproj.para.catalogpath = logpath
-    rfproj.para.RFpath = RFpath
+    rfproj.para.rfpath = RFpath
     rfproj.para.gauss = 1.
     rfproj.para.only_r = True
     rfproj.load_stainfo()
@@ -385,7 +385,7 @@ def srf_test():
     rfproj.date_end = date_end
     rfproj.para.datapath = datapath
     rfproj.para.catalogpath = logpath
-    rfproj.para.RFpath = RFpath
+    rfproj.para.rfpath = RFpath
     rfproj.para.time_before = 100
     rfproj.para.time_after = 30
     rfproj.para.gauss = 1
