@@ -104,7 +104,10 @@ class eq(object):
     def snr(self, length=50, phase='P'):
         st_noise = self.trim(length, 0, phase=phase, isreturn=True)
         st_signal = self.trim(0, length, phase=phase, isreturn=True)
-        snr_R = seispy.geo.snr(st_signal[1].data, st_noise[1].data)
+        try:
+            snr_R = seispy.geo.snr(st_signal[1].data, st_noise[1].data)
+        except IndexError:
+            snr_R = 0
         return snr_R
     
     def get_time_offset(self, event_time):
@@ -121,7 +124,6 @@ class eq(object):
 
         Pcorrect_time = Parr_time - self.timeoffset
         Scorrect_time = Sarr_time - self.timeoffset
-
         if write_to_sac:
             for tr in self.st:
                 tr.stats.sac.t0 = Pcorrect_time

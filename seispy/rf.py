@@ -14,7 +14,6 @@ from datetime import timedelta, datetime
 import pandas as pd
 from pandas.errors import PerformanceWarning
 from obspy.taup import TauPyModel
-from obspy.io.sac import SACTrace
 import deepdish as dd
 import urllib.request as rq
 import configparser
@@ -425,11 +424,14 @@ def get_events_test():
 
 
 def proj_test():
-    cfg_file= '/workspace/seispy_test/RF.cfg'
+    cfg_file = '/workspace/seispy_test/RF.cfg'
     pjt = rf(cfg_file)
     pjt.load_stainfo()
     pjt.search_eq(local=True)
     pjt.match_eq()
+    pjt.cal_phase()
+    for _, row in pjt.eqs.iterrows():
+        row['data'].snr()
 
 
 if __name__ == '__main__':
