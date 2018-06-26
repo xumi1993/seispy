@@ -17,7 +17,7 @@ import deepdish as dd
 class eq(object):
     def __init__(self, pathname, datestr, suffix):
         self.datastr = datestr
-        self.st = obspy.read(join(pathname, '*' + datestr + '.*.' + suffix))
+        self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
         if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
             raise ValueError('Samples are different in 3 components')
         self.st.sort()

@@ -14,6 +14,7 @@ from datetime import timedelta, datetime
 import pandas as pd
 from pandas.errors import PerformanceWarning
 from obspy.taup import TauPyModel
+from obspy.io.sac import SACTrace
 import deepdish as dd
 import urllib.request as rq
 import configparser
@@ -77,29 +78,35 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
 
 def load_station_info(pathname, ref_comp, suffix):
     try:
-        ex_sac = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))[0]
+        ex_sac = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))[0]
     except Exception:
         raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
     ex_tr = obspy.read(ex_sac)[0]
     return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo, ex_tr.stats.sac.stel
 
 
-def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=0,
+def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=None,
              tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
     pattern = datestr2regex(dateformat)
-    ref_eqs = glob.glob(join(pathname, '*{0}*.{1}'.format(ref_comp, suffix)))
+    ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
     sac_files = []
     for ref_sac in ref_eqs:
         datestr = re.findall(pattern, ref_sac)[0]
         tr = obspy.read(ref_sac)[0]
-        sac_files.append([datestr, tr])
+        if offset is None:
+            this_offset = tr.stats.sac.o
+        elif isinstance(offset, (int, float)):
+            this_offset = -offset
+        else:
+            raise TypeError('offset should be int or float type')
+        sac_files.append([datestr, tr.stats.starttime, this_offset])
     new_col = ['dis', 'bazi', 'data']
     eq_match = pd.DataFrame(columns=new_col)
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
-        for datestr, tr in sac_files:
-            if tr.stats.starttime - timedelta(seconds=offset + tolerance) <= evt['date'] \
-                    <= tr.stats.starttime + timedelta(seconds=-offset + tolerance):
+        for datestr, b_time, offs in sac_files:
+            if b_time + timedelta(seconds=offs - tolerance) <= evt['date'] \
+                    <= b_time + timedelta(seconds=offs + tolerance):
                 tmp_datestr.append(datestr)
         if len(tmp_datestr) == 1:
             try:
@@ -144,6 +151,11 @@ def CfgParser(cfg_file):
             pa.__dict__[key] = obspy.UTCDateTime(value)
         elif key == 'date_end':
             pa.__dict__[key] = obspy.UTCDateTime(value)
+        elif key == 'offset':
+            try:
+                pa.__dict__[key] = float(value)
+            except:
+                pa.__dict__[key] = None
         elif key == 'only_r':
             pa.only_r = cf.getboolean('para', 'only_r')
         else:
@@ -412,14 +424,15 @@ def get_events_test():
     print(get_events(date_begin, date_end, 32.051701, 118.8544))
 
 
-def para_test():
-    pa = para()
-    pa.rfpath = '/home/xumj/rftest'
+def proj_test():
+    cfg_file= '/workspace/seispy_test/RF.cfg'
+    pjt = rf(cfg_file)
+    pjt.load_stainfo()
+    pjt.search_eq(local=True)
+    pjt.match_eq()
 
 
 if __name__ == '__main__':
     # get_events_test()
     # srf_test()
-    rfp = rf('/home/xumj/Codes/seispy/Scripts/paraRF.cfg')
-    print(rfp.para.get_para())
-    # para_test()
+    proj_test()

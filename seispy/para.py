@@ -9,7 +9,7 @@ class para(object):
         self.rfpath = expanduser('~')
         self.imagepath = expanduser('~')
         self.catalogpath = join(expanduser('~'), 'EventCMT.dat')
-        self.offset = 0
+        self.offset = None
         self.tolerance = 210
         self.dateformat = '%Y.%j.%H.%M.%S'
         self.date_begin = obspy.UTCDateTime('19760101')
