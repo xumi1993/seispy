@@ -149,7 +149,7 @@ class eq(object):
         else:
             self.rf = self.st.copy().trim(t1, t2)
     
-    def deconvolute(self, shift, f0, phase='P', only_r=False, itmax=400, minderr=0.001):
+    def deconvolute(self, shift, f0, phase='P', only_r=False, itmax=400, minderr=0.001, target_dt=None):
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
         if self.rf == obspy.Stream():
@@ -160,15 +160,16 @@ class eq(object):
             if not only_r:
                 self.rf[0].data, self.rms, self.it = seispy.decov.decovit(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta,
                                      self.rf[1].data.shape[0], shift, f0, itmax, minderr)
-        elif phase == 'S':
+        else:
             if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
                 raise ValueError('Please rotate component to \'LQT\'')
             Q = np.flip(self.rf[1].data, axis=0)
             L = np.flip(self.rf[2].data, axis=0)
             self.rf[2].data, self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta, self.rf[1].data.shape[0], shift,
                                                          f0, itmax, minderr)
-        else:
-            pass
+        if target_dt is not None:
+            if self.rf[0].stats.delta != target_dt:
+                self.rf.resample(1/target_dt)
 
     def saverf(self, path, phase='P', evla=-12345., evlo=-12345., evdp=-12345., gauss=0, only_r=False):
         if phase == 'P':

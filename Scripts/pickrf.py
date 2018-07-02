@@ -367,6 +367,7 @@ class plotrffig():
         self.axt.grid()
         plt.draw()
 
+
 def main():
     opts = initopts.opts()
     opts.maxidx = 20

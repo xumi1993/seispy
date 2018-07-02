@@ -316,7 +316,7 @@ class rf(object):
 
         for i, row in self.eqs.iterrows():
             row['data'].deconvolute(shift, self.para.gauss, phase=self.para.phase,
-                                    only_r=self.para.only_r, itmax=400, minderr=0.001)
+                                    only_r=self.para.only_r, itmax=400, minderr=0.001, target_dt=self.para.target_dt)
             if not row['data'].judge_rf(self.para.time_before, criterion=criterion):
                 drop_lst.append(i)
                 continue
