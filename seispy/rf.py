@@ -283,7 +283,7 @@ class rf(object):
         self.logger.RFlog.info('Calculate arrivals and ray parameters for all data')
         for _, row in self.eqs.iterrows():
             row['data'].get_arrival(self.model, row['evdp'], row['dis'])
-            row['data'].get_raypara(self.model, row['evdp'], row['dis'])
+            # row['data'].get_raypara(self.model, row['evdp'], row['dis'])
 
     def rotate(self, method='NE->RT'):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
@@ -324,9 +324,9 @@ class rf(object):
                 self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
                                        ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
                                                                 row['data'].rms[-1]))
-                row['data'].saverf(self.para.rfpath, phase=self.para.phase,
-                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'],
-                                   gauss=self.para.gauss, only_r=self.para.only_r)
+                row['data'].saverf(self.para.rfpath, phase=self.para.phase, shift=shift,
+                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['dis'],
+                                   gcarc=row['bazi'], gauss=self.para.gauss, only_r=self.para.only_r)
         self.eqs.drop(drop_lst, inplace=True)
 
 

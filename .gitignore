@@ -9,7 +9,6 @@ build/
 dist/
 
 seispy/__pycache__/
-
 Scripts/__pycache__/
 
 *.egg

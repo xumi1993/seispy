@@ -77,12 +77,12 @@ class eq(object):
             raise ValueError('Please cut out 3 components before')
 
         if inc is None:
-            if self.PRaypara is None or self.SRaypara is None:
+            if self.PArrival is None or self.SArrival is None:
                 raise ValueError('inc must be specified')
             elif phase == 'P':
-                inc = self.PRaypara.incident_angle
+                inc = self.PArrival.incident_angle
             elif phase == 'S':
-                inc = self.SRaypara.incident_angle
+                inc = self.SArrival.incident_angle
                 # inc = self.search_inc(bazi)
             else:
                 pass
@@ -171,25 +171,34 @@ class eq(object):
             if self.rf[0].stats.delta != target_dt:
                 self.rf.resample(1/target_dt)
 
-    def saverf(self, path, phase='P', evla=-12345., evlo=-12345., evdp=-12345., gauss=0, only_r=False):
+    def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345.,
+               gauss=0, baz=-12345., gcarc=-12345., only_r=False):
         if phase == 'P':
             if only_r:
                 loop_lst = [1]
             else:
                 loop_lst = [0, 1]
+            rayp = seispy.geo.srad2skm(self.PArrival.ray_param)
         elif phase == 'S':
             loop_lst = [2]
+            rayp = seispy.geo.srad2skm(self.SArrival.ray_param)
         else:
             raise ValueError('Phase must be in \'P\' or \'S\'')
 
         filename = join(path, self.datastr)
         for i in loop_lst:
             tr = SACTrace.from_obspy_trace(self.rf[i])
-            tr.b = 0
+            tr.b = -shift
+            tr.o = 0
             tr.evla = evla
             tr.evlo = evlo
             tr.evdp = evdp
-            tr.user0 = gauss
+            tr.baz = baz
+            tr.gcarc = gcarc
+            tr.user0 = rayp
+            tr.kuser0 = 'Ray para'
+            tr.user1 = gauss
+            tr.kuser1 = 'G fator'
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
     def judge_rf(self, shift, criterion='crust'):
