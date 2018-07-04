@@ -5,7 +5,7 @@ import obspy
 import re
 import io
 from os.path import dirname, join, expanduser, exists
-from seispy import para
+from seispy.para import para
 import seispy
 from seispy.eq import eq
 from seispy.setuplog import setuplog
@@ -101,6 +101,22 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         sac_files.append([datestr, tr.stats.starttime, this_offset])
     new_col = ['dis', 'bazi', 'data']
     eq_match = pd.DataFrame(columns=new_col)
+    for datestr, b_time, offs in sac_files:
+        date_range_begin = b_time + timedelta(seconds=offs - tolerance)
+        date_range_end = b_time + timedelta(seconds=offs + tolerance)
+        results = eq_lst[(eq_lst.date > date_range_begin) & (eq_lst.date < date_range_end)]
+        if len(results) == 1:
+            try:
+                this_eq = eq(pathname, datestr, suffix)
+            except:
+                continue
+        else:
+            continue
+        this_eq.get_time_offset(results.iloc[0]['date'])
+        daz = seispy.distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
+        this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=results.index.values)
+        eq_match = eq_match.append(this_df)
+    '''
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
         for datestr, b_time, offs in sac_files:
@@ -116,6 +132,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
             daz = seispy.distaz(stla, stlo, evt['evla'], evt['evlo'])
             this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=[i])
             eq_match = eq_match.append(this_df)
+    '''
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
 
@@ -166,7 +183,7 @@ def CfgParser(cfg_file):
 
 
 class rf(object):
-    def __init__(self, cfg=None):
+    def __init__(self, cfg=None, log=None):
         if cfg is None:
             self.para = para()
         elif isinstance(cfg, str):
@@ -175,6 +192,10 @@ class rf(object):
             raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg)))
         if not isinstance(self.para, para):
             raise TypeError('Input value should be class seispy.rf.para')
+        if log is None:
+            self.logger = setuplog()
+        else:
+            self.logger = log
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()
         self.model = TauPyModel('iasp91')
@@ -304,7 +325,7 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
 
-    def deconv(self, criterion='crust'):
+    def deconv(self, criterion='crust', itmax=400, minderr=0.001):
         drop_lst = []
         if self.para.phase == 'P':
             shift = self.para.time_before
@@ -315,8 +336,8 @@ class rf(object):
             pass
 
         for i, row in self.eqs.iterrows():
-            row['data'].deconvolute(shift, self.para.gauss, phase=self.para.phase,
-                                    only_r=self.para.only_r, itmax=400, minderr=0.001, target_dt=self.para.target_dt)
+            row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
+                                    only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
             if not row['data'].judge_rf(self.para.time_before, criterion=criterion):
                 drop_lst.append(i)
                 continue
@@ -325,8 +346,8 @@ class rf(object):
                                        ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
                                                                 row['data'].rms[-1]))
                 row['data'].saverf(self.para.rfpath, phase=self.para.phase, shift=shift,
-                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['dis'],
-                                   gcarc=row['bazi'], gauss=self.para.gauss, only_r=self.para.only_r)
+                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
+                                   gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
         self.eqs.drop(drop_lst, inplace=True)
 
 
@@ -339,14 +360,14 @@ def InitRfProj(cfg_path):
 def rf_test():
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
-    # logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
-    logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    # datapath = '/Users/xumj/Researches/test4seispy/data'
-    datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    # proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
-    proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    # RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
-    RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
+    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
+    datapath = '/Users/xumj/Researches/test4seispy/data'
+    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
+    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
+    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
+    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
 
     rfproj = rf()
     # rfproj.load(proj_file)
@@ -357,19 +378,19 @@ def rf_test():
     rfproj.para.datapath = datapath
     rfproj.para.catalogpath = logpath
     rfproj.para.rfpath = RFpath
-    rfproj.para.gauss = 1.
-    rfproj.para.only_r = True
+    rfproj.para.gauss = 2.
+    rfproj.para.offset = 0
     rfproj.load_stainfo()
     rfproj.search_eq(local=True)
     rfproj.match_eq()
-    rfproj.detrend()
-    rfproj.filter(freqmin=0.03, freqmax=0.5)
-    rfproj.cal_phase()
-    rfproj.drop_eq_snr(length=50)
-    rfproj.save(proj_file)
-    rfproj.trim()
-    rfproj.rotate()
-    rfproj.save(proj_file)
+    # rfproj.detrend()
+    # rfproj.filter(freqmin=0.03, freqmax=0.5)
+    # rfproj.cal_phase()
+    # rfproj.drop_eq_snr(length=50)
+    # rfproj.save(proj_file)
+    # rfproj.trim()
+    # rfproj.rotate()
+    # rfproj.save(proj_file)
     # '''
 
     # rfproj.deconv()
@@ -436,5 +457,5 @@ def proj_test():
 
 if __name__ == '__main__':
     # get_events_test()
-    # srf_test()
-    proj_test()
+    rf_test()
+    # proj_test()

@@ -2,16 +2,10 @@ import numpy as np
 import obspy
 from obspy.io.sac import SACTrace
 from obspy.signal.rotate import rotate_zne_lqt
-import re
-import io
+from scipy.signal import resample
 from os.path import dirname, join, expanduser
 import seispy
-from seispy.setuplog import setuplog
-import glob
-from datetime import timedelta, datetime
-import pandas as pd
-from obspy.taup import TauPyModel
-import deepdish as dd
+
 
 
 class eq(object):
@@ -149,7 +143,7 @@ class eq(object):
         else:
             self.rf = self.st.copy().trim(t1, t2)
     
-    def deconvolute(self, shift, f0, phase='P', only_r=False, itmax=400, minderr=0.001, target_dt=None):
+    def deconvolute(self, shift, time_after, f0, phase='P', only_r=False, itmax=400, minderr=0.001, target_dt=None):
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
         if self.rf == obspy.Stream():
@@ -169,7 +163,10 @@ class eq(object):
                                                          f0, itmax, minderr)
         if target_dt is not None:
             if self.rf[0].stats.delta != target_dt:
-                self.rf.resample(1/target_dt)
+                self.rf.resample(1 / target_dt)
+                for tr in self.rf:
+                    tr.data = tr.data[0:-1]
+                    # tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
 
     def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False):
