@@ -91,7 +91,10 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
     sac_files = []
     for ref_sac in ref_eqs:
         datestr = re.findall(pattern, ref_sac)[0]
-        tr = obspy.read(ref_sac)[0]
+        try:
+            tr = obspy.read(ref_sac)[0]
+        except TypeError:
+            continue
         if offset is None:
             this_offset = tr.stats.sac.o
         elif isinstance(offset, (int, float)):
@@ -105,17 +108,18 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         date_range_begin = b_time + timedelta(seconds=offs - tolerance)
         date_range_end = b_time + timedelta(seconds=offs + tolerance)
         results = eq_lst[(eq_lst.date > date_range_begin) & (eq_lst.date < date_range_end)]
-        if len(results) == 1:
-            try:
-                this_eq = eq(pathname, datestr, suffix)
-            except:
-                continue
-        else:
+        if len(results) != 1:
+            continue
+        try:
+            this_eq = eq(pathname, datestr, suffix)
+        except:
             continue
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = seispy.distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=results.index.values)
         eq_match = eq_match.append(this_df)
+    ind = eq_match.index.drop_duplicates(False)
+    eq_match = eq_match.loc[ind]
     '''
     for i, evt in eq_lst.iterrows():
         tmp_datestr = []
@@ -199,7 +203,6 @@ class rf(object):
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()
         self.model = TauPyModel('iasp91')
-        self.logger = setuplog()
         self.stainfo = stainfo()
 
     @property
@@ -346,7 +349,7 @@ class rf(object):
                                        ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
                                                                 row['data'].rms[-1]))
                 row['data'].saverf(self.para.rfpath, phase=self.para.phase, shift=shift,
-                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
+                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'], mag=row['mag'],
                                    gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
         self.eqs.drop(drop_lst, inplace=True)
 

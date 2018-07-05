@@ -113,8 +113,11 @@ class eq(object):
         """
         offset = sac.b - real o
         """
-        Parr_time = self.PArrival.time
-        Sarr_time = self.SArrival.time
+        try:
+            Parr_time = self.PArrival.time
+            Sarr_time = self.SArrival.time
+        except AttributeError:
+            raise Exception('Please calculate PArrival or SArrival first')
 
         Pcorrect_time = Parr_time - self.timeoffset
         Scorrect_time = Sarr_time - self.timeoffset
@@ -168,7 +171,7 @@ class eq(object):
                     tr.data = tr.data[0:-1]
                     # tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
 
-    def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345.,
+    def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False):
         if phase == 'P':
             if only_r:
@@ -190,6 +193,7 @@ class eq(object):
             tr.evla = evla
             tr.evlo = evlo
             tr.evdp = evdp
+            tr.mag = mag
             tr.baz = baz
             tr.gcarc = gcarc
             tr.user0 = rayp
