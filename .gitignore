@@ -1,6 +1,7 @@
 .idea/
 
 seispy/.idea/
+seispy/*.pyc
 
 *.xml
 
