@@ -5,32 +5,32 @@ from scipy import interpolate
 import math
 
 def sind(deg):
-    rad = math.radians(deg)
-    return math.sin(rad)
+    rad = np.radians(deg)
+    return np.sin(rad)
 
 def cosd(deg):
-    rad = math.radians(deg)
-    return math.cos(rad)
+    rad = np.radians(deg)
+    return np.cos(rad)
 
 def tand(deg):
-    rad = math.radians(deg)
-    return math.tan(rad)
+    rad = np.radians(deg)
+    return np.tan(rad)
 
 def cotd(deg):
-    rad = math.radians(deg)
-    return math.cos(rad) / math.sin(rad)
+    rad = np.radians(deg)
+    return np.cos(rad) / np.sin(rad)
 
 def asind(x):
-    rad = math.asin(x)
-    return math.degrees(rad)
+    rad = np.arcsin(x)
+    return np.degrees(rad)
 
 def acosd(x):
-    rad = math.acos(x)
-    return math.degrees(rad)
+    rad = np.arccos(x)
+    return np.degrees(rad)
 
 def atand(x):
-    rad = math.atan(x)
-    return math.degrees(rad)
+    rad = np.arctan(x)
+    return np.degrees(rad)
 
 def km2deg(km):
     radius = 6371
@@ -110,12 +110,27 @@ def snr(x, y):
     npow = rssq(y)**2
     return 10 * np.log10(spow / npow)
 
-def latlon_from(lat1,lon1,azimuth,gcarc_dist):
+def latlon_from(lat1, lon1, azimuth, gcarc_dist):
     lat2 = asind ((sind (lat1) * cosd (gcarc_dist)) + (cosd (lat1) * sind (gcarc_dist) * cosd (azimuth)))
-    if ( cosd (gcarc_dist) >= (cosd (90 - lat1) * cosd (90 - lat2))):
-        lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2))
+    if isinstance(gcarc_dist, np.ndarray):
+        lon2 = np.zeros_like(lat2)
+        for n in range(len(gcarc_dist)):
+            if cosd (gcarc_dist[n]) >= (cosd (90 - lat1) * cosd (90 - lat2[n])):
+                lon2[n] = lon1 + asind (sind (gcarc_dist[n]) * sind (azimuth) / cosd (lat2[n]))
+            else:
+                lon2[n] = lon1 + asind (sind (gcarc_dist[n]) * sind (azimuth) / cosd (lat2[n])) + 180
+    elif isinstance(azimuth, np.ndarray):
+        lon2 = np.zeros_like(lat2)
+        for n in range(len(azimuth)):
+            if cosd (gcarc_dist) >= (cosd (90 - lat1) * cosd (90 - lat2[n])):
+                lon2[n] = lon1 + asind (sind (gcarc_dist) * sind (azimuth[n]) / cosd (lat2[n]))
+            else:
+                lon2[n] = lon1 + asind (sind (gcarc_dist) * sind (azimuth[n]) / cosd (lat2[n])) + 180
     else:
-        lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2)) + 180
+        if ( cosd (gcarc_dist) >= (cosd (90 - lat1) * cosd (90 - lat2))):
+            lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2))
+        else:
+            lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2)) + 180
     return lat2, lon2
 
 def geoproject(lat_p, lon_p, lat1, lon1, lat2, lon2):
