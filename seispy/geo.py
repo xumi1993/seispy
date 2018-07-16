@@ -62,6 +62,10 @@ def srad2skm(srad):
     sdeg = srad * ((2*pi)/360)
     return sdeg / deg2km(1)
 
+def skm2srad(skm):
+    sdeg = skm * deg2km(1)
+    return rad2deg(sdeg)
+
 
 def rot3D(bazi, inc):
     """
