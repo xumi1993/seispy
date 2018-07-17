@@ -171,7 +171,7 @@ class plotrffig():
                 mag = opts.rffiles[i].stats.sac.mag
                 gauss = opts.rffiles[i].stats.sac.user1
                 fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (evtname, 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
-        shutil.copy(os.path.join(opts.path, opts.staname+"finallist.dat"), os.path.join(opts.cut_path, opts.staname+"finallist.dat"))
+        # shutil.copy(os.path.join(opts.path, opts.staname+"finallist.dat"), os.path.join(opts.cut_path, opts.staname+"finallist.dat"))
         sys.exit(0)
 
     def onclick(self, event):
