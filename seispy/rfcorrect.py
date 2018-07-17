@@ -76,7 +76,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
             StopIndex = dep_mod.depths.shape[0]
         EndIndex[i] = StopIndex - 1
         Newaxis = np.append(Newaxis, np.append(np.arange(-shift, 0, sampling), 0))
-        for j in np.arange(int(shift / sampling + 1), RFlength):
+        for j in np.arange(int(shift / sampling + 1), stadatar.RFlength):
             Refaxis = j * sampling - shift
             index = np.where(Refaxis <= Tpds[i, 0:StopIndex])[0]
             if index.size == 0:
@@ -94,7 +94,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
         if New_data.shape[0] < stadatar.RFlength:
             Newdatar[i] = np.append(New_data, np.zeros(stadatar.RFlength - New_data.shape[0]))
         else:
-            Newdatar[i] = New_data[0: RFlength]
+            Newdatar[i] = New_data[0: stadatar.RFlength]
     return Newdatar, EndIndex, x_s, x_p
 
 
