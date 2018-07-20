@@ -1,8 +1,6 @@
 .idea/
-
-seispy/.idea/
-seispy/*.pyc
-Scripts/*.pyc
+/*/.idea/
+/*/*.py[cod]
 
 *.xml
 
@@ -10,8 +8,7 @@ build/
 
 dist/
 
-seispy/__pycache__/
-Scripts/__pycache__/
+/*/__pycache__/
 
 *.egg
 
