@@ -2,6 +2,7 @@
 
 seispy/.idea/
 seispy/*.pyc
+Scripts/*.pyc
 
 *.xml
 

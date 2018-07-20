@@ -1,9 +1,10 @@
-import obspy
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d
-from os.path import dirname, join
-from seispy.geo import skm2srad
+from os.path import dirname, join, exists
+from seispy.geo import skm2srad, sdeg2skm
+from seispy.psrayp import get_psrayp
+import matplotlib.pyplot as plt
 
 
 class SACStation(object):
@@ -69,7 +70,6 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
 #
     for i in range(stadatar.ev_num):
         Newaxis = np.array([])
-        New_data = np.array([])
         TempTpds = Tpds[i, :]
         StopIndex = np.where(np.imag(TempTpds) == 1)[0]
         if StopIndex.size == 0:
@@ -98,18 +98,88 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
     return Newdatar, EndIndex, x_s, x_p
 
 
+def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp=None):
+    """
+    :param stadatar:
+    :param YAxisRange:
+    :param sampling:
+    :param shift:
+    :param velmod:
+    :return:
+    """
+    dep_mod = DepModel(YAxisRange, velmod)
+
+    x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    Tpds = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    if srayp is None:
+        for i in range(stadatar.ev_num):
+            x_s[i] = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (stadatar.rayp[i] ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
+            x_p[i] = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (stadatar.rayp[i] ** 2. * (dep_mod.R / dep_mod.vp) ** -2)) - 1))
+            Tpds[i] = np.cumsum((np.sqrt((dep_mod.R / dep_mod.vs) ** 2 - stadatar.rayp[i] ** 2) -
+                                 np.sqrt((dep_mod.R / dep_mod.vp) ** 2 - stadatar.rayp[i] ** 2)) * (dep_mod.dz / dep_mod.R))
+    elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
+        if isinstance(srayp, str):
+            if not exists(srayp):
+                raise FileNotFoundError('Ps rayp lib file not found')
+            else:
+                rayp_lib = np.load(srayp)
+        else:
+            rayp_lib = srayp
+        for i in range(stadatar.ev_num):
+            rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths)
+            rayp = skm2srad(sdeg2skm(rayp))
+            x_s[i] = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (rayp ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
+            x_p[i] = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (stadatar.rayp[i] ** 2. * (dep_mod.R / dep_mod.vp) ** -2)) - 1))
+            Tpds[i] = np.cumsum((np.sqrt((dep_mod.R / dep_mod.vs) ** 2 - rayp ** 2) -
+                                 np.sqrt((dep_mod.R / dep_mod.vp) ** 2 - stadatar.rayp[i] ** 2)) * (dep_mod.dz / dep_mod.R))
+    else:
+        raise TypeError('srayp should be path to Ps rayp lib')
+
+    time_axis = np.arange(0, stadatar.RFlength) * sampling - shift
+    PS_RFdepth = np.zeros([stadatar.ev_num, dep_mod.depths.shape[0]])
+    EndIndex = np.zeros(stadatar.ev_num)
+    for i in range(stadatar.ev_num):
+        TempTpds = Tpds[i, :]
+        StopIndex = np.where(np.imag(TempTpds) == 1)[0]
+        if StopIndex.size == 0:
+            EndIndex[i] = dep_mod.depths.shape[0]
+        else:
+            EndIndex[i] = StopIndex[0] - 1
+
+        if StopIndex.size == 0:
+            DepthAxis = interp1d(TempTpds, dep_mod.depths, bounds_error=False)(time_axis)
+        else:
+            DepthAxis = interp1d(TempTpds[0:StopIndex], dep_mod.depths[0: StopIndex], bounds_error=False)(time_axis)
+        PS_RFTempAmps = stadatar.data[i]
+        ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
+
+        if ValueIndices.size == 0:
+            PS_RFAmps = TempTpds * np.nan
+        elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
+            PS_RFAmps = TempTpds * np.nan
+        else:
+            PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
+        PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
+    return PS_RFdepth, EndIndex, x_s, x_p
+
+
 if __name__ == '__main__':
     velmod = '/Users/xumj/Researches/YN_crust/gradient_study/IASP91.vel'
     RFlength = 13001
     sampling = 0.01
     shift = 10
     raypref = skm2srad(0.065)
-    lst = '/Volumes/xumj2/CXRF/RFresult/PZH01/T1.PZH01finallist.dat'
-    YAxisRange = np.append(np.arange(0, 300, 0.5), 300)
+    lst = '/Volumes/xumj3/YNRF/RFresult/MC17/MC17finallist.dat'
+    YAxisRange = np.append(np.arange(0, 200, 0.5), 200)
     # dep_mod = DepModel(YAxisRange, velmod)
     # print(dep_mod.vp.shape, dep_mod.R.shape, YAxisRange[-1])
 
     stadatar = SACStation(lst)
-    Newdatar, _, _, _ = moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod)
-    mean_data = np.mean(Newdatar, axis=0)
+    PS_RFdepth, _, x_s, x_p = psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp='/Users/xumj/Researches/Ps_rayp.npz')
+    print(PS_RFdepth.shape)
+    mean_data = np.mean(PS_RFdepth, axis=0)
+
+    plt.plot(YAxisRange, mean_data)
+    plt.show()
 
