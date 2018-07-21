@@ -144,23 +144,21 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp=None):
         StopIndex = np.where(np.imag(TempTpds) == 1)[0]
         if StopIndex.size == 0:
             EndIndex[i] = dep_mod.depths.shape[0]
-        else:
-            EndIndex[i] = StopIndex[0] - 1
-
-        if StopIndex.size == 0:
             DepthAxis = interp1d(TempTpds, dep_mod.depths, bounds_error=False)(time_axis)
         else:
+            EndIndex[i] = StopIndex[0] - 1
             DepthAxis = interp1d(TempTpds[0:StopIndex], dep_mod.depths[0: StopIndex], bounds_error=False)(time_axis)
+
         PS_RFTempAmps = stadatar.data[i]
         ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
 
         if ValueIndices.size == 0:
-            PS_RFAmps = TempTpds * np.nan
+            continue
         elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
-            PS_RFAmps = TempTpds * np.nan
+            continue
         else:
             PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
-        PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
+            PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
     return PS_RFdepth, EndIndex, x_s, x_p
 
 

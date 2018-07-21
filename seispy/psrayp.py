@@ -1,31 +1,9 @@
 import os
-from obspy.taup import TauPyModel
 import numpy as np
-from seispy.geo import srad2skm
 from scipy.interpolate import interpn
-import time
 import subprocess
-
-def makepheaselist(layers):
-    ph_list = ['P'+str(int(depth))+'s' for depth in layers]
-    return ph_list
-
-
-def PsRayp_test(layers, dist, dep):
-    model = TauPyModel(model="iasp91")
-    ph_list = makepheaselist(layers)
-    t1 = time.time()
-    arrs = model.get_ray_paths(dist, dep, ph_list)
-    print(time.time()-t1)
-    arr_num = len(arrs)
-    rayp_list = np.zeros([arr_num, 2])
-    for i in range(arr_num):
-        rayp_list[i][0] = arrs[i].ray_param
-        rayp_list[i][1] = int(arrs[i].name.strip('Ps'))
-    rayp_list.sort(axis=0)
-    print(time.time() - t1)
-    return(rayp_list)
-
+import argparse
+import sys
 
 class PsRayp(object):
     def __init__(self, dis, dep, laymin=0, laymax=800):
@@ -79,13 +57,29 @@ class PsRayp(object):
         np.savez(path, dis=self.dis, dep=self.dep, layers=self.layers, rayp=self.rayp)
 
 
-def gen_rayp_lib(out_path, dis, dep, laymin=0, laymax=800):
-    if not (isinstance(dis, np.ndarray) and isinstance(dep, np.ndarray)):
-        raise TypeError('dis and dep must be np.ndarray type')
+def gen_rayp_lib():
+    parser = argparse.ArgumentParser(description="Gen a ray parameter lib for Pds phases")
+    parser.add_argument('-d', help='Distance range as \'min_dis/max_dis/interval\'', dest='dis_str', type=str)
+    parser.add_argument('-e', help='Event depth range as \'min_dep/max_dep/interval\'', dest='dep_str', type=str)
+    parser.add_argument('-l', help='layers range as \'min_layer/man_layer\'', dest='lay_str', type=str, default='0/800')
+    parser.add_argument('-o', help='Out path to Pds ray parameter lib', type=str, default='./Ps_rayp', dest='out_path')
+
+    arg = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+    print(arg.__dict__)
+    dis_lst = [float(dd) for dd in arg.dis_str.split('/')]
+    dis = np.arange(dis_lst[0], dis_lst[1], dis_lst[2])
+    dep_lst = [float(dd) for dd in arg.dep_str.split('/')]
+    dep = np.arange(dep_lst[0], dep_lst[1], dep_lst[2])
+    laymin = int(arg.lay_str.split('/')[0])
+    laymax = int(arg.lay_str.split('/')[1])
+
     pr = PsRayp(dis, dep, laymin=laymin, laymax=laymax)
     pr.make_phase_list()
     pr.get_rayp()
-    pr.save(path=out_path)
+    pr.save(path=arg.out_path)
 
 
 def get_psrayp(rayp_lib, dis, dep, layers):
