@@ -22,7 +22,10 @@ class SACStation(object):
         self.phase = [ph.decode() for ph in self.phase]
         self.rayp = skm2srad(self.rayp)
         self.ev_num = len(self.event)
-        self.RFlength = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac')).npts
+        sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
+        self.RFlength = sample_sac.npts
+        self.shift = -sample_sac.b
+        self.sampling = sample_sac.delta
         self.data = np.empty([self.ev_num, self.RFlength])
         for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
             sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
@@ -163,7 +166,7 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp=None):
 
 
 if __name__ == '__main__':
-    velmod = '/Users/xumj/Researches/YN_crust/gradient_study/IASP91.vel'
+    velmod = '/Users/xumj/Researches/YN_crust/gradient_study/iasp91.vel'
     RFlength = 13001
     sampling = 0.01
     shift = 10

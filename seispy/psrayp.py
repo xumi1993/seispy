@@ -68,7 +68,6 @@ def gen_rayp_lib():
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-    print(arg.__dict__)
     dis_lst = [float(dd) for dd in arg.dis_str.split('/')]
     dis = np.arange(dis_lst[0], dis_lst[1], dis_lst[2])
     dep_lst = [float(dd) for dd in arg.dep_str.split('/')]
