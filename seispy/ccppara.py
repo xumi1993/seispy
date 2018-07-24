@@ -11,6 +11,7 @@ class CCPPara(object):
         self.stackfile = 'ccp.dat'
         self.stalist = 'sta.lst'
         self.velmod = ''
+        self.stack_sta_list = ''
         self.domperiod = 5
         self.shape = 'circle'
         self.slid_val = 5
@@ -18,6 +19,9 @@ class CCPPara(object):
         self.bin_radius = 50
         self.line = np.array([])
         self.depth_axis = np.array([])
+        self.stack_range = np.array([])
+        self.dep_val = 0
+        self.stack_val = 0
 
     @property
     def bin_radius(self):
@@ -61,6 +65,7 @@ def ccppara(cfg_file):
     cpara.depthdat = cf.get('FileIO', 'depthdat')
     cpara.stackfile = cf.get('FileIO', 'stackfile')
     cpara.stalist = cf.get('FileIO', 'stalist')
+    cpara.stack_sta_list = cf.get('FileIO', 'stack_sta_list')
     velmod = cf.get('FileIO', 'velmod')
     if velmod == '':
         cpara.velmod = join(dirname(__file__), 'data', 'iasp91.vel')
@@ -86,6 +91,11 @@ def ccppara(cfg_file):
     # para for depth section
     dep_start = cf.getfloat('depth', 'dep_start')
     dep_end = cf.getfloat('depth', 'dep_end')
-    dep_val = cf.getfloat('depth', 'dep_val')
-    cpara.depth_axis = np.append(np.arange(dep_start, dep_end, dep_val), dep_end)
+    cpara.dep_val = cf.getfloat('depth', 'dep_val')
+    cpara.depth_axis = np.append(np.arange(dep_start, dep_end, cpara.dep_val), dep_end)
+
+    stack_start = cf.getfloat('stack', 'stack_start')
+    stack_end = cf.getfloat('stack', 'stack_end')
+    cpara.stack_val = cf.getfloat('stack', 'stack_val')
+    cpara.stack_range = np.append(np.arange(stack_start, stack_end, cpara.stack_val), stack_end)
     return cpara

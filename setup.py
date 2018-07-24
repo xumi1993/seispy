@@ -12,7 +12,8 @@ setup(name='seispy',
       package_dir={'seispy': 'seispy'},
       package_data={'': ['data/*.vel']},
       install_requires=['obspy', 'deepdish', 'pandas'],
-      entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib']},
+      entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
+                                        'rf2depth=seispy.rf2depth_makedata:rf2depth']},
       include_package_data=True,
       zip_safe=False
       )

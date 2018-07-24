@@ -36,8 +36,8 @@ class DepModel(object):
     def __init__(self, YAxisRange, velmod):
         VelocityModel = np.loadtxt(velmod)
         Depths = VelocityModel[:, 0]
-        Vp = VelocityModel[:, 2]
-        Vs = VelocityModel[:, 1]
+        Vp = VelocityModel[:, 1]
+        Vs = VelocityModel[:, 2]
         self.vp = interp1d(Depths, Vp)(YAxisRange)
         self.vs = interp1d(Depths, Vs)(YAxisRange)
         self.depths = YAxisRange

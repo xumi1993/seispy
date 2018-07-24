@@ -4,6 +4,8 @@ from seispy.ccppara import ccppara
 from seispy.geo import latlon_from, deg2km, rad2deg
 from os.path import join
 from scipy.io import savemat
+import argparse
+import sys
 
 
 class Station(object):
@@ -17,7 +19,7 @@ def init_mat(sta_num):
     dtype = {'names': ('Station', 'stalat', 'stalon', 'Depthrange', 'events', 'bazi', 'rayp', 'phases', 'moveout_correct',
                       'Piercelat', 'Piercelon', 'StopIndex'),
              'formats': tuple(['O']*12)}
-    return np.zeros(sta_num, dtype=dtype)
+    return np.zeros([1, sta_num], dtype=dtype)
 
 
 def _convert_str_mat(instr):
@@ -42,19 +44,29 @@ def makedata(cfg_file):
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], deg2km(rad2deg(x_s[j])))
-        RFdepth[i]['Station'] = sta_info.station[i]
-        RFdepth[i]['stalat'] = sta_info.stla[i]
-        RFdepth[i]['stalon'] = sta_info.stlo[i]
-        RFdepth[i]['Depthrange'] = cpara.depth_axis
-        RFdepth[i]['events'] = _convert_str_mat(stadatar.event)
-        RFdepth[i]['bazi'] = stadatar.bazi
-        RFdepth[i]['rayp'] = stadatar.rayp
-        RFdepth[i]['phases'] = _convert_str_mat(stadatar.phase)
-        RFdepth[i]['moveout_correct'] = PS_RFdepth.T
-        RFdepth[i]['Piercelat'] = piercelat.T
-        RFdepth[i]['Piercelon'] = piercelon.T
-        RFdepth[i]['StopIndex'] = end_index
+        RFdepth[0, i]['Station'] = sta_info.station[i]
+        RFdepth[0, i]['stalat'] = sta_info.stla[i]
+        RFdepth[0, i]['stalon'] = sta_info.stlo[i]
+        RFdepth[0, i]['Depthrange'] = cpara.depth_axis
+        RFdepth[0, i]['events'] = _convert_str_mat(stadatar.event)
+        RFdepth[0, i]['bazi'] = stadatar.bazi
+        RFdepth[0, i]['rayp'] = stadatar.rayp
+        RFdepth[0, i]['phases'] = _convert_str_mat(stadatar.phase)
+        RFdepth[0, i]['moveout_correct'] = PS_RFdepth.T
+        RFdepth[0, i]['Piercelat'] = piercelat.T
+        RFdepth[0, i]['Piercelon'] = piercelon.T
+        RFdepth[0, i]['StopIndex'] = end_index
     savemat(cpara.depthdat, {'RFdepth': RFdepth}, oned_as='column')
+
+
+def rf2depth():
+    parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
+    parser.add_argument('cfg_file', type=str, help='Path to configure file')
+    arg = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+    makedata(arg.cfg_file)
 
 
 if __name__ == '__main__':
