@@ -2,8 +2,11 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
 from seispy.rfcorrect import SACStation
+from seispy.rf import CfgParser
+import argparse
 import numpy as np
 from os.path import join
+import sys
 
 
 def init_figure():
@@ -77,7 +80,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axr.add_line(Line2D([0, 0], axr.get_ylim(), color='black'))
 
     # set axr_sum
-    axr_sum.set_title('R components ({})'.format(station), fontsize=16, fontname='Times New Roman')
+    axr_sum.set_title('R components ({})'.format(station), fontsize=16)
     axr_sum.set_xlim(xmin, xmax)
     axr_sum.set_xticks(x_range)
     axr_sum.set_xticklabels([])
@@ -100,7 +103,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axt.add_line(Line2D([0, 0], axt.get_ylim(), color='black'))
 
     # set axt_sum
-    axt_sum.set_title('T components ({})'.format(station), fontsize=16, fontname='Times New Roman')
+    axt_sum.set_title('T components ({})'.format(station), fontsize=16)
     axt_sum.set_xlim(xmin, xmax)
     axt_sum.set_xticks(x_range)
     axt_sum.set_xticklabels([])
@@ -120,15 +123,29 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(station):
-    outpath = '/Volumes/xumj3/YNRF/plotRT'
-    lst = '/Volumes/xumj2/CXRF/RFresult/'+station+'/T1.'+station+'finallist.dat'
+def plotrt(station, enf, cfg_file):
+    pa = CfgParser(cfg_file)
+    pa.rfpath = join(pa.rfpath, station)
+    lst = join(pa.rfpath, station+'finallist.dat')
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
     stadata, time_axis = read_process_data(lst)
-    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis)
+    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
-    h.savefig(join(outpath, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
+    h.savefig(join(pa.imagepath, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
+    parser.add_argument('-s', help='Station as folder name of RFs and list', dest='station', type=str)
+    parser.add_argument('-e', help='Enlargement factor', dest='enf', type=int, default=3)
+    parser.add_argument('cfg_file', type=str, help='Path to configure file')
+    arg = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+    plotrt(arg.station, arg.enf, arg.cfg_file)
 
 
 if __name__ == '__main__':
     plotrt('XHL01')
+
