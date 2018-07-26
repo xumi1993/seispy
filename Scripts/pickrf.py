@@ -58,7 +58,8 @@ def get_sac():
     dateformat = config.get('para', 'dateformat')
     path = os.path.join(path)
     files = glob.glob(os.path.join(path, '*_R.sac'))
-    pattern = datestr2regex(dateformat)
+    # pattern = datestr2regex(dateformat)
+    pattern = r'\d{4}.*\d{3}.*\d{2}.*\d{2}.*\d{2}'
     filenames = [re.match(pattern, os.path.basename(fl)).group() for fl in files]
     filenames.sort()
     rffiles = obspy.read(os.path.join(path, '*_R.sac'))

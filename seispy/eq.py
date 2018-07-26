@@ -7,13 +7,21 @@ from os.path import dirname, join, expanduser
 import seispy
 
 
-
 class eq(object):
-    def __init__(self, pathname, datestr, suffix):
+    def __init__(self, pathname, datestr, suffix, switchEN=False, reverseE=False, reverseN=False):
         self.datastr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
         if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
             raise ValueError('Samples are different in 3 components')
+        if reverseE:
+            self.st.select(channel='*[E2]')[0].data *= -1
+        if reverseN:
+            self.st.select(channel='*[N1]')[0].data *= -1
+        if switchEN:
+            chE = self.st.select(channel='*[E2]')[0].stats.channel
+            chN = self.st.select(channel='*[N1]')[0].stats.channel
+            self.st.select(channel='*[E2]')[0].stats.channel = chN
+            self.st.select(channel='*[N1]')[0].stats.channel = chE
         self.st.sort()
         self.rf = obspy.Stream()
         self.timeoffset = 0

@@ -15,21 +15,24 @@ class SACStation(object):
         """
         data_path = dirname(evt_lst)
         dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
-                 'formats': ('S20', 'S10', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
+                 'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
             np.loadtxt(evt_lst, dtype=dtype, unpack=True)
-        self.event = [datestr.decode() for datestr in self.event]
-        self.phase = [ph.decode() for ph in self.phase]
+        # self.event = [datestr.decode() for datestr in self.event]
+        # self.phase = [ph.decode() for ph in self.phase]
         self.rayp = skm2srad(self.rayp)
         self.ev_num = len(self.event)
         sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
         self.RFlength = sample_sac.npts
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
-        self.data = np.empty([self.ev_num, self.RFlength])
+        self.datar = np.empty([self.ev_num, self.RFlength])
+        self.datat = np.empty([self.ev_num, self.RFlength])
         for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
             sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
-            self.data[_i] = sac.data
+            sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
+            self.datar[_i] = sac.data
+            self.datat[_i] = sact.data
 
 
 class DepModel(object):
@@ -88,12 +91,12 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
             Newaxis = np.append(Newaxis, Tpds_ref[index[0] - 1] + (Refaxis - Tpds[i, index[0] - 1]) * Ratio)
         endidx = Newaxis.shape[0]
         x_new = np.arange(0, stadatar.RFlength) * sampling - shift
-        Tempdata = interp1d(Newaxis, stadatar.data[i, 0:endidx], bounds_error=False)(x_new)
+        Tempdata = interp1d(Newaxis, stadatar.datar[i, 0:endidx], bounds_error=False)(x_new)
         endIndice = np.where(np.isnan(Tempdata))[0]
         if endIndice.size == 0:
             New_data = Tempdata
         else:
-            New_data = np.append(Tempdata[1:endIndice[0]], stadatar.data[i, endidx+1:])
+            New_data = np.append(Tempdata[1:endIndice[0]], stadatar.datar[i, endidx+1:])
         if New_data.shape[0] < stadatar.RFlength:
             Newdatar[i] = np.append(New_data, np.zeros(stadatar.RFlength - New_data.shape[0]))
         else:
@@ -152,7 +155,7 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp=None):
             EndIndex[i] = StopIndex[0] - 1
             DepthAxis = interp1d(TempTpds[0:StopIndex], dep_mod.depths[0: StopIndex], bounds_error=False)(time_axis)
 
-        PS_RFTempAmps = stadatar.data[i]
+        PS_RFTempAmps = stadatar.datar[i]
         ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
 
         if ValueIndices.size == 0:
