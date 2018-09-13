@@ -386,18 +386,17 @@ def rf_test():
     rfproj.load_stainfo()
     rfproj.search_eq(local=True)
     rfproj.match_eq()
-    # rfproj.detrend()
-    # rfproj.filter(freqmin=0.03, freqmax=0.5)
-    # rfproj.cal_phase()
-    # rfproj.drop_eq_snr(length=50)
+    rfproj.detrend()
+    rfproj.filter(freqmin=0.03, freqmax=0.5)
+    rfproj.cal_phase()
+    rfproj.drop_eq_snr(length=50)
     # rfproj.save(proj_file)
-    # rfproj.trim()
-    # rfproj.rotate()
+    rfproj.trim()
+    rfproj.rotate()
     # rfproj.save(proj_file)
     # '''
 
-    # rfproj.deconv()
-    # rfproj.save(proj_file)
+    rfproj.deconv()
 
 
 def srf_test():

@@ -48,7 +48,17 @@ class DepModel(object):
         self.R = 6371 - self.depths
 
 
-def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
+def from_file(mode_name):
+    if exists(mode_name):
+        filename = mode_name
+    elif exists(join(dirname(__file__), 'data', mode_name.lower()+'.vel')):
+        filename = join(dirname(__file__), 'data', mode_name.lower()+'.vel')
+    else:
+        raise ValueError('No such velocity mode')
+    return filename
+
+
+def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod='iasp91'):
     """
     :param stadatar: data class of SACStation
     :param raypref: referred ray parameter in rad
@@ -58,7 +68,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
     :param velmod: Path to velocity model
     :return: Newdatar, EndIndex, x_s, x_p
     """
-    dep_mod = DepModel(YAxisRange, velmod)
+    dep_mod = DepModel(YAxisRange, from_file(velmod))
 
     x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -104,7 +114,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod):
     return Newdatar, EndIndex, x_s, x_p
 
 
-def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp=None):
+def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod='iasp91', srayp=None):
     """
     :param stadatar:
     :param YAxisRange:
@@ -113,7 +123,8 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp=None):
     :param velmod:
     :return:
     """
-    dep_mod = DepModel(YAxisRange, velmod)
+
+    dep_mod = DepModel(YAxisRange, from_file(velmod))
 
     x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
