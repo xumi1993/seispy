@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 
 class SACStation(object):
-    def __init__(self, evt_lst):
+    def __init__(self, evt_lst, only_r=False):
         """
         :param evt_lst: event list in RF data dir. Column as date string, phase, evt lat, evt lon, evt dep,
                         distance, back-azimuth, ray parameter, magnitude, gauss factor.
@@ -27,12 +27,17 @@ class SACStation(object):
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
         self.datar = np.empty([self.ev_num, self.RFlength])
-        self.datat = np.empty([self.ev_num, self.RFlength])
-        for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
-            sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
-            sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
-            self.datar[_i] = sac.data
-            self.datat[_i] = sact.data
+        if not only_r:
+            self.datat = np.empty([self.ev_num, self.RFlength])
+            for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
+                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
+                sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
+                self.datar[_i] = sac.data
+                self.datat[_i] = sact.data
+        else:
+            for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
+                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
+                self.datar[_i] = sac.data
 
 
 class DepModel(object):
