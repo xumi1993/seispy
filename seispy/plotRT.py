@@ -125,7 +125,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
 
 def plotrt(station, enf, cfg_file):
     pa = CfgParser(cfg_file)
-    pa.rfpath = join(pa.rfpath, station)
+    # pa.rfpath = join(pa.rfpath, station)
     lst = join(pa.rfpath, station+'finallist.dat')
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
     stadata, time_axis = read_process_data(lst)
@@ -147,5 +147,5 @@ def main():
 
 
 if __name__ == '__main__':
-    plotrt('XHL01')
-
+    # plotrt('XHL01')
+    pass
