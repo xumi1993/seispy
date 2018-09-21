@@ -41,8 +41,8 @@ class SACStation(object):
 
 
 class DepModel(object):
-    def __init__(self, YAxisRange, velmod):
-        VelocityModel = np.loadtxt(velmod)
+    def __init__(self, YAxisRange, velmod='iasp91'):
+        VelocityModel = np.loadtxt(from_file(velmod))
         Depths = VelocityModel[:, 0]
         Vp = VelocityModel[:, 1]
         Vs = VelocityModel[:, 2]
@@ -73,7 +73,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod='i
     :param velmod: Path to velocity model
     :return: Newdatar, EndIndex, x_s, x_p
     """
-    dep_mod = DepModel(YAxisRange, from_file(velmod))
+    dep_mod = DepModel(YAxisRange, velmod)
 
     x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -129,7 +129,7 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod='iasp91', srayp=Non
     :return:
     """
 
-    dep_mod = DepModel(YAxisRange, from_file(velmod))
+    dep_mod = DepModel(YAxisRange, velmod)
 
     x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
