@@ -100,6 +100,15 @@ def rotateSeisZENtoLQT(Z, E, N, bazi, inc):
     return LQT[0, :], LQT[1, :], LQT[2, :]
 
 
+def spherical2cartesian(lon, lat, dep):
+    cola = 90. - lat
+    r = 6371 - dep
+    x = r * asind(cola) * acosd(lon)
+    y = r * asind(cola) * asind(lon)
+    z = r * acosd(cola)
+    return x, y, z
+
+
 def rotateSeisENtoTR(E, N, BAZ):
     angle = mod(BAZ+180, 360)
     R = N*cosd(angle) + E*sind(angle)
