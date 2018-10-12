@@ -186,6 +186,16 @@ def CfgParser(cfg_file):
     return pa
 
 
+def CfgModify(cfg_file, session, key, value):
+    cf = configparser.RawConfigParser()
+    try:
+        cf.read(cfg_file)
+    except Exception:
+        raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
+    cf.set(session, key, value)
+    cf.write(open(cfg_file, 'w'))
+
+
 class rf(object):
     def __init__(self, cfg=None, log=None):
         if cfg is None:
