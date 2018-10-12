@@ -123,7 +123,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(station, enf, cfg_file):
+def plotrt(station, cfg_file, enf=3):
     pa = CfgParser(cfg_file)
     # pa.rfpath = join(pa.rfpath, station)
     lst = join(pa.rfpath, station+'finallist.dat')
@@ -143,7 +143,7 @@ def main():
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-    plotrt(arg.station, arg.enf, arg.cfg_file)
+    plotrt(arg.station, arg.cfg_file, enf=arg.enf)
 
 
 if __name__ == '__main__':
