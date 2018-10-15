@@ -26,6 +26,7 @@ before_script:
 
 test:
   script:
+  - pip install numpy, scipy, matplotlib
   - python setup.py install
 #  - pip install tox flake8  # you can also use tox
 #  - tox -e py36,flake8
