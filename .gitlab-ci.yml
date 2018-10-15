@@ -26,7 +26,7 @@ before_script:
 
 test:
   script:
-  - python setup.py test
+  - python setup.py install
 #  - pip install tox flake8  # you can also use tox
 #  - tox -e py36,flake8
 
@@ -41,13 +41,13 @@ run:
     paths:
     - dist/*.whl
 
-pages:
-  script:
-  - pip install sphinx sphinx-rtd-theme
-  - cd doc ; make html
-  - mv build/html/ ../public/
-  artifacts:
-    paths:
-    - public
-  only:
-  - master
+#pages:
+#  script:
+#  - pip install sphinx sphinx-rtd-theme
+#  - cd doc ; make html
+#  - mv build/html/ ../public/
+#  artifacts:
+#    paths:
+#    - public
+#  only:
+#  - master
