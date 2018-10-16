@@ -1,4 +1,4 @@
-seispy
+# seispy
 
 [![pipeline status](https://git.nju.edu.cn/geophy/seispy/badges/master/pipeline.svg)](https://git.nju.edu.cn/geophy/seispy/commits/master)
 =============
