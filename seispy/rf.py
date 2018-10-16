@@ -12,7 +12,6 @@ from seispy.setuplog import setuplog
 import glob
 from datetime import timedelta, datetime
 import pandas as pd
-from pandas.errors import PerformanceWarning
 from obspy.taup import TauPyModel
 # import deepdish as dd
 import urllib.request as rq
@@ -35,7 +34,7 @@ def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dis
     endtime = e_time.strftime('%Y-%m-%dT%H:%M:%S')
     use_cols = ['Time', 'Latitude', 'Longitude', 'Depth', 'Magnitude']
     real_cols = ['date', 'evla', 'evlo', 'evdp', 'mag']
-    dateparse = lambda x: obspy.UTCDateTime.strptime(x, '%Y-%m-%dT%H:%M:%SZ')
+    dateparse = lambda x: obspy.UTCDateTime(datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
     url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}' \
           '&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
           'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&' \
