@@ -18,7 +18,6 @@ before_script:
   - conda config --set always_yes yes
   - conda update -q conda
   - conda config --add channels conda-forge
-  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
   - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
   - conda info -a
   - conda create -q -n testenv
