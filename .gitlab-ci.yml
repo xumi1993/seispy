@@ -15,7 +15,6 @@ variables:
 # them in a virtualenv and cache it as well.
 
 before_script:
-  - apt-get install libhdf5-serial-dev
   - conda config --set always_yes yes
   - conda update -q conda
   - conda config --add channels conda-forge
