@@ -1,7 +1,7 @@
 # This file is a template, and might need editing before it works on your project.
 # Official language image. Look for the different tagged releases at:
 # https://hub.docker.com/r/library/python/tags/
-image: python:latest
+image: continuumio/miniconda3:latest
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
@@ -19,14 +19,27 @@ cache:
     - venv/
 
 before_script:
-  - python -V               # Print out python version for debugging
-  - pip install virtualenv
-  - virtualenv venv
-  - source venv/bin/activate
+  - conda config --set always_yes yes
+  - conda update -q conda
+  - conda config --add channels conda-forge
+  - conda info -a
+  - conda create -q -n testenv
+      python=3.7
+      obspy gcc coverage
+      tqdm shapely cartopy
+      geographiclib
+      scipy
+      cython h5py
+  - source activate testenv
+  - pip install toeplitz obspyh5
+  - conda list
+  #- python -V               # Print out python version for debugging
+  #- pip install virtualenv
+  #- virtualenv venv
+  #- source venv/bin/activate
 
 test:
   script:
-  - pip install numpy scipy matplotlib cython h5py
   - python setup.py install
 #  - pip install tox flake8  # you can also use tox
 #  - tox -e py36,flake8
@@ -34,7 +47,7 @@ test:
 run:
   script:
   - python setup.py bdist_wheel
-  - pip install nympy scipy obspy
+  - pip install nympy, scipy, obspy
   # an alternative approach is to install and run:
   - pip install dist/*
   # run the command here
