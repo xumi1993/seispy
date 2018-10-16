@@ -23,7 +23,7 @@ before_script:
   - conda info -a
   - conda create -n testenv python=3.7
   - source activate testenv
-  - conda install obspy
+  - conda install obspy pandas
   - conda list
   - python setup.py install
   #- python -V               # Print out python version for debugging
