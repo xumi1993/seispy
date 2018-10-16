@@ -14,7 +14,7 @@ from datetime import timedelta, datetime
 import pandas as pd
 from pandas.errors import PerformanceWarning
 from obspy.taup import TauPyModel
-import deepdish as dd
+# import deepdish as dd
 import urllib.request as rq
 import configparser
 
@@ -272,7 +272,8 @@ class rf(object):
             self.logger.RFlog.error('{0}'.format(e))
             raise e
         self.logger.RFlog.info('{0} earthquakes matched'.format(self.eqs.shape[0]))
-
+        
+    '''
     def save(self, path=''):
         if path == '':
             path = '{0}.{1}.h5'.format(self.stainfo.network, self.stainfo.station)
@@ -302,7 +303,8 @@ class rf(object):
             self.eqs = fdd['eqs']
         except Exception as e:
             raise ValueError(e)
-
+    '''
+    
     def detrend(self):
         self.logger.RFlog.info('Detrend all data')
         for _, row in self.eqs.iterrows():
