@@ -19,16 +19,11 @@ before_script:
   - conda update -q conda
   - conda config --add channels conda-forge
   - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
   - conda info -a
-  - conda create -q -n testenv
-      python=3.7
-      obspy gcc coverage
-      tqdm shapely cartopy
-      geographiclib
-      scipy
-      cython h5py
+  - conda create -n testenv python=3.7
   - source activate testenv
-  - pip install toeplitz obspyh5
+  - conda install obspy
   - conda list
   #- python -V               # Print out python version for debugging
   #- pip install virtualenv
