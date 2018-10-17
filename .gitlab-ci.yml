@@ -19,26 +19,32 @@ before_script:
   - conda update -q conda
   - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
   - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
-  - pip install pip -U
   - pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
   - conda info -a
-  - conda create -n testenv python=3.7
-  - source activate testenv
-  - conda install obspy pandas pytz
-  - conda list
-  - python setup.py install
   #- python -V               # Print out python version for debugging
   #- pip install virtualenv
   #- virtualenv venv
   #- source venv/bin/activate
 
-tc1:
+py37:
   script:
+  - conda create -n testenv37 python=3.7
+  - source activate testenv
+  - conda install obspy pandas pytz
+  - python setup.py install
   - cd test/testcase01
   - python testcase01.py
 #  - pip install tox flake8  # you can also use tox
 #  - tox -e py36,flake8
 
+py36:
+  script:
+  - conda create -n testenv36 python=3.6
+  - source activate testenv
+  - conda install obspy pandas pytz
+  - python setup.py install
+  - cd test/testcase01
+  - python testcase01.py
 
 
 #pages:
