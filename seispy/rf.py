@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-import numpy as np
 import obspy
 import re
 import io
@@ -164,7 +163,9 @@ def CfgParser(cfg_file):
     pa.datapath = cf.get('path', 'datapath')
     pa.rfpath = cf.get('path', 'rfpath')
     pa.imagepath = cf.get('path', 'imagepath')
-    pa.catalogpath = cf.get('path', 'catalogpath')
+    logpath = cf.get('path', 'catalogpath')
+    if logpath != '':
+        pa.catalogpath = cf.get('path', 'catalogpath')
     for key, value in cf.items('para'):
         if key == 'date_begin':
             pa.__dict__[key] = obspy.UTCDateTime(value)

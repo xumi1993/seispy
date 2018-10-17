@@ -1,4 +1,4 @@
-from os.path import expanduser, join, exists
+from os.path import expanduser, join, exists, dirname
 import os
 import obspy
 
@@ -8,7 +8,7 @@ class para(object):
         self.datapath = expanduser('~')
         self.rfpath = expanduser('~')
         self.imagepath = expanduser('~')
-        self.catalogpath = join(expanduser('~'), 'EventCMT.dat')
+        self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
         self.offset = None
         self.tolerance = 210
         self.dateformat = '%Y.%j.%H.%M.%S'

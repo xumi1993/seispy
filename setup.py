@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 packages = find_packages()
 
-VERSION = "1.1.5"
+VERSION = "1.1.6"
 setup(name='seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -10,11 +10,12 @@ setup(name='seispy',
       license='GPLv3',
       packages=find_packages(),
       package_dir={'seispy': 'seispy'},
-      package_data={'': ['data/*.vel']},
+      package_data={'': ['data/*']},
       install_requires=['obspy', 'pandas', 'numpy', 'scipy', 'matplotlib'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'rf2depth=seispy.rf2depth_makedata:rf2depth',
-                                        'plotrt=seispy.plotRT:main']},
+                                        'plotrt=seispy.plotRT:main',
+                                        'updatecatalog=seispy.updatecatalog:main']},
       include_package_data=True,
       zip_safe=False
       )

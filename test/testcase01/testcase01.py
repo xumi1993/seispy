@@ -1,8 +1,9 @@
 import obspy
 from seispy.rf import *
+from seispy.updatecatalog import fetch_cata
 
 
-def iris_fetch():
+def subTC1():
     date_begin = obspy.UTCDateTime('20130101')
     date_end = obspy.UTCDateTime('20140101')
     rfproj = rf()
@@ -12,5 +13,10 @@ def iris_fetch():
     print(rfproj.eq_lst)
 
 
+def subTC2():
+    fetch_cata()
+
+
 if __name__ == '__main__':
-    iris_fetch()
+    subTC1()
+    subTC2()
