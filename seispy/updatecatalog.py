@@ -21,7 +21,7 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
         all_old_log = fid_old.readlines()
     old_log = all_old_log[-1]
     old_time_end = datetime(int(old_log.split()[0]), int(old_log.split()[1]), int(old_log.split()[2]),
-                                     int(old_log.split()[4]), int(old_log.split()[5]), int(old_log.split()[6]))
+                            int(old_log.split()[4]), int(old_log.split()[5]), int(old_log.split()[6]))
 
     if outlog == '':
         fid_new = open(inlog, 'w+')
@@ -29,17 +29,8 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
     else:
         fid_new = open(outlog, 'a+')
 
-    i = 0
-    maxcol = int(os.popen('stty size').read().strip().split()[1])
-    maxsharp = int(maxcol * 0.8)
     print('Writing station info to ' + outlog)
     for info in find_re.findall(html):
-        num = len(find_re.findall(html))
-        j = '#' * int((i / num) * maxsharp)
-        sys.stdout.write(str(int((i / num) * 100 + 1)) + '% ||' + j + '->' + "\r")
-        sys.stdout.flush()
-        i += 1
-
         year = int(info.split()[1].split('/')[0])
         mon = int(info.split()[1].split('/')[1])
         day = int(info.split()[1].split('/')[2])
