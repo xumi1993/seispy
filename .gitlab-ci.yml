@@ -20,6 +20,8 @@ before_script:
   - conda config --add channels conda-forge
   - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
   - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - pip install pip -U
+  - pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
   - conda info -a
   - conda create -n testenv python=3.7
   - source activate testenv
