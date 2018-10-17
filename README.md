@@ -2,6 +2,7 @@
 
 [![pipeline status](https://git.nju.edu.cn/geophy/seispy/badges/master/pipeline.svg)](https://git.nju.edu.cn/geophy/seispy/commits/master)
 [![coverage report](https://git.nju.edu.cn/geophy/seispy/badges/master/coverage.svg)](https://git.nju.edu.cn/geophy/seispy/commits/master)
+[![LGPLv3](https://www.gnu.org/graphics/lgplv3-88x31.png)](https://www.gnu.org/licenses/lgpl.html)
 
 Python module of seismology and  receiver functions
 
