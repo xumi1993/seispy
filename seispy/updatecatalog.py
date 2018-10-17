@@ -45,7 +45,7 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
     else:
         fid_new = open(outlog, 'a+')
 
-    print('Writing station info to ' + outlog)
+    print('Writing event info')
     for year, mon, day, hour, min, sec, lat, lon, dep, mw in ndkparse(html):
         evt_time = datetime(year, mon, day, hour, min, int(sec))
         if old_time_end < evt_time:
