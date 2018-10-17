@@ -29,7 +29,7 @@ before_script:
 py37:
   script:
   - conda create -n testenv37 python=3.7
-  - source activate testenv
+  - source activate testenv37
   - conda install obspy pandas pytz
   - python setup.py install
   - cd test/testcase01
@@ -40,7 +40,7 @@ py37:
 py36:
   script:
   - conda create -n testenv36 python=3.6
-  - source activate testenv
+  - source activate testenv36
   - conda install obspy pandas pytz
   - python setup.py install
   - cd test/testcase01
