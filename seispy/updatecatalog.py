@@ -49,7 +49,6 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
             fid_new.write('%d %d %d %s %d %d %d %6.2f %6.2f %s %s\n' % (
             year, mon, day, evt_time.strftime('%j'), hour, min, sec, lat, lon, dep, mw))
     fid_new.close()
-    sys.stdout('\n')
 
 
 def main():
