@@ -7,16 +7,32 @@ import sys
 import os
 
 
+def convertinfo(info):
+    if info[5] == '60.0':
+        sec = 59
+    else:
+        sec = float(info[5])
+    return int(info[0]), int(info[1]), int(info[2]), int(info[3]), int(info[4]), sec, float(info[6]), float(info[7]), \
+           float(info[8]), float(info[9])
+
+
+def ndkparse(ndk_str):
+    find_re = re.compile(
+        r'[A-Z]+\s(\d+)/(\d+)/(\d+)\s+(\d+):(\d+):(\d+.\d)\s+(.+?)\s+(.+?)\s+(.+?)\s+.+?\s+(.+?)\s+.+?\\n', re.DOTALL)
+    ndk_lst = [convertinfo(info) for info in find_re.findall(ndk_str)]
+    return ndk_lst
+
+
 def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog=''):
     url = 'http://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_QUICK/qcmt.ndk'
     try:
         print('Connecting to http://www.ldeo.columbia.edu/.../qcmt.ndk')
         response = rq.urlopen(url)
-    except:
-        raise TimeoutError('Could not connect to http://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_QUICK/qcmt.ndk')
+    except Exception as e:
+        raise TimeoutError('Could not connect to http://www.ldeo.columbia.edu/~gcmt/projects/CMT/'
+                           'catalog/NEW_QUICK/qcmt.ndk\n{}'.format(e))
 
     html = str(response.read())
-    find_re = re.compile(r'[A-Z]+\s\d+/\d+/\d+\s.+?\\n', re.DOTALL)
     with open(inlog, 'r') as fid_old:
         all_old_log = fid_old.readlines()
     old_log = all_old_log[-1]
@@ -30,24 +46,11 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
         fid_new = open(outlog, 'a+')
 
     print('Writing station info to ' + outlog)
-    for info in find_re.findall(html):
-        year = int(info.split()[1].split('/')[0])
-        mon = int(info.split()[1].split('/')[1])
-        day = int(info.split()[1].split('/')[2])
-        hour = int(info.split()[2].split(':')[0])
-        min = int(info.split()[2].split(':')[1])
-        sec = float(info.split()[2].split(':')[2])
-        sec = round(sec)
-        if sec == 60:
-            sec = 59
-        lat = float(info.split()[3])
-        lon = float(info.split()[4])
-        dep = info.split()[5]
-        mw = info.split()[7]
-        evt_time = datetime(year, mon, day, hour, min, sec)
+    for year, mon, day, hour, min, sec, lat, lon, dep, mw in ndkparse(html):
+        evt_time = datetime(year, mon, day, hour, min, int(sec))
         if old_time_end < evt_time:
             fid_new.write('%d %d %d %s %d %d %d %6.2f %6.2f %s %s\n' % (
-            year, mon, day, evt_time.strftime('%j'), hour, min, sec, lat, lon, dep, mw))
+            year, mon, day, evt_time.strftime('%j'), hour, min, int(sec), lat, lon, dep, mw))
     fid_new.close()
 
 
@@ -61,4 +64,9 @@ def main():
 
 
 if __name__ == '__main__':
-    pass
+    url = 'http://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_QUICK/qcmt.ndk'
+    response = rq.urlopen(url)
+    html = str(response.read())
+    ndk_lst = ndkparse(html)
+    for year, mon, day, hour, min, sec, lat, lon, dep, mw in ndk_lst:
+        print(datetime(year, mon, day, hour, min, int(sec)))
