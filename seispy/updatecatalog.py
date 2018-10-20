@@ -8,6 +8,7 @@ import os
 
 
 def convertinfo(info):
+    print(info)
     if info[5] == '60.0':
         sec = 59
     else:
@@ -63,10 +64,21 @@ def main():
     fetch_cata(inlog=arg.inlog, outlog=arg.outlog)
 
 
+def ndk2dat():
+    parser = argparse.ArgumentParser(description="Convert ndk file to dat catalog")
+    parser.add_argument('-i', help='Input Catalog', dest='inlog',
+                        type=str)
+    parser.add_argument('-o', help='Onput Catalog', dest='outlog', type=str, default='EventCMT.dat')
+    arg = parser.parse_args()
+    with open(arg.inlog) as f:
+        content = f.read()
+    try:
+        log_lst = ndkparse(content)
+    except Exception as e:
+        raise TypeError('Error type for ndk file\n{}'.format(e))
+    with open(arg.outlog, 'w+') as f:
+        f.writelines(log.lst)
+
+
 if __name__ == '__main__':
-    url = 'http://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_QUICK/qcmt.ndk'
-    response = rq.urlopen(url)
-    html = str(response.read())
-    ndk_lst = ndkparse(html)
-    for year, mon, day, hour, min, sec, lat, lon, dep, mw in ndk_lst:
-        print(datetime(year, mon, day, hour, min, int(sec)))
+    ndk2dat()

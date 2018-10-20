@@ -15,7 +15,8 @@ setup(name='seispy',
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'rf2depth=seispy.rf2depth_makedata:rf2depth',
                                         'plotrt=seispy.plotRT:main',
-                                        'updatecatalog=seispy.updatecatalog:main']},
+                                        'updatecatalog=seispy.updatecatalog:main',
+                                        'ndk2dat=seispy.updatecatalog:ndk2dat']},
       include_package_data=True,
       zip_safe=False
       )
