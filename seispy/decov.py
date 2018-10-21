@@ -37,7 +37,7 @@ def correl(R, W, nfft):
 def phaseshift(x, nfft, DT, TSHIFT):
     Xf = fft(x, nfft)
     shift_i = int(TSHIFT / DT)
-    p = 2 * pi * np.arange(1, nfft + 1) * shift_i / (nfft);
+    p = 2 * pi * np.arange(1, nfft + 1) * shift_i / nfft
     Xf = Xf * np.vectorize(complex)(np.cos(p), -np.sin(p))
     x = ifft(Xf, nfft) / np.cos(2 * pi * shift_i / nfft)
     x = x.real

@@ -323,8 +323,14 @@ class rf(object):
 
     def rotate(self, method='NE->RT'):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
-        for _, row in self.eqs.iterrows():
-            row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
+        drop_idx = []
+        for i, row in self.eqs.iterrows():
+            try:
+                row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
+            except Exception as e:
+                self.logger.RFlog.error('{}'.format(e))
+                drop_idx.append(i)
+        self.eqs.drop(drop_idx, inplace=True)
 
     def drop_eq_snr(self, length=50):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
@@ -340,8 +346,27 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
 
-    def deconv(self, criterion='crust', itmax=400, minderr=0.001):
+    def deconv(self, itmax=400, minderr=0.001):
+        if self.para.phase == 'P':
+            shift = self.para.time_before
+        elif self.para.phase == 'S':
+            shift = self.para.time_after
+        else:
+            pass
         drop_lst = []
+
+        for i, row in self.eqs.iterrows():
+            try:
+                row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
+                                    only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
+                self.logger.RFlog.info('Iterative Decon {0} iterations: {1}; final RMS: {2}'.format(
+                    row['data'].datastr, row['data'].it, row['data'].rms[-1]))
+            except Exception as e:
+                self.logger.RFlog.error('{}: {}'.format(row['data'].datastr, e))
+                drop_lst.append(i)
+        self.eqs.drop(drop_lst, inplace=True)
+
+    def saverf(self, criterion='crust'):
         if self.para.phase == 'P':
             shift = self.para.time_before
         elif self.para.phase == 'S':
@@ -349,21 +374,17 @@ class rf(object):
             criterion = None
         else:
             pass
+        drop_lst = []
 
+        self.logger.RFlog.info('Save RFs with criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
-            row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
-                                    only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
-            if not row['data'].judge_rf(self.para.time_before, criterion=criterion):
-                drop_lst.append(i)
-                continue
-            else:
-                self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
-                                       ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
-                                                                row['data'].rms[-1]))
+            if row['data'].judge_rf(shift, criterion=criterion):
                 row['data'].saverf(self.para.rfpath, phase=self.para.phase, shift=shift,
-                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'], mag=row['mag'],
-                                   gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
-        self.eqs.drop(drop_lst, inplace=True)
+                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
+                                   mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
+            else:
+                drop_lst.append(i)
+        self.eqs.drop(drop_lst)
 
 
 def InitRfProj(cfg_path):
@@ -409,6 +430,7 @@ def rf_test():
     # '''
 
     rfproj.deconv()
+    rfproj.saverf()
 
 
 def srf_test():
