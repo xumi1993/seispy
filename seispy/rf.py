@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import obspy
+from obspy.io.sac import SACTrace
 import re
 import io
 from os.path import dirname, join, expanduser, exists
@@ -78,8 +79,8 @@ def load_station_info(pathname, ref_comp, suffix):
         ex_sac = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))[0]
     except Exception:
         raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
-    ex_tr = obspy.read(ex_sac)[0]
-    return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo, ex_tr.stats.sac.stel
+    ex_tr = SACTrace.read(ex_sac, headonly=True)
+    return ex_tr.knetwk, ex_tr.kstnm, ex_tr.stla, ex_tr.stlo, ex_tr.stel
 
 
 def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=None,
@@ -89,17 +90,28 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
     sac_files = []
     for ref_sac in ref_eqs:
         datestr = re.findall(pattern, ref_sac)[0]
-        try:
-            tr = obspy.read(ref_sac)[0]
-        except TypeError:
-            continue
-        if offset is None:
-            this_offset = tr.stats.sac.o
-        elif isinstance(offset, (int, float)):
-            this_offset = -offset
+        if isinstance(offset, (int, float)):
+            sac_files.append([datestr, obspy.UTCDateTime.strptime(datestr, dateformat), -offset])
+        elif offset is None:
+            try:
+                tr = obspy.read(ref_sac)[0]
+            except TypeError:
+                continue
+            sac_files.append([datestr, tr.stats.starttime, tr.stats.sac.o])
         else:
             raise TypeError('offset should be int or float type')
-        sac_files.append([datestr, tr.stats.starttime, this_offset])
+
+        # try:
+        #     tr = obspy.read(ref_sac)[0]
+        # except TypeError:
+        #     continue
+        # if offset is None:
+        #     this_offset = tr.stats.sac.o
+        # elif isinstance(offset, (int, float)):
+        #     this_offset = -offset
+        # else:
+        #     raise TypeError('offset should be int or float type')
+        # sac_files.append([datestr, tr.stats.starttime, this_offset])
     new_col = ['dis', 'bazi', 'data']
     eq_match = pd.DataFrame(columns=new_col)
     for datestr, b_time, offs in sac_files:

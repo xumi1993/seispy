@@ -11,15 +11,17 @@ class setuplog(object):
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
         self.RFlog = logging.getLogger('RF')
-        self.RFlog.setLevel(logging.INFO)
-        self.RFlog.removeHandler(ch)
-        self.RFlog.addHandler(ch)
+        if not self.RFlog.handlers:
+            self.RFlog.setLevel(logging.INFO)
+            # self.RFlog.removeHandler(ch)
+            self.RFlog.addHandler(ch)
         self.Batlog = logging.getLogger('Bat')
-        self.Batlog.setLevel(logging.INFO)
-        self.Batlog.removeHandler(ch)
-        self.Batlog.removeHandler(fh)
-        self.Batlog.addHandler(ch)
-        self.Batlog.addHandler(fh)
+        if not self.Batlog.handlers:
+            self.Batlog.setLevel(logging.INFO)
+            # self.Batlog.removeHandler(ch)
+            # self.Batlog.removeHandler(fh)
+            self.Batlog.addHandler(ch)
+            self.Batlog.addHandler(fh)
 
 
 if __name__ == '__main__':
