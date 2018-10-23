@@ -1,4 +1,3 @@
-import obspy
 import pandas as pd
 from obspy import UTCDateTime
 from obspy.clients.fdsn import Client
