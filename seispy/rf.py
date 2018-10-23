@@ -12,8 +12,6 @@ import glob
 from datetime import timedelta, datetime
 import pandas as pd
 from obspy.taup import TauPyModel
-# import deepdish as dd
-import urllib.request as rq
 import configparser
 
 
