@@ -455,7 +455,6 @@ def srf_test():
     rfproj.drop_eq_snr(length=50)
     rfproj.trim()
     rfproj.rotate(method='ZNE->LQT')
-    rfproj.save(proj_file)
     # '''
 
     rfproj.deconv()
