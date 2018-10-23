@@ -1,10 +1,23 @@
 import numpy as np
 import obspy
 from obspy.io.sac import SACTrace
-from obspy.signal.rotate import rotate_zne_lqt
+from obspy.signal.rotate import rotate2zne, rotate_zne_lqt
 from scipy.signal import resample
 from os.path import dirname, join, expanduser
 import seispy
+
+
+def rotateZNE(st):
+    try:
+        zne = rotate2zne(
+            st[0], st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc,
+            st[1], st[1].stats.sac.cmpaz, st[1].stats.sac.cmpinc,
+            st[2], st[2].stats.sac.cmpaz, st[2].stats.sac.cmpinc)
+    except Exception as e:
+        raise ValueError('No specified cmpaz or cmpinc. {}'.format(e))
+    for tr, new_data, component in zip(st, zne, "ZNE"):
+        tr.data = new_data
+        tr.stats.channel = tr.stats.channel[:-1] + component
 
 
 class eq(object):
@@ -91,6 +104,15 @@ class eq(object):
 
         if inv is not None:
             self.rf.rotate('->ZNE', inventory=inv)
+        elif self.rf.select(channel='*1'):
+            if self.rf.select(channel='*1')[0].stats.sac.cmpaz == 0:
+                self.rf.select(channel='*1')[0].stats.channel = self.rf.select(channel='*1')[0].stats.channel[:-1] + 'N'
+                self.rf.select(channel='*2')[0].stats.channel = self.rf.select(channel='*2')[0].stats.channel[:-1] + 'E'
+            elif self.rf.select(channel='*1')[0].stats.sac.cmpaz != 0:
+                rotateZNE(self.rf)
+            self.rf.sort(['channel'])
+        else:
+            pass
 
         if method == 'NE->RT':
             self.rf.rotate('NE->RT', back_azimuth=bazi)
@@ -180,7 +202,7 @@ class eq(object):
                     # tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
 
     def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
-               gauss=0, baz=-12345., gcarc=-12345., only_r=False):
+               gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
         if phase == 'P':
             if only_r:
                 loop_lst = [1]
@@ -195,19 +217,15 @@ class eq(object):
 
         filename = join(path, self.datastr)
         for i in loop_lst:
+            header = {'evla': evla, 'evlo': evlo, 'evdp': evdp, 'mag': mag, 'baz': baz,
+                      'gcarc': gcarc, 'user0': rayp, 'kuser0': 'Ray Para', 'user1': gauss, 'kuser1': 'G factor'}
+            for key in kwargs:
+                header[key] = kwargs[key]
+            for key, value in header.items():
+                self.rf[i].stats['sac'][key] = value
             tr = SACTrace.from_obspy_trace(self.rf[i])
             tr.b = -shift
             tr.o = 0
-            tr.evla = evla
-            tr.evlo = evlo
-            tr.evdp = evdp
-            tr.mag = mag
-            tr.baz = baz
-            tr.gcarc = gcarc
-            tr.user0 = rayp
-            tr.kuser0 = 'Ray para'
-            tr.user1 = gauss
-            tr.kuser1 = 'G fator'
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
     def judge_rf(self, shift, criterion='crust'):
@@ -229,11 +247,11 @@ class eq(object):
             else:
                 return False
         elif criterion == 'mtz':
-            max_deep = np.max(np.abs(self.rf[1].data[int((25 + shift) / self.rf[1].stats.delta):]))
-            time_P1 = int(np.floor((-2 + shift) / self.rf[1].stats.delta))
-            time_P2 = int(np.floor((2 + shift) / self.rf[1].stats.delta))
+            max_deep = np.max(np.abs(self.rf[1].data[int((30 + shift) / self.rf[1].stats.delta):]))
+            time_P1 = int(np.floor((-5 + shift) / self.rf[1].stats.delta))
+            time_P2 = int(np.floor((5 + shift) / self.rf[1].stats.delta))
             max_P = np.max(self.rf[1].data[time_P1:time_P2])
-            if self.rms[-1] < 0.2 and max_deep < max_P * 0.3 and \
+            if self.rms[-1] < 0.4 and max_deep < max_P * 0.4 and \
                   max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
                 return True
             else:

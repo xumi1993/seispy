@@ -40,12 +40,7 @@ class para(object):
         if not isinstance(value, str):
             raise TypeError('datapath should be \'str\' type not \'{0}\''.format(type(value)))
         elif not exists(value):
-            try:
-                os.makedirs(value)
-            except Exception as e:
-                Warning('Cannot create datapath of {0}'.format(value))
-            finally:
-                self._datapath = value
+                raise FileExistsError('No such find data path of {0}'.format(value))
         else:
             self._datapath = value
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import obspy
+from obspy.io.sac import SACTrace
 import re
 from seispy.io import wsfetch
 from os.path import dirname, join, expanduser, exists
@@ -52,8 +53,8 @@ def load_station_info(pathname, ref_comp, suffix):
         ex_sac = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))[0]
     except Exception:
         raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
-    ex_tr = obspy.read(ex_sac)[0]
-    return ex_tr.stats.network, ex_tr.stats.station, ex_tr.stats.sac.stla, ex_tr.stats.sac.stlo, ex_tr.stats.sac.stel
+    ex_tr = SACTrace.read(ex_sac, headonly=True)
+    return ex_tr.knetwk, ex_tr.kstnm, ex_tr.stla, ex_tr.stlo, ex_tr.stel
 
 
 def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=None,
@@ -63,17 +64,28 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
     sac_files = []
     for ref_sac in ref_eqs:
         datestr = re.findall(pattern, ref_sac)[0]
-        try:
-            tr = obspy.read(ref_sac)[0]
-        except TypeError:
-            continue
-        if offset is None:
-            this_offset = tr.stats.sac.o
-        elif isinstance(offset, (int, float)):
-            this_offset = -offset
+        if isinstance(offset, (int, float)):
+            sac_files.append([datestr, obspy.UTCDateTime.strptime(datestr, dateformat), -offset])
+        elif offset is None:
+            try:
+                tr = obspy.read(ref_sac)[0]
+            except TypeError:
+                continue
+            sac_files.append([datestr, tr.stats.starttime, tr.stats.sac.o])
         else:
             raise TypeError('offset should be int or float type')
-        sac_files.append([datestr, tr.stats.starttime, this_offset])
+
+        # try:
+        #     tr = obspy.read(ref_sac)[0]
+        # except TypeError:
+        #     continue
+        # if offset is None:
+        #     this_offset = tr.stats.sac.o
+        # elif isinstance(offset, (int, float)):
+        #     this_offset = -offset
+        # else:
+        #     raise TypeError('offset should be int or float type')
+        # sac_files.append([datestr, tr.stats.starttime, this_offset])
     new_col = ['dis', 'bazi', 'data']
     eq_match = pd.DataFrame(columns=new_col)
     for datestr, b_time, offs in sac_files:
@@ -298,8 +310,14 @@ class rf(object):
 
     def rotate(self, method='NE->RT'):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
-        for _, row in self.eqs.iterrows():
-            row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
+        drop_idx = []
+        for i, row in self.eqs.iterrows():
+            try:
+                row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
+            except Exception as e:
+                self.logger.RFlog.error('{}'.format(e))
+                drop_idx.append(i)
+        self.eqs.drop(drop_idx, inplace=True)
 
     def drop_eq_snr(self, length=50):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
@@ -315,8 +333,27 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
 
-    def deconv(self, criterion='crust', itmax=400, minderr=0.001):
+    def deconv(self, itmax=400, minderr=0.001):
+        if self.para.phase == 'P':
+            shift = self.para.time_before
+        elif self.para.phase == 'S':
+            shift = self.para.time_after
+        else:
+            pass
         drop_lst = []
+
+        for i, row in self.eqs.iterrows():
+            try:
+                row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
+                                    only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
+                self.logger.RFlog.info('Iterative Decon {0} iterations: {1}; final RMS: {2}'.format(
+                    row['data'].datastr, row['data'].it, row['data'].rms[-1]))
+            except Exception as e:
+                self.logger.RFlog.error('{}: {}'.format(row['data'].datastr, e))
+                drop_lst.append(i)
+        self.eqs.drop(drop_lst, inplace=True)
+
+    def saverf(self, criterion='crust'):
         if self.para.phase == 'P':
             shift = self.para.time_before
         elif self.para.phase == 'S':
@@ -324,21 +361,17 @@ class rf(object):
             criterion = None
         else:
             pass
+        drop_lst = []
 
+        self.logger.RFlog.info('Save RFs with criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
-            row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
-                                    only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
-            if not row['data'].judge_rf(self.para.time_before, criterion=criterion):
-                drop_lst.append(i)
-                continue
-            else:
-                self.logger.RFlog.info('Iterative Decon {0} iterations: {1};'
-                                       ' final RMS: {2}'.format(row['data'].datastr, row['data'].it,
-                                                                row['data'].rms[-1]))
+            if row['data'].judge_rf(shift, criterion=criterion):
                 row['data'].saverf(self.para.rfpath, phase=self.para.phase, shift=shift,
-                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'], mag=row['mag'],
-                                   gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
-        self.eqs.drop(drop_lst, inplace=True)
+                                   evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
+                                   mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
+            else:
+                drop_lst.append(i)
+        self.eqs.drop(drop_lst)
 
 
 def InitRfProj(cfg_path):
@@ -384,6 +417,7 @@ def rf_test():
     # '''
 
     rfproj.deconv()
+    rfproj.saverf()
 
 
 def srf_test():
