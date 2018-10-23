@@ -2,7 +2,7 @@
 
 import obspy
 import re
-import io
+from seispy.io import wsfetch
 from os.path import dirname, join, expanduser, exists
 from seispy.para import para
 import seispy
@@ -26,30 +26,6 @@ def datestr2regex(datestr):
     pattern = pattern.replace('%M', r'\d{2}')
     pattern = pattern.replace('%S', r'\d{2}')
     return pattern
-
-
-def get_events(b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
-    starttime = b_time.strftime('%Y-%m-%dT%H:%M:%S')
-    endtime = e_time.strftime('%Y-%m-%dT%H:%M:%S')
-    use_cols = ['Time', 'Latitude', 'Longitude', 'Depth', 'Magnitude']
-    real_cols = ['date', 'evla', 'evlo', 'evdp', 'mag']
-    dateparse = lambda x: obspy.UTCDateTime(datetime.strptime(x, '%Y-%m-%dT%H:%M:%SZ'))
-    url = 'http://service.iris.edu/fdsnws/event/1/query?&starttime={0}' \
-          '&endtime={1}&lat={2}&lon={3}&minradius={4}&' \
-          'maxradius={5}&minmag={6}&maxmag={7}&catalog=GCMT&' \
-          'orderby=time-asc&format=geocsv'.format(starttime, endtime, stla, stlo, dismin, dismax, magmin, magmax)
-    try:
-        response = rq.urlopen(url)
-    except Exception as e:
-        raise ConnectionError('{0}'.format(e))
-    evt_csv = io.StringIO(response.read().decode())
-    df = pd.read_csv(evt_csv, sep='|', comment='#', parse_dates=[0], date_parser=dateparse, usecols=use_cols)
-    # daz = seispy.distaz(stla, stlo, df['Latitude'].values, df['Longitude'].values)
-    # df['dis'] = pd.Series(daz.delta, index=df.index)
-    # df['bazi'] = pd.Series(daz.baz, index=df.index)
-    col_dict = dict(zip(use_cols, real_cols))
-    df.rename(columns=col_dict, inplace=True)
-    return df
 
 
 def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
@@ -239,13 +215,14 @@ class rf(object):
             self.logger.RFlog.error('{0}'.format(e))
             raise e
 
-    def search_eq(self, local=False):
+    def search_eq(self, local=False, server='IRIS'):
         if not local:
             try:
-                self.logger.RFlog.info('Searching earthquakes from IRIS-WS')
-                self.eq_lst = get_events(self.para.date_begin, self.para.date_end, self.stainfo.stla,
-                                         self.stainfo.stlo, magmin=self.para.magmin, magmax=self.para.magmax,
-                                         dismin=self.para.dismin, dismax=self.para.dismax)
+                self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
+                self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
+                                      latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
+                                      minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
+                                      minradius=self.para.dismin, maxradius=self.para.dismax)
             except Exception as e:
                 raise ConnectionError(e)
         else:
@@ -450,12 +427,6 @@ def srf_test():
     # '''
 
     rfproj.deconv()
-
-
-def get_events_test():
-    date_begin = obspy.UTCDateTime('20130101')
-    date_end = obspy.UTCDateTime('20140101')
-    print(get_events(date_begin, date_end, 32.051701, 118.8544))
 
 
 def proj_test():
