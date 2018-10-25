@@ -63,7 +63,10 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
     ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
     sac_files = []
     for ref_sac in ref_eqs:
-        datestr = re.findall(pattern, ref_sac)[0]
+        try:
+            datestr = re.findall(pattern, ref_sac)[0]
+        except IndexError:
+            raise IndexError('Error data format in {}'.format(ref_sac))
         if isinstance(offset, (int, float)):
             sac_files.append([datestr, obspy.UTCDateTime.strptime(datestr, dateformat), -offset])
         elif offset is None:
