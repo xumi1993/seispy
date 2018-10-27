@@ -16,49 +16,57 @@ from matplotlib.widgets import Button
 from operator import itemgetter
 import initopts
 import plotrf
-try:
-    import configparser
-    config = configparser.ConfigParser()
-except:
-    import ConfigParser
-    config = ConfigParser.ConfigParser()
+from seispy.rf import datestr2regex
+import configparser
+
+
+config = configparser.RawConfigParser()
+
 
 def Usage():
-    print("Usage:  python pickrf_R.py -Sstation_name para.cfg")
+    print("Usage:  python pickrf_R.py  para.cfg")
+
 
 def get_sac():
-    if  sys.argv[1:] == []:
+    if not sys.argv[1:]:
         Usage()
         sys.exit(1)
     for o in sys.argv[1:]:
         if os.path.isfile(o):
             head = o
             break
+    ispath = 0
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "S:h")
+        opts, args = getopt.getopt(sys.argv[1:], "D:h")
     except:
         print("invalid argument")
         sys.exit(1)
     for op, value in opts:
-        if op == "-S":
-            staname = value
-        elif op == "-h":
+        if op == "-h":
             Usage()
             sys.exit(1)
+        elif op == "-D":
+            rfpath = value
+            ispath = 1
         else:
             print("invalid argument")
             sys.exit(1)
     config.read(head)
-    image_path = config.get('path', 'image_path')
-    path = config.get('path', 'RF_path')
-    cut_path = config.get('path', 'out_path')
-    path = os.path.join(path, staname)
-    cut_path = os.path.join(cut_path, staname)
+    image_path = config.get('path', 'imagepath')
+    if ispath:
+        path = rfpath
+    else:
+        path = config.get('path', 'rfpath')
+    time_before = config.getint('para', 'time_before') * -1
+    time_after = config.getint('para', 'time_after')
+    path = os.path.join(path)
     files = glob.glob(os.path.join(path, '*_R.sac'))
-    filenames = [re.match('\d{4}\D\d{3}\D\d{2}\D\d{2}\D\d{2}', os.path.basename(fl)).group() for fl in files]
+    pattern = r'\d{4}.*\d{3}.*\d{2}.*\d{2}.*\d{2}'
+    filenames = [re.match(pattern, os.path.basename(fl)).group() for fl in files]
     filenames.sort()
     rffiles = obspy.read(os.path.join(path, '*_R.sac'))
-    return rffiles.sort(['starttime']), filenames, path, image_path, cut_path, staname
+    staname = rffiles[0].stats.network+'.'+rffiles[0].stats.station
+    return rffiles.sort(['starttime']), filenames, path, image_path, staname, time_before, time_after
 
 def indexpags(maxidx, evt_num):
     axpages = int(np.floor(evt_num/maxidx)+1)
@@ -147,7 +155,7 @@ class plotrffig():
                 mag = opts.rffiles[i].stats.sac.mag
                 gauss = opts.rffiles[i].stats.sac.user1
                 fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (evtname, 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
-        shutil.copy(os.path.join(opts.path, opts.staname+"finallist.dat"), os.path.join(opts.cut_path, opts.staname+"finallist.dat"))
+        # shutil.copy(os.path.join(opts.path, opts.staname+"finallist.dat"), os.path.join(opts.cut_path, opts.staname+"finallist.dat"))
         sys.exit(0)
 
     def onclick(self, event):
@@ -253,14 +261,14 @@ class plotrffig():
 def main():
     opts = initopts.opts()
     opts.maxidx = 20
-    opts.enf = 7
+    opts.enf = 6
     opts.xlim = [-2, 80]
     opts.ylim = [0, 22]
-    opts.rffiles, opts.filenames, opts.path, opts.image_path, opts.cut_path, opts.staname = get_sac()
+    opts.rffiles, opts.filenames, opts.path, opts.image_path, opts.staname, opts.b, opts.e = get_sac()
     opts.evt_num = len(opts.rffiles)
     rf = opts.rffiles[0]
-    opts.b = rf.stats.sac.b
-    opts.e = rf.stats.sac.e
+    # opts.b = rf.stats.sac.b
+    # opts.e = rf.stats.sac.e
     opts.stla = rf.stats.sac.stla
     opts.stlo = rf.stats.sac.stlo
     opts.RFlength = rf.data.shape[0]
