@@ -5,6 +5,7 @@ import subprocess
 import argparse
 import sys
 
+
 class PsRayp(object):
     def __init__(self, dis, dep, laymin=0, laymax=800):
         self.dis = dis
@@ -59,8 +60,8 @@ class PsRayp(object):
 
 def gen_rayp_lib():
     parser = argparse.ArgumentParser(description="Gen a ray parameter lib for Pds phases")
-    parser.add_argument('-d', help='Distance range as \'min_dis/max_dis/interval\'', dest='dis_str', type=str)
-    parser.add_argument('-e', help='Event depth range as \'min_dep/max_dep/interval\'', dest='dep_str', type=str)
+    parser.add_argument('-d', help='Distance range as \'min_dis/max_dis/interval\'', required=True, dest='dis_str', type=str)
+    parser.add_argument('-e', help='Event depth range as \'min_dep/max_dep/interval\'', required=True, dest='dep_str', type=str)
     parser.add_argument('-l', help='layers range as \'min_layer/man_layer\'', dest='lay_str', type=str, default='0/800')
     parser.add_argument('-o', help='Out path to Pds ray parameter lib', type=str, default='./Ps_rayp', dest='out_path')
 
@@ -90,7 +91,7 @@ def get_psrayp(rayp_lib, dis, dep, layers):
 
 if __name__ == '__main__':
     layers = np.arange(11, 300)
-    dep = np.arange(0, 300, 0.5)
+    dep = np.arange(0, 600, 2)
     dis = np.arange(30, 90)
     rayp_path = '/Users/xumj/Researches/Ps_rayp.npz'
     rayp_lib = np.load(rayp_path)
