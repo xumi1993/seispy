@@ -39,7 +39,7 @@ class InstabilityWarning(UserWarning):
 warnings.simplefilter('always', InstabilityWarning)
 
 
-def ci(data, statfunction=None, alpha=0.05, n_samples=10000,
+def ci(data, statfunction=np.average, alpha=0.05, n_samples=10000,
        method='bca', output='lowhigh', epsilon=0.001, multi=None,
        _iter=True):
     """
