@@ -92,7 +92,7 @@ def ccppara(cfg_file):
     dep_start = cf.getfloat('depth', 'dep_start')
     dep_end = cf.getfloat('depth', 'dep_end')
     cpara.dep_val = cf.getfloat('depth', 'dep_val')
-    cpara.depth_axis = np.append(np.arange(dep_start, dep_end, cpara.dep_val), dep_end)
+    cpara.depth_axis = np.append(np.arange(0, dep_end, cpara.dep_val), dep_end)
 
     stack_start = cf.getfloat('stack', 'stack_start')
     stack_end = cf.getfloat('stack', 'stack_end')

@@ -196,10 +196,10 @@ class eq(object):
                                                          f0, itmax, minderr)
         if target_dt is not None:
             if self.rf[0].stats.delta != target_dt:
-                self.rf.resample(1 / target_dt)
+                # self.rf.resample(1 / target_dt)
                 for tr in self.rf:
-                    tr.data = tr.data[0:-1]
-                    # tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
+                    # tr.data = tr.data[0:-1]
+                    tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
 
     def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):

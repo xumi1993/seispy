@@ -86,7 +86,8 @@ def get_psrayp(rayp_lib, dis, dep, layers):
     x_layers = np.zeros([len(layers), 3])
     for i in range(len(layers)):
         x_layers[i] = np.array([dis, dep, layers[i]])
-    return interpn((rayp_lib['dis'], rayp_lib['dep'], rayp_lib['layers']), rayp_lib['rayp'], x_layers, fill_value=None)
+    return interpn((rayp_lib['dis'], rayp_lib['dep'], rayp_lib['layers']), rayp_lib['rayp'], x_layers,
+                   bounds_error=False, fill_value=None)
 
 
 if __name__ == '__main__':

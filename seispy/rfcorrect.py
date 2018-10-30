@@ -17,11 +17,11 @@ class SACStation(object):
         dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
-            np.loadtxt(evt_lst, dtype=dtype, unpack=True)
+            np.loadtxt(evt_lst, dtype=dtype, unpack=True, ndmin=1)
         # self.event = [datestr.decode() for datestr in self.event]
         # self.phase = [ph.decode() for ph in self.phase]
         self.rayp = skm2srad(self.rayp)
-        self.ev_num = len(self.event)
+        self.ev_num = self.evla.shape[0]
         sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
         self.RFlength = sample_sac.npts
         self.shift = -sample_sac.b
