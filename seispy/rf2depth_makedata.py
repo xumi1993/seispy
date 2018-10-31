@@ -49,15 +49,15 @@ def makedata(cpara, use_rayp_lib=True):
                                              srayp=srayp)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
-                                                     stadatar.bazi[j], deg2km(rad2deg(x_s[j])))
+                                                     stadatar.bazi[j], rad2deg(x_s[j]))
         rfdep['Station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]
         rfdep['stalon'] = sta_info.stlo[i]
-        rfdep['Depthrange'] = cpara.depth_axis
-        rfdep['events'] = _convert_str_mat(stadatar.event)
+        # rfdep['Depthrange'] = cpara.depth_axis
+        # rfdep['events'] = _convert_str_mat(stadatar.event)
         rfdep['bazi'] = stadatar.bazi
         rfdep['rayp'] = stadatar.rayp
-        rfdep['phases'] = _convert_str_mat(stadatar.phase)
+        # rfdep['phases'] = _convert_str_mat(stadatar.phase)
         rfdep['moveout_correct'] = PS_RFdepth.T
         rfdep['Piercelat'] = piercelat.T
         rfdep['Piercelon'] = piercelon.T
