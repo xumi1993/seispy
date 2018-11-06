@@ -21,7 +21,7 @@ def initgrid(lat1, lon1, lat2, lon2, val):
     return bin_loca
 
 
-def search_pierce(rfdep, depaxis, bin_loca, bin_radius=100):
+def search_pierce(rfdep, depaxis, bin_loca, bin_radius=50):
     bin_radius = km2deg(bin_radius)
     data = np.zeros((bin_loca.shape[0], depaxis.shape[0]), dtype='O')
     for i in range(bin_loca.shape[0]):
@@ -70,9 +70,10 @@ if __name__ == '__main__':
     lat2 = 39
     lon2 = 101
     bin_loca = initgrid(lat1, lon1, lat2, lon2, 0.5)
-    # rfdep = np.load('/Volumes/xumj3/TibetRF/RFdepth_1D.npy')
+    rfdep = np.load('/Users/xumj/Researches/Tibet_MTZ/RFdepth_1D.npy')
     depaxis = np.arange(300, 800)
     # data = search_pierce(rfdep, depaxis, bin_loca)
-    ccp_data = loadmat('/Users/xumj/Researches/Tibet_MTZ/ccp_data.mat')['ccp_data']
+    # savemat('/Users/xumj/Researches/Tibet_MTZ/ccp_data_0.5.mat', {'ccp_data': data})
+    ccp_data = loadmat('/Users/xumj/Researches/Tibet_MTZ/ccp_data_0.5.mat')['ccp_data']
     stack_data = boot_stack(ccp_data, bin_loca, depaxis)
-    np.save('/Users/xumj/Researches/Tibet_MTZ/ccp_results/stack_data', stack_data)
+    np.save('/Users/xumj/Researches/Tibet_MTZ/ccp_results/stack_data_0.5', stack_data)

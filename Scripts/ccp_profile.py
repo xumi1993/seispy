@@ -52,12 +52,12 @@ def search_pierce(rfdep, depaxis, bin_loca, profile_range, bin_radius=75):
 
 
 if __name__ == '__main__':
-    lat1 = 35.8
-    lon1 = 85.3
-    lat2 = 25.5
-    lon2 = 88
+    lat1 = 37.8
+    lon1 = 96
+    lat2 = 25.8
+    lon2 = 92
     bin_loca, profile_range = init_profile(lat1, lon1, lat2, lon2, 25)
     rfdep = np.load('/Users/xumj/Researches/Tibet_MTZ/RFdepth_1D.npy')
     depaxis = np.arange(300, 800)
     ccp_data = search_pierce(rfdep, depaxis, bin_loca, profile_range)
-    np.save('/Users/xumj/Researches/Tibet_MTZ/ccp_A', ccp_data)
+    np.save('/Users/xumj/Researches/Tibet_MTZ/ccp_B', ccp_data)
