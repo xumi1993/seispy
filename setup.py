@@ -17,7 +17,8 @@ setup(name='seispy',
                                         'plotrt=seispy.plotRT:main',
                                         'plotr=seispy.plotR:main',
                                         'updatecatalog=seispy.updatecatalog:main',
-                                        'ndk2dat=seispy.updatecatalog:ndk2dat']},
+                                        'ndk2dat=seispy.updatecatalog:ndk2dat',
+                                        'lsnc=seispy.io:lsnc']},
       include_package_data=True,
       zip_safe=False
       )

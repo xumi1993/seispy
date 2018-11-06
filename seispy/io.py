@@ -1,6 +1,10 @@
 import pandas as pd
 from obspy import UTCDateTime
+import numpy as np
+import argparse
 from obspy.clients.fdsn import Client
+from netCDF4 import Dataset
+import sys
 
 
 def _cat2df(cat):
@@ -28,5 +32,34 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
     return cat_df
 
 
+def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, maxdep=6371, key='dvs'):
+    lat = ncdata.variables['latitude'][:].data
+    lon = ncdata.variables['longitude'][:].data
+    dep = ncdata.variables['depth'][:].data
+    data = ncdata.variables[key][:].data
+    idx_lat = np.where((lat > minlat) & (lat < maxlat))[0]
+    idx_lon = np.where((lon > minlon) & (lon < maxlon))[0]
+    idx_dep = np.where((dep > mindep) & (dep < maxdep))[0]
+    cut_data = data[idx_dep[0]:idx_dep[-1]+1, idx_lat[0]:idx_lat[-1]+1, idx_lon[0]:idx_lon[-1]+1]
+    cut_lat = lat[idx_lat]
+    cut_lon = lon[idx_lon]
+    cut_dep = lat[idx_dep]
+    new_lat, new_dep, new_lon = np.meshgrid(cut_lat, cut_dep, cut_lon)
+    return cut_data, new_lat, new_dep, new_lon
+
+
+def lsnc():
+    parser = argparse.ArgumentParser(description="List all fields of netCDF file")
+    parser.add_argument('ncfile', type=str, help='Path to netCDF file')
+    arg = parser.parse_args()
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
+    ncdata = Dataset(arg.ncfile)
+    print(ncdata.variables)
+
+
 if __name__ == '__main__':
-    wsfetch('IRIS', starttime=UTCDateTime(2018,10,20))
+    ncfile = '/workspace/Tibet_MTZ/models/3D2017-09Sv-depth.nc'
+    ncdata = Dataset(ncfile)
+    nc2npz(ncdata, minlat=22, maxlat=40, minlon=80, maxlon=105, maxdep=900)
