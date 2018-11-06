@@ -44,8 +44,8 @@ def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, max
     cut_lat = lat[idx_lat]
     cut_lon = lon[idx_lon]
     cut_dep = lat[idx_dep]
-    new_lat, new_dep, new_lon = np.meshgrid(cut_lat, cut_dep, cut_lon)
-    return cut_data, new_lat, new_dep, new_lon
+    # new_lat, new_dep, new_lon = np.meshgrid(cut_lat, cut_dep, cut_lon)
+    return cut_data, cut_lat, cut_lon, cut_dep
 
 
 def lsnc():
