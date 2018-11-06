@@ -30,7 +30,7 @@ py37:
   script:
   - conda create -n testenv37 python=3.7
   - source activate testenv37
-  - conda install obspy pandas pytz
+  - conda install obspy pandas pytz netCDF4
   - python setup.py install
   - cd test/testcase01
   - python testcase01.py
