@@ -89,7 +89,6 @@ def ccppara(cfg_file):
     cpara.slid_val = cf.getfloat('line', 'slid_val')
     cpara.line = np.array([[lat1, lon1], [lat2, lon2]])
     # para for depth section
-    dep_start = cf.getfloat('depth', 'dep_start')
     dep_end = cf.getfloat('depth', 'dep_end')
     cpara.dep_val = cf.getfloat('depth', 'dep_val')
     cpara.depth_axis = np.append(np.arange(0, dep_end, cpara.dep_val), dep_end)
