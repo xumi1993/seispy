@@ -10,6 +10,10 @@ class setuplog(object):
         formatter = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s')
         fh.setFormatter(formatter)
         ch.setFormatter(formatter)
+        self.RF2depthlog = logging.getLogger('RF2depth')
+        if not self.RF2depthlog.handlers:
+            self.RF2depthlog.setLevel(logging.INFO)
+            self.RF2depthlog.addHandler(ch)
         self.RFlog = logging.getLogger('RF')
         if not self.RFlog.handlers:
             self.RFlog.setLevel(logging.INFO)

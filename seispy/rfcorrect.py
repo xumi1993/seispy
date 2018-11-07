@@ -1,8 +1,8 @@
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, interpn
 from os.path import dirname, join, exists
-from seispy.geo import skm2srad, sdeg2skm
+from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from
 from seispy.psrayp import get_psrayp
 import matplotlib.pyplot as plt
 
@@ -43,14 +43,21 @@ class SACStation(object):
 class DepModel(object):
     def __init__(self, YAxisRange, velmod='iasp91'):
         VelocityModel = np.loadtxt(from_file(velmod))
-        Depths = VelocityModel[:, 0]
-        Vp = VelocityModel[:, 1]
-        Vs = VelocityModel[:, 2]
-        self.vp = interp1d(Depths, Vp)(YAxisRange)
-        self.vs = interp1d(Depths, Vs)(YAxisRange)
+        self.depthsraw = VelocityModel[:, 0]
+        self.vpraw = VelocityModel[:, 1]
+        self.vsraw = VelocityModel[:, 2]
+        self.vp = interp1d(self.depthsraw, self.vpraw)(YAxisRange)
+        self.vs = interp1d(self.depthsraw, self.vsraw)(YAxisRange)
         self.depths = YAxisRange
         self.dz = np.append(0, np.diff(self.depths))
         self.R = 6371 - self.depths
+
+
+def _imag2nan(arr):
+    StopIndex = np.where(np.imag(arr) == 1)[0]
+    if StopIndex.size != 0:
+        arr[StopIndex[0]:] = np.nan
+    return arr
 
 
 def from_file(mode_name):
@@ -184,22 +191,141 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod='iasp91', srayp=Non
     return PS_RFdepth, EndIndex, x_s, x_p
 
 
+def psrf_1D_raytracing(stla, stlo, stadatar, YAxisRange, velmod='iasp91', srayp=None):
+    dep_mod = DepModel(YAxisRange, velmod)
+
+    # x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    raylength_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    pplat_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    pplon_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    # x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    raylength_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    pplat_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    pplon_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    Tpds = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    if srayp is None:
+        for i in range(stadatar.ev_num):
+            x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (stadatar.rayp[i] ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
+            raylength_s[i] = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vs) ** 2) - (stadatar.rayp[i] ** 2)) * dep_mod.vs)
+            x_p = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (stadatar.rayp[i] ** 2. * (dep_mod.R / dep_mod.vp) ** -2)) - 1))
+            raylength_p[i] = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vp) ** 2) - (stadatar.rayp[i] ** 2)) * dep_mod.vp)
+            Tpds[i] = np.cumsum((np.sqrt((dep_mod.R / dep_mod.vs) ** 2 - stadatar.rayp[i] ** 2) -
+                                 np.sqrt((dep_mod.R / dep_mod.vp) ** 2 - stadatar.rayp[i] ** 2)) * (dep_mod.dz / dep_mod.R))
+            pplat_s[i], pplon_s[i] = latlon_from(stla, stlo, stadatar.bazi[i], rad2deg(x_s))
+            pplat_p[i], pplon_p[i] = latlon_from(stla, stlo, stadatar.bazi[i], rad2deg(x_p))
+    elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
+        if isinstance(srayp, str):
+            if not exists(srayp):
+                raise FileNotFoundError('Ps rayp lib file not found')
+            else:
+                rayp_lib = np.load(srayp)
+        else:
+            rayp_lib = srayp
+        for i in range(stadatar.ev_num):
+            rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths)
+            rayp = skm2srad(sdeg2skm(rayp))
+            x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (rayp ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
+            raylength_s[i] = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vs) ** 2) - (rayp ** 2)) * dep_mod.vs)
+            x_p = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (stadatar.rayp[i] ** 2. * (dep_mod.R / dep_mod.vp) ** -2)) - 1))
+            raylength_p[i] = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vp) ** 2) - (stadatar.rayp[i] ** 2)) * dep_mod.vp)
+            Tpds[i] = np.cumsum((np.sqrt((dep_mod.R / dep_mod.vs) ** 2 - rayp ** 2) -
+                                 np.sqrt((dep_mod.R / dep_mod.vp) ** 2 - stadatar.rayp[i] ** 2)) * (dep_mod.dz / dep_mod.R))
+            x_s = _imag2nan(x_s)
+            x_p = _imag2nan(x_p)
+            pplat_s[i], pplon_s[i] = latlon_from(stla, stlo, stadatar.bazi[i], rad2deg(x_s))
+            pplat_p[i], pplon_p[i] = latlon_from(stla, stlo, stadatar.bazi[i], rad2deg(x_p))
+    else:
+        raise TypeError('srayp should be path to Ps rayp lib')
+    return pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds
+
+
+class Mod3DPerturbation:
+    def __init__(self, modpath, YAxisRange, velmod='iasp91'):
+        dep_mod = DepModel(YAxisRange, velmod=velmod)
+        self.model = np.load(modpath)
+        new1dvp = interp1d(dep_mod.depthsraw, dep_mod.vpraw)(self.model['dep'])
+        new1dvs = interp1d(dep_mod.depthsraw, dep_mod.vsraw)(self.model['dep'])
+        new1dvp, _, _ = np.meshgrid(new1dvp, self.model['lat'], self.model['lon'], indexing='ij')
+        new1dvs, _, _ = np.meshgrid(new1dvs, self.model['lat'], self.model['lon'], indexing='ij')
+        self.dvp = (self.model['vp'] - new1dvp) / new1dvp
+        self.dvs = (self.model['vs'] - new1dvs) / new1dvs
+        self.cvp = dep_mod.vp
+        self.cvs = dep_mod.vs
+
+    def interpdvp(self, points):
+        dvp = interpn((self.model['dep'], self.model['lat'], self.model['lon']), self.dvp, points,
+                      bounds_error=False, fill_value=None)
+        return dvp
+
+    def interpdvs(self, points):
+        dvs = interpn((self.model['dep'], self.model['lat'], self.model['lon']), self.dvs, points,
+                      bounds_error=False, fill_value=None)
+        return dvs
+
+
+def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, YAxisRange, mod3d):
+    ev_num, rfdepth = raylength_p.shape
+    timecorrections = np.zeros_like(raylength_p)
+    for i in range(ev_num):
+        points = np.array([YAxisRange, pplat_p[i], pplon_p[i]]).T
+        dvp = mod3d.interpdvp(points)
+        points = np.array([YAxisRange, pplat_s[i], pplon_s[i]]).T
+        dvs = mod3d.interpdvs(points)
+        dlp = raylength_p[i]
+        dls = raylength_s[i]
+        tmpds = (dls / (mod3d.cvs * (1 + dvs)) - dls / mod3d.cvs) - (dlp / (mod3d.cvp * (1 + dvp)) - dlp / mod3d.cvp)
+        tmpds[np.isnan(tmpds)] = 0
+        timecorrections[i] = np.cumsum(tmpds)
+    return Tpds + timecorrections
+
+
+def time2depth(stadatar, YAxisRange, Tpds):
+    time_axis = np.arange(0, stadatar.RFlength) * stadatar.sampling - stadatar.shift
+    PS_RFdepth = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    EndIndex = np.zeros(stadatar.ev_num)
+    for i in range(stadatar.ev_num):
+        TempTpds = Tpds[i, :]
+        StopIndex = np.where(np.imag(TempTpds) == 1)[0]
+        if StopIndex.size == 0:
+            EndIndex[i] = YAxisRange.shape[0]
+            DepthAxis = interp1d(TempTpds, YAxisRange, bounds_error=False)(time_axis)
+        else:
+            EndIndex[i] = StopIndex[0] - 1
+            DepthAxis = interp1d(TempTpds[0:StopIndex], YAxisRange[0: StopIndex], bounds_error=False)(time_axis)
+
+        PS_RFTempAmps = stadatar.datar[i]
+        ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
+
+        if ValueIndices.size == 0:
+            continue
+        elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
+            continue
+        else:
+            PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
+            PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
+    return PS_RFdepth, EndIndex
+
+
 if __name__ == '__main__':
-    velmod = '/Users/xumj/Researches/YN_crust/gradient_study/iasp91.vel'
-    RFlength = 13001
-    sampling = 0.01
-    shift = 10
-    raypref = skm2srad(0.065)
-    lst = '/Volumes/xumj3/YNRF/RFresult/MC17/MC17finallist.dat'
-    YAxisRange = np.append(np.arange(0, 200, 0.5), 200)
+    lst = '/Users/xumj/Researches/XE.ES01/XE.ES01finallist.dat'
+    YAxisRange = np.append(np.arange(0, 800, 1), 800)
+    stla = 36.8121
+    stlo = 92.9486
     # dep_mod = DepModel(YAxisRange, velmod)
     # print(dep_mod.vp.shape, dep_mod.R.shape, YAxisRange[-1])
+    srayp = np.load('/Users/xumj/Researches/Tibet_MTZ/process/psrayp.npz')
+    mod3d = Mod3DPerturbation('/Users/xumj/Researches/Tibet_MTZ/models/GYPSUM.npz', YAxisRange)
+    stadatar = SACStation(lst, only_r=True)
+    pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(stla, stlo, stadatar, YAxisRange, srayp=srayp)
+    newtds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, YAxisRange, mod3d)
+    amp1d = time2depth(stadatar, YAxisRange, Tpds)
+    amp3d = time2depth(stadatar, YAxisRange, newtds)
+    plt.imshow(amp3d)
+    # plt.plot(YAxisRange, amp1d[1])
+    # plt.plot(YAxisRange, amp3d[1])
+    # PS_RFdepth, _, x_s, x_p = psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp='/Users/xumj/Researches/Ps_rayp.npz')
+    # mean_data = np.mean(PS_RFdepth, axis=0)
 
-    stadatar = SACStation(lst)
-    PS_RFdepth, _, x_s, x_p = psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp='/Users/xumj/Researches/Ps_rayp.npz')
-    print(PS_RFdepth.shape)
-    mean_data = np.mean(PS_RFdepth, axis=0)
-
-    plt.plot(YAxisRange, mean_data)
+    # plt.plot(YAxisRange, mean_data)
     plt.show()
 
