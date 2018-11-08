@@ -5,6 +5,9 @@ from os.path import dirname, join, exists
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from
 from seispy.psrayp import get_psrayp
 import matplotlib.pyplot as plt
+import warnings
+
+warnings.filterwarnings("ignore")
 
 
 class SACStation(object):

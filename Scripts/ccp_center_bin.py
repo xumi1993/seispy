@@ -21,19 +21,43 @@ def initgrid(lat1, lon1, lat2, lon2, val):
     return bin_loca
 
 
-def search_pierce(rfdep, depaxis, bin_loca, bin_radius=50):
+def boot_bin_stack(data_bin):
+    count = data_bin.shape[0]
+    if count > 1:
+        cci = ci(data_bin, n_samples=2000)
+        mu = np.average(data_bin)
+    else:
+        cci = np.array([np.nan, np.nan])
+        mu = np.nan
+    return mu, cci, count
+
+
+def search_pierce(rfdep, depaxis, bin_loca, bin_radius=75):
     bin_radius = km2deg(bin_radius)
-    data = np.zeros((bin_loca.shape[0], depaxis.shape[0]), dtype='O')
+    # data = np.zeros((bin_loca.shape[0], depaxis.shape[0]), dtype='O')
+    stack_data = []
     for i in range(bin_loca.shape[0]):
-        print('{}/{}'.format(i, bin_loca.shape[0]))
+        boot_stack = {}
+        bin_mu = np.zeros(depaxis.shape[0])
+        bin_ci = np.zeros([depaxis.shape[0], 2])
+        bin_count = np.zeros(depaxis.shape[0])
+        print('{}/{}'.format(i+1, bin_loca.shape[0]))
         for j, dep in zip(range(depaxis.shape[0]), depaxis):
             bin_dep = np.array([])
             for sta in rfdep:
-                fall_idx = np.where(distaz(sta['Piercelat'][dep, :], sta['Piercelon'][dep, :], bin_loca[i, 0],
+                fall_idx = np.where(distaz(sta['Piercelat'][0,0][:, dep], sta['Piercelon'][0,0][:, dep], bin_loca[i, 0],
                                            bin_loca[i, 1]).delta < bin_radius)[0]
-                bin_dep = np.append(bin_dep, sta['moveout_correct'][dep, fall_idx])
-            data[i, j] = bin_dep
-    return data
+                bin_dep = np.append(bin_dep, sta['moveout_correct'][0,0][fall_idx, dep])
+            bin_mu[j], cci, bin_count[j] = boot_bin_stack(bin_dep)
+            bin_ci[j, 0] = cci[0]
+            bin_ci[j, 1] = cci[1]
+        boot_stack['bin_lat'] = bin_loca[i, 0]
+        boot_stack['bin_lon'] = bin_loca[i, 1]
+        boot_stack['mu'] = bin_mu
+        boot_stack['ci'] = bin_ci
+        boot_stack['count'] = bin_count
+        stack_data.append(boot_stack)
+    return stack_data
 
 
 def boot_stack(ccp_data, bin_loca, depaxis):
@@ -70,10 +94,11 @@ if __name__ == '__main__':
     lat2 = 39
     lon2 = 101
     bin_loca = initgrid(lat1, lon1, lat2, lon2, 0.5)
-    rfdep = np.load('/Users/xumj/Researches/Tibet_MTZ/RFdepth_1D.npy')
+    # rfdep = np.load('/Users/xumj/Researches/Tibet_MTZ/RFdepth_1D.npy')
+    rfdep = loadmat('/Users/xumj/Researches/Tibet_MTZ/ccp_results/RFdepth_3D.mat')['RFdepth'][0, :]
     depaxis = np.arange(300, 800)
-    # data = search_pierce(rfdep, depaxis, bin_loca)
+    stack_data = search_pierce(rfdep, depaxis, bin_loca)
     # savemat('/Users/xumj/Researches/Tibet_MTZ/ccp_data_0.5.mat', {'ccp_data': data})
-    ccp_data = loadmat('/Users/xumj/Researches/Tibet_MTZ/ccp_data_0.5.mat')['ccp_data']
-    stack_data = boot_stack(ccp_data, bin_loca, depaxis)
-    np.save('/Users/xumj/Researches/Tibet_MTZ/ccp_results/stack_data_0.5', stack_data)
+    # ccp_data = loadmat('/Users/xumj/Researches/Tibet_MTZ/ccp_data_0.5.mat')['ccp_data']
+    # stack_data = boot_stack(ccp_data, bin_loca, depaxis)
+    np.save('/Users/xumj/Researches/Tibet_MTZ/ccp_results/stack_data_75km_3D', stack_data)
