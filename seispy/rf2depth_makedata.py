@@ -65,8 +65,8 @@ def makedata(cpara, use_rayp_lib=True, log=setuplog()):
         rfdep['Piercelon'] = piercelon
         rfdep['StopIndex'] = end_index
         RFdepth.append(rfdep)
-    # savemat(cpara.depthdat, {'RFdepth': RFdepth}, oned_as='column')
-    np.save(cpara.depthdat, RFdepth)
+    savemat(cpara.depthdat, {'RFdepth': RFdepth})
+    # np.save(cpara.depthdat, RFdepth)
 
 
 def makedata3d(cpara, velmod3d, log=setuplog()):
