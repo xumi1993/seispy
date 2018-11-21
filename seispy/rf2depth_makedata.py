@@ -12,9 +12,9 @@ import sys
 
 class Station(object):
     def __init__(self, sta_lst):
-        dtype = {'names': ('station', 'evla', 'evlo'), 'formats': ('S20', 'f4', 'f4')}
-        self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True)
-        self.station = [sta.decode() for sta in self.station]
+        dtype = {'names': ('station', 'evla', 'evlo'), 'formats': ('U20', 'f4', 'f4')}
+        self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
+        #self.station = [sta.decode() for sta in self.station]
         self.sta_num = self.stla.shape[0]
 
 
