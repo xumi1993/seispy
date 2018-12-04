@@ -15,7 +15,7 @@ class CCPPara(object):
         self.domperiod = 5
         self.shape = 'circle'
         self.slid_val = 5
-        self.width = 0.25
+        self.width = 100
         self.bin_radius = 50
         self.line = np.array([])
         self.depth_axis = np.array([])

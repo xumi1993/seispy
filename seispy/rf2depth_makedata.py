@@ -4,7 +4,7 @@ import numpy as np
 from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog
 from seispy.geo import latlon_from, deg2km, rad2deg
-from os.path import join
+from os.path import join, dirname
 from scipy.io import savemat
 import argparse
 import sys
@@ -32,13 +32,9 @@ def _convert_str_mat(instr):
     return mat
 
 
-def makedata(cpara, use_rayp_lib=True, log=setuplog()):
+def makedata(cpara, log=setuplog()):
     # cpara = ccppara(cfg_file)
     sta_info = Station(cpara.stalist)
-    if use_rayp_lib:
-        srayp = np.load(cpara.rayp_lib)
-    else:
-        srayp = None
     RFdepth = []
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
@@ -48,7 +44,7 @@ def makedata(cpara, use_rayp_lib=True, log=setuplog()):
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, cpara.velmod,
-                                             srayp=srayp)
+                                             srayp=cpara.rayp_lib)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
@@ -97,7 +93,12 @@ def makedata3d(cpara, velmod3d, log=setuplog()):
         rfdep['Piercelon'] = pplon_s
         rfdep['StopIndex'] = end_index
         RFdepth.append(rfdep)
-    savemat(cpara.depthdat, {'RFdepth': RFdepth})
+    try:
+        savemat(cpara.depthdat, {'RFdepth': RFdepth})
+    except FileNotFoundError:
+        log.RF2depthlog.warning('No such file or directory: {}'.format(dirname(cpara.depthdat)))
+        rfdep_path = input('Enter a exist path:')
+        savemat(rfdep_path, {'RFdepth': RFdepth})
 
 
 def rf2depth():

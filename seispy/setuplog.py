@@ -26,6 +26,10 @@ class setuplog(object):
             # self.Batlog.removeHandler(fh)
             self.Batlog.addHandler(ch)
             self.Batlog.addHandler(fh)
+        self.CCPlog = logging.getLogger('CCP')
+        if not self.CCPlog.handlers:
+            self.CCPlog.setLevel(logging.INFO)
+            self.CCPlog.addHandler(ch)
 
 
 if __name__ == '__main__':
