@@ -18,7 +18,8 @@ setup(name='seispy',
                                         'plotr=seispy.plotR:main',
                                         'updatecatalog=seispy.updatecatalog:main',
                                         'ndk2dat=seispy.updatecatalog:ndk2dat',
-                                        'lsnc=seispy.io:lsnc']},
+                                        'lsnc=seispy.io:lsnc',
+                                        'ccp_profile=seispy.ccp:ccp_profile']},
       include_package_data=True,
       zip_safe=False
       )
