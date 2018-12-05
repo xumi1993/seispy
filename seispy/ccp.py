@@ -59,10 +59,11 @@ def search_pierce(rfdep, bin_loca, profile_range, stack_range, dep_axis, log, bi
     stack_idx = np.int16(np.round(interp1d(dep_axis, dep_idx)(stack_range)))
     data = []
     depmod = DepModel(dep_axis)
-    fzone = np.sqrt(0.5*domperiod*depmod.vs*dep_axis)
+    fzone = km2deg(np.sqrt(0.5*domperiod*depmod.vs*dep_axis))
     for i in range(bin_loca.shape[0]):
         rfbin = {}
-        log.CCPlog.info('{}/{} bin at lat: {} lon: {}'.format(i + 1, bin_loca.shape[0], bin_loca[i, 0], bin_loca[0, 1]))
+        log.CCPlog.info('{}/{} bin from {} at lat: {} lon: {}'.format(i + 1, bin_loca.shape[0], profile_range[i],
+                                                                      bin_loca[i, 0], bin_loca[0, 1]))
         ccp_mean = np.zeros(stack_range.shape[0])
         ccp_count = np.zeros_like(ccp_mean)
         if isci:
@@ -72,8 +73,8 @@ def search_pierce(rfdep, bin_loca, profile_range, stack_range, dep_axis, log, bi
                 bin_radius = fzone[j]
             bin_dep = np.array([])
             for sta in rfdep:
-                fall_idx = np.where(distaz(sta['projlat'][:, j], sta['projlon'][:, j],
-                                           bin_loca[i, 0], bin_loca[i, 1]).delta < bin_radius[j])[0]
+                fall_idx = np.where(distaz(sta['projlat'][0, 0][:, j], sta['projlon'][0, 0][:, j],
+                                           bin_loca[i, 0], bin_loca[i, 1]).delta < bin_radius)[0]
                 bin_dep = np.append(bin_dep, sta['moveout_correct'][0, 0][fall_idx, j])
             if bin_dep.shape[0] > 1:
                 if isci:
@@ -86,7 +87,8 @@ def search_pierce(rfdep, bin_loca, profile_range, stack_range, dep_axis, log, bi
         rfbin['bin_lon'] = bin_loca[i, 1]
         rfbin['profile_dis'] = profile_range[i]
         rfbin['mu'] = ccp_mean
-        rfbin['ci'] = ccp_ci
+        if isci:
+            rfbin['ci'] = ccp_ci
         rfbin['count'] = ccp_count
         data.append(rfbin)
     return data
@@ -101,7 +103,7 @@ def stack(rfdep, cpara, log=setuplog()):
     """
     bin_radius = km2deg(cpara.bin_radius)
     bin_loca, profile_range = init_profile(cpara.line[0, 0], cpara.line[0, 1], cpara.line[1, 0],
-                                           cpara.line[0, 1], cpara.slid_val)
+                                           cpara.line[1, 1], cpara.slid_val)
     new_rfdep = get_sta(rfdep, cpara.stack_sta_list, cpara.line, cpara.depth_axis, log)
     # del rfdep
     stack_data = search_pierce(new_rfdep, bin_loca, profile_range,
@@ -123,7 +125,7 @@ def ccp_profile():
         except Exception:
             log.CCPlog.error('Error in \'-l\' option. The format should be <lat1>/<lon1>/<lat2>/<lon2>')
             sys.exit(1)
-        cpara.line = np.array([[line_loca[0], line_loca[1]], [line_loca[1], line_loca[3]]])
+        cpara.line = np.array([[line_loca[0], line_loca[1]], [line_loca[2], line_loca[3]]])
     rfdep = loadmat(cpara.depthdat)['RFdepth'][0, :]
     try:
         stack_data = stack(rfdep, cpara, log)

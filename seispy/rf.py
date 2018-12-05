@@ -3,7 +3,7 @@
 import obspy
 from obspy.io.sac import SACTrace
 import re
-from seispy.io import wsfetch
+from seispy.sio import wsfetch
 from os.path import dirname, join, expanduser, exists
 from seispy.para import para
 import seispy
