@@ -23,5 +23,18 @@ Befor the CCP stacking, we should prepare:
     - `f0`: The gauss factor used in computing the PRF.
 
 ### 2. (Optional) a lib of Ps ray parameters.
-If you would stack PRFs in a great depth (e.g., D410 or D660), the raypara of P arrival cannot represent that of Ps phase. Therefore, 
+If you would stack PRFs in a great depth (e.g., D410 or D660), the ray parameters of P arrival cannot represent that of Ps phase. Therefore, 
 a library file of Ps ray parameters in different depths and epicentral distance is required in calculating Ps-P time difference.
+This lib file has specific binary format. You can generate it by command of `gen_rayp_lib`:
+```
+usage: gen_rayp_lib [-h] -d DIS_STR -e DEP_STR [-l LAY_STR] [-o OUT_PATH]
+
+Gen a ray parameter lib for Pds phases
+
+optional arguments:
+  -h, --help   show this help message and exit
+  -d DIS_STR   Distance range as 'min_dis/max_dis/interval'
+  -e DEP_STR   Event depth range as 'min_dep/max_dep/interval'
+  -l LAY_STR   layers range as 'min_layer/man_layer'
+  -o OUT_PATH  Out path to Pds ray parameter lib
+```
