@@ -42,17 +42,27 @@ stalist = /path/to/sta_all.lst
 # If it's empty the ray parameters of Ps would be assumed as that of P arrival
 rayp_lib =
 
-# A output data struct after time to depth
+# Output data struct after time to depth
 depthdat =  /Users/xumj/Researches/NETibet/ccp_result/RFdepth_3D.mat
 
-
+# Output data struct after CCP stacking
 stackfile = /Users/xumj/Researches/NETibet/Ordos_Process/stack_L5
+
+# Station list used to stack
 stack_sta_list = /Users/xumj/Researches/NETibet/Ordos_Process/sta_L5.lst
+
+# Path to 1D velocity model
+# If it's empty, useing IASP91 model
 velmod =
 
 [bin]
+# The shape of bins
 shape = rect
+
+# period of S wave (to assuming the radius of fresnel zone)
 domperiod = 5
+
+# Width of the profile
 width = 100
 bin_radius =
 
