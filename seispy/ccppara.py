@@ -81,12 +81,12 @@ def ccppara(cfg_file):
         cpara.bin_radius = cf.getfloat('bin', 'bin_radius')
     except:
         cpara.bin_radius = None
+    cpara.slid_val = cf.getfloat('bin', 'slid_val')
     # para for line section
     lat1 = cf.getfloat('line', 'profile_lat1')
     lon1 = cf.getfloat('line', 'profile_lon1')
     lat2 = cf.getfloat('line', 'profile_lat2')
     lon2 = cf.getfloat('line', 'profile_lon2')
-    cpara.slid_val = cf.getfloat('line', 'slid_val')
     cpara.line = np.array([lat1, lon1, lat2, lon2])
     # para for depth section
     dep_end = cf.getfloat('depth', 'dep_end')
