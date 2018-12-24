@@ -139,5 +139,10 @@ The output struct would be saved as a `.mat` file, which can be read in **MATLAB
 - `Station`: The station name.
 - `stalat`: The Latitude of the station.
 - `stalon`: The Longitude of the station.
-- `bazi`: The back-azimuth of each event (1D array with shape of `(ev_num,)`)
- 
+- `bazi`: The back-azimuth of each event (1D array with shape of `(ev_num,)`).
+- `rayp`: The Ray-parameter of each event (1D array with shape of `(ev_num,)`).
+- `moveout_correct`: The amplitude for each PRF after time-depth conversion (2D array with shape of `(ev_num, layer_num)`).
+    >Note: the `layer_num` was determined by field [depth] in parameter file.
+- `Piercelat`: Latitudes of each event at each depth (2D array with shape of `(ev_num, layer_num)`).
+- `Piercelon`: Longitudes of each event at each depth (2D array with shape of `(ev_num, layer_num)`).
+- `StopIndex`: The last layer after time-depth conversion (2D array with shape of `(ev_num, layer_num)`).
