@@ -142,7 +142,31 @@ The output struct would be saved as a `.mat` file, which can be read in **MATLAB
 - `bazi`: The back-azimuth of each event (1D array with shape of `(ev_num,)`).
 - `rayp`: The Ray-parameter of each event (1D array with shape of `(ev_num,)`).
 - `moveout_correct`: The amplitude for each PRF after time-depth conversion (2D array with shape of `(ev_num, layer_num)`).
-    >Note: the `layer_num` was determined by field [depth] in parameter file.
 - `Piercelat`: Latitudes of each event at each depth (2D array with shape of `(ev_num, layer_num)`).
 - `Piercelon`: Longitudes of each event at each depth (2D array with shape of `(ev_num, layer_num)`).
 - `StopIndex`: The last layer after time-depth conversion (2D array with shape of `(ev_num, layer_num)`).
+    >Note: the `layer_num` was determined by field [depth] in parameter file.
+
+## CCP Stack PRFs along a profile
+The `ccp_profile` command provide functions to stack PRFs along a profile:
+```bash
+usage: ccp_profile [-h] [-l LINE_LOCA] [-s STALIST] [-o OUTPATH] [-t] cfg_file
+
+Stack PRFS along a profile
+
+positional arguments:
+  cfg_file      Path to CCP configure file
+
+optional arguments:
+  -h, --help    show this help message and exit
+  -l LINE_LOCA  Location of the profile <lat1>/<lon1>/<lat2>/<lon2>
+  -s STALIST    Path to station list
+  -o OUTPATH    Path to output data
+  -t            Output as text file
+```
+
+### Required arguments
+
+- `cfg_file`: the *parameter file* introduced above. Meanwhile, some options are required:
+    - `stack` section: Define the nodes of the profile
+    - `bin` section: The shape of bin.
