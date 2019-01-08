@@ -2,6 +2,8 @@
 /*/.idea/
 /*/*.py[cod]
 .vscode/
+.DS_Store
+/*/.DS_Store
 *.xml
 
 build/

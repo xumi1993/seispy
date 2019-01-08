@@ -5,7 +5,7 @@ from seispy.rfcorrect import SACStation
 from seispy.rf import CfgParser
 import argparse
 import numpy as np
-from os.path import join
+from os.path import join, realpath, basename
 import sys
 
 
@@ -123,8 +123,11 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(station, cfg_file, enf=3):
+def plotrt(cfg_file, rfpath=None, enf=3):
     pa = CfgParser(cfg_file)
+    if rfpath is not None:
+        pa.rfpath = rfpath
+    station = basename(pa.rfpath)
     # pa.rfpath = join(pa.rfpath, station)
     lst = join(pa.rfpath, station+'finallist.dat')
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
@@ -135,15 +138,16 @@ def plotrt(station, cfg_file, enf=3):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
-    parser.add_argument('-s', help='Station as folder name of RFs and list', dest='station', type=str)
+    parser = argparse.ArgumentParser(description="Plot R&T components for P receiver functions (PRFs)")
+    parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
+                        dest='station', type=str, default=None)
     parser.add_argument('-e', help='Enlargement factor', dest='enf', type=int, default=3)
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     arg = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-    plotrt(arg.station, arg.cfg_file, enf=arg.enf)
+    plotrt(arg.cfg_file, rfpath=arg.station, enf=arg.enf)
 
 
 if __name__ == '__main__':
