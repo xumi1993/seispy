@@ -2,9 +2,13 @@ import numpy as np
 import re
 from obspy.io.sac.sactrace import SACTrace
 import matplotlib.pyplot as plt
-from os.path import dirname, join
+from os.path import dirname, join, basename
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
+from seispy.rfcorrect import SACStation
+from seispy.hkpara import hkpara
+import argparse
+
 
 def transarray(array, axis=0):
     if not isinstance(array, np.ndarray):
@@ -102,10 +106,12 @@ def load_cyan_map():
     return ListedColormap(carray)
 
 
-def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map()):
+def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), title=None, path=None):
     f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
     xlim = (h[0], h[-1])
     ylim = (kappa[0], kappa[-1])
+    if title is not None:
+        f.suptitle(title, fontsize='large')
     ax1.imshow(stack[:, :, 0], cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
     ax1.set_ylabel('$V_P/V_S$')
     ax1.set_title('Ps')
@@ -121,7 +127,10 @@ def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map()):
     ax4.plot(xlim, [bestk, bestk], color='red', linestyle='--', linewidth=0.6)
     ax4.plot([besth, besth], ylim, color='red', linestyle='--', linewidth=0.6)
     ax4.set_xlabel('Moho depth (km)')
-    plt.show(f)
+    if path is None:
+        f.show()
+    else:
+        f.savefig(path, format='pdf')
 
 
 def ci(allstack, h, kappa, ev_num):
@@ -153,6 +162,45 @@ def print_result(besth, bestk, maxhsig, maxksig, print_comment=True):
     else:
         msg = '{:.1f}\t{:.2f}\t{:.2f}\t{:.2f}'.format(besth, maxhsig, bestk, maxksig)
     print(msg)
+
+
+def hksta(hpara, isplot=False):
+    station = basename(hpara.rfpath)
+    stadata = SACStation(join(hpara.rfpath, station+'finallist.dat'), only_r=True)
+    stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, stadata.rayp,
+                                    hpara.hrange, hpara.krange, vp=hpara.vp)
+    besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, hpara.hrange, hpara.krange, stadata.ev_num)
+    with open(hpara.hklist, 'a') as f:
+        f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(station, stadata.stla, stadata.stlo,
+                                                                              besth, maxhsig, bestk, maxksig))
+    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$\nV_P/V_S = ${:.2f}\pm{:.3f}$'.format(station, besth,
+                                                                                     maxhsig, bestk, maxksig)
+    if isplot:
+        img_path = join(hpara.hkpath, station+'.pdf')
+        plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title, path=img_path)
+    else:
+        plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title)
+
+
+def hk():
+    parser = argparse.ArgumentParser(description="HK stacking for single station")
+    parser.add_argument('cfg_file', type=str, help='Path to HK configure file')
+    parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
+                        dest='station', type=str, default=None)
+    parser.add_argument('-H', help='Range for searching best H: <hmin>/<hmax>', type=str, default='')
+    parser.add_argument('-K', help='Range for searching best K: <kmin>/<kmax>', type=str, default='')
+    parser.add_argument('-p', help='If save the figure', dest='isplot', action='store_false')
+    arg = parser.parse_args()
+    hpara = hkpara(arg.cfg_file)
+    if arg.station is not None:
+        hpara.hkpath = arg.station
+    if arg.H != '':
+        hmin, hmax = [float(val) for val in arg.H.split('/')]
+        hpara.hrange = np.arange(hmin, hmax, 0.1)
+    if arg.K != '':
+        kmin, kmax = [float(val) for val in arg.K.split('/')]
+        hpara.krange = np.arange(kmin, kmax, 0.1)
+    hksta(hpara, isplot=arg.isplot)
 
 
 def hktest():

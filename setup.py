@@ -19,7 +19,8 @@ setup(name='seispy',
                                         'updatecatalog=seispy.updatecatalog:main',
                                         'ndk2dat=seispy.updatecatalog:ndk2dat',
                                         'lsnc=seispy.io:lsnc',
-                                        'ccp_profile=seispy.ccp:ccp_profile']},
+                                        'ccp_profile=seispy.ccp:ccp_profile',
+                                        'hk=seispy.hk:hk']},
       include_package_data=True,
       zip_safe=False
       )

@@ -26,6 +26,8 @@ class SACStation(object):
         self.rayp = skm2srad(self.rayp)
         self.ev_num = self.evla.shape[0]
         sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
+        self.stla = sample_sac.stla
+        self.stlo = sample_sac.stlo
         self.RFlength = sample_sac.npts
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
