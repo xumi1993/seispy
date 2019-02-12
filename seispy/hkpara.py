@@ -11,6 +11,7 @@ class HKPara(object):
         self.hrange = np.arange(20, 80, 0.1)
         self.krange = np.arange(1.6, 1.9, 0.01)
         self.vp = 6.3
+        self.weight = (0.7, 0.2, 0.1)
 
     @property
     def hrange(self):
@@ -58,4 +59,9 @@ def hkpara(cfg_file):
     vp = cf.get('hk', 'vp')
     if vp != '':
         hpara.vp = float(vp)
+
+    w1 = cf.getfloat('hk', 'weight1')
+    w2 = cf.getfloat('hk', 'weight2')
+    w3 = cf.getfloat('hk', 'weight3')
+    hpara.weight = (w1, w2, w3)
     return hpara

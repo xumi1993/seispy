@@ -168,7 +168,7 @@ def hksta(hpara, isplot=False):
     station = basename(hpara.rfpath)
     stadata = SACStation(join(hpara.rfpath, station+'finallist.dat'), only_r=True)
     stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, stadata.rayp,
-                                    hpara.hrange, hpara.krange, vp=hpara.vp)
+                                    hpara.hrange, hpara.krange, vp=hpara.vp, weight=hpara.weight)
     besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, hpara.hrange, hpara.krange, stadata.ev_num)
     with open(hpara.hklist, 'a') as f:
         f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(station, stadata.stla, stadata.stlo,
