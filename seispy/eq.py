@@ -200,8 +200,9 @@ class eq(object):
                 for tr in self.rf:
                     # tr.data = tr.data[0:-1]
                     tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
+                    tr.stats.delta = target_dt
 
-    def saverf(self, path, phase='P', shift=0, time_after=120, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
+    def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
         if phase == 'P':
             if only_r:
@@ -225,7 +226,6 @@ class eq(object):
                 self.rf[i].stats['sac'][key] = value
             tr = SACTrace.from_obspy_trace(self.rf[i])
             tr.b = -shift
-            tr.e = time_after
             tr.o = 0
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
