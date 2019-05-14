@@ -15,7 +15,7 @@ Python module of seismology and  receiver functions
 ```Python
 python setup.py install
 ```
-Add the ```seispy/Scripts``` to environment	variables.
+
 # Inclusion
 --------------
   * seispy.distaz: Calculate distance and azimuth (by [the lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/)).<br />
