@@ -17,8 +17,9 @@ variables:
 before_script:
   - conda config --set always_yes yes
   - conda update -q conda
-  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
-  - conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+  - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
+  - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
+  - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
   - pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
   - conda info -a
   #- python -V               # Print out python version for debugging
