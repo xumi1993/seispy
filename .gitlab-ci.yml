@@ -19,7 +19,7 @@ before_script:
   - conda update -q conda
   - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
   - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
-  - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
+  # - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
   - pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
   - conda info -a
   #- python -V               # Print out python version for debugging
@@ -31,7 +31,7 @@ py37:
   script:
   - conda create -n testenv37 python=3.7
   - source activate testenv37
-  - conda install obspy pandas pytz netCDF4
+  - pip install obspy pandas pytz netCDF4
   - python setup.py install
   - cd test/testcase01
   - python testcase01.py
