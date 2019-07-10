@@ -1,6 +1,7 @@
 import sys
 import random
 import matplotlib
+import argparse
 
 matplotlib.use("Qt5Agg")
 from PyQt5 import QtCore
@@ -13,13 +14,14 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
-from pickfigure import RFFigure
+from seispy.pickfigure import RFFigure
 
 class MyMplCanvas(FigureCanvas):
-    def __init__(self, rfpath, parent=None, width=21, height=11, dpi=100):
+    def __init__(self, parent=None, rfpath='', width=21, height=11, dpi=100):
 
         plt.rcParams['axes.unicode_minus'] = False 
 
+        print(rfpath)
         self.rffig = RFFigure(rfpath, width=width, height=height, dpi=dpi)
 
         FigureCanvas.__init__(self, self.rffig.fig)
@@ -34,12 +36,13 @@ class MyMplCanvas(FigureCanvas):
 class MatplotlibWidget(QWidget):
     def __init__(self, rfpath, parent=None):
         super(MatplotlibWidget, self).__init__(parent)
-        self.initUi()
+        self.initUi(rfpath)
 
-    def initUi(self):
+    def initUi(self, rfpath):
         self.layout = QVBoxLayout(self)
         self.add_btn()
-        self.mpl = MyMplCanvas(self, width=21, height=11, dpi=100)
+        print(rfpath)
+        self.mpl = MyMplCanvas(self, rfpath=rfpath, width=21, height=11, dpi=100)
         self.layout.addWidget(self.mpl, 2)
         self.mpl.mpl_connect('button_press_event', self.on_click)
 
@@ -110,7 +113,10 @@ class MatplotlibWidget(QWidget):
         self.layout.addLayout(ctrl_layout)
 
 def main():
-    rfpath = sys.argv[1]
+    parser = argparse.ArgumentParser(description="User interface for picking PRFs")
+    parser.add_argument('rf_path', type=str, help='Path to PRFs')
+    arg = parser.parse_args()
+    rfpath = arg.rf_path
     if not exists(rfpath):
         raise('No such directory of {}'.format(rfpath))
     app = QApplication(sys.argv)

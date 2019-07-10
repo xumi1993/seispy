@@ -20,7 +20,8 @@ setup(name='seispy',
                                         'ndk2dat=seispy.updatecatalog:ndk2dat',
                                         'lsnc=seispy.io:lsnc',
                                         'ccp_profile=seispy.ccp:ccp_profile',
-                                        'hk=seispy.hk:hk']},
+                                        'hk=seispy.hk:hk',
+                                        'pickrf=seispy.pickui:main']},
       include_package_data=True,
       zip_safe=False
       )
