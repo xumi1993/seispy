@@ -104,12 +104,17 @@ class eq(object):
 
         if inv is not None:
             self.rf.rotate('->ZNE', inventory=inv)
-        elif self.rf.select(channel='*1'):
+        elif self.rf.select(channel='??1') and hasattr(self.rf.select(channel='*1')[0].stats.sac, 'cmpaz'):
             if self.rf.select(channel='*1')[0].stats.sac.cmpaz == 0:
                 self.rf.select(channel='*1')[0].stats.channel = self.rf.select(channel='*1')[0].stats.channel[:-1] + 'N'
                 self.rf.select(channel='*2')[0].stats.channel = self.rf.select(channel='*2')[0].stats.channel[:-1] + 'E'
             elif self.rf.select(channel='*1')[0].stats.sac.cmpaz != 0:
                 rotateZNE(self.rf)
+            self.rf.sort(['channel'])
+        elif self.rf.select(channel='1'):
+            self.rf.select(channel='1')[0].stats.channel = 'Z'
+            self.rf.select(channel='2')[0].stats.channel = 'N'
+            self.rf.select(channel='3')[0].stats.channel = 'E'
             self.rf.sort(['channel'])
         else:
             pass

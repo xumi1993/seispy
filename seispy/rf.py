@@ -384,15 +384,15 @@ def InitRfProj(cfg_path):
 
 
 def rf_test():
-    date_begin = obspy.UTCDateTime('20130101')
-    date_end = obspy.UTCDateTime('20140101')
-    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
+    date_begin = obspy.UTCDateTime('20180601')
+    date_end = obspy.UTCDateTime('20190601')
+    logpath = '/Users/xumj/Codes/cutevents/EventCMT.dat'
     # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    datapath = '/Users/xumj/Researches/test4seispy/data'
+    datapath = '/Users/xumj/Codes/cutevents/test/YN001'
     # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
     proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
     # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
+    RFpath = '/Users/xumj/Researches/YNRF/RFresult/RFresult/YN001'
     # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
 
     rfproj = rf()
@@ -404,6 +404,8 @@ def rf_test():
     rfproj.para.datapath = datapath
     rfproj.para.catalogpath = logpath
     rfproj.para.rfpath = RFpath
+    rfproj.para.ref_comp = '.1.'
+    rfproj.para.suffix = 'sac'
     rfproj.para.gauss = 2.
     rfproj.para.offset = 0
     rfproj.load_stainfo()
@@ -416,8 +418,6 @@ def rf_test():
     # rfproj.save(proj_file)
     rfproj.trim()
     rfproj.rotate()
-    # rfproj.save(proj_file)
-    # '''
 
     rfproj.deconv()
     rfproj.saverf()
