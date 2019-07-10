@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from os.path import join, basename, dirname
 from seispy.setuplog import setuplog
+from seispy.plotRT import init_figure, set_fig, plot_waves
 
 
 def indexpags(evt_num, maxidx=20):
@@ -15,6 +16,21 @@ def indexpags(evt_num, maxidx=20):
         rfidx.append(range(maxidx*i, maxidx*(i+1)))
     rfidx.append(range(maxidx*(axpages-1), evt_num))
     return axpages, rfidx
+
+
+class StaData():
+    def __init__(self, filenames, rrf, trf, baz, goodrf):
+        goodidx = np.where(goodrf==1)
+        self.event = [filenames[i] for i in goodidx[0]]
+        self.bazi = baz[goodidx]
+        self.RFlength = len(rrf[0].data)
+        self.ev_num = len(self.bazi)
+        self.datar = np.empty([self.ev_num, self.RFlength])
+        self.datat = np.empty([self.ev_num, self.RFlength])
+        for i, idx in enumerate(goodidx[0]):
+            self.datar[i, :] = rrf[idx].data
+            self.datat[i, :] = trf[idx].data
+
 
 class RFFigure(Figure):
     def __init__(self, rfpath, width=21, height=11, dpi=100):
@@ -88,9 +104,9 @@ class RFFigure(Figure):
 
     def read_sac(self, dt=0.1):
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
-        self.filenames = [basename(sac_file).split('_')[0] for sac_file in glob.glob(join(self.rfpath, '*_R.sac'))]
-        self.rrf = obspy.read(join(self.rfpath, '*_R.sac')).resample(1/dt)
-        self.trf = obspy.read(join(self.rfpath, '*_T.sac')).resample(1/dt)
+        self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(glob.glob(join(self.rfpath, '*_R.sac')))]
+        self.rrf = obspy.read(join(self.rfpath, '*_R.sac')).sort(['starttime']).resample(1/dt)
+        self.trf = obspy.read(join(self.rfpath, '*_T.sac')).sort(['starttime']).resample(1/dt)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
         self.evt_num = len(self.rrf)
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
@@ -98,13 +114,14 @@ class RFFigure(Figure):
         self.sort_baz_()
     
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
-        self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
+        self.staname = self.rrf[0].stats.network+'.'+self.rrf[0].stats.station
+        self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
 
     def sort_baz_(self):
         idx = np.argsort(self.baz)
         self.baz = self.baz[idx]
         self.rrf = obspy.Stream([self.rrf[i] for i in idx])
-        self.rrf = obspy.Stream([self.rrf[i] for i in idx])
+        self.trf = obspy.Stream([self.trf[i] for i in idx])
         self.filenames = [self.filenames[i] for i in idx]
 
     def plotwave(self):
@@ -216,7 +233,10 @@ class RFFigure(Figure):
                 mag = self.rrf[i].stats.sac.mag
                 gauss = self.rrf[i].stats.sac.user1
                 fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
-    # @classmethod
-    # def init(cls, width=21, height=11, dpi=100):
-    #     frame = cls(width, height, dpi)
-    #     return frame.fig
+    
+    def plot(self, image_path):
+        stadata = StaData(self.filenames, self.rrf, self.trf, self.baz, self.goodrf)
+        h, axr, axt, axb, axr_sum, axt_sum = init_figure()
+        plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, self.time_axis, enf=self.enf)
+        set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, self.staname)
+        h.savefig(image_path)

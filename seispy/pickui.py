@@ -1,4 +1,5 @@
 import sys
+import os
 import random
 import matplotlib
 import argparse
@@ -7,7 +8,7 @@ matplotlib.use("Qt5Agg")
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSizePolicy, QWidget, QDesktopWidget, \
-                            QPushButton, QHBoxLayout, QLineEdit
+                            QPushButton, QHBoxLayout, QLineEdit, QFileDialog
 from numpy import arange, sin, pi
 from os.path import exists
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -21,7 +22,6 @@ class MyMplCanvas(FigureCanvas):
 
         plt.rcParams['axes.unicode_minus'] = False 
 
-        print(rfpath)
         self.rffig = RFFigure(rfpath, width=width, height=height, dpi=dpi)
 
         FigureCanvas.__init__(self, self.rffig.fig)
@@ -41,7 +41,6 @@ class MatplotlibWidget(QWidget):
     def initUi(self, rfpath):
         self.layout = QVBoxLayout(self)
         self.add_btn()
-        print(rfpath)
         self.mpl = MyMplCanvas(self, rfpath=rfpath, width=21, height=11, dpi=100)
         self.layout.addWidget(self.mpl, 2)
         self.mpl.mpl_connect('button_press_event', self.on_click)
@@ -72,6 +71,16 @@ class MatplotlibWidget(QWidget):
         self.mpl.rffig.finish()
         QApplication.quit()
 
+    def plot_save(self):
+        fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
+                                    "Save the figure",  
+                                    os.path.join(os.getcwd(), self.mpl.rffig.staname + 'RT_bazorder'), 
+                                    "PDF Files (*.pdf);;All Files (*)")  
+
+        if fileName_choose == "":
+            return
+        self.mpl.rffig.plot(fileName_choose)
+
     def _set_geom_center(self, height=0.8, width=0.8):
         screen_resolution = QDesktopWidget().screenGeometry()
         screen_height = screen_resolution.height()
@@ -89,6 +98,7 @@ class MatplotlibWidget(QWidget):
         next_btn = QPushButton("Next")
         next_btn.clicked.connect(self.next_connect)
         plot_btn = QPushButton("Plot")
+        plot_btn.clicked.connect(self.plot_save)
         finish_btn = QPushButton("Finish")
         finish_btn.clicked.connect(self.finish)
         btnbox = QHBoxLayout()
