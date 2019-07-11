@@ -7,9 +7,9 @@ import argparse
 matplotlib.use("Qt5Agg")
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSizePolicy, QWidget, QDesktopWidget, \
-                            QPushButton, QHBoxLayout, QLineEdit, QFileDialog, QAction
+                            QPushButton, QHBoxLayout, QLineEdit, QFileDialog, QAction, QShortcut
 from numpy import arange, sin, pi
 from os.path import exists, dirname, join
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
@@ -61,6 +61,7 @@ class MatplotlibWidget(QMainWindow):
         fileMenu.addAction(saveAction)
 
         self._set_geom_center()
+        self._define_global_shortcuts()
         self.setWindowTitle('PickRF')
         self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
     
@@ -97,11 +98,17 @@ class MatplotlibWidget(QMainWindow):
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
                                     "Save the figure",  
                                     os.path.join(os.getcwd(), self.mpl.rffig.staname + 'RT_bazorder'), 
-                                    "PDF Files (*.pdf);;All Files (*)")  
+                                    "PDF Files (*.pdf);;Images (*.png);;All Files (*)")
 
         if fileName_choose == "":
             return
-        self.mpl.rffig.plotfig.savefig(fileName_choose, format=filetype)
+        if not hasattr(self.mpl.rffig, 'plotfig'):
+            self.mpl.rffig.plot()
+        try:
+            self.mpl.rffig.plotfig.savefig(fileName_choose)
+            self.mpl.rffig.log.RFlog.info('Figure saved to {}'.format(fileName_choose))
+        except Exception as e:
+            self.mpl.rffig.log.RFlog.error('{}'.format(e))
 
     def _set_geom_center(self, height=0.8, width=0.8):
         screen_resolution = QDesktopWidget().screenGeometry()
@@ -113,13 +120,19 @@ class MatplotlibWidget(QMainWindow):
         self.setGeometry(0, 0, frame_width, frame_height)
         self.move((screen_width / 2) - (self.frameSize().width() / 2),
                   (screen_height / 2) - (self.frameSize().height() / 2)) 
+    
+    def _define_global_shortcuts(self):
+        self.key_c = QShortcut(QKeySequence('c'), self)
+        self.key_c.activated.connect(self.next_connect)
+        self.key_z = QShortcut(QKeySequence('z'), self)
+        self.key_z.activated.connect(self.previous_connect)
 
     def add_btn(self):
-        pre_btn = QPushButton("Previous")
+        pre_btn = QPushButton("Previous (z)")
         pre_btn.clicked.connect(self.previous_connect)
-        next_btn = QPushButton("Next")
+        next_btn = QPushButton("Next (c)")
         next_btn.clicked.connect(self.next_connect)
-        plot_btn = QPushButton("Plot")
+        plot_btn = QPushButton("Preview")
         plot_btn.clicked.connect(self.plot_ui)
         finish_btn = QPushButton("Finish")
         finish_btn.clicked.connect(self.finish)
