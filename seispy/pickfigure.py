@@ -10,7 +10,11 @@ from seispy.plotRT import init_figure, set_fig, plot_waves
 
 
 def indexpags(evt_num, maxidx=20):
-    axpages = int(np.floor(evt_num/maxidx)+1)
+    full_pages = evt_num//maxidx
+    if np.mod(evt_num, maxidx) == 0:
+        axpages = full_pages
+    else:
+        axpages = full_pages+1
     rfidx = []
     for i in range(axpages-1):
         rfidx.append(range(maxidx*i, maxidx*(i+1)))
@@ -51,8 +55,8 @@ class RFFigure(Figure):
         self.plotbaz()
 
     def set_ylabels(self):
-        self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
-        self.axr.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
+        self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1)
+        self.axr.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1))
         ylabels = self.filenames[self.rfidx[self.ipage][0]::]
         ylabels.insert(0, '')
         self.axr.set_yticklabels(ylabels)
@@ -66,8 +70,8 @@ class RFFigure(Figure):
 
     def set_page(self):
         self.set_ylabels()
-        self.axr.plot([0, 0], [0, self.axpages*self.maxidx], color="black")
-        self.axt.plot([0, 0], [0, self.axpages*self.maxidx], color="black")
+        self.axr.plot([0, 0], [0, self.axpages*self.maxidx+1], color="black")
+        self.axt.plot([0, 0], [0, self.axpages*self.maxidx+1], color="black")
         self.axr.set_xlim(self.xlim[0], self.xlim[1])
         self.axr.set_xticks(np.arange(self.xlim[0], self.xlim[1]+1, 2))
         self.axt.set_xlim(self.xlim[0], self.xlim[1])
@@ -85,16 +89,16 @@ class RFFigure(Figure):
         self.twvfillnag = [[] for i in range(self.evt_num)]
 
     def init_figure(self, width=21, height=11, dpi=100):
-        self.fig = Figure(figsize=(width, height), dpi=dpi)  # 新建一个figure
+        self.fig = Figure(figsize=(width, height), dpi=dpi) 
         self.axr = self.fig.add_axes([0.1, 0.05, 0.35, 0.84])
         self.axt = self.fig.add_axes([0.47, 0.05, 0.35, 0.84])
         self.axb = self.fig.add_axes([0.855, 0.05, 0.12, 0.84])
         self.set_figure()
 
     def set_figure(self):
-        self.axr.grid()
-        self.axt.grid()
-        self.axb.grid()
+        self.axr.grid(which='major', axis='x')
+        self.axt.grid(which='major', axis='x')
+        self.axb.grid(which='major')
         self.axr.set_ylabel("Event")
         self.axr.set_xlabel("Time after P (s)")
         self.axr.set_title("R component")
@@ -114,7 +118,7 @@ class RFFigure(Figure):
         self.sort_baz_()
     
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
-        self.staname = self.rrf[0].stats.network+'.'+self.rrf[0].stats.station
+        self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
         self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
 
     def sort_baz_(self):
@@ -172,27 +176,7 @@ class RFFigure(Figure):
         if self.ipage >= self.axpages:
             self.ipage = self.axpages-1
             return
-        if self.ipage == self.axpages-1:
-            ymax = (self.ipage+1)*self.maxidx
-            self.axr.set_ylim(self.rfidx[self.ipage][0], ymax)
-            self.axr.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
-            ylabels = self.filenames[self.rfidx[self.ipage][0]::]
-            ylabels.insert(0, '')
-            self.axr.set_yticklabels(ylabels)
-            self.azi_label = ['%5.2f' % self.baz[i] for i in self.rfidx[self.ipage]]
-        else:
-            self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2)
-            self.axr.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][-1]+2))
-            ylabels = self.filenames[self.rfidx[self.ipage][0]::]
-            ylabels.insert(0, '')
-            self.axr.set_yticklabels(ylabels)
-            self.azi_label = ['%5.2f' % self.baz[i] for i in self.rfidx[self.ipage]]
-        self.axt.set_ylim(self.axr.get_ylim())
-        self.axt.set_yticks(self.axr.get_yticks())
-        self.axb.set_ylim(self.axr.get_ylim())
-        self.azi_label.insert(0, "")
-        self.axb.set_yticklabels(self.azi_label)
-        self.axb.set_yticks(self.axr.get_yticks())
+        self.set_ylabels()
     
     def enlarge(self):
         self.enf += 1
@@ -234,9 +218,8 @@ class RFFigure(Figure):
                 gauss = self.rrf[i].stats.sac.user1
                 fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
     
-    def plot(self, image_path):
+    def plot(self):
         stadata = StaData(self.filenames, self.rrf, self.trf, self.baz, self.goodrf)
-        h, axr, axt, axb, axr_sum, axt_sum = init_figure()
+        self.plotfig, axr, axt, axb, axr_sum, axt_sum = init_figure()
         plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, self.time_axis, enf=self.enf)
         set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, self.staname)
-        h.savefig(image_path)

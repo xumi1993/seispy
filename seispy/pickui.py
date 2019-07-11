@@ -7,15 +7,17 @@ import argparse
 matplotlib.use("Qt5Agg")
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSizePolicy, QWidget, QDesktopWidget, \
-                            QPushButton, QHBoxLayout, QLineEdit, QFileDialog
+                            QPushButton, QHBoxLayout, QLineEdit, QFileDialog, QAction
 from numpy import arange, sin, pi
-from os.path import exists
+from os.path import exists, dirname, join
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from seispy.pickfigure import RFFigure
+from seispy.plotui import PreviewWidget
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, rfpath='', width=21, height=11, dpi=100):
@@ -33,19 +35,34 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.updateGeometry(self)
 
 
-class MatplotlibWidget(QWidget):
+class MatplotlibWidget(QMainWindow):
     def __init__(self, rfpath, parent=None):
         super(MatplotlibWidget, self).__init__(parent)
         self.initUi(rfpath)
 
     def initUi(self, rfpath):
-        self.layout = QVBoxLayout(self)
+        self.layout = QVBoxLayout()
         self.add_btn()
         self.mpl = MyMplCanvas(self, rfpath=rfpath, width=21, height=11, dpi=100)
         self.layout.addWidget(self.mpl, 2)
         self.mpl.mpl_connect('button_press_event', self.on_click)
 
+        main_frame = QWidget()
+        self.setCentralWidget(main_frame)
+        main_frame.setLayout(self.layout)
+
+        saveAction = QAction('&Save', self)        
+        saveAction.setShortcut('Ctrl+S')
+        saveAction.setStatusTip('Save this figure')
+        saveAction.triggered.connect(self.plot_save)
+
+        menubar = self.menuBar()
+        fileMenu = menubar.addMenu('&File')
+        fileMenu.addAction(saveAction)
+
         self._set_geom_center()
+        self.setWindowTitle('PickRF')
+        self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
     
     def on_click(self, event):
         self.mpl.rffig.onclick(event)
@@ -71,6 +88,11 @@ class MatplotlibWidget(QWidget):
         self.mpl.rffig.finish()
         QApplication.quit()
 
+    def plot_ui(self):
+        self.mpl.rffig.plot()
+        self.plotwin = PreviewWidget(self.mpl.rffig.plotfig)
+        self.plotwin.show()
+
     def plot_save(self):
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
                                     "Save the figure",  
@@ -79,7 +101,7 @@ class MatplotlibWidget(QWidget):
 
         if fileName_choose == "":
             return
-        self.mpl.rffig.plot(fileName_choose)
+        self.mpl.rffig.plotfig.savefig(fileName_choose, format=filetype)
 
     def _set_geom_center(self, height=0.8, width=0.8):
         screen_resolution = QDesktopWidget().screenGeometry()
@@ -98,7 +120,7 @@ class MatplotlibWidget(QWidget):
         next_btn = QPushButton("Next")
         next_btn.clicked.connect(self.next_connect)
         plot_btn = QPushButton("Plot")
-        plot_btn.clicked.connect(self.plot_save)
+        plot_btn.clicked.connect(self.plot_ui)
         finish_btn = QPushButton("Finish")
         finish_btn.clicked.connect(self.finish)
         btnbox = QHBoxLayout()
@@ -111,7 +133,7 @@ class MatplotlibWidget(QWidget):
         enlarge_btn = QPushButton("Amp enlarge")
         enlarge_btn.clicked.connect(self.enlarge)
         areduce_btn = QPushButton("Amp reduce")
-        areduce_btn.clicked.connect(self.enlarge)
+        areduce_btn.clicked.connect(self.reduce)
         pathbox = QHBoxLayout()
         pathbox.addWidget(enlarge_btn)
         pathbox.addWidget(areduce_btn)
@@ -121,6 +143,7 @@ class MatplotlibWidget(QWidget):
         ctrl_layout.addLayout(btnbox)
 
         self.layout.addLayout(ctrl_layout)
+
 
 def main():
     parser = argparse.ArgumentParser(description="User interface for picking PRFs")
