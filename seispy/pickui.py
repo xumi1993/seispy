@@ -91,8 +91,6 @@ class MatplotlibWidget(QMainWindow):
 
     def plot_ui(self):
         self.mpl.rffig.plot()
-        self.plotwin = PreviewWidget(self.mpl.rffig.plotfig)
-        self.plotwin.show()
 
     def plot_save(self):
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,  

@@ -219,6 +219,8 @@ class RFFigure(Figure):
                 fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
     
     def plot(self):
+        plt.ion()
+        plt.rcParams['toolbar'] = 'None'
         stadata = StaData(self.filenames, self.rrf, self.trf, self.baz, self.goodrf)
         self.plotfig, axr, axt, axb, axr_sum, axt_sum = init_figure()
         plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, self.time_axis, enf=self.enf)
