@@ -164,7 +164,7 @@ def main():
     arg = parser.parse_args()
     rfpath = arg.rf_path
     if not exists(rfpath):
-        raise('No such directory of {}'.format(rfpath))
+        raise FileNotFoundError('No such directory of {}'.format(rfpath))
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(rfpath)
     ui.show()

@@ -5,7 +5,7 @@ from seispy.rfcorrect import SACStation
 from seispy.rf import CfgParser
 import argparse
 import numpy as np
-from os.path import join, realpath, basename
+from os.path import join, realpath, basename, exists
 import sys
 
 
@@ -123,31 +123,30 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(cfg_file, rfpath=None, enf=3):
-    pa = CfgParser(cfg_file)
-    if rfpath is not None:
-        pa.rfpath = rfpath
-    station = basename(pa.rfpath)
-    # pa.rfpath = join(pa.rfpath, station)
-    lst = join(pa.rfpath, station+'finallist.dat')
+def plotrt(rfpath, enf=3, out_path='./'):
+    station = basename(rfpath)
+    lst = join(rfpath, station+'finallist.dat')
+    if not exists(lst):
+        raise FileExistsError('No such a final list as {}'.format(lst))
+    if not exists(out_path):
+        raise FileExistsError('The output path {} not exists'.format(out_path))
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
     stadata, time_axis = read_process_data(lst)
     plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
-    h.savefig(join(pa.imagepath, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
+    h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
 
 
 def main():
     parser = argparse.ArgumentParser(description="Plot R&T components for P receiver functions (PRFs)")
-    parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
-                        dest='station', type=str, default=None)
-    parser.add_argument('-e', help='Enlargement factor', dest='enf', type=int, default=3)
-    parser.add_argument('cfg_file', type=str, help='Path to configure file')
+    parser.add_argument('path', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
+    parser.add_argument('-e', help='Enlargement factor default is 3', dest='enf', type=int, default=3)
+    parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str)
     arg = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-    plotrt(arg.cfg_file, rfpath=arg.station, enf=arg.enf)
+    plotrt(rfpath=arg.path, enf=arg.enf, out_path=arg.output)
 
 
 if __name__ == '__main__':
