@@ -124,8 +124,8 @@ class RFFigure(Figure):
     def sort_baz_(self):
         idx = np.argsort(self.baz)
         self.baz = self.baz[idx]
-        self.rrf = obspy.Stream([self.rrf[i] for i in idx])
-        self.trf = obspy.Stream([self.trf[i] for i in idx])
+        self.rrf = [self.rrf[i] for i in idx]
+        self.trf = [self.trf[i] for i in idx]
         self.filenames = [self.filenames[i] for i in idx]
 
     def plotwave(self):

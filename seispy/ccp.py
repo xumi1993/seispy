@@ -135,7 +135,7 @@ def search_pierce(rfdep, bin_loca, profile_range, stack_range, dep_axis, log, bi
         depmod = DepModel(dep_axis)
         fzone = km2deg(np.sqrt(0.5*domperiod*depmod.vs*dep_axis))
     else:
-        fzone = np.ones(dep_axis) * km2deg(bin_radius)
+        fzone = np.ones(dep_axis.shape[0]) * km2deg(bin_radius)
     for i in range(bin_loca.shape[0]):
         rfbin = {}
         log.CCPlog.info('{}/{} bin from {} at lat: {:.3f} lon: {:.3f}'.format(i + 1, bin_loca.shape[0], profile_range[i],
@@ -247,11 +247,7 @@ def ccp_profile():
 
     rfdep = loadmat(cpara.depthdat)['RFdepth'][0, :]
 
-    try:
-        stack_data = stack(rfdep, cpara, log)
-    except Exception as e:
-        log.CCPlog.error('{}'.format(e))
-        sys.exit(1)
+    stack_data = stack(rfdep, cpara, log)
 
     log.CCPlog.info('Save stack data into {}'.format(stackfile))
     if arg.isdat:
