@@ -7,6 +7,7 @@ from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
 from seispy.rfcorrect import SACStation
 from seispy.hkpara import hkpara
+from seispy.geo import srad2skm
 import argparse
 
 
@@ -167,7 +168,7 @@ def print_result(besth, bestk, maxhsig, maxksig, print_comment=True):
 def hksta(hpara, isplot=False):
     station = basename(hpara.rfpath)
     stadata = SACStation(join(hpara.rfpath, station+'finallist.dat'), only_r=True)
-    stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, stadata.rayp,
+    stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, srad2skm(stadata.rayp),
                                     hpara.hrange, hpara.krange, vp=hpara.vp, weight=hpara.weight)
     besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, hpara.hrange, hpara.krange, stadata.ev_num)
     with open(hpara.hklist, 'a') as f:
@@ -186,14 +187,14 @@ def hk():
     parser = argparse.ArgumentParser(description="HK stacking for single station")
     parser.add_argument('cfg_file', type=str, help='Path to HK configure file')
     parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
-                        dest='station', type=str, default=None)
+                        dest='station', type=str, default='')
     parser.add_argument('-H', help='Range for searching best H: <hmin>/<hmax>', type=str, default='')
     parser.add_argument('-K', help='Range for searching best K: <kmin>/<kmax>', type=str, default='')
-    parser.add_argument('-p', help='If save the figure', dest='isplot', action='store_false')
+    parser.add_argument('-p', help='If save the figure', dest='isplot', action='store_true')
     arg = parser.parse_args()
     hpara = hkpara(arg.cfg_file)
-    if arg.station is not None:
-        hpara.hkpath = arg.station
+    if arg.station != '':
+        hpara.rfpath = arg.station
     if arg.H != '':
         hmin, hmax = [float(val) for val in arg.H.split('/')]
         hpara.hrange = np.arange(hmin, hmax, 0.1)
@@ -226,6 +227,9 @@ def hktest():
     print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
     plot(stack, allstack, h, kappa, besth, bestk, cvalue)
 
+def hk_sta_test():
+    hpara = hkpara('/Users/xumj/Researches/YNRF/hk.cfg')
+    hksta(hpara, isplot=True)
 
 if __name__ == '__main__':
-    hktest()
+    hk_sta_test()
