@@ -68,7 +68,10 @@ def makedata(cpara, log=setuplog()):
 def makedata3d(cpara, velmod3d, log=setuplog()):
     mod3d = Mod3DPerturbation(velmod3d, cpara.depth_axis, velmod=cpara.velmod)
     sta_info = Station(cpara.stalist)
-    srayp = np.load(cpara.rayp_lib)
+    if cpara.rayp_lib is not None:
+        srayp = np.load(cpara.rayp_lib)
+    else:
+        srayp = None
     RFdepth = []
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}

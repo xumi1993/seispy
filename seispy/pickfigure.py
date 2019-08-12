@@ -207,16 +207,16 @@ class RFFigure(Figure):
                     for fil in files:
                         os.remove(fil)
                     self.log.RFlog.info("Reject PRF of "+self.filenames[i])
-                    
-                evla = self.rrf[i].stats.sac.evla
-                evlo = self.rrf[i].stats.sac.evlo
-                evdp = self.rrf[i].stats.sac.evdp
-                dist = self.rrf[i].stats.sac.gcarc
-                baz = self.rrf[i].stats.sac.baz
-                rayp = self.rrf[i].stats.sac.user0
-                mag = self.rrf[i].stats.sac.mag
-                gauss = self.rrf[i].stats.sac.user1
-                fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
+                else:
+                    evla = self.rrf[i].stats.sac.evla
+                    evlo = self.rrf[i].stats.sac.evlo
+                    evdp = self.rrf[i].stats.sac.evdp
+                    dist = self.rrf[i].stats.sac.gcarc
+                    baz = self.rrf[i].stats.sac.baz
+                    rayp = self.rrf[i].stats.sac.user0
+                    mag = self.rrf[i].stats.sac.mag
+                    gauss = self.rrf[i].stats.sac.user1
+                    fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
     
     def plot(self):
         plt.ion()
