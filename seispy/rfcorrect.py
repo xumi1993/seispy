@@ -244,6 +244,14 @@ def psrf_1D_raytracing(stla, stlo, stadatar, YAxisRange, velmod='iasp91', srayp=
     return pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds
 
 
+def interp_depth_model(modpath, lat, lon):
+    model = np.load(modpath)
+    points = [[depth, lat, lon] for depth in model['dep']]
+    vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False)
+    vs = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False)
+    return vp, vs
+
+
 class Mod3DPerturbation:
     def __init__(self, modpath, YAxisRange, velmod='iasp91'):
         dep_mod = DepModel(YAxisRange, velmod=velmod)
