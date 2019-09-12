@@ -166,10 +166,10 @@ def extrema(x, opt='max'):
     return idx
 
 def slantstack(seis, timeaxis, rayp_range, tau_range, ref_dis, dis):
-    EV_num = seis.shape()[1]
-    tmp = np.zeros([EV_num, tau_range.shape()[0]])
-    amp = np.zeros([rayp_range.shape()[0], tau_range.shape()[0]])
-    for j in range(rayp_range.shape()[0]):
+    EV_num = seis.shape[1]
+    tmp = np.zeros([EV_num, tau_range.shape[0]])
+    amp = np.zeros([rayp_range.shape[0], tau_range.shape[0]])
+    for j in range(rayp_range.shape[0]):
         for i in range(EV_num):
             seis[:,i] = seis[:,i] / np.max(np.abs(seis[:,i]))
             tps = tau_range - rayp_range[j] * (dis[i] - ref_dis)
