@@ -190,6 +190,7 @@ def stack(rfdep, cpara, log=setuplog()):
 def writedat(dat_path, stack_data, stack_range):
     with open(dat_path, 'w') as f:
         for bin in stack_data:
+            f.write('>\n')
             for i, dep in enumerate(stack_range):
                 f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
                                                                                 bin['profile_dis'],

@@ -171,9 +171,9 @@ def slantstack(seis, timeaxis, rayp_range, tau_range, ref_dis, dis):
     amp = np.zeros([rayp_range.shape[0], tau_range.shape[0]])
     for j in range(rayp_range.shape[0]):
         for i in range(EV_num):
-            seis[:,i] = seis[:,i] / np.max(np.abs(seis[:,i]))
+            seis[i, :] = seis[i, :] / np.max(np.abs(seis[i, :]))
             tps = tau_range - rayp_range[j] * (dis[i] - ref_dis)
-            tmp[i,:] = interpolate.interp1d(timeaxis, seis[:,i].T)(tps)
-        amp[j,:] = np.mean(tmp)
+            tmp[i, :] = interpolate.interp1d(timeaxis, seis[i, :], fill_value='extrapolate')(tps)
+        amp[j, :] = np.mean(tmp, axis=0)
     return amp
 
