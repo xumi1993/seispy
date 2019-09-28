@@ -131,7 +131,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod='i
     return Newdatar, EndIndex, x_s, x_p
 
 
-def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod='iasp91', srayp=None):
+def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod='iasp91', velmod_3d=None, srayp=None):
     """
     :param stadatar:
     :param YAxisRange:
@@ -142,6 +142,8 @@ def psrf2depth(stadatar, YAxisRange, sampling, shift, velmod='iasp91', srayp=Non
     """
 
     dep_mod = DepModel(YAxisRange, velmod)
+    if velmod_3d is not None:
+        dep_mod.vp, dep_mod.vs = interp_depth_model(velmod_3d, stadatar.stla, stadatar.stlo, YAxisRange)
 
     x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -244,6 +246,14 @@ def psrf_1D_raytracing(stla, stlo, stadatar, YAxisRange, velmod='iasp91', srayp=
     return pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds
 
 
+def interp_depth_model(model, lat, lon, new_dep):
+    #  model = np.load(modpath)
+    points = [[depth, lat, lon] for depth in new_dep]
+    vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False, fill_value=None)
+    vs = interpn((model['dep'], model['lat'], model['lon']), model['vs'], points, bounds_error=False, fill_value=None)
+    return vp, vs
+
+
 class Mod3DPerturbation:
     def __init__(self, modpath, YAxisRange, velmod='iasp91'):
         dep_mod = DepModel(YAxisRange, velmod=velmod)
@@ -312,25 +322,31 @@ def time2depth(stadatar, YAxisRange, Tpds):
 
 
 if __name__ == '__main__':
-    lst = '/Users/xumj/Researches/XE.ES01/XE.ES01finallist.dat'
-    YAxisRange = np.append(np.arange(0, 800, 1), 800)
-    stla = 36.8121
-    stlo = 92.9486
+    stadata = SACStation('/Volumes/xumj3/YNRF/RFresult/4501/4501finallist.dat')
+    vel3dmod = np.load('/Users/xumj/Researches/YN_crust/SETPvs/model_Bao_Wang.npz')
+    YAxisRange = np.append(np.arange(0, 150, 1), 150)
+    stla = 24.667
+    stlo = 104.896
+    PS_RFdepth, EndIndex, x_s, x_p = psrf2depth(stadata, YAxisRange, stadata.sampling, stadata.shift, velmod='iasp91', velmod_3d=vel3dmod, srayp=None)
+    plt.plot(YAxisRange, PS_RFdepth[1])
+    plt.show()
+
+    '''
     # dep_mod = DepModel(YAxisRange, velmod)
     # print(dep_mod.vp.shape, dep_mod.R.shape, YAxisRange[-1])
     srayp = np.load('/Users/xumj/Researches/Tibet_MTZ/process/psrayp.npz')
     mod3d = Mod3DPerturbation('/Users/xumj/Researches/Tibet_MTZ/models/GYPSUM.npz', YAxisRange)
-    stadatar = SACStation(lst, only_r=True)
     pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(stla, stlo, stadatar, YAxisRange, srayp=srayp)
     newtds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, YAxisRange, mod3d)
     amp1d = time2depth(stadatar, YAxisRange, Tpds)
     amp3d = time2depth(stadatar, YAxisRange, newtds)
     plt.imshow(amp3d)
-    # plt.plot(YAxisRange, amp1d[1])
+    # plt.plot(YAxisRange, amp1d[1])plt.plot(YAxisRange, amp1d[1])
     # plt.plot(YAxisRange, amp3d[1])
     # PS_RFdepth, _, x_s, x_p = psrf2depth(stadatar, YAxisRange, sampling, shift, velmod, srayp='/Users/xumj/Researches/Ps_rayp.npz')
     # mean_data = np.mean(PS_RFdepth, axis=0)
 
     # plt.plot(YAxisRange, mean_data)
     plt.show()
+    '''
 

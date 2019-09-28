@@ -4,7 +4,7 @@ import numpy as np
 from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog
 from seispy.geo import latlon_from, deg2km, rad2deg
-from os.path import join, dirname
+from os.path import join, dirname, exists
 from scipy.io import savemat
 import argparse
 import sys
@@ -32,7 +32,17 @@ def _convert_str_mat(instr):
     return mat
 
 
-def makedata(cpara, log=setuplog()):
+def makedata(cpara, velmod3d=None, log=setuplog()):
+    if velmod3d is not None:
+        if isinstance(velmod3d, str):
+            if exists(velmod3d):
+                model_3d = np.load(velmod3d)
+            else:
+                model_3d = None
+        else:
+            raise ValueError('Path to 3d velocity model should be in str')
+    else:
+        model_3d = None
     # cpara = ccppara(cfg_file)
     sta_info = Station(cpara.stalist)
     RFdepth = []
@@ -43,8 +53,8 @@ def makedata(cpara, log=setuplog()):
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
-        PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, cpara.velmod,
-                                             srayp=cpara.rayp_lib)
+        PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, cpara.velmod, 
+                                             velmod_3d=model_3d, srayp=cpara.rayp_lib)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
@@ -106,17 +116,22 @@ def makedata3d(cpara, velmod3d, log=setuplog()):
 
 def rf2depth():
     parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
-    parser.add_argument('-d', help='Path to 3d vel model in npz file', dest='vel3dpath', type=str, default='')
+    parser.add_argument('-d', help='Path to 3d vel model in npz file for moveout correcting', type=str, default='')
+    parser.add_argument('-r', help='Path to 3d vel model in npz file for 1D ray tracing', type=str, default='')
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     arg = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
     cpara = ccppara(arg.cfg_file)
-    if arg.vel3dpath == '':
-        makedata(cpara)
+    if arg.d != '' and arg.r != '':
+        raise ValueError('Specify only 1 argument in \'-d\' and \'-r\'')
+    elif arg.d != '' and arg.r == '':
+        makedata3d(cpara, arg.d)
+    elif arg.d == '' and arg.r != '':
+        makedata(cpara, arg.r)
     else:
-        makedata3d(cpara, arg.vel3dpath)
+        makedata(cpara)
 
 
 if __name__ == '__main__':
