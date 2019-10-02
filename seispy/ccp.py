@@ -239,7 +239,7 @@ def ccp_profile():
     if arg.outpath is not None:
         cpara.stackfile = arg.outpath
     else:
-        raise('Out path sould be sepified.')
+        raise ValueError('Out path sould be sepified.')
     if arg.isdat:
         typ = 'dat'
     else:
