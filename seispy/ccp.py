@@ -150,6 +150,7 @@ def search_pierce(rfdep, bin_loca, profile_range, stack_range, dep_axis, log, bi
                 fall_idx = np.where(distaz(sta['projlat'][0, 0][:, j], sta['projlon'][0, 0][:, j],
                                            bin_loca[i, 0], bin_loca[i, 1]).delta < fzone[j])[0]
                 bin_dep = np.append(bin_dep, sta['moveout_correct'][0, 0][fall_idx, j])
+            bin_dep = bin_dep[np.where(np.logical_not(np.isnan(bin_dep)))]
             if bin_dep.shape[0] > 1:
                 if isci:
                     ccp_ci[jj] = ci(bin_dep, n_samples=2000)
@@ -179,22 +180,33 @@ def stack(rfdep, cpara, log=setuplog()):
                                            cpara.line[3], cpara.slid_val)
     if exists(cpara.stack_sta_list):
         new_rfdep = get_sta(rfdep, cpara.stack_sta_list, cpara.line, cpara.depth_axis, log)
-    else:
+    elif cpara.width is not None:
         new_rfdep = select_sta(rfdep, cpara.stack_sta_list, cpara.line, cpara.width/2, cpara.depth_axis, log)
+    elif cpara.width is None and cpara.shape == 'circ':
+        new_rfdep = rfdep
+    else:
+        raise ValueError('Please specify profile width or use circle bin')
     # del rfdep
     stack_data = search_pierce(new_rfdep, bin_loca, profile_range,
                                cpara.stack_range, cpara.depth_axis, log, bin_radius=cpara.bin_radius, isci=False, domperiod=5)
     return stack_data
 
 
-def writedat(dat_path, stack_data, stack_range):
+def writedat(dat_path, stack_data, stack_range, isci=False):
     with open(dat_path, 'w') as f:
-        for bin in stack_data:
-            f.write('>\n')
-            for i, dep in enumerate(stack_range):
-                f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
-                                                                                bin['profile_dis'],
-                                                                                dep, bin['mu'][i], int(bin['count'][i])))
+        if isci:
+            for bin in stack_data:
+                for i, dep in enumerate(stack_range):
+                    f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
+                                                                                    bin['profile_dis'],
+                                                                                    dep, bin['mu'][i], bin['ci'][i, 0], 
+                                                                                    bin['ci'][i, 1], int(bin['count'][i])))
+        else:
+            for bin in stack_data:
+                for i, dep in enumerate(stack_range):
+                    f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
+                                                                                    bin['profile_dis'],
+                                                                                    dep, bin['mu'][i], int(bin['count'][i])))
 
 
 def fix_filename(filename, typ='dat'):
@@ -226,6 +238,10 @@ def ccp_profile():
 
     if arg.outpath is not None:
         cpara.stackfile = arg.outpath
+    elif cpara.stackfile is not None:
+        pass
+    else:
+        raise ValueError('Out path sould be sepified.')
     if arg.isdat:
         typ = 'dat'
     else:
@@ -233,7 +249,7 @@ def ccp_profile():
     try:
         stackfile = fix_filename(cpara.stackfile, typ=typ)
     except FileExistsError:
-        log.CCPlog.error('Output path {} not exists'.format(dirname(cpara.stackfile)))
+        log.CCPlog.error('Cannot open such file of {}'.format(dirname(cpara.stackfile)))
         sys.exit(1)
 
     if arg.stalist is not None:

@@ -76,7 +76,10 @@ def ccppara(cfg_file):
     # para for bin section
     cpara.shape = cf.get('bin', 'shape')
     cpara.domperiod = cf.getfloat('bin', 'domperiod')
-    cpara.width = cf.getfloat('bin', 'width')
+    try:
+        cpara.width = cf.getfloat('bin', 'width')
+    except:
+        cpara.width = None
     try:
         cpara.bin_radius = cf.getfloat('bin', 'bin_radius')
     except:

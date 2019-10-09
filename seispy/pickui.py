@@ -17,7 +17,6 @@ from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as Navigatio
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from seispy.pickfigure import RFFigure
-from seispy.plotui import PreviewWidget
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, rfpath='', width=21, height=11, dpi=100):
