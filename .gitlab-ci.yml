@@ -41,6 +41,16 @@ py37:
 #  - pip install tox flake8  # you can also use tox
 #  - tox -e py36,flake8
 
+py36:
+  script:
+  - conda create -n testenv36 python=3.6
+  - source activate testenv36
+  - conda install obspy pandas pytz netCDF4
+  - python setup.py install
+  - cd test/testcase01
+  - python testcase01.py
+  - cd ../testcase02
+  - python testcase02.py
 #pages:
 #  script:
 #  - pip install sphinx sphinx-rtd-theme
