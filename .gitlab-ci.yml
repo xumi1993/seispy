@@ -16,7 +16,6 @@ variables:
 
 before_script:
   - conda config --set always_yes yes
-  - conda update -q conda
   - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
   - conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
   - conda config --add channels conda-forge
