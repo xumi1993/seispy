@@ -15,6 +15,7 @@ class para(object):
         self.dateformat = '%Y.%j.%H.%M.%S'
         self.date_begin = obspy.UTCDateTime('19760101')
         self.date_end = obspy.UTCDateTime.now()
+        self.catalog_server = 'IRIS'
         self.magmin = 5.5
         self.magmax = 10
         self.dismin = 30

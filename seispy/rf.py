@@ -205,7 +205,7 @@ class RF(object):
             self.logger.RFlog.error('{0}'.format(e))
             raise e
 
-    def search_eq(self, local=False, server='IRIS'):
+    def search_eq(self, local=False, server=None):
         if not local:
             try:
                 self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
@@ -216,6 +216,8 @@ class RF(object):
             except Exception as e:
                 raise ConnectionError(e)
         else:
+            if server is None:
+                server = self.para.catalog_server
             try:
                 self.logger.RFlog.info(
                     'Searching earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
