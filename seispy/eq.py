@@ -22,7 +22,7 @@ def rotateZNE(st):
 
 class eq(object):
     def __init__(self, pathname, datestr, suffix, switchEN=False, reverseE=False, reverseN=False):
-        self.datastr = datestr
+        self.datestr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
         if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
             raise ValueError('Samples are different in 3 components')
@@ -46,7 +46,7 @@ class eq(object):
         self.SRaypara = None
 
     def __str__(self):
-        return('Event data class {0}'.format(self.datastr))
+        return('Event data class {0}'.format(self.datestr))
 
     def detrend(self):
         self.st.detrend(type='linear')
@@ -207,7 +207,7 @@ class eq(object):
                     tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
                     tr.stats.delta = target_dt
 
-    def saverf(self, path, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
+    def saverf(self, path, evtstr=None, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
         if phase == 'P':
             if only_r:
@@ -220,8 +220,11 @@ class eq(object):
             rayp = seispy.geo.srad2skm(self.SArrival.ray_param)
         else:
             raise ValueError('Phase must be in \'P\' or \'S\'')
-
-        filename = join(path, self.datastr)
+        
+        if evtstr is None:
+            filename = join(path, self.datestr)
+        else:
+            filename = join(path, evtstr)
         for i in loop_lst:
             header = {'evla': evla, 'evlo': evlo, 'evdp': evdp, 'mag': mag, 'baz': baz,
                       'gcarc': gcarc, 'user0': rayp, 'kuser0': 'Ray Para', 'user1': gauss, 'kuser1': 'G factor'}

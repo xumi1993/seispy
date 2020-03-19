@@ -9,6 +9,7 @@ class para(object):
         self.rfpath = expanduser('~')
         self.imagepath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
+        self.catalog_server = 'IRIS'
         self.offset = None
         self.tolerance = 210
         self.dateformat = '%Y.%j.%H.%M.%S'
@@ -21,11 +22,17 @@ class para(object):
         self.ref_comp = 'BHZ'
         self.suffix = 'SAC'
         self.noisegate = 5
+        self.noiselen = 50
         self.gauss = 2
         self.target_dt = 0.01
         self.phase = 'P'
         self.time_before = 10
         self.time_after = 120
+        self.freqmin = 0.05
+        self.freqmax = 1
+        self.itmax = 400
+        self.minderr = 0.001
+        self.criterion = 'crust'
         self.only_r = False
 
     def get_para(self):

@@ -14,6 +14,7 @@ from datetime import timedelta, datetime
 import pandas as pd
 from obspy.taup import TauPyModel
 import configparser
+import argparse
 
 
 def datestr2regex(datestr):
@@ -77,18 +78,6 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
             sac_files.append([datestr, tr.stats.starttime, tr.stats.sac.o])
         else:
             raise TypeError('offset should be int or float type')
-
-        # try:
-        #     tr = obspy.read(ref_sac)[0]
-        # except TypeError:
-        #     continue
-        # if offset is None:
-        #     this_offset = tr.stats.sac.o
-        # elif isinstance(offset, (int, float)):
-        #     this_offset = -offset
-        # else:
-        #     raise TypeError('offset should be int or float type')
-        # sac_files.append([datestr, tr.stats.starttime, this_offset])
     new_col = ['dis', 'bazi', 'data']
     eq_match = pd.DataFrame(columns=new_col)
     for datestr, b_time, offs in sac_files:
@@ -107,23 +96,6 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         eq_match = eq_match.append(this_df)
     ind = eq_match.index.drop_duplicates(False)
     eq_match = eq_match.loc[ind]
-    '''
-    for i, evt in eq_lst.iterrows():
-        tmp_datestr = []
-        for datestr, b_time, offs in sac_files:
-            if b_time + timedelta(seconds=offs - tolerance) <= evt['date'] \
-                    <= b_time + timedelta(seconds=offs + tolerance):
-                tmp_datestr.append(datestr)
-        if len(tmp_datestr) == 1:
-            try:
-                this_eq = eq(pathname, tmp_datestr[0], suffix)
-            except:
-                continue
-            this_eq.get_time_offset(evt['date'])
-            daz = seispy.distaz(stla, stlo, evt['evla'], evt['evlo'])
-            this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=[i])
-            eq_match = eq_match.append(this_df)
-    '''
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
 
@@ -155,23 +127,28 @@ def CfgParser(cfg_file):
     logpath = cf.get('path', 'catalogpath')
     if logpath != '':
         pa.catalogpath = cf.get('path', 'catalogpath')
-    for key, value in cf.items('para'):
-        if key == 'date_begin':
-            pa.__dict__[key] = obspy.UTCDateTime(value)
-        elif key == 'date_end':
-            pa.__dict__[key] = obspy.UTCDateTime(value)
-        elif key == 'offset':
-            try:
-                pa.__dict__[key] = float(value)
-            except:
-                pa.__dict__[key] = None
-        elif key == 'only_r':
-            pa.only_r = cf.getboolean('para', 'only_r')
-        else:
-            try:
-                pa.__dict__[key] = float(value)
-            except ValueError:
-                pa.__dict__[key] = value
+    sections = cf.sections()
+    sections.remove('path')
+    for sec in sections:
+        for key, value in cf.items(sec):
+            if key == 'date_begin':
+                pa.__dict__[key] = obspy.UTCDateTime(value)
+            elif key == 'date_end':
+                pa.__dict__[key] = obspy.UTCDateTime(value)
+            elif key == 'offset':
+                try:
+                    pa.__dict__[key] = float(value)
+                except:
+                    pa.__dict__[key] = None
+            elif key == 'itmax':
+                pa.__dict__[key] = int(value)
+            elif key == 'only_r':
+                pa.__dict__[key] = cf.getboolean(sec, 'only_r')
+            else:
+                try:
+                    pa.__dict__[key] = float(value)
+                except ValueError:
+                    pa.__dict__[key] = value
     return pa
 
 
@@ -185,14 +162,14 @@ def CfgModify(cfg_file, session, key, value):
     cf.write(open(cfg_file, 'w'))
 
 
-class rf(object):
-    def __init__(self, cfg=None, log=None):
-        if cfg is None:
+class RF(object):
+    def __init__(self, cfg_file=None, log=None):
+        if cfg_file is None:
             self.para = para()
-        elif isinstance(cfg, str):
-            self.para = CfgParser(cfg)
+        elif isinstance(cfg_file, str):
+            self.para = CfgParser(cfg_file)
         else:
-            raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg)))
+            raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg_file)))
         if not isinstance(self.para, para):
             raise TypeError('Input value should be class seispy.rf.para')
         if log is None:
@@ -300,7 +277,11 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].detrend()
 
-    def filter(self, freqmin=0.05, freqmax=1., order=4):
+    def filter(self, freqmin=None, freqmax=None, order=4):
+        if freqmin is None:
+            freqmin = self.para.freqmin
+        if freqmax is None:
+            freqmax = self.para.freqmax
         self.logger.RFlog.info('Filter all data from {0} to {1}'.format(freqmin, freqmax))
         for _, row in self.eqs.iterrows():
             row['data'].filter(freqmin=freqmin, freqmax=freqmax, order=order)
@@ -322,7 +303,9 @@ class rf(object):
                 drop_idx.append(i)
         self.eqs.drop(drop_idx, inplace=True)
 
-    def drop_eq_snr(self, length=50):
+    def drop_eq_snr(self, length=None):
+        if length is None:
+            length = self.para.noiselen
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
@@ -336,7 +319,11 @@ class rf(object):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
 
-    def deconv(self, itmax=400, minderr=0.001):
+    def deconv(self, itmax=None, minderr=None):
+        if itmax is None:
+            itmax = self.para.itmax
+        if minderr is None:
+            minderr = self.para.minderr
         if self.para.phase == 'P':
             shift = self.para.time_before
         elif self.para.phase == 'S':
@@ -345,20 +332,23 @@ class rf(object):
             pass
         drop_lst = []
 
+        count = 0
         for i, row in self.eqs.iterrows():
+            count += 1
             try:
                 row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
                                     only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
-                self.logger.RFlog.info('Iterative Decon {0} iterations: {1}; final RMS: {2}'.format(
-                    row['data'].datastr, row['data'].it, row['data'].rms[-1]))
+                self.logger.RFlog.info('Iterative Decon {0} ({3}/{4}) iterations: {1}; final RMS: {2:.4f}'.format(
+                    row['data'].datestr, row['data'].it, row['data'].rms[-1], count, self.eqs.shape[0]))
             except Exception as e:
-                self.logger.RFlog.error('{}: {}'.format(row['data'].datastr, e))
+                self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
 
-    def saverf(self, criterion='crust'):
+    def saverf(self):
         if self.para.phase == 'P':
             shift = self.para.time_before
+            criterion = self.para.criterion
         elif self.para.phase == 'S':
             shift = self.para.time_after
             criterion = None
@@ -369,7 +359,7 @@ class rf(object):
         self.logger.RFlog.info('Save RFs with criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
             if row['data'].judge_rf(shift, criterion=criterion):
-                row['data'].saverf(self.para.rfpath, phase=self.para.phase, shift=shift,
+                row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
             else:
@@ -377,104 +367,26 @@ class rf(object):
         self.eqs.drop(drop_lst)
 
 
-def InitRfProj(cfg_path):
-    pjt = rf()
-    pjt.para = CfgParser(cfg_path)
-    return pjt
-
-
-def rf_test():
-    date_begin = obspy.UTCDateTime('20180601')
-    date_end = obspy.UTCDateTime('20190601')
-    logpath = '/Users/xumj/Codes/cutevents/EventCMT.dat'
-    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    datapath = '/Users/xumj/Codes/cutevents/test/YN001'
-    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
-    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    RFpath = '/Users/xumj/Researches/YNRF/RFresult/RFresult/YN001'
-    # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
-
-    rfproj = rf()
-    # rfproj.load(proj_file)
-    #
-    # '''
-    rfproj.date_begin = date_begin
-    rfproj.date_end = date_end
-    rfproj.para.datapath = datapath
-    rfproj.para.catalogpath = logpath
-    rfproj.para.rfpath = RFpath
-    rfproj.para.ref_comp = '.1.'
-    rfproj.para.suffix = 'sac'
-    rfproj.para.gauss = 2.
-    rfproj.para.offset = 0
-    rfproj.load_stainfo()
-    rfproj.search_eq(local=True)
-    rfproj.match_eq()
-    rfproj.detrend()
-    rfproj.filter(freqmin=0.03, freqmax=0.5)
-    rfproj.cal_phase()
-    rfproj.drop_eq_snr(length=50)
-    # rfproj.save(proj_file)
-    rfproj.trim()
-    rfproj.rotate()
-
-    rfproj.deconv()
-    rfproj.saverf()
-
-
-def srf_test():
-    date_begin = obspy.UTCDateTime('20130101')
-    date_end = obspy.UTCDateTime('20140101')
-    logpath = '/Users/xumj/Codes/seispy/Scripts/EventCMT.dat'
-    # logpath = '/home/xu_mijian/Codes/seispy/Scripts/EventCMT.dat'
-    datapath = '/Users/xumj/Researches/test4seispy/data'
-    # datapath = '/home/xu_mijian/xu_mijian/NJ2_SRF/data'
-    proj_file = '/Users/xumj/Researches/test4seispy/test.h5'
-    # proj_file = '/home/xu_mijian/xu_mijian/NJ2_SRF/test.h5'
-    RFpath = '/Users/xumj/Researches/test4seispy/RFresult'
-    # RFpath = '/home/xu_mijian/xu_mijian/NJ2_SRF/RFresult'
-
-    rfproj = rf()
-    # rfproj.load(proj_file)
-    #
-    # '''
-    rfproj.date_begin = date_begin
-    rfproj.date_end = date_end
-    rfproj.para.datapath = datapath
-    rfproj.para.catalogpath = logpath
-    rfproj.para.rfpath = RFpath
-    rfproj.para.time_before = 100
-    rfproj.para.time_after = 30
-    rfproj.para.gauss = 1
-    rfproj.para.only_r = True
-    rfproj.para.phase = 'S'
-    rfproj.load_stainfo()
-    rfproj.search_eq(local=True)
-    rfproj.match_eq()
-    rfproj.detrend()
-    rfproj.filter(freqmin=0.03, freqmax=0.5)
-    rfproj.cal_phase()
-    rfproj.drop_eq_snr(length=50)
-    rfproj.trim()
-    rfproj.rotate(method='ZNE->LQT')
-    # '''
-
-    rfproj.deconv()
-
-
-def proj_test():
-    cfg_file = '/workspace/seispy_test/RF.cfg'
-    pjt = rf(cfg_file)
+def prf():
+    parser = argparse.ArgumentParser(description="Calculating RFs for single station")
+    parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
+    parser.add_argument('-l', help="use local catalog. Default is false", dest='islocal', action='store_true')
+    arg = parser.parse_args()
+    pjt = RF(cfg_file=arg.cfg_file)
     pjt.load_stainfo()
-    pjt.search_eq(local=True)
+    pjt.search_eq(local=arg.islocal)
     pjt.match_eq()
+    pjt.detrend()
+    pjt.filter()
     pjt.cal_phase()
-    for _, row in pjt.eqs.iterrows():
-        row['data'].snr()
+    pjt.drop_eq_snr()
+    pjt.trim()
+    pjt.rotate()
+    pjt.deconv()
+    pjt.saverf()
 
 
 if __name__ == '__main__':
     # get_events_test()
-    rf_test()
+    prf()
     # proj_test()
