@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 packages = find_packages()
 
-VERSION = "1.1.9"
+VERSION = "1.1.10"
 setup(name='seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -14,6 +14,7 @@ setup(name='seispy',
       install_requires=['netcdf4', 'pyerf', 'obspy', 'pandas', 'numpy', 'scipy', 'matplotlib'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.rf:prf',
+                                        'setpar=seispy.rf:setpar',
                                         'rf2depth=seispy.rf2depth_makedata:rf2depth',
                                         'plotrt=seispy.plotRT:main',
                                         'plotr=seispy.plotR:main',
