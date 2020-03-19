@@ -208,6 +208,8 @@ class RF(object):
     def search_eq(self, local=False, server=None):
         if not local:
             try:
+                if server is None:
+                    server = self.para.catalog_server
                 self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
                 self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
                                       latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
@@ -216,8 +218,6 @@ class RF(object):
             except Exception as e:
                 raise ConnectionError(e)
         else:
-            if server is None:
-                server = self.para.catalog_server
             try:
                 self.logger.RFlog.info(
                     'Searching earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
