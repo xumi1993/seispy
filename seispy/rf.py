@@ -392,7 +392,7 @@ def setpar():
     parser = argparse.ArgumentParser(description="Set parameters to configure file")
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     parser.add_argument('session', type=str, help='session name')
-    parser.add_argument('key', type=str help='key name')
+    parser.add_argument('key', type=str, help='key name')
     parser.add_argument('value', type=str, help='value')
     arg = parser.parse_args()
     CfgModify(arg.cfg_file, arg.session, arg.key, arg.value)
