@@ -28,6 +28,7 @@ python setup.py install
   * `seispy.decov`: Iterative time domain deconvolution method (Ligorria and Ammon's 1999 BSSA)
 
 ## Commands
+ * `prf`: Calculate PRFs for a station.
  * `pickrf`: Pick PRFs after the calculation.
  * `plotrt`: Plot PRFs in R and T components order by back-azimuth.
  * `plotr`: Plot PRFs in R component order by back-azimuth.
