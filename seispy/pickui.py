@@ -4,7 +4,7 @@ import random
 import matplotlib
 import argparse
 
-matplotlib.use("Qt5Agg")
+# matplotlib.use("Qt5Agg")
 from PyQt5 import QtCore
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
@@ -123,13 +123,15 @@ class MatplotlibWidget(QMainWindow):
         self.key_c.activated.connect(self.next_connect)
         self.key_z = QShortcut(QKeySequence('z'), self)
         self.key_z.activated.connect(self.previous_connect)
+        self.key_space = QShortcut(QKeySequence('Space'), self)
+        self.key_space.activated.connect(self.plot_ui)
 
     def add_btn(self):
         pre_btn = QPushButton("Previous (z)")
         pre_btn.clicked.connect(self.previous_connect)
         next_btn = QPushButton("Next (c)")
         next_btn.clicked.connect(self.next_connect)
-        plot_btn = QPushButton("Preview")
+        plot_btn = QPushButton("Preview (Space)")
         plot_btn.clicked.connect(self.plot_ui)
         finish_btn = QPushButton("Finish")
         finish_btn.clicked.connect(self.finish)
