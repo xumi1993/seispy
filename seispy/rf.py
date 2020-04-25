@@ -10,11 +10,13 @@ import seispy
 from seispy.eq import eq
 from seispy.setuplog import setuplog
 import glob
+import numpy as np
 from datetime import timedelta, datetime
 import pandas as pd
 from obspy.taup import TauPyModel
 import configparser
 import argparse
+import sys
 
 
 def datestr2regex(datestr):
@@ -294,6 +296,19 @@ class RF(object):
             row['data'].get_arrival(self.model, row['evdp'], row['dis'])
             # row['data'].get_raypara(self.model, row['evdp'], row['dis'])
 
+    def baz_correct(self, time_b=10, time_e=20, offset=90):
+        self.logger.RFlog.info('correct back-azimuth')
+        shift_all = []
+        for i, row in self.eqs.iterrows():
+            shift_all.append(row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset))
+        if None in shift_all:
+            self.logger.RFlog.error('Range of searching bazi is too small.')
+            sys.exit(1)
+        shift_all = np.array(shift_all)
+        baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
+        self.logger.RFlog.info('Average {:.4f} deg offset in back-azimuth'.format(baz_shift))
+        self.eqs['bazi'] = self.eqs['bazi'] + baz_shift
+
     def rotate(self, method='NE->RT'):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
         drop_idx = []
@@ -350,6 +365,7 @@ class RF(object):
     def saverf(self):
         if self.para.phase == 'P':
             shift = self.para.time_before
+            npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
             criterion = self.para.criterion
         elif self.para.phase == 'S':
             shift = self.para.time_after
@@ -360,7 +376,7 @@ class RF(object):
 
         self.logger.RFlog.info('Save RFs with criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, criterion=criterion):
+            if row['data'].judge_rf(shift, npts, criterion=criterion):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
@@ -373,15 +389,40 @@ def prf():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
     parser.add_argument('-l', help="use local catalog. Default is false", dest='islocal', action='store_true')
+    parser.add_argument('-r', help='Reverse components: EN, E or N', default=None, type=str)
+    parser.add_argument('-b', help='Correct back-azimuth via minimal energy of T component', default=None, type=str)
     arg = parser.parse_args()
+    if arg.r is not None:
+        arg.r = arg.r.upper()        
+        if arg.r == 'NE' or arg.r == 'EN':
+            reverseE = True
+            reverseN = True
+        elif arg.r == 'E':
+            reverseE = True
+            reverseN = False
+        elif arg.r == 'N':
+            reverseE = False
+            reverseN = True
+        else:
+            raise ValueError('component name must be in EN, E or N')
+    else:
+        reverseN = False
+        reverseE = False
+    if arg.b is not None:
+        try:
+            baz_corr = [float(val) for val in arg.b.split('/')]
+        except:
+            raise ValueError('Format of baz correction must be as 10/20/45')
     pjt = RF(cfg_file=arg.cfg_file)
     pjt.load_stainfo()
     pjt.search_eq(local=arg.islocal)
-    pjt.match_eq()
+    pjt.match_eq(reverseN=reverseN, reverseE=reverseE)
     pjt.detrend()
     pjt.filter()
     pjt.cal_phase()
     pjt.drop_eq_snr()
+    if arg.b is not None:
+        pjt.baz_correct(baz_corr[0], baz_corr[1], baz_corr[2])
     pjt.trim()
     pjt.rotate()
     pjt.deconv()

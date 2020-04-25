@@ -19,7 +19,7 @@ def convertinfo(info):
 
 def ndkparse(ndk_str):
     find_re = re.compile(
-        r'[A-Z]+\s(\d+)/(\d+)/(\d+)\s+(\d+):(\d+):(\d+.\d)\s+(.+?)\s+(.+?)\s+(.+?)\s+.+?\s+(.+?)\s+.+?\\n', re.DOTALL)
+        r'[A-Z]+\s(\d+)/(\d+)/(\d+)\s+(\d+):(\d+):(\d+.\d)\s+(.+?)\s+(.+?)\s+(.+?)\s+.+?\s+(.+?)\s+.+?\n', re.DOTALL)
     ndk_lst = [convertinfo(info) for info in find_re.findall(ndk_str)]
     return ndk_lst
 
@@ -59,7 +59,9 @@ def main():
     parser = argparse.ArgumentParser(description="Update CMT Catalog")
     parser.add_argument('-i', help='Input Catalog', dest='inlog',
                         type=str, default=join(dirname(__file__), 'data', 'EventCMT.dat'))
-    parser.add_argument('-o', help='Onput Catalog', dest='outlog', type=str, default='')
+    parser.add_argument('-o', help='Onput Catalog', dest='outlog', type=str,
+                        default=join(dirname(__file__), 'data', 'EventCMT.dat'))
+    parser.add_argument('-u', help='url of ndk', type=str)
     arg = parser.parse_args()
     fetch_cata(inlog=arg.inlog, outlog=arg.outlog)
 
@@ -77,7 +79,10 @@ def ndk2dat():
     except Exception as e:
         raise TypeError('Error type for ndk file\n{}'.format(e))
     with open(arg.outlog, 'w+') as f:
-        f.writelines(log.lst)
+        for year, mon, day, hour, min, sec, lat, lon, dep, mw in log_lst:
+            evt_time = datetime(year, mon, day, hour, min, int(sec))
+            f.write('%d %d %d %s %d %d %d %6.2f %6.2f %s %s\n' % (
+            year, mon, day, evt_time.strftime('%j'), hour, min, int(sec), lat, lon, dep, mw))
 
 
 if __name__ == '__main__':

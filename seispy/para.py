@@ -97,3 +97,14 @@ class para(object):
         if not isinstance(value, str):
             raise TypeError('catalogpath should be \'str\' type not \'{0}\''.format(type(value)))
         self._catalogpath = value
+
+    @property
+    def criterion(self):
+        return self._criterion
+
+    @criterion.setter
+    def criterion(self, value):
+        if value == '':
+            self._criterion = None
+        else:
+            self._criterion = value

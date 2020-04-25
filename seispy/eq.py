@@ -51,6 +51,7 @@ class eq(object):
     def detrend(self):
         self.st.detrend(type='linear')
         self.st.detrend(type='constant')
+        self.fix_channel_name()
 
     def filter(self, freqmin=0.05, freqmax=1, order=4):
         self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order, zerophase=True)
@@ -84,7 +85,41 @@ class eq(object):
         real_inc = inc_range[real_inc_idx]
         return real_inc
 
-    def rotate(self, bazi, inc=None, method='NE->RT', phase='P', inv=None):
+    def search_baz(self, bazi, time_b=10, time_e=20, offset=90):
+        p_arr, _ = self.arr_correct(write_to_sac=False)
+        this_st = self.st.copy()
+        this_st.filter('bandpass', freqmin=0.03, freqmax=0.5)
+        this_st.trim(this_st[0].stats.starttime+p_arr-time_b, this_st[0].stats.starttime+p_arr+time_e)
+        bazs = np.arange(bazi-offset, bazi+offset)
+        ampt = np.zeros_like(bazs)
+        for i, b in enumerate(bazs):
+            t, _ = seispy.geo.rotateSeisENtoTR(this_st[0].data, this_st[1].data, b)
+            ampt[i] = seispy.geo.rssq(t)
+        idx = seispy.geo.extrema(ampt, opt='min')
+        if len(idx) == 0:
+            return np.nan
+        elif len(idx) > 1:
+            return None
+        else:
+            return bazs[seispy.geo.extrema(ampt, opt='min')[0]] - bazi
+
+    def fix_channel_name(self):
+        if self.st.select(channel='??1') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
+            if self.st.select(channel='*1')[0].stats.sac.cmpaz == 0:
+                self.st.select(channel='*1')[0].stats.channel = self.st.select(channel='*1')[0].stats.channel[:-1] + 'N'
+                self.st.select(channel='*2')[0].stats.channel = self.st.select(channel='*2')[0].stats.channel[:-1] + 'E'
+            elif self.st.select(channel='*1')[0].stats.sac.cmpaz != 0:
+                rotateZNE(self.st)
+            self.st.sort(['channel'])
+        elif self.st.select(channel='1'):
+            self.st.select(channel='1')[0].stats.channel = 'Z'
+            self.st.select(channel='2')[0].stats.channel = 'N'
+            self.st.select(channel='3')[0].stats.channel = 'E'
+            self.st.sort(['channel'])
+        else:
+            pass
+
+    def rotate(self, bazi, inc=None, method='NE->RT', phase='P'):
         if phase not in ('P', 'S'):
             raise ValueError('phase must be in [\'P\', \'S\']')
 
@@ -101,23 +136,6 @@ class eq(object):
                 # inc = self.search_inc(bazi)
             else:
                 pass
-
-        if inv is not None:
-            self.rf.rotate('->ZNE', inventory=inv)
-        elif self.rf.select(channel='??1') and hasattr(self.rf.select(channel='*1')[0].stats.sac, 'cmpaz'):
-            if self.rf.select(channel='*1')[0].stats.sac.cmpaz == 0:
-                self.rf.select(channel='*1')[0].stats.channel = self.rf.select(channel='*1')[0].stats.channel[:-1] + 'N'
-                self.rf.select(channel='*2')[0].stats.channel = self.rf.select(channel='*2')[0].stats.channel[:-1] + 'E'
-            elif self.rf.select(channel='*1')[0].stats.sac.cmpaz != 0:
-                rotateZNE(self.rf)
-            self.rf.sort(['channel'])
-        elif self.rf.select(channel='1'):
-            self.rf.select(channel='1')[0].stats.channel = 'Z'
-            self.rf.select(channel='2')[0].stats.channel = 'N'
-            self.rf.select(channel='3')[0].stats.channel = 'E'
-            self.rf.sort(['channel'])
-        else:
-            pass
 
         if method == 'NE->RT':
             self.rf.rotate('NE->RT', back_azimuth=bazi)
@@ -237,16 +255,18 @@ class eq(object):
             tr.o = 0
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
-    def judge_rf(self, shift, criterion='crust'):
+    def judge_rf(self, shift, npts, criterion='crust'):
         if not isinstance(criterion, (str, type(None))):
             raise TypeError('criterion should be string in [\'crust\', \'mtz\']')
         elif criterion is None:
             pass
-        elif criterion.lower() not in ['crust', 'mtz', 'lab']:
+        elif criterion.lower() not in ['crust', 'mtz']:
             raise ValueError('criterion should be string in [\'crust\', \'mtz\']')
         else:
             criterion = criterion.lower()
-
+        
+        if self.rf[1].stats.npts != npts:
+            return False
         if criterion == 'crust':
             time_P1 = int(np.floor((-2+shift)/self.rf[1].stats.delta))
             time_P2 = int(np.floor((2+shift)/self.rf[1].stats.delta))
