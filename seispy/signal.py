@@ -52,7 +52,7 @@ def smooth(x, half_len=5, window='flat'):
     if window == 'flat': #moving average
         w = np.ones(window_len,'d')
     else:
-        w = eval('numpy.'+window+'(window_len)')
+        w = eval('np.'+window+'(window_len)')
 
     y = np.convolve(w/w.sum(), s, mode='valid')
     return  y[half_len:-half_len]

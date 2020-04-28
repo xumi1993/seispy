@@ -372,7 +372,7 @@ class RF(object):
             criterion = None
         else:
             pass
-        drop_lst = []
+        good_lst = []
 
         self.logger.RFlog.info('Save RFs with criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
@@ -380,9 +380,8 @@ class RF(object):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
-            else:
-                drop_lst.append(i)
-        self.eqs.drop(drop_lst)
+                good_lst.append(i)
+        self.eqs = self.eqs.ix[good_lst]
 
 
 def prf():
