@@ -108,7 +108,7 @@ def load_cyan_map():
 
 
 def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), title=None, path=None):
-    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, sharex='col', sharey='row')
+    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 8) sharex='col', sharey='row')
     xlim = (h[0], h[-1])
     ylim = (kappa[0], kappa[-1])
     if title is not None:
@@ -174,7 +174,7 @@ def hksta(hpara, isplot=False):
     with open(hpara.hklist, 'a') as f:
         f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(station, stadata.stla, stadata.stlo,
                                                                               besth, maxhsig, bestk, maxksig))
-    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$\nV_P/V_S = ${:.2f}\pm{:.3f}$'.format(station, besth,
+    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(station, besth,
                                                                                      maxhsig, bestk, maxksig)
     if isplot:
         img_path = join(hpara.hkpath, station+'.pdf')
