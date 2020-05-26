@@ -108,7 +108,7 @@ def load_cyan_map():
 
 
 def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), title=None, path=None):
-    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 8) sharex='col', sharey='row')
+    f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 8), sharex='col', sharey='row')
     xlim = (h[0], h[-1])
     ylim = (kappa[0], kappa[-1])
     if title is not None:
