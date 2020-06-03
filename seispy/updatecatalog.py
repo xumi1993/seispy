@@ -33,7 +33,7 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
         raise TimeoutError('Could not connect to http://www.ldeo.columbia.edu/~gcmt/projects/CMT/'
                            'catalog/NEW_QUICK/qcmt.ndk\n{}'.format(e))
 
-    html = str(response.read())
+    html = response.read().decode('utf-8')
     with open(inlog, 'r') as fid_old:
         all_old_log = fid_old.readlines()
     old_log = all_old_log[-1]
