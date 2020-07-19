@@ -5,6 +5,10 @@ image: continuumio/miniconda3:latest
 
 # Change pip's cache directory to be inside the project directory since we can
 # only cache local items.
+#
+#
+#
+
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
 
@@ -27,7 +31,12 @@ before_script:
   #- virtualenv venv
   #- source venv/bin/activate
 
+stages:
+  - test
+  - deploy
+
 py37:
+  stage: test
   script:
   - conda create -n testenv37 python=3.7
   - source activate testenv37
@@ -41,6 +50,7 @@ py37:
 #  - tox -e py36,flake8
 
 py36:
+  stage: test
   script:
   - conda create -n testenv36 python=3.6
   - source activate testenv36
@@ -50,6 +60,13 @@ py36:
   - python testcase01.py
   - cd ../testcase02
   - python testcase02.py
+
+doc:
+  stage: deploy
+  script:
+    - bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
+
+
 #pages:
 #  script:
 #  - pip install sphinx sphinx-rtd-theme
