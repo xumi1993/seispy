@@ -1,7 +1,9 @@
 # seispy
 
 [![pipeline status](https://git.nju.edu.cn/geophy/seispy/badges/master/pipeline.svg)](https://git.nju.edu.cn/geophy/seispy/commits/master)
-[![LGPLv3](https://www.gnu.org/graphics/lgplv3-88x31.png)](https://www.gnu.org/licenses/lgpl.html)
+[![Build Status](https://travis-ci.com/xumi1993/seispy-doc.post.svg?branch=master)](https://travis-ci.com/xumi1993/seispy-doc.post)
+[![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
+[![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
 
 Python module of seismology and receiver functions
 
