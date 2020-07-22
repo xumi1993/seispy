@@ -35,6 +35,7 @@ before_script:
 stages:
   - test
   - deploy
+  - coverage
 
 py37:
   stage: test
@@ -68,6 +69,7 @@ doc:
   - bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
 
 codecov:
+  stage: coverage
   script:
   - bash <(curl -s https://codecov.io/bash)
   when: on_success
