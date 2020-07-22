@@ -67,7 +67,8 @@ doc:
   script:
   - bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
 
-after_script:
+codecov:
+  script:
   - bash <(curl -s https://codecov.io/bash)
   when: on_success
  
