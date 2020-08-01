@@ -11,6 +11,7 @@ image: continuumio/miniconda3:latest
 
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+  CODECOV_TOKEN: "19cc2f17-6db7-4633-9cb6-658b0b399ec2"
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
@@ -34,6 +35,7 @@ before_script:
 stages:
   - test
   - deploy
+  - coverage
 
 py37:
   stage: test
@@ -64,9 +66,14 @@ py36:
 doc:
   stage: deploy
   script:
-    - bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
+  - bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
 
-
+codecov:
+  stage: coverage
+  script:
+  - bash <(curl -s https://codecov.io/bash)
+  when: on_success
+ 
 #pages:
 #  script:
 #  - pip install sphinx sphinx-rtd-theme
