@@ -207,7 +207,7 @@ class RF(object):
             self.logger.RFlog.error('{0}'.format(e))
             raise e
 
-    def search_eq(self, local=False, server=None):
+    def search_eq(self, local=False, server=None, catalog='GCMT'):
         if not local:
             try:
                 if server is None:
@@ -216,7 +216,7 @@ class RF(object):
                 self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
                                       latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
                                       minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
-                                      minradius=self.para.dismin, maxradius=self.para.dismax)
+                                      minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
             except Exception as e:
                 raise ConnectionError(e)
         else:

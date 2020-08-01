@@ -104,17 +104,17 @@ class eq(object):
             return bazs[seispy.geo.extrema(ampt, opt='min')[0]] - bazi
 
     def fix_channel_name(self):
-        if self.st.select(channel='??1') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
+        if self.st.select(channel='??1') and self.st.select(channel='??Z') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
             if self.st.select(channel='*1')[0].stats.sac.cmpaz == 0:
                 self.st.select(channel='*1')[0].stats.channel = self.st.select(channel='*1')[0].stats.channel[:-1] + 'N'
                 self.st.select(channel='*2')[0].stats.channel = self.st.select(channel='*2')[0].stats.channel[:-1] + 'E'
             elif self.st.select(channel='*1')[0].stats.sac.cmpaz != 0:
                 rotateZNE(self.st)
             self.st.sort(['channel'])
-        elif self.st.select(channel='1'):
-            self.st.select(channel='1')[0].stats.channel = 'Z'
-            self.st.select(channel='2')[0].stats.channel = 'N'
-            self.st.select(channel='3')[0].stats.channel = 'E'
+        elif self.st.select(channel='*1'):
+            self.st.select(channel='*1')[0].stats.channel = 'Z'
+            self.st.select(channel='*2')[0].stats.channel = 'N'
+            self.st.select(channel='*3')[0].stats.channel = 'E'
             self.st.sort(['channel'])
         else:
             pass
