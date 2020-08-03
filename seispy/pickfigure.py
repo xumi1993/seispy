@@ -58,15 +58,17 @@ class RFFigure(Figure):
         self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1)
         self.axr.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1))
         ylabels = self.filenames[self.rfidx[self.ipage][0]::]
-        ylabels.insert(0, '')
-        self.axr.set_yticklabels(ylabels)
+        ticklabels = [''] * (self.maxidx+1)        
+        ticklabels[1: len(ylabels)+1] = ylabels
+        self.axr.set_yticklabels(ticklabels)
         self.axt.set_ylim(self.axr.get_ylim())
         self.axt.set_yticks(self.axr.get_yticks())
         self.axb.set_ylim(self.axr.get_ylim())
         self.axb.set_yticks(self.axr.get_yticks())
         self.azi_label = ['%5.2f' % self.baz[i] for i in self.rfidx[self.ipage]]
-        self.azi_label.insert(0, "")
-        self.axb.set_yticklabels(self.azi_label)
+        ticklabels = [''] * (self.maxidx+1)
+        ticklabels[1: len(self.azi_label)+1] = self.azi_label
+        self.axb.set_yticklabels(ticklabels)
 
     def set_page(self):
         self.set_ylabels()

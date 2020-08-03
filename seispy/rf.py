@@ -381,7 +381,7 @@ class RF(object):
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
                 good_lst.append(i)
-        self.eqs = self.eqs.ix[good_lst]
+        self.eqs = self.eqs.loc[good_lst]
 
 
 def prf():
