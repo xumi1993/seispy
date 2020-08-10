@@ -88,7 +88,7 @@ def makedata3d(cpara, velmod3d, log=setuplog()):
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
         stadatar = SACStation(evt_lst, only_r=True)
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
-        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tpds = psrf_1D_raytracing(sta_info.stla[i], sta_info.stlo[i], stadatar,
+        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tpds = psrf_1D_raytracing(stadatar,
                                                                                                 cpara.depth_axis, srayp=srayp)
         newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
                                     tpds, cpara.depth_axis, mod3d)
