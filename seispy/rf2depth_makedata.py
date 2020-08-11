@@ -1,5 +1,5 @@
 from seispy.rfcorrect import SACStation, psrf2depth, Mod3DPerturbation, psrf_1D_raytracing,\
-    psrf_3D_migration, time2depth
+    psrf_3D_migration, time2depth, psrf_3D_raytracing
 import numpy as np
 from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog
@@ -75,7 +75,7 @@ def makedata(cpara, velmod3d=None, log=setuplog()):
     # np.save(cpara.depthdat, RFdepth)
 
 
-def makedata3d(cpara, velmod3d, log=setuplog()):
+def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
     mod3d = Mod3DPerturbation(velmod3d, cpara.depth_axis, velmod=cpara.velmod)
     sta_info = Station(cpara.stalist)
     if cpara.rayp_lib is not None:
@@ -88,10 +88,13 @@ def makedata3d(cpara, velmod3d, log=setuplog()):
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
         stadatar = SACStation(evt_lst, only_r=True)
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
-        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tpds = psrf_1D_raytracing(stadatar,
+        if raytracing3d:
+            pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp)
+        else:
+            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tpds = psrf_1D_raytracing(stadatar,
                                                                                                 cpara.depth_axis, srayp=srayp)
-        newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
-                                    tpds, cpara.depth_axis, mod3d)
+            newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
+                                        tpds, cpara.depth_axis, mod3d)
         amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
         rfdep['Station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]
@@ -117,7 +120,7 @@ def makedata3d(cpara, velmod3d, log=setuplog()):
 def rf2depth():
     parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
     parser.add_argument('-d', help='Path to 3d vel model in npz file for moveout correcting', type=str, default='')
-    parser.add_argument('-r', help='Path to 3d vel model in npz file for 1D ray tracing', type=str, default='')
+    parser.add_argument('-r', help='Path to 3d vel model in npz file for 3D ray tracing', type=str, default='')
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     arg = parser.parse_args()
     if len(sys.argv) == 1:
@@ -127,9 +130,9 @@ def rf2depth():
     if arg.d != '' and arg.r != '':
         raise ValueError('Specify only 1 argument in \'-d\' and \'-r\'')
     elif arg.d != '' and arg.r == '':
-        makedata3d(cpara, arg.d)
+        makedata3d(cpara, arg.d, raytracing3d=False)
     elif arg.d == '' and arg.r != '':
-        makedata(cpara, arg.r)
+        makedata3d(cpara, arg.r, raytracing3d=True)
     else:
         makedata(cpara)
 
