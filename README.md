@@ -1,8 +1,9 @@
 # seispy
 
-[![pipeline status](https://git.nju.edu.cn/geophy/seispy/badges/master/pipeline.svg)](https://git.nju.edu.cn/geophy/seispy/commits/master)
-[![Build Status](https://travis-ci.com/xumi1993/seispy-doc.post.svg?branch=master)](https://travis-ci.com/xumi1993/seispy-doc.post)
+[![pipeline status](https://img.shields.io/travis/com/xumi1993/seispy)](https://travis-ci.com/xumi1993/seispy)
+[![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=Doc)](https://travis-ci.com/xumi1993/seispy-doc.post)
 [![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
+[![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
 
 Python module of seismology and receiver functions
