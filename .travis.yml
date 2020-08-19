@@ -12,12 +12,17 @@ install:
 jobs:
   include:
     - stage: test
-      script:
-        - cd test/testcase01
-        - python testcase01.py
-        - cd ../testcase02
-        - python testcase02.py
+      python: "3.6"
+      script: bash test/run.sh
     
+    - stage: test
+      python: "3.7"
+      script: bash test/run.sh
+
+    - stage: test
+      python: "3.8"
+      script: bash test/run.sh
+
     - stage: doc
       script: bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
 
