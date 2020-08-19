@@ -10,7 +10,7 @@ install:
 
 script:
   - git clone https://github.com/xumi1993/seispy-test test
-  - cd test/testscase01
+  - cd test/testcase01
   - python testcase01.py
   - cd ../testcase02
   - python testcase02.py
