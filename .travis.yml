@@ -15,6 +15,6 @@ script:
   - cd ../testcase02
   - python testcase02.py
 
-deploy:
+after_success:
   script: bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
 
