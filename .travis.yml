@@ -8,9 +8,16 @@ install:
   - pip install obspy pandas pytz netCDF4 pyerf
   - pip install .
 
-script:
-  - git clone https://github.com/xumi1993/seispy-test test
-  - cd test/testcase01
-  - python testcase01.py
-  - cd ../testcase02
-  - python testcase02.py
+jobs:
+  include:
+    - stage: tests
+      script:
+        - git clone https://github.com/xumi1993/seispy-test test
+        - cd test/testcase01
+        - python testcase01.py
+        - cd ../testcase02
+        - python testcase02.py
+    - stage: docs
+      script: 
+        - bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
+
