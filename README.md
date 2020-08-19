@@ -4,6 +4,7 @@
 [![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=Doc)](https://travis-ci.com/xumi1993/seispy-doc.post)
 [![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
 [![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
+[![](https://img.shields.io/github/commit-activity/m/xumi1993/seispy)]()
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
 
 Python module of seismology and receiver functions
