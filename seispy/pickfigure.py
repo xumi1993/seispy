@@ -17,14 +17,14 @@ def indexpags(evt_num, maxidx=20):
         axpages = full_pages+1
     rfidx = []
     for i in range(axpages-1):
-        rfidx.append(range(maxidx*i, maxidx*(i+1)))
-    rfidx.append(range(maxidx*(axpages-1), evt_num))
+        rfidx.append(np.arange(maxidx*i, maxidx*(i+1)))
+    rfidx.append(np.arange(maxidx*(axpages-1), evt_num))
     return axpages, rfidx
 
 
 class StaData():
     def __init__(self, filenames, rrf, trf, baz, goodrf):
-        goodidx = np.where(goodrf==1)
+        goodidx = np.where(goodrf == 1)
         self.event = [filenames[i] for i in goodidx[0]]
         self.bazi = baz[goodidx]
         self.RFlength = len(rrf[0].data)
@@ -57,7 +57,7 @@ class RFFigure(Figure):
     def set_ylabels(self):
         self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1)
         self.axr.set_yticks(np.arange(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1))
-        ylabels = self.filenames[self.rfidx[self.ipage][0]::]
+        ylabels = np.array(self.filenames)[self.rfidx[self.ipage]]
         ticklabels = [''] * (self.maxidx+1)        
         ticklabels[1: len(ylabels)+1] = ylabels
         self.axr.set_yticklabels(ticklabels)
@@ -108,7 +108,7 @@ class RFFigure(Figure):
         self.axt.set_title("T component")
         self.axb.set_xlabel("Backazimuth (\N{DEGREE SIGN})")
 
-    def read_sac(self, dt=0.1):
+    def read_sac(self, dt=0.2):
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(glob.glob(join(self.rfpath, '*_R.sac')))]
         self.rrf = obspy.read(join(self.rfpath, '*_R.sac')).sort(['starttime']).resample(1/dt)
