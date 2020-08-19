@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.6"
+  - "3.7"
+  - "3.8"
+
+install:
+  - pip install obspy pandas pytz netCDF4 pyerf
+  - pip install .
+
+script:
+  - git clone https://github.com/xumi1993/seispy-test test
+  - cd testscase01
+  - python testcase01.py
+  - cd ../testcase02
+  - python testcase02.py
