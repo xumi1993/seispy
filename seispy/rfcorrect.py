@@ -258,6 +258,7 @@ stla: float
 stlo: float
     The longitude of the station
 stadatar: object SACStation
+    The data class including PRFs and more parameters
 YAxisRange: array_like
     The depth array with the same intervals
 model: numpy.lib.npyio.NpzFile
