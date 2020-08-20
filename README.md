@@ -8,6 +8,7 @@
 [![](https://img.shields.io/github/commit-activity/m/xumi1993/seispy)]()
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)
 ![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)
+[![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
 
 Seispy is a Python module for processing seismological data and calculating Receiver Functions. The advanced functions are available to improve the Obspy.
