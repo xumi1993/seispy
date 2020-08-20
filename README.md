@@ -1,4 +1,4 @@
-# seispy
+# Seispy
 
 [![pipeline status](https://img.shields.io/travis/com/xumi1993/seispy)](https://travis-ci.com/xumi1993/seispy)
 [![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=doc)](https://travis-ci.com/xumi1993/seispy-doc.post)
@@ -26,7 +26,6 @@ python setup.py install
 ```
 
 # Inclusion
---------------
 ## Libraries
   * `seispy.distaz`: Calculate distance and azimuth (by [the lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/)).<br />
   * `seispy.geo`: Tiny codes of geophysics.
