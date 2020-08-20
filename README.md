@@ -3,13 +3,16 @@
 [![pipeline status](https://img.shields.io/travis/com/xumi1993/seispy)](https://travis-ci.com/xumi1993/seispy)
 [![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=doc)](https://travis-ci.com/xumi1993/seispy-doc.post)
 [![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
-[!GitHub tag (latest by date)](https://img.shields.io/github/v/tag/xumi1993/seispy)
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/xumi1993/seispy)]()
 [![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
 [![](https://img.shields.io/github/commit-activity/m/xumi1993/seispy)]()
-[!GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)
-[!GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
+[![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)]()
 [![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
+
+[![GitHub stars](https://img.shields.io/github/stars/xumi1993/seispy?style=social)]()
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
+
 
 Seispy is a Python module for processing seismological data and calculating Receiver Functions. The advanced functions are available to improve the Obspy.
 
@@ -47,4 +50,3 @@ python setup.py install
  * `hk`: H-Kappa stacking.
  * `rf2depth`: Convert PRFs to depth axis.
  * `ccp_profile`: Stack PRFs along a profile with a CCP stacking method.
-
