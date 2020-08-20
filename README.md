@@ -1,7 +1,7 @@
 # Seispy
 
 [![pipeline status](https://img.shields.io/travis/com/xumi1993/seispy)](https://travis-ci.com/xumi1993/seispy)
-[![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=doc)](https://travis-ci.com/xumi1993/seispy-doc.post)
+[![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=doc)](https://seispy.xumijian.me)
 [![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
 [![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/xumi1993/seispy)]()
 [![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
