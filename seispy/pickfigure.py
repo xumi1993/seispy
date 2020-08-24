@@ -4,7 +4,7 @@ import obspy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from os.path import join, basename, dirname
+from os.path import join, basename
 from seispy.setuplog import setuplog
 from seispy.plotRT import init_figure, set_fig, plot_waves
 
@@ -80,6 +80,8 @@ class RFFigure(Figure):
         self.axt.set_xticks(np.arange(self.xlim[0], self.xlim[1]+1, 2))
         self.axb.set_xlim(0, 360)
         self.axb.set_xticks(np.arange(0, 361, 60))
+        self.axg.set_xlim(30, 90)
+        self.axg.set_xticks(np.arange(30, 91, 10))
 
     def init_variables(self):
         self.goodrf = np.ones(self.evt_num)
@@ -95,18 +97,20 @@ class RFFigure(Figure):
         self.axr = self.fig.add_axes([0.1, 0.05, 0.35, 0.84])
         self.axt = self.fig.add_axes([0.47, 0.05, 0.35, 0.84])
         self.axb = self.fig.add_axes([0.855, 0.05, 0.12, 0.84])
+        self.axg = self.axb.twiny()
         self.set_figure()
 
     def set_figure(self):
-        self.axr.grid(which='major', axis='x')
-        self.axt.grid(which='major', axis='x')
-        self.axb.grid(which='major')
+        self.axr.grid(b=True, which='major', axis='x')
+        self.axt.grid(b=True, which='major', axis='x')
+        self.axb.grid(b=True, which='major')
         self.axr.set_ylabel("Event")
         self.axr.set_xlabel("Time after P (s)")
         self.axr.set_title("R component")
         self.axt.set_xlabel("Time after P (s)")
         self.axt.set_title("T component")
         self.axb.set_xlabel("Backazimuth (\N{DEGREE SIGN})")
+        self.axg.set_xlabel('Distance (\N{DEGREE SIGN})')
 
     def read_sac(self, dt=0.2):
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
@@ -128,6 +132,7 @@ class RFFigure(Figure):
         self.baz = self.baz[idx]
         self.rrf = [self.rrf[i] for i in idx]
         self.trf = [self.trf[i] for i in idx]
+        self.gcarc = [self.rrf[i].stats.sac.gcarc for i in idx]
         self.filenames = [self.filenames[i] for i in idx]
 
     def plotwave(self):
@@ -144,6 +149,7 @@ class RFFigure(Figure):
 
     def plotbaz(self):
         self.axb.scatter(self.baz, np.arange(self.evt_num)+1)
+        self.axg.scatter(self.gcarc, np.arange(self.evt_num)+1, color='orange', alpha=0.6)
 
     def onclick(self, event):
         if event.inaxes != self.axr and event.inaxes != self.axt:
@@ -166,12 +172,20 @@ class RFFigure(Figure):
             self.twvfillpos[click_idx-1].set_facecolor('red')
             self.twvfillnag[click_idx-1].set_facecolor('blue')
 
+    def _set_gray(self):
+        for i in np.where(self.goodrf == 0)[0]:
+            self.rwvfillpos[i].set_facecolor('gray')
+            self.rwvfillnag[i].set_facecolor('gray')
+            self.twvfillpos[i].set_facecolor('gray')
+            self.twvfillnag[i].set_facecolor('gray')
+
     def butprevious(self):
         self.ipage -= 1
         if self.ipage < 0:
             self.ipage = 0
             return
         self.set_ylabels()
+        self.set_figure()
 
     def butnext(self):
         self.ipage += 1
@@ -179,14 +193,16 @@ class RFFigure(Figure):
             self.ipage = self.axpages-1
             return
         self.set_ylabels()
+        self.set_figure()
     
     def enlarge(self):
         self.enf += 1
         self.axr.cla()
         self.axt.cla()
         self.plotwave()
-        self.set_figure()
+        self._set_gray()
         self.set_page()
+        self.set_figure()
 
     def reduce(self):
         if self.enf > 1:
@@ -196,8 +212,9 @@ class RFFigure(Figure):
         self.axr.cla()
         self.axt.cla()
         self.plotwave()
-        self.set_figure()
+        self._set_gray()
         self.set_page()
+        self.set_figure()
 
     def finish(self):
         badidx = np.where(self.goodrf == 0)[0]

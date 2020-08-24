@@ -107,7 +107,7 @@ class MatplotlibWidget(QMainWindow):
         except Exception as e:
             self.mpl.rffig.log.RFlog.error('{}'.format(e))
 
-    def _set_geom_center(self, height=0.8, width=0.8):
+    def _set_geom_center(self, height=1, width=1):
         screen_resolution = QDesktopWidget().screenGeometry()
         screen_height = screen_resolution.height()
         screen_width = screen_resolution.width()
