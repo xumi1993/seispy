@@ -1,13 +1,21 @@
-# seispy
+# Seispy
 
 [![pipeline status](https://img.shields.io/travis/com/xumi1993/seispy)](https://travis-ci.com/xumi1993/seispy)
-[![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=Doc)](https://travis-ci.com/xumi1993/seispy-doc.post)
+[![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=doc)](https://seispy.xumijian.me)
 [![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
+[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/xumi1993/seispy)]()
 [![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
 [![](https://img.shields.io/github/commit-activity/m/xumi1993/seispy)]()
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
+[![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)]()
+[![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
+
+[![GitHub stars](https://img.shields.io/github/stars/xumi1993/seispy?style=social)]()
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
 
-Python module of seismology and receiver functions
+
+Seispy is a Python module for processing seismological data and calculating Receiver Functions. The advanced functions are available to improve the Obspy.
+
 
 # Installation
 ## Dependencies
@@ -19,24 +27,26 @@ Python module of seismology and receiver functions
   * [PyQt5](https://www.riverbankcomputing.com/software/pyqt/)
   
 ## Installation
-```Python
+```
+git clone https://github.com/xumi1993/seispy.git
 python setup.py install
 ```
 
 # Inclusion
---------------
 ## Libraries
   * `seispy.distaz`: Calculate distance and azimuth (by [the lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/)).<br />
   * `seispy.geo`: Tiny codes of geophysics.
   * `seispy.bootstrap`: Bootstrap confidence interval estimation (by [scikits-bootstrap](https://github.com/cgevans/scikits-bootstrap))
   * `seispy.decov`: Iterative time domain deconvolution method (Ligorria and Ammon's 1999 BSSA)
+  * `seispy.rfcorrect`: Subsequent process of PRFs includeing moveout correct and time to depth conversion (1D and 3D) (see Mijian Xu et al., 2018 EPSL)
+  * `seispy.ccp`: CCP stacking along a profile.
+
 
 ## Commands
  * `prf`: Calculate PRFs for a station.
- * `pickrf`: Pick PRFs after the calculation.
+ * `pickrf`: Reject PRFs with poor qualities after the calculation.
  * `plotrt`: Plot PRFs in R and T components order by back-azimuth.
  * `plotr`: Plot PRFs in R component order by back-azimuth.
  * `hk`: H-Kappa stacking.
  * `rf2depth`: Convert PRFs to depth axis.
  * `ccp_profile`: Stack PRFs along a profile with a CCP stacking method.
-
