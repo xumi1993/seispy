@@ -24,8 +24,8 @@ class eq(object):
     def __init__(self, pathname, datestr, suffix, switchEN=False, reverseE=False, reverseN=False):
         self.datestr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
-        if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
-            raise ValueError('Samples are different in 3 components')
+        # if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
+        #     raise ValueError('Samples are different in 3 components')
         if reverseE:
             self.st.select(channel='*[E2]')[0].data *= -1
         if reverseN:
