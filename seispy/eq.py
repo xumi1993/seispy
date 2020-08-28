@@ -24,6 +24,8 @@ class eq(object):
     def __init__(self, pathname, datestr, suffix, switchEN=False, reverseE=False, reverseN=False):
         self.datestr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
+        if len(self.st) != 3:
+            raise ValueError('Sismogram must be in 3 components, but there are {} of {}'.format(len(self.st), datestr))
         # if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
         #     raise ValueError('Samples are different in 3 components')
         if reverseE:
