@@ -1,6 +1,7 @@
 import math
 import numpy as np
 
+
 def sind(deg):
     rad = math.radians(deg)
     return math.sin(rad)

@@ -41,21 +41,20 @@ def smooth(x, half_len=5, window='flat'):
     if x.size < window_len:
         raise ValueError("Input vector needs to be bigger than window size.")
 
-    if window_len<3:
+    if window_len < 3:
         return x
 
-    if not window in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
-        raise ValueError("Window is on of 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'")    
-    
+    if window not in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
+        raise ValueError("Window is on of 'flat', 'hanning', 'hamming',"
+                         "'bartlett', 'blackman'")
     s = np.r_[x[window_len-1:0:-1], x, x[-1:-window_len:-1]]
-    #print(len(s))
-    if window == 'flat': #moving average
-        w = np.ones(window_len,'d')
+    if window == 'flat':
+        w = np.ones(window_len, 'd')  # moving average
     else:
         w = eval('np.'+window+'(window_len)')
 
     y = np.convolve(w/w.sum(), s, mode='valid')
-    return  y[half_len:-half_len]
+    return y[half_len:-half_len]
 
 
 def whiten(data, Nfft, delta, f1, f2, f3, f4):

@@ -1,6 +1,7 @@
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
+from scipy.signal import resample
 from os.path import dirname, join, exists
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
@@ -17,6 +18,7 @@ class SACStation(object):
         :param evt_lst: event list in RF data dir. Column as date string, phase, evt lat, evt lon, evt dep,
                         distance, back-azimuth, ray parameter, magnitude, gauss factor.
         """
+        self.only_r = only_r
         data_path = dirname(evt_lst)
         dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
@@ -44,6 +46,14 @@ class SACStation(object):
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
                 self.datar[_i] = sac.data
+
+    def resample(self, dt):
+        npts = int(self.RFlength * (self.sampling / dt)) + 1
+        self.datar = resample(self.datar, npts, axis=1)
+        if not self.only_r:
+            self.datat = resample(self.datat, npts, axis=1)
+        self.sampling = dt
+        self.RFlength = npts
 
 
 class DepModel(object):

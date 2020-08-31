@@ -4,19 +4,21 @@ import obspy
 from obspy.io.sac import SACTrace
 import re
 from seispy.io import wsfetch
-from os.path import dirname, join, expanduser, exists
+from os.path import join
 from seispy.para import para
 import seispy
 from seispy.eq import eq
 from seispy.setuplog import setuplog
 import glob
 import numpy as np
-from datetime import timedelta, datetime
+from datetime import timedelta
 import pandas as pd
 from obspy.taup import TauPyModel
 import configparser
 import argparse
 import sys
+from tkinter import messagebox
+import matplotlib.pyplot as plt
 
 
 def datestr2regex(datestr):
@@ -164,6 +166,13 @@ def CfgModify(cfg_file, session, key, value):
     cf.write(open(cfg_file, 'w'))
 
 
+def _plotampt(x, y, ampt):
+    xx, yy = np.meshgrid(x, y)
+    f = plt.figure(figsize=(8, 8))
+    plt.pcolor(xx, yy, ampt)
+    return f
+
+
 class RF(object):
     def __init__(self, cfg_file=None, log=None):
         if cfg_file is None:
@@ -299,15 +308,32 @@ class RF(object):
     def baz_correct(self, time_b=10, time_e=20, offset=90):
         self.logger.RFlog.info('correct back-azimuth')
         shift_all = []
+        # ampt_all = []
         for i, row in self.eqs.iterrows():
-            shift_all.append(row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset))
+            curr_baz, _ = row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset)
+            shift_all.append(curr_baz)
+            # ampt_all.append(ampt)
         if None in shift_all:
             self.logger.RFlog.error('Range of searching bazi is too small.')
             sys.exit(1)
         shift_all = np.array(shift_all)
+        # ampt_all = np.array(ampt_all)
         baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
-        self.logger.RFlog.info('Average {:.4f} deg offset in back-azimuth'.format(baz_shift))
-        self.eqs['bazi'] = self.eqs['bazi'] + baz_shift
+        # self._baz_confirm(offset, ampt_all)
+        self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(baz_shift))
+        self.eqs['bazi'] = np.mod(self.eqs['bazi'] + baz_shift, 360)
+
+    # def _baz_confirm(self, offset, ampt_all):
+    #     y = np.arange(self.eqs.shape[0])
+    #     x = np.linspace(-offset, offset, ampt_all.shape[1])
+    #     fig = _plotampt(x, y, ampt_all)
+    #     if messagebox.askyesno('Back-azimuth correction',
+    #                            'Would you like to keep this correction?'):
+    #         fig.close()
+    #     else:
+    #         self.logger.RFlog.error('Manual interruption.')
+    #         fig.close()
+    #         sys.exit(1)
 
     def rotate(self, method='NE->RT'):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
@@ -316,7 +342,7 @@ class RF(object):
             try:
                 row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
             except Exception as e:
-                self.logger.RFlog.error('{}'.format(e))
+                self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_idx.append(i)
         self.eqs.drop(drop_idx, inplace=True)
 
@@ -326,8 +352,9 @@ class RF(object):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
-            snr_R = row['data'].snr(length=length)
-            if snr_R < self.para.noisegate:
+            snr_E, snr_N, snr_Z = row['data'].snr(length=length)
+            if (np.nan in (snr_E, snr_N, snr_Z) or snr_E < self.para.noisegate
+               or snr_N < self.para.noisegate or snr_Z < self.para.noisegate):
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
         self.logger.RFlog.info('{0} events left after SNR calculation'.format(self.eqs.shape[0]))
@@ -381,6 +408,7 @@ class RF(object):
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
                 good_lst.append(i)
+        self.logger.RFlog.info('{} PRFs are saved.'.format(len(good_lst)))
         self.eqs = self.eqs.loc[good_lst]
 
 
@@ -388,18 +416,22 @@ def prf():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
     parser.add_argument('-l', help="use local catalog. Default is false", dest='islocal', action='store_true')
-    parser.add_argument('-r', help='Reverse components: EN, E or N', default=None, type=str)
-    parser.add_argument('-b', help='Correct back-azimuth via minimal energy of T component', default=None, type=str)
+    parser.add_argument('-r', help='Reverse components: EN, E or N', dest='comp', default=None, type=str)
+    parser.add_argument('-s', help='Switch East and North components', dest='isswitch', action='store_true')
+    parser.add_argument('-b', help='Correct back-azimuth with minimal '
+                                   'energy of T component. "baz" is specified '
+                                   'as half-searching range. Default value is 90 deg',
+                                   dest='baz', nargs='?', const=90, type=float)
     arg = parser.parse_args()
-    if arg.r is not None:
-        arg.r = arg.r.upper()        
-        if arg.r == 'NE' or arg.r == 'EN':
+    if arg.comp is not None:
+        arg.comp = arg.comp.upper()
+        if arg.comp == 'NE' or arg.comp == 'EN':
             reverseE = True
             reverseN = True
-        elif arg.r == 'E':
+        elif arg.comp == 'E':
             reverseE = True
             reverseN = False
-        elif arg.r == 'N':
+        elif arg.comp == 'N':
             reverseE = False
             reverseN = True
         else:
@@ -407,21 +439,21 @@ def prf():
     else:
         reverseN = False
         reverseE = False
-    if arg.b is not None:
-        try:
-            baz_corr = [float(val) for val in arg.b.split('/')]
-        except:
-            raise ValueError('Format of baz correction must be as 10/20/45')
+    # if arg.baz is not None:
+    #     try:
+    #         baz_corr = [float(val) for val in arg.b.split('/')]
+    #     except:
+    #         raise ValueError('Format of baz correction must be as 10/20/45')
     pjt = RF(cfg_file=arg.cfg_file)
     pjt.load_stainfo()
     pjt.search_eq(local=arg.islocal)
-    pjt.match_eq(reverseN=reverseN, reverseE=reverseE)
+    pjt.match_eq(switchEN=arg.isswitch, reverseN=reverseN, reverseE=reverseE)
     pjt.detrend()
     pjt.filter()
     pjt.cal_phase()
     pjt.drop_eq_snr()
-    if arg.b is not None:
-        pjt.baz_correct(baz_corr[0], baz_corr[1], baz_corr[2])
+    if arg.baz is not None:
+        pjt.baz_correct(offset=arg.baz)
     pjt.trim()
     pjt.rotate()
     pjt.deconv()
@@ -436,6 +468,7 @@ def setpar():
     parser.add_argument('value', type=str, help='value')
     arg = parser.parse_args()
     CfgModify(arg.cfg_file, arg.session, arg.key, arg.value)
+
 
 if __name__ == '__main__':
     # get_events_test()

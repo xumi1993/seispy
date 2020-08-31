@@ -92,18 +92,19 @@ class eq(object):
         this_st = self.st.copy()
         this_st.filter('bandpass', freqmin=0.03, freqmax=0.5)
         this_st.trim(this_st[0].stats.starttime+p_arr-time_b, this_st[0].stats.starttime+p_arr+time_e)
-        bazs = np.arange(bazi-offset, bazi+offset)
+        bazs = np.mod(np.arange(bazi-offset, bazi+offset), 360)
         ampt = np.zeros_like(bazs)
         for i, b in enumerate(bazs):
             t, _ = seispy.geo.rotateSeisENtoTR(this_st[0].data, this_st[1].data, b)
             ampt[i] = seispy.geo.rssq(t)
         idx = seispy.geo.extrema(ampt, opt='min')
         if len(idx) == 0:
-            return np.nan
+            corr_baz = np.nan
         elif len(idx) > 1:
-            return None
+            corr_baz = None
         else:
-            return bazs[seispy.geo.extrema(ampt, opt='min')[0]] - bazi
+            corr_baz = bazs[idx[0]] - bazi
+        return corr_baz, ampt
 
     def fix_channel_name(self):
         if self.st.select(channel='??1') and self.st.select(channel='??Z') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
@@ -154,10 +155,18 @@ class eq(object):
         st_noise = self.trim(length, 0, phase=phase, isreturn=True)
         st_signal = self.trim(0, length, phase=phase, isreturn=True)
         try:
-            snr_R = seispy.geo.snr(st_signal[1].data, st_noise[1].data)
+            snr_E = seispy.geo.snr(st_signal[0].data, st_noise[0].data)
         except IndexError:
-            snr_R = 0
-        return snr_R
+            snr_E = 0
+        try:
+            snr_N = seispy.geo.snr(st_signal[1].data, st_noise[1].data)
+        except IndexError:
+            snr_N = 0
+        try:
+            snr_Z = seispy.geo.snr(st_signal[2].data, st_noise[2].data)
+        except IndexError:
+            snr_Z = 0
+        return snr_E, snr_N, snr_Z
     
     def get_time_offset(self, event_time):
         if not isinstance(event_time, obspy.core.utcdatetime.UTCDateTime):

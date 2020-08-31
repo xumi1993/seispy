@@ -2,35 +2,42 @@ import numpy as np
 from numpy import pi, mod
 from seispy import distaz
 from scipy import interpolate
-import math
+
 
 def sind(deg):
     rad = np.radians(deg)
     return np.sin(rad)
 
+
 def cosd(deg):
     rad = np.radians(deg)
     return np.cos(rad)
+
 
 def tand(deg):
     rad = np.radians(deg)
     return np.tan(rad)
 
+
 def cotd(deg):
     rad = np.radians(deg)
     return np.cos(rad) / np.sin(rad)
+
 
 def asind(x):
     rad = np.arcsin(x)
     return np.degrees(rad)
 
+
 def acosd(x):
     rad = np.arccos(x)
     return np.degrees(rad)
 
+
 def atand(x):
     rad = np.arctan(x)
     return np.degrees(rad)
+
 
 def km2deg(km):
     radius = 6371
@@ -39,6 +46,7 @@ def km2deg(km):
     deg = km / conv
     return deg
 
+
 def deg2km(deg):
     radius = 6371
     circum = 2*pi*radius
@@ -46,21 +54,26 @@ def deg2km(deg):
     km = deg * conv
     return km
 
+
 def rad2deg(rad):
     deg = rad*(360/(2*pi))
     return deg
+
 
 def skm2sdeg(skm):
     sdeg = skm * deg2km(1)
     return sdeg
 
+
 def sdeg2skm(sdeg):
     skm = sdeg / deg2km(1)
     return skm
 
+
 def srad2skm(srad):
     sdeg = srad * ((2*pi)/360)
     return sdeg / deg2km(1)
+
 
 def skm2srad(skm):
     sdeg = skm * deg2km(1)
@@ -115,35 +128,41 @@ def rotateSeisENtoTR(E, N, BAZ):
     T = E*cosd(angle) - N*sind(angle)
     return T, R
 
+
 def rssq(x):
     return np.sqrt(np.sum(x**2)/len(x))
+
 
 def snr(x, y):
     spow = rssq(x)**2
     npow = rssq(y)**2
-    return 10 * np.log10(spow / npow)
+    if npow == 0:
+        return np.nan
+    else:
+        return 10 * np.log10(spow / npow)
+
 
 def latlon_from(lat1, lon1, azimuth, gcarc_dist):
-    lat2 = asind ((sind (lat1) * cosd (gcarc_dist)) + (cosd (lat1) * sind (gcarc_dist) * cosd (azimuth)))
+    lat2 = asind((sind(lat1) * cosd(gcarc_dist)) + (cosd(lat1) * sind(gcarc_dist) * cosd(azimuth)))
     if isinstance(gcarc_dist, np.ndarray):
         lon2 = np.zeros_like(lat2)
         for n in range(len(gcarc_dist)):
-            if cosd (gcarc_dist[n]) >= (cosd (90 - lat1) * cosd (90 - lat2[n])):
-                lon2[n] = lon1 + asind (sind (gcarc_dist[n]) * sind (azimuth) / cosd (lat2[n]))
+            if cosd(gcarc_dist[n]) >= (cosd(90 - lat1) * cosd(90 - lat2[n])):
+                lon2[n] = lon1 + asind(sind(gcarc_dist[n]) * sind(azimuth) / cosd(lat2[n]))
             else:
-                lon2[n] = lon1 + asind (sind (gcarc_dist[n]) * sind (azimuth) / cosd (lat2[n])) + 180
+                lon2[n] = lon1 + asind(sind(gcarc_dist[n]) * sind(azimuth) / cosd(lat2[n])) + 180
     elif isinstance(azimuth, np.ndarray):
         lon2 = np.zeros_like(lat2)
         for n in range(len(azimuth)):
-            if cosd (gcarc_dist) >= (cosd (90 - lat1) * cosd (90 - lat2[n])):
-                lon2[n] = lon1 + asind (sind (gcarc_dist) * sind (azimuth[n]) / cosd (lat2[n]))
+            if cosd(gcarc_dist) >= (cosd(90 - lat1) * cosd(90 - lat2[n])):
+                lon2[n] = lon1 + asind(sind(gcarc_dist) * sind(azimuth[n]) / cosd(lat2[n]))
             else:
-                lon2[n] = lon1 + asind (sind (gcarc_dist) * sind (azimuth[n]) / cosd (lat2[n])) + 180
+                lon2[n] = lon1 + asind(sind(gcarc_dist) * sind(azimuth[n]) / cosd(lat2[n])) + 180
     else:
-        if ( cosd (gcarc_dist) >= (cosd (90 - lat1) * cosd (90 - lat2))):
-            lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2))
+        if (cosd(gcarc_dist) >= (cosd(90 - lat1) * cosd(90 - lat2))):
+            lon2 = lon1 + asind(sind(gcarc_dist) * sind(azimuth) / cosd(lat2))
         else:
-            lon2 = lon1 + asind (sind (gcarc_dist) * sind (azimuth) / cosd (lat2)) + 180
+            lon2 = lon1 + asind(sind(gcarc_dist) * sind(azimuth) / cosd(lat2)) + 180
     return lat2, lon2
 
 
@@ -164,6 +183,7 @@ def extrema(x, opt='max'):
     else:
         raise ImportError('Wrong Options!!!')
     return idx
+
 
 def slantstack(seis, timeaxis, rayp_range, tau_range, ref_dis, dis):
     EV_num = seis.shape[0]

@@ -1,22 +1,17 @@
 import sys
 import os
-import random
-import matplotlib
 import argparse
-
 # matplotlib.use("Qt5Agg")
-from PyQt5 import QtCore
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QSizePolicy, QWidget, QDesktopWidget, \
-                            QPushButton, QHBoxLayout, QLineEdit, QFileDialog, QAction, QShortcut
-from numpy import arange, sin, pi
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
+                            QSizePolicy, QWidget, QDesktopWidget, \
+                            QPushButton, QHBoxLayout, QFileDialog, \
+                            QAction, QShortcut
 from os.path import exists, dirname, join
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 from seispy.pickfigure import RFFigure
+
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, rfpath='', width=21, height=11, dpi=100):
@@ -63,7 +58,7 @@ class MatplotlibWidget(QMainWindow):
         self._define_global_shortcuts()
         self.setWindowTitle('PickRF')
         self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
-    
+
     def on_click(self, event):
         self.mpl.rffig.onclick(event)
         self.mpl.draw()
@@ -71,7 +66,7 @@ class MatplotlibWidget(QMainWindow):
     def previous_connect(self):
         self.mpl.rffig.butprevious()
         self.mpl.draw()
-    
+
     def next_connect(self):
         self.mpl.rffig.butnext()
         self.mpl.draw()
@@ -79,11 +74,11 @@ class MatplotlibWidget(QMainWindow):
     def enlarge(self):
         self.mpl.rffig.enlarge()
         self.mpl.draw()
-    
+
     def reduce(self):
         self.mpl.rffig.reduce()
         self.mpl.draw()
-    
+
     def finish(self):
         self.mpl.rffig.finish()
         QApplication.quit()
@@ -92,8 +87,8 @@ class MatplotlibWidget(QMainWindow):
         self.mpl.rffig.plot()
 
     def plot_save(self):
-        fileName_choose, filetype = QFileDialog.getSaveFileName(self,  
-                                    "Save the figure",  
+        fileName_choose, filetype = QFileDialog.getSaveFileName(self,
+                                    "Save the figure",
                                     os.path.join(os.getcwd(), self.mpl.rffig.staname + 'RT_bazorder'), 
                                     "PDF Files (*.pdf);;Images (*.png);;All Files (*)")
 
@@ -116,8 +111,8 @@ class MatplotlibWidget(QMainWindow):
 
         self.setGeometry(0, 0, frame_width, frame_height)
         self.move((screen_width / 2) - (self.frameSize().width() / 2),
-                  (screen_height / 2) - (self.frameSize().height() / 2)) 
-    
+                  (screen_height / 2) - (self.frameSize().height() / 2))
+
     def _define_global_shortcuts(self):
         self.key_c = QShortcut(QKeySequence('c'), self)
         self.key_c.activated.connect(self.next_connect)
@@ -167,7 +162,8 @@ def main():
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(rfpath)
     ui.show()
-    sys.exit(app.exec_()) 
+    sys.exit(app.exec_())
+
 
 if __name__ == '__main__':
     main()

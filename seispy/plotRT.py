@@ -26,8 +26,9 @@ def init_figure():
     return h, axr, axt, axb, axr_sum, axt_sum
 
 
-def read_process_data(lst):
+def read_process_data(lst, resamp_dt=0.1):
     stadata = SACStation(lst)
+    stadata.resample(resamp_dt)
     idx = np.argsort(stadata.bazi)
     stadata.event = stadata.event[idx]
     stadata.bazi = stadata.bazi[idx]

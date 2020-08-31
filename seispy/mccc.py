@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def mccc(seis, dt, twin=0):
     data = np.zeros([len(seis), seis[0].data.shape[0]])
     for i in range(len(seis)):
