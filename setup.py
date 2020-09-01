@@ -2,7 +2,7 @@
 from setuptools import find_packages, setup
 packages = find_packages()
 
-VERSION = "1.1.15"
+VERSION = "1.1.16"
 setup(name='seispy',
       version=VERSION,
       author='Mijian Xu',

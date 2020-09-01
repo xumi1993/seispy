@@ -92,11 +92,12 @@ class eq(object):
         this_st = self.st.copy()
         this_st.filter('bandpass', freqmin=0.03, freqmax=0.5)
         this_st.trim(this_st[0].stats.starttime+p_arr-time_b, this_st[0].stats.starttime+p_arr+time_e)
-        bazs = np.mod(np.arange(bazi-offset, bazi+offset), 360)
+        bazs = np.arange(-offset, offset) + bazi
         ampt = np.zeros_like(bazs)
         for i, b in enumerate(bazs):
             t, _ = seispy.geo.rotateSeisENtoTR(this_st[0].data, this_st[1].data, b)
             ampt[i] = seispy.geo.rssq(t)
+        ampt = ampt / np.max(ampt)
         idx = seispy.geo.extrema(ampt, opt='min')
         if len(idx) == 0:
             corr_baz = np.nan
@@ -249,7 +250,7 @@ class eq(object):
             rayp = seispy.geo.srad2skm(self.SArrival.ray_param)
         else:
             raise ValueError('Phase must be in \'P\' or \'S\'')
-        
+
         if evtstr is None:
             filename = join(path, self.datestr)
         else:
@@ -275,7 +276,7 @@ class eq(object):
             raise ValueError('criterion should be string in [\'crust\', \'mtz\']')
         else:
             criterion = criterion.lower()
-        
+
         if self.rf[1].stats.npts != npts:
             return False
         if criterion == 'crust':

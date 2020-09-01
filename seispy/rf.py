@@ -17,7 +17,6 @@ from obspy.taup import TauPyModel
 import configparser
 import argparse
 import sys
-from tkinter import messagebox
 import matplotlib.pyplot as plt
 
 
@@ -148,6 +147,8 @@ def CfgParser(cfg_file):
                 pa.__dict__[key] = int(value)
             elif key == 'only_r':
                 pa.__dict__[key] = cf.getboolean(sec, 'only_r')
+            elif key == 'criterion':
+                pa.criterion = value
             else:
                 try:
                     pa.__dict__[key] = float(value)
@@ -166,10 +167,11 @@ def CfgModify(cfg_file, session, key, value):
     cf.write(open(cfg_file, 'w'))
 
 
-def _plotampt(x, y, ampt):
+def _plotampt(x, y, ampt, shift_all):
     xx, yy = np.meshgrid(x, y)
     f = plt.figure(figsize=(8, 8))
     plt.pcolor(xx, yy, ampt)
+    plt.scatter(shift_all, y)
     return f
 
 
@@ -307,18 +309,20 @@ class RF(object):
 
     def baz_correct(self, time_b=10, time_e=20, offset=90):
         self.logger.RFlog.info('correct back-azimuth')
-        shift_all = []
-        # ampt_all = []
+        y = np.arange(self.eqs.shape[0])
+        shift_all = np.array([])
+        x = np.arange(-offset, offset)
+        ampt_all = np.empty([0, x.shape[0]])
         for i, row in self.eqs.iterrows():
-            curr_baz, _ = row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset)
-            shift_all.append(curr_baz)
-            # ampt_all.append(ampt)
+            curr_baz, ampt = row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset)
+            shift_all = np.append(shift_all, curr_baz)
+            ampt_all = np.vstack((ampt_all, ampt))
         if None in shift_all:
             self.logger.RFlog.error('Range of searching bazi is too small.')
             sys.exit(1)
-        shift_all = np.array(shift_all)
-        # ampt_all = np.array(ampt_all)
         baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
+        # fig = _plotampt(x, y, ampt_all, shift_all)
+        # fig.savefig('{}_rotation.png'.format(self.stainfo.station))
         # self._baz_confirm(offset, ampt_all)
         self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(baz_shift))
         self.eqs['bazi'] = np.mod(self.eqs['bazi'] + baz_shift, 360)
