@@ -307,25 +307,29 @@ class RF(object):
             row['data'].get_arrival(self.model, row['evdp'], row['dis'])
             # row['data'].get_raypara(self.model, row['evdp'], row['dis'])
 
-    def baz_correct(self, time_b=10, time_e=20, offset=90):
-        self.logger.RFlog.info('correct back-azimuth')
-        y = np.arange(self.eqs.shape[0])
-        shift_all = np.array([])
-        x = np.arange(-offset, offset)
-        ampt_all = np.empty([0, x.shape[0]])
-        for i, row in self.eqs.iterrows():
-            curr_baz, ampt = row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset)
-            shift_all = np.append(shift_all, curr_baz)
-            ampt_all = np.vstack((ampt_all, ampt))
-        if None in shift_all:
-            self.logger.RFlog.error('Range of searching bazi is too small.')
-            sys.exit(1)
-        baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
-        # fig = _plotampt(x, y, ampt_all, shift_all)
-        # fig.savefig('{}_rotation.png'.format(self.stainfo.station))
-        # self._baz_confirm(offset, ampt_all)
-        self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(baz_shift))
-        self.eqs['bazi'] = np.mod(self.eqs['bazi'] + baz_shift, 360)
+    def baz_correct(self, time_b=10, time_e=20, offset=90, correct_angle=None):
+        if correct_angle is not None:
+            self.logger.RFlog.info('correct back-azimuth with {} deg.'.format(correct_angle))
+            self.eqs['bazi'] = np.mod(self.eqs['bazi'] + correct_angle, 360)
+        else:
+            self.logger.RFlog.info('correct back-azimuth with T energy minimization')
+            y = np.arange(self.eqs.shape[0])
+            shift_all = np.array([])
+            x = np.arange(-offset, offset)
+            ampt_all = np.empty([0, x.shape[0]])
+            for i, row in self.eqs.iterrows():
+                curr_baz, ampt = row['data'].search_baz(row['bazi'], time_b=time_b, time_e=time_e, offset=offset)
+                shift_all = np.append(shift_all, curr_baz)
+                ampt_all = np.vstack((ampt_all, ampt))
+            if None in shift_all:
+                self.logger.RFlog.error('Range of searching bazi is too small.')
+                sys.exit(1)
+            baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
+            # fig = _plotampt(x, y, ampt_all, shift_all)
+            # fig.savefig('{}_rotation.png'.format(self.stainfo.station))
+            # self._baz_confirm(offset, ampt_all)
+            self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(baz_shift))
+            self.eqs['bazi'] = np.mod(self.eqs['bazi'] + baz_shift, 360)
 
     # def _baz_confirm(self, offset, ampt_all):
     #     y = np.arange(self.eqs.shape[0])
@@ -425,7 +429,7 @@ def prf():
     parser.add_argument('-b', help='Correct back-azimuth with minimal '
                                    'energy of T component. "baz" is specified '
                                    'as half-searching range. Default value is 90 deg',
-                                   dest='baz', nargs='?', const=90, type=float)
+                                   dest='baz', nargs='?', const=0, type=float)
     arg = parser.parse_args()
     if arg.comp is not None:
         arg.comp = arg.comp.upper()
@@ -456,8 +460,12 @@ def prf():
     pjt.filter()
     pjt.cal_phase()
     pjt.drop_eq_snr()
-    if arg.baz is not None:
-        pjt.baz_correct(offset=arg.baz)
+    if arg.baz is not None and arg.baz != 0:
+        pjt.baz_correct(correct_angle=arg.baz)
+    elif arg.baz is not None and arg.baz == 0:
+        pjt.baz_correct()
+    else:
+        pass
     pjt.trim()
     pjt.rotate()
     pjt.deconv()

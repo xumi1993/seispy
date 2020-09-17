@@ -203,14 +203,14 @@ class eq(object):
             raise ValueError('Phase must in \'P\' or \'S\'')
         P_arr, S_arr = self.arr_correct(write_to_sac=False)
         time_dict = dict(zip(['P', 'S'], [P_arr, S_arr]))
-        
+
         t1 = self.st[2].stats.starttime + (time_dict[phase] - time_before)
         t2 = self.st[2].stats.starttime + (time_dict[phase] + time_after)
         if isreturn:
             return self.st.copy().trim(t1, t2)
         else:
             self.rf = self.st.copy().trim(t1, t2)
-    
+
     def deconvolute(self, shift, time_after, f0, phase='P', only_r=False, itmax=400, minderr=0.001, target_dt=None):
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
@@ -281,7 +281,7 @@ class eq(object):
             return False
         if criterion == 'crust':
             time_P1 = int(np.floor((-2+shift)/self.rf[1].stats.delta))
-            time_P2 = int(np.floor((2+shift)/self.rf[1].stats.delta))
+            time_P2 = int(np.floor((4+shift)/self.rf[1].stats.delta))
             max_P = np.max(self.rf[1].data[time_P1:time_P2])
             if max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
                 return True
