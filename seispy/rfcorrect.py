@@ -257,7 +257,7 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     return pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds
 
 
-def psrf_3D_raytracing(stadatar, YAxisRange, model, srayp=None):
+def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None):
     """
 Back ray trace the S wavs with a assumed ray parameter of P.
 
@@ -271,7 +271,7 @@ stadatar: object SACStation
     The data class including PRFs and more parameters
 YAxisRange: array_like
     The depth array with the same intervals
-model: numpy.lib.npyio.NpzFile
+mod3d: 'Mod3DPerturbation' object
     The 3D velocity model with fields of ``dep``, ``lat``,
     ``lon``, ``vp`` and ``vs``.
     """
@@ -313,11 +313,11 @@ model: numpy.lib.npyio.NpzFile
         vs = np.zeros_like(YAxisRange)
         vp = np.zeros_like(YAxisRange)
         for j, dep in enumerate(YAxisRange[:-1]):
-            vs[j] = interpn((model['dep'], model['lat'], model['lon']),
-                            model['vs'], (dep, pplat_s[i, j], pplon_s[i, j]),
+            vs[j] = interpn((mod3d.model['dep'], mod3d.model['lat'], mod3d.model['lon']),
+                            mod3d.model['vs'], (dep, pplat_s[i, j], pplon_s[i, j]),
                             bounds_error=False, fill_value=None)
-            vp[j] = interpn((model['dep'], model['lat'], model['lon']),
-                            model['vp'], (dep, pplat_p[i, j], pplon_p[i, j]),
+            vp[j] = interpn((mod3d.model['dep'], mod3d.model['lat'], mod3d.model['lon']),
+                            mod3d.model['vp'], (dep, pplat_p[i, j], pplon_p[i, j]),
                             bounds_error=False, fill_value=None)
             x_s[i, j+1] = ddepth*tand(asind(vs[j]*rayps[i])) + x_s[i, j]
             x_p[i, j+1] = ddepth*tand(asind(vp[j]*rayps[i])) + x_p[i, j]
