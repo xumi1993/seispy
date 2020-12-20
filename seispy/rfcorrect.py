@@ -16,7 +16,7 @@ class SACStation(object):
     def __init__(self, evt_lst, only_r=False):
         """
         :param evt_lst: event list in RF data dir. Column as date string, phase, evt lat, evt lon, evt dep,
-                        distance, back-azimuth, ray parameter, magnitude, gauss factor.
+                        distance, back-azimuth, ray parameter, magnitude and gauss factor.
         """
         self.only_r = only_r
         data_path = dirname(evt_lst)
@@ -62,8 +62,8 @@ class DepModel(object):
         self.depthsraw = VelocityModel[:, 0]
         self.vpraw = VelocityModel[:, 1]
         self.vsraw = VelocityModel[:, 2]
-        self.vp = interp1d(self.depthsraw, self.vpraw)(YAxisRange)
-        self.vs = interp1d(self.depthsraw, self.vsraw)(YAxisRange)
+        self.vp = interp1d(self.depthsraw, self.vpraw, bounds_error=False, fill_value='extrapolate')(YAxisRange)
+        self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False, fill_value='extrapolate')(YAxisRange)
         self.depths = YAxisRange
         self.dz = np.append(0, np.diff(self.depths))
         self.R = 6371 - self.depths
@@ -306,8 +306,8 @@ mod3d: 'Mod3DPerturbation' object
             srayps = get_psrayp(rayp_lib, stadatar.dis[i],
                                 stadatar.evdp[i], YAxisRange)
             srayps = skm2srad(sdeg2skm(srayps))
-        pplat_s[i][0] = stadatar.stla
-        pplon_s[i][0] = stadatar.stlo
+        pplat_s[i][0] = pplat_p[i][0] = stadatar.stla
+        pplon_s[i][0] = pplon_p[i][0] = stadatar.stlo
         x_s[i][0] = 0
         x_p[i][0] = 0
         vs = np.zeros_like(YAxisRange)
@@ -418,7 +418,6 @@ if __name__ == '__main__':
     # plt.plot(YAxisRange, PS_RFdepth[1])
     # plt.show()
     psrf_3D_raytracing(stadata, YAxisRange, vel3dmod, srayp=None)
-
 
     '''
     # dep_mod = DepModel(YAxisRange, velmod)
