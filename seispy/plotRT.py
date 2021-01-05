@@ -124,7 +124,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(rfpath, enf=3, out_path='./'):
+def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
     station = basename(rfpath)
     lst = join(rfpath, station+'finallist.dat')
     if not exists(lst):
@@ -135,7 +135,10 @@ def plotrt(rfpath, enf=3, out_path='./'):
     stadata, time_axis = read_process_data(lst)
     plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
-    h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
+    if outformat == 'g':
+        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=200)
+    elif outformat == 'f':
+        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
 
 
 def main():
@@ -143,11 +146,16 @@ def main():
     parser.add_argument('path', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
     parser.add_argument('-e', help='Enlargement factor default is 3', dest='enf', type=int, default=3)
     parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str)
+    parser.add_argument('-t', help='Specify figure format. f = .pdf, g = .png', dest='format', default='g', type=str)
     arg = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
-    plotrt(rfpath=arg.path, enf=arg.enf, out_path=arg.output)
+    if arg.format not in ('f', 'g'):
+        print('The format must be in \'f\' and \'g\'')
+        parser.print_help()
+        sys.exit(1)
+    plotrt(rfpath=arg.path, enf=arg.enf, out_path=arg.output, outformat=arg.format)
 
 
 if __name__ == '__main__':
