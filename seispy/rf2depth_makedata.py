@@ -8,6 +8,7 @@ from os.path import join, dirname, exists
 from scipy.io import savemat
 import argparse
 import sys
+import glob
 
 
 class Station(object):
@@ -32,7 +33,26 @@ def _convert_str_mat(instr):
     return mat
 
 
-def makedata(cpara, velmod3d=None, log=setuplog()):
+def _load_mod(datapath, staname):
+    """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
+
+    :param datapath: Folder name with 1D velocity model files.
+    :type datapath: string
+    :param staname: The station name as a part of file name of 1D velocity model files.
+    :type staname: string
+    """
+    expresion = join(datapath, "*"+staname+"*.vel")
+    modfiles = glob.glob(expresion)
+    if len(modfiles) == 0:
+        raise FileNotFoundError("The model file of {} were not found.".format(expresion))
+    elif len(modfiles) > 1:
+        raise ValueError('More then 1 file were found as the expresion: {}'.format(expresion))
+    else:
+        return modfiles[0]
+
+
+def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
+    ismod1d = False
     if velmod3d is not None:
         if isinstance(velmod3d, str):
             if exists(velmod3d):
@@ -41,8 +61,17 @@ def makedata(cpara, velmod3d=None, log=setuplog()):
                 model_3d = None
         else:
             raise ValueError('Path to 3d velocity model should be in str')
+    elif modfolder1d is not None:
+        if isinstance(modfolder1d, str):
+            if exists(modfolder1d):
+                ismod1d = True
+            else:
+                raise FileNotFoundError('No such folder of {}'.format(modfolder1d))
+        else:
+            ValueError('Path to 1d velocity model files should be in str')
     else:
-        model_3d = None
+        pass
+
     # cpara = ccppara(cfg_file)
     sta_info = Station(cpara.stalist)
     RFdepth = []
@@ -53,8 +82,13 @@ def makedata(cpara, velmod3d=None, log=setuplog()):
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
-        PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, cpara.velmod, 
-                                             velmod_3d=model_3d, srayp=cpara.rayp_lib)
+        if ismod1d:
+            mod1d = _load_mod(modfolder1d, sta_info.station[i])
+            PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, 
+                                              velmod=mod1d, srayp=cpara.rayp_lib)
+        else:
+            PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, cpara.velmod, 
+                                              velmod_3d=model_3d, srayp=cpara.rayp_lib)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
@@ -120,6 +154,7 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
 def rf2depth():
     parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
     parser.add_argument('-d', help='Path to 3d vel model in npz file for moveout correcting', type=str, default='')
+    parser.add_argument('-m', help='Folder path to 1d vel model files with staname.vel as the file name', type=str, default='')
     parser.add_argument('-r', help='Path to 3d vel model in npz file for 3D ray tracing', type=str, default='')
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     arg = parser.parse_args()
@@ -129,10 +164,12 @@ def rf2depth():
     cpara = ccppara(arg.cfg_file)
     if arg.d != '' and arg.r != '':
         raise ValueError('Specify only 1 argument in \'-d\' and \'-r\'')
-    elif arg.d != '' and arg.r == '':
+    elif arg.d != '' and arg.r == '' and arg.m == '':
         makedata3d(cpara, arg.d, raytracing3d=False)
-    elif arg.d == '' and arg.r != '':
+    elif arg.d == '' and arg.r != '' and arg.m == '':
         makedata3d(cpara, arg.r, raytracing3d=True)
+    elif arg.d == '' and arg.r == '' and arg.m != '':
+        makedata(cpara, modfolder1d=arg.m)
     else:
         makedata(cpara)
 

@@ -5,6 +5,7 @@ from obspy.signal.rotate import rotate2zne, rotate_zne_lqt
 from scipy.signal import resample
 from os.path import dirname, join, expanduser
 import seispy
+from seispy import deconvolve
 
 
 def rotateZNE(st):
@@ -73,7 +74,7 @@ class eq(object):
         # bazi_range = np.repeat(bazi, len(inc_range))
         # M_all = seispy.geo.rot3D(bazi=bazi_range, inc=inc_range)
         # ZEN = np.array([self.rf[2].data, self.rf[0].data, self.rf[1].data])
-        s_range = self.trim(10, 10, phase='S', isreturn=True)
+        s_range = self.trim(20, 20, phase='S', isreturn=True)
         # LQT_all = np.zeros([ZEN.shape[0], ZEN.shape[1], M_all.shape[2]])
         power = np.zeros(inc_range.shape[0])
         for i in range(len(inc_range)):
@@ -123,7 +124,7 @@ class eq(object):
         else:
             pass
 
-    def rotate(self, bazi, inc=None, method='NE->RT', phase='P'):
+    def rotate(self, bazi, inc=None, method='NE->RT', phase='P', search_inc=False):
         if phase not in ('P', 'S'):
             raise ValueError('phase must be in [\'P\', \'S\']')
 
@@ -136,7 +137,12 @@ class eq(object):
             elif phase == 'P':
                 inc = self.PArrival.incident_angle
             elif phase == 'S':
-                inc = self.SArrival.incident_angle
+                if search_inc:
+                    inc = self.search_inc(bazi)
+                    #  if inc == 0.1 or inc == 89.9:
+                        #  print(self.datestr)
+                else:
+                    inc = self.SArrival.incident_angle
                 # inc = self.search_inc(bazi)
             else:
                 pass
@@ -227,8 +233,10 @@ class eq(object):
                 raise ValueError('Please rotate component to \'LQT\'')
             Q = np.flip(self.rf[1].data, axis=0)
             L = np.flip(self.rf[2].data, axis=0)
-            self.rf[2].data, self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta, self.rf[1].data.shape[0], shift,
-                                                         f0, itmax, minderr)
+            self.rf[2].data, self.rms, self.it = seispy.decov.decovit(self.rf[2].data, self.rf[1].data, self.rf[1].stats.delta,
+                                                         self.rf[1].data.shape[0], shift,
+                                                         f0, itmax, minderr, phase='S')
+            self.rf[2].data = - np.flip(self.rf[2].data)
         if target_dt is not None:
             if self.rf[0].stats.delta != target_dt:
                 # self.rf.resample(1 / target_dt)
@@ -305,3 +313,4 @@ class eq(object):
 
 if __name__ == '__main__':
     pass
+

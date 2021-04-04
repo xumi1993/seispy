@@ -343,12 +343,12 @@ class RF(object):
     #         fig.close()
     #         sys.exit(1)
 
-    def rotate(self, method='NE->RT'):
+    def rotate(self, method='NE->RT', search_inc=False):
         self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
         drop_idx = []
         for i, row in self.eqs.iterrows():
             try:
-                row['data'].rotate(row['bazi'], method=method, phase=self.para.phase)
+                row['data'].rotate(row['bazi'], method=method, phase=self.para.phase, search_inc=search_inc)
             except Exception as e:
                 self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_idx.append(i)
@@ -360,7 +360,7 @@ class RF(object):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
-            snr_E, snr_N, snr_Z = row['data'].snr(length=length)
+            snr_E, snr_N, snr_Z = row['data'].snr(length=length, phase=self.para.phase)
             if (np.nan in (snr_E, snr_N, snr_Z) or snr_E < self.para.noisegate
                or snr_N < self.para.noisegate or snr_Z < self.para.noisegate):
                 drop_lst.append(i)
@@ -398,9 +398,9 @@ class RF(object):
         self.eqs.drop(drop_lst, inplace=True)
 
     def saverf(self):
+        npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
         if self.para.phase == 'P':
             shift = self.para.time_before
-            npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
             criterion = self.para.criterion
         elif self.para.phase == 'S':
             shift = self.para.time_after
