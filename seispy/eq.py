@@ -5,8 +5,6 @@ from obspy.signal.rotate import rotate2zne, rotate_zne_lqt
 from scipy.signal import resample
 from os.path import dirname, join, expanduser
 import seispy
-from seispy import deconvolve
-
 
 def rotateZNE(st):
     try:

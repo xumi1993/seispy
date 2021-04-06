@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import obspy
 from obspy.io.sac import SACTrace
 import re
@@ -18,6 +16,17 @@ import configparser
 import argparse
 import sys
 import matplotlib.pyplot as plt
+from PyQt5.QtWidgets import QApplication
+from seispy.sviewerui import MatplotlibWidget
+
+
+def pickphase(eqs, para):
+    app = QApplication(sys.argv)
+    ui = MatplotlibWidget(eqs, para)
+    ui.show()
+    if app.exec_() == 0:
+        ui.exit_app()
+        return
 
 
 def datestr2regex(datestr):
@@ -370,6 +379,10 @@ class RF(object):
     def trim(self):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
+    
+    def pick(self):
+        pickphase(self.eqs, self.para)
+        self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
 
     def deconv(self, itmax=None, minderr=None):
         if itmax is None:
