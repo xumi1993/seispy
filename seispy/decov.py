@@ -133,6 +133,122 @@ def decovit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
 
     return RFI, rms, it 
 
+def __get_length(rsp_list):
+    if isinstance(rsp_list, (list, tuple)):
+        rsp_list = rsp_list[0]
+    return len(rsp_list)
+
+
+def _phase_shift_filter(nft, dt, tshift):
+    """
+    Construct filter to shift an array to account for time before onset
+
+    :param nft: number of points for fft
+    :param dt: sample spacing in seconds
+    :param tshift: time to shift by in seconds
+    :return: shifted array
+    """
+    freq = np.fft.fftfreq(nft, d=dt)
+    return np.exp(-2j * pi * freq * tshift)
+
+
+def _gauss_filter(dt, nft, f0, waterlevel=None):
+    """
+    Gaussian filter with width f0
+
+    :param dt: sample spacing in seconds
+    :param nft: length of filter in points
+    :param f0: Standard deviation of the Gaussian Low-pass filter,
+        corresponds to cut-off frequency in Hz for a response value of
+        exp(0.5)=0.607.
+    :param waterlevel: waterlevel for eliminating very low values
+        (default: no waterlevel)
+    :return: array with Gaussian filter frequency response
+    """
+    f = np.fft.fftfreq(nft, dt)
+    gauss_arg = -0.5 * (f/f0) ** 2
+    if waterlevel is not None:
+        gauss_arg = np.maximum(gauss_arg, waterlevel)
+    return np.exp(gauss_arg)
+
+
+def deconv_waterlevel(rsp_list, src, sampling_rate, waterlevel=0.05, gauss=0.5,
+                      tshift=10., length=None, normalize=0, nfft=None,
+                      return_info=False):
+    """
+    Frequency-domain deconvolution using waterlevel method.
+
+    Deconvolve src from arrays in rsp_list.
+
+    :param rsp_list: either a list of arrays containing the response functions
+        or a single array
+    :param src: array with source function
+    :param sampling_rate: sampling rate of the data
+    :param waterlevel: waterlevel to stabilize the deconvolution
+    :param gauss: Gauss parameter (standard deviation) of the
+        Gaussian Low-pass filter,
+        corresponds to cut-off frequency in Hz for a response value of
+        exp(0.5)=0.607.
+    :param tshift: delay time 0s will be at time tshift afterwards
+    :param nfft: explicitely set number of samples for the fft
+    :param length: number of data points in results, optional
+    :param normalize: normalize all results so that the maximum of the trace
+        with supplied index is 1. Set normalize to 'src' to normalize
+        for the maximum of the prepared source. Set normalize to None for no
+        normalization.
+    :param return_info: return additionally a lot of different parameters in a
+        dict for debugging purposes
+
+    :return: (list of) array(s) with deconvolution(s)
+    """
+    if length is None:
+        length = __get_length(rsp_list)
+    N = length
+    if nfft is None:
+        nfft = next_pow_2(N)
+    dt = 1. / sampling_rate
+    ffilt = _phase_shift_filter(nfft, dt, tshift)
+    if gauss is not None:
+        ffilt = _gauss_filter(dt, nfft, gauss, waterlevel=-700) * ffilt
+    spec_src = fft(src, nfft)
+    spec_src_conj = np.conjugate(spec_src)
+    spec_src_water = np.abs(spec_src * spec_src_conj)
+    spec_src_water = np.maximum(
+        spec_src_water, max(spec_src_water) * waterlevel)
+
+    if normalize == 'src':
+        spec_src = ffilt * spec_src * spec_src_conj / spec_src_water
+        rf_src = ifft(spec_src, nfft)[:N]
+        norm = 1 / max(rf_src)
+        rf_src = norm * rf_src
+
+    flag = False
+    if not isinstance(rsp_list, (list, tuple)):
+        flag = True
+        rsp_list = [rsp_list]
+    rf_list = [ifft(ffilt * fft(rsp, nfft) * spec_src_conj / spec_src_water,
+                    nfft)[:N] for rsp in rsp_list]
+    if normalize not in (None, 'src'):
+        norm = 1. / max(rf_list[normalize])
+    if normalize is not None:
+        for rf in rf_list:
+            rf *= norm
+    if return_info:
+        if normalize not in (None, 'src'):
+            spec_src = ffilt * spec_src * spec_src_conj / spec_src_water
+            rf_src = ifft(spec_src, nfft)[:N]
+            norm = 1 / max(rf_src)
+            rf_src = norm * rf_src
+        info = {'rf_src': rf_src, 'rf_src_conj': spec_src_conj,
+                'spec_src_water': spec_src_water,
+                'freq': np.fft.fftfreq(nfft, d=dt),
+                'gauss': ffilt, 'norm': norm, 'N': N, 'nfft': nfft}
+        return rf_list, info
+    elif flag:
+        return rf
+    else:
+        return rf_list
+
 
 if __name__ == '__main__':
     ldata = SACTrace.read('data/syn_S.L')

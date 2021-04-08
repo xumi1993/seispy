@@ -227,14 +227,19 @@ class eq(object):
                 self.rf[0].data, self.rms, self.it = seispy.decov.decovit(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta,
                                      self.rf[1].data.shape[0], shift, f0, itmax, minderr)
         else:
-            if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
-                raise ValueError('Please rotate component to \'LQT\'')
+            # if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
+            #     raise ValueError('Please rotate component to \'LQT\'')
             Q = np.flip(self.rf[1].data, axis=0)
             L = np.flip(self.rf[2].data, axis=0)
-            self.rf[2].data, self.rms, self.it = seispy.decov.decovit(self.rf[2].data, self.rf[1].data, self.rf[1].stats.delta,
+            self.rf[2].data, self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta,
                                                          self.rf[1].data.shape[0], shift,
                                                          f0, itmax, minderr, phase='S')
-            self.rf[2].data = - np.flip(self.rf[2].data)
+            # self.rf[2].data = seispy.decov.deconv_waterlevel(L, -Q, self.rf[1].stats.delta, 
+            #                                                  self.rf[1].data.shape[0], tshift=shift,
+            #                                                  gauss=f0)
+            # self.rms = [0]
+            # self.it = 0
+            # self.rf[2].data = - self.rf[2].data
         if target_dt is not None:
             if self.rf[0].stats.delta != target_dt:
                 # self.rf.resample(1 / target_dt)

@@ -391,8 +391,10 @@ class RF(object):
             minderr = self.para.minderr
         if self.para.phase == 'P':
             shift = self.para.time_before
+            time_after = self.para.time_after
         elif self.para.phase == 'S':
             shift = self.para.time_after
+            time_after = self.para.time_before
         else:
             pass
         drop_lst = []
@@ -401,7 +403,7 @@ class RF(object):
         for i, row in self.eqs.iterrows():
             count += 1
             try:
-                row['data'].deconvolute(shift, self.para.time_after, self.para.gauss, phase=self.para.phase,
+                row['data'].deconvolute(shift, time_after, self.para.gauss, phase=self.para.phase,
                                     only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
                 self.logger.RFlog.info('Iterative Decon {0} ({3}/{4}) iterations: {1}; final RMS: {2:.4f}'.format(
                     row['data'].datestr, row['data'].it, row['data'].rms[-1], count, self.eqs.shape[0]))

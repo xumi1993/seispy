@@ -8,9 +8,38 @@ from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
 from seispy.psrayp import get_psrayp
 import matplotlib.pyplot as plt
 import warnings
+import glob
 
 warnings.filterwarnings("ignore")
 
+
+class SACStationS():
+    def __init__(self, path):
+        fnames = sorted(glob.glob(join(path, '*S_*.sac')))
+        self.ev_num = len(fnames)
+        self.rayp = np.zeros(self.ev_num)
+        self.bazi = np.zeros(self.ev_num)
+        self.dis = np.zeros(self.ev_num)
+        self.evla = np.zeros(self.ev_num)
+        self.evlo = np.zeros(self.ev_num)
+        self.evdp = np.zeros(self.ev_num)
+        sample_sac = SACTrace.read(fnames[0])
+        self.sampling = sample_sac.delta
+        self.stla = sample_sac.stla
+        self.stlo = sample_sac.stlo
+        self.shift = -sample_sac.b
+        self.RFlength = sample_sac.npts
+        self.datal = np.zeros([self.ev_num, self.RFlength])
+        for i, sacfile in enumerate(fnames):
+            sac = SACTrace.read(sacfile)
+            self.rayp[i] = sac.user0
+            self.bazi[i] = sac.baz
+            self.dis[i] = sac.gcarc
+            self.evla[i] = sac.evla
+            self.evlo[i] = sac.evlo
+            self.evdp[i] = sac.evdp
+            self.datal[i] = sac.data
+        self.rayp = skm2srad(self.rayp)
 
 class SACStation(object):
     def __init__(self, evt_lst, only_r=False):
@@ -86,18 +115,24 @@ def from_file(mode_name):
     return filename
 
 
-def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod='iasp91'):
+def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling=None, shift=None, velmod='iasp91'):
     """
     :param stadatar: data class of SACStation
     :param raypref: referred ray parameter in rad
     :param YAxisRange: Depth range in nd.array type
-    :param sampling: dt
-    :param shift: time before P
     :param velmod: Path to velocity model
+
     :return: Newdatar, EndIndex, x_s, x_p
     """
+    sampling = stadatar.sampling
+    shift = stadatar.shift
+    if 'datar' in stadatar.__dict__:
+        data = stadatar.datar
+    elif 'datal' in stadatar.__dict__:
+        data = stadatar.datal
+    else:
+        raise ValueError('Field \'datar\' or \'datal\' must be in the SACStation')
     dep_mod = DepModel(YAxisRange, velmod)
-
     x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     Tpds = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -129,12 +164,12 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling, shift, velmod='i
             Newaxis = np.append(Newaxis, Tpds_ref[index[0] - 1] + (Refaxis - Tpds[i, index[0] - 1]) * Ratio)
         endidx = Newaxis.shape[0]
         x_new = np.arange(0, stadatar.RFlength) * sampling - shift
-        Tempdata = interp1d(Newaxis, stadatar.datar[i, 0:endidx], bounds_error=False)(x_new)
+        Tempdata = interp1d(Newaxis, data[i, 0:endidx], bounds_error=False)(x_new)
         endIndice = np.where(np.isnan(Tempdata))[0]
         if endIndice.size == 0:
             New_data = Tempdata
         else:
-            New_data = np.append(Tempdata[1:endIndice[0]], stadatar.datar[i, endidx+1:])
+            New_data = np.append(Tempdata[1:endIndice[0]], data[i, endidx+1:])
         if New_data.shape[0] < stadatar.RFlength:
             Newdatar[i] = np.append(New_data, np.zeros(stadatar.RFlength - New_data.shape[0]))
         else:
