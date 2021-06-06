@@ -197,14 +197,22 @@ def writedat(dat_path, stack_data, stack_range, isci=False):
         if isci:
             for bin in stack_data:
                 for i, dep in enumerate(stack_range):
-                    f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
+                    if dep == stack_range[-1]:
+                        f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f} nan nan nan nan\n'.format(bin['bin_lat'], bin['bin_lon'],
+                                                                                          bin['profile_dis'], dep))
+                    else:
+                        f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
                                                                                     bin['profile_dis'],
-                                                                                    dep, bin['mu'][i], bin['ci'][i, 0], 
+                                                                                    dep, bin['mu'][i], bin['ci'][i, 0],
                                                                                     bin['ci'][i, 1], int(bin['count'][i])))
         else:
             for bin in stack_data:
                 for i, dep in enumerate(stack_range):
-                    f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
+                    if dep == stack_range[-1]:
+                        f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f} nan nan\n'.format(bin['bin_lat'], bin['bin_lon'],
+                                                                                  bin['profile_dis'], dep))
+                    else:
+                        f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
                                                                                     bin['profile_dis'],
                                                                                     dep, bin['mu'][i], int(bin['count'][i])))
 
