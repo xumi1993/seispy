@@ -129,7 +129,7 @@ def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), 
     ax4.plot([besth, besth], ylim, color='red', linestyle='--', linewidth=0.6)
     ax4.set_xlabel('Moho depth (km)')
     if path is None:
-        f.show()
+        plt.show()
     else:
         f.savefig(path, format='pdf')
 
@@ -153,6 +153,7 @@ def ci(allstack, h, kappa, ev_num):
     cs_path = cs.collections[0].get_paths()[0].vertices
     maxhsig = (np.max(cs_path[:, 0]) - np.min(cs_path[:, 0])) / 2
     maxksig = (np.max(cs_path[:, 1]) - np.min(cs_path[:, 1])) / 2
+    plt.close()
     return besth, bestk, cvalue, maxhsig, maxksig
 
 
@@ -165,7 +166,7 @@ def print_result(besth, bestk, maxhsig, maxksig, print_comment=True):
     print(msg)
 
 
-def hksta(hpara, isplot=False):
+def hksta(hpara, isplot=False, isdisplay=False):
     station = basename(hpara.rfpath)
     stadata = SACStation(join(hpara.rfpath, station+'finallist.dat'), only_r=True)
     stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, srad2skm(stadata.rayp),
@@ -176,6 +177,8 @@ def hksta(hpara, isplot=False):
                                                                               besth, maxhsig, bestk, maxksig))
     title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(station, besth,
                                                                                      maxhsig, bestk, maxksig)
+    if isdisplay:
+        print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
     if isplot:
         img_path = join(hpara.hkpath, station+'.pdf')
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title, path=img_path)
@@ -186,22 +189,25 @@ def hksta(hpara, isplot=False):
 def hk():
     parser = argparse.ArgumentParser(description="HK stacking for single station")
     parser.add_argument('cfg_file', type=str, help='Path to HK configure file')
-    parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
-                        dest='station', type=str, default='')
-    parser.add_argument('-H', help='Range for searching best H: <hmin>/<hmax>', type=str, default='')
-    parser.add_argument('-K', help='Range for searching best K: <kmin>/<kmax>', type=str, default='')
-    parser.add_argument('-p', help='If save the figure', dest='isplot', action='store_true')
+    # parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
+                        # dest='station', type=str, default='')
+    # parser.add_argument('-H', help='Range for searching best H: <hmin>/<hmax>', type=str, default='')
+    # parser.add_argument('-K', help='Range for searching best K: <kmin>/<kmax>', type=str, default='')
+    parser.add_argument('-p', help='Whether to save the image',
+                        dest='isplot', action='store_true')
+    parser.add_argument('-v', help='Display results to standard output',
+                        dest='isdisplay', action='store_true')
     arg = parser.parse_args()
     hpara = hkpara(arg.cfg_file)
-    if arg.station != '':
-        hpara.rfpath = arg.station
-    if arg.H != '':
-        hmin, hmax = [float(val) for val in arg.H.split('/')]
-        hpara.hrange = np.arange(hmin, hmax, 0.1)
-    if arg.K != '':
-        kmin, kmax = [float(val) for val in arg.K.split('/')]
-        hpara.krange = np.arange(kmin, kmax, 0.1)
-    hksta(hpara, isplot=arg.isplot)
+    # if arg.station != '':
+    #     hpara.rfpath = arg.station
+    # if arg.H != '':
+    #     hmin, hmax = [float(val) for val in arg.H.split('/')]
+    #     hpara.hrange = np.arange(hmin, hmax, 0.1)
+    # if arg.K != '':
+    #     kmin, kmax = [float(val) for val in arg.K.split('/')]
+    #     hpara.krange = np.arange(kmin, kmax, 0.1)
+    hksta(hpara, isplot=arg.isplot, isdisplay=arg.isdisplay)
 
 
 def hktest():

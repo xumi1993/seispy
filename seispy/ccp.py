@@ -14,6 +14,23 @@ from os.path import dirname, basename, join, exists
 
 
 def init_profile(lat1, lon1, lat2, lon2, val):
+    """ Initial bins along a profile with given position of two points.
+
+    :param lat1: The latitude of the start point
+    :type lat1: float
+    :param lon1: The lontitude of the start point
+    :type lon1: float
+    :param lat2: The latitude of the end point
+    :type lat2: float
+    :param lon2: The lontitude of the end point
+    :type lon2: float
+    :param val: The interval between two points
+    :type val: float
+    :return: The location of bins (bin_loca), and length between each bin and the start point (profile_range)
+
+    The bin_loca is a numpy.array with two column. The profile_range is an 1D numpy.array.
+    :rtype: (numpy.array, numpy.array)
+    """
     azi = distaz(lat1, lon1, lat2, lon2).baz
     dis = distaz(lat1, lon1, lat2, lon2).delta
     profile_range = np.arange(0, deg2km(dis), val)

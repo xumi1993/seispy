@@ -13,6 +13,9 @@ import glob
 
 class Station(object):
     def __init__(self, sta_lst):
+        """
+        Read station list
+        """
         dtype = {'names': ('station', 'evla', 'evlo'), 'formats': ('U20', 'f4', 'f4')}
         self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
         #self.station = [sta.decode() for sta in self.station]

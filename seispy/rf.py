@@ -67,6 +67,8 @@ def load_station_info(pathname, ref_comp, suffix):
     except Exception:
         raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
     ex_tr = SACTrace.read(ex_sac, headonly=True)
+    if (ex_tr.stla is None or ex_tr.stlo is None):
+        raise ValueError('The stlo and stla are not in the SACHeader')
     return ex_tr.knetwk, ex_tr.kstnm, ex_tr.stla, ex_tr.stlo, ex_tr.stel
 
 
@@ -79,7 +81,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         try:
             datestr = re.findall(pattern, ref_sac)[0]
         except IndexError:
-            raise IndexError('Error data format in {}'.format(ref_sac))
+            raise IndexError('Error data format of {} in {}'.format(dateformat, ref_sac))
         if isinstance(offset, (int, float)):
             sac_files.append([datestr, obspy.UTCDateTime.strptime(datestr, dateformat), -offset])
         elif offset is None:
@@ -251,6 +253,7 @@ class RF(object):
             except Exception as e:
                 self.logger.RFlog.error('{0}'.format(e))
                 raise e
+        self.logger.RFlog.info('Found {} earthquakes'.format(self.eq_lst.shape[0]))
 
     def match_eq(self, switchEN=False, reverseE=False, reverseN=False):
         try:
