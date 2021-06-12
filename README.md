@@ -38,15 +38,22 @@ python setup.py install
   * `seispy.geo`: Tiny codes of geophysics.
   * `seispy.bootstrap`: Bootstrap confidence interval estimation (by [scikits-bootstrap](https://github.com/cgevans/scikits-bootstrap))
   * `seispy.decov`: Iterative time domain deconvolution method (Ligorria and Ammon's 1999 BSSA)
-  * `seispy.rfcorrect`: Subsequent process of PRFs includeing moveout correct and time to depth conversion (1D and 3D) (see Mijian Xu et al., 2018 EPSL)
+  * `seispy.rfcorrect`: Subsequent process of PRFs includeing moveout correct and time to depth conversion (1D and 3D) (see [Mijian Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
   * `seispy.ccp`: CCP stacking along a profile.
 
 
 ## Commands
+### Receiver Functions
  * `prf`: Calculate PRFs for a station.
- * `pickrf`: Reject PRFs with poor qualities after the calculation.
+ * `pickrf`: Pick PRFs with virtual quality control after the calculation.
  * `plotrt`: Plot PRFs in R and T components order by back-azimuth.
  * `plotr`: Plot PRFs in R component order by back-azimuth.
  * `hk`: H-Kappa stacking.
  * `rf2depth`: Convert PRFs to depth axis.
  * `ccp_profile`: Stack PRFs along a profile with a CCP stacking method.
+
+### Others
+ * `ndk2dat`: Convert the GCMT catalog file ("ndk" format) to the list file for the `prf` command.
+ * `updatecatalog`: update the GCMT catalog with the list file online.
+ * `setpar`: Set up the values in "cfg" files.
+
