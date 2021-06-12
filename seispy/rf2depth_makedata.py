@@ -73,7 +73,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         else:
             ValueError('Path to 1d velocity model files should be in str')
     else:
-        pass
+        ismod1d = True
 
     # cpara = ccppara(cfg_file)
     sta_info = Station(cpara.stalist)
@@ -86,7 +86,10 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         if ismod1d:
-            mod1d = _load_mod(modfolder1d, sta_info.station[i])
+            if modfolder1d is not None:
+                mod1d = _load_mod(modfolder1d, sta_info.station[i])
+            else:
+                mod1d = 'iasp91'
             PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, 
                                               velmod=mod1d, srayp=cpara.rayp_lib)
         else:
