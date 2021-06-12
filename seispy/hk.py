@@ -122,16 +122,21 @@ def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), 
     ax3.set_title('PsPs+PpSs')
     ax3.set_xlabel('Moho depth (km)')
     ax3.set_ylabel('$V_P/V_S$')
-    ax4.imshow(allstack, cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
+    im = ax4.imshow(allstack, cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
     ax4.plot(besth, bestk, color='red', marker='s', markerfacecolor='none')
     ax4.contour(allstack, [cvalue, 1], colors='k', extent=[xlim[0], xlim[1], ylim[0], ylim[1]], origin='lower')
     ax4.plot(xlim, [bestk, bestk], color='red', linestyle='--', linewidth=0.6)
     ax4.plot([besth, besth], ylim, color='red', linestyle='--', linewidth=0.6)
     ax4.set_xlabel('Moho depth (km)')
+
+    plt.subplots_adjust(bottom=0.1, right=0.9, top=0.9)
+    _, yy, _, ww = ax4.get_position().bounds
+    cax = plt.axes([0.93, yy, 0.016, ww])
+    plt.colorbar(im, cax=cax)
     if path is None:
         plt.show()
     else:
-        f.savefig(path, format='pdf')
+        f.savefig(path, format='pdf', bbox_inches='tight')
 
 
 def ci(allstack, h, kappa, ev_num):
@@ -175,7 +180,7 @@ def hksta(hpara, isplot=False, isdisplay=False):
     with open(hpara.hklist, 'a') as f:
         f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(station, stadata.stla, stadata.stlo,
                                                                               besth, maxhsig, bestk, maxksig))
-    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(station, besth,
+    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$ km\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(station, besth,
                                                                                      maxhsig, bestk, maxksig)
     if isdisplay:
         print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
