@@ -54,6 +54,6 @@ python setup.py install
 
 ### Others
  * `ndk2dat`: Convert the GCMT catalog file ("ndk" format) to the list file for the `prf` command.
- * `updatecatalog`: update the GCMT catalog with the list file online.
- * `setpar`: Set up the values in "cfg" files.
+ * `updatecatalog`: Automatically update the GCMT catalog.
+ * `setpar`: Set up the values in configure files.
 
