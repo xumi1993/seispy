@@ -3,12 +3,11 @@ import re
 from obspy.io.sac.sactrace import SACTrace
 import matplotlib.pyplot as plt
 from os.path import dirname, join, basename
-from scipy.io import loadmat
-from matplotlib.colors import ListedColormap
 from seispy.rfcorrect import SACStation
 from seispy.hkpara import hkpara
 from seispy.geo import srad2skm
 import argparse
+from seispy.utils import load_cyan_map
 
 
 def transarray(array, axis=0):
@@ -99,12 +98,6 @@ def hkstack(seis, t0, dt, p, h, kappa, vp=6.3, weight=(0.7, 0.2, 0.1)):
     Normed_stack = allstack - np.min(allstack)
     Normed_stack = Normed_stack / np.max(Normed_stack)
     return stack, stackvar, Normed_stack, allstackvar
-
-
-def load_cyan_map():
-    path = join(dirname(__file__), 'data', 'cyan.mat')
-    carray = loadmat(path)['cyan']
-    return ListedColormap(carray)
 
 
 def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), title=None, path=None):

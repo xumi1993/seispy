@@ -1,14 +1,13 @@
 import numpy as np
 from obspy.io.sac import SACTrace
 from os.path import join, basename
-import sys
-import re
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 from os.path import join, abspath, dirname
 from seispy.geo import cosd, sind
 from seispy.decov import decovit
 from scipy.interpolate import griddata
+from seispy.utils import load_cyan_map
 
 
 def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
@@ -173,16 +172,27 @@ class RFAni():
         self.bf, self.bt = self.search_peak(self.energy_joint, opt='max')
         return self.bf, self.bt
 
-    def plot_polar(self, show=True, outpath='./'):
+    def plot_polar(self, cmap=load_cyan_map(), show=False, outpath='./'):
+        """Polar map of crustal anisotropy inverted by a joint method. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
+
+        :param cmap: Colormap of matplotlib, defaults to 'rainbow'
+        :type cmap: optional
+        :param show: If show the polar map in the Matplotlib window, defaults to True
+        :type show: bool, optional
+        :param outpath: Output path to saving the figure. If show the figure in the Matplotlib window, this option will be invalid, defaults to current directory.
+        :type outpath: str, optional
+        """
         fig, axes = plt.subplots(2, 2, figsize=(8, 7), subplot_kw={'projection': 'polar'}, constrained_layout=True)
         axs = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
         energy_all = [self.energy_r, self.energy_cc, self.energy_tc, self.energy_joint]
         energy_title = ['R cosine energy', 'R cross-correlation', 'T energy', 'Joint']
         for ax, energy, title in zip(axs, energy_all, energy_title):
-            # ax.set_polar(True)
             ax.set_theta_direction(-1)
             ax.set_theta_zero_location("N")
-            eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap='jet', shading='auto')
+            if title == 'T energy':
+                eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap.reversed(), shading='auto')
+            else:
+                eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap, shading='auto')
             ax.grid(True, color='lightgray', linewidth=0.5)
             ax.scatter(np.radians(self.bf), self.bt, color='white', marker='X', s=48)
             ax.set_xticks(np.radians(np.arange(0, 360, 30)))
@@ -191,7 +201,8 @@ class RFAni():
             fig.colorbar(eng, ax=ax)
         if show:
             plt.show()
-        fig.savefig(join(outpath, 'joint_ani_'+self.sacdatar.staname+'.png'), bbox_inches='tight')
+        else:
+            fig.savefig(join(outpath, 'joint_ani_'+self.sacdatar.staname+'.png'), bbox_inches='tight')
 
 
 if __name__ == "__main__":

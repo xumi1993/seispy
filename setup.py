@@ -2,8 +2,11 @@
 from setuptools import find_packages, setup
 packages = find_packages()
 
-VERSION = "1.1.23"
-setup(name='seispy',
+with open("README.md", "r") as fh:
+    long_description = fh.read()
+
+VERSION = "1.1.24"
+setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
       author_email='gomijianxu@gmail.com',
@@ -33,5 +36,9 @@ setup(name='seispy',
                                         'hk=seispy.hk:hk',
                                         'pickrf=seispy.pickui:main']},
       include_package_data=True,
-      zip_safe=False
+      zip_safe=False,
+      classifiers=['Programming Language :: Python',
+                   'Programming Language :: Python :: 3.7',
+                   'Programming Language :: Python :: 3.8',
+                   'Programming Language :: Python :: 3.9']
       )
