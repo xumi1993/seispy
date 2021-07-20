@@ -1,7 +1,6 @@
 language: python
 
 install:
-  - pip install obspy pandas pytz netCDF4 pyerf
   - pip install .
   - git clone https://github.com/xumi1993/seispy-test test
 
