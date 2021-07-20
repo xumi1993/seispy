@@ -2,7 +2,7 @@ from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
 from scipy.signal import resample
-from os.path import dirname, join, exists, basename
+from os.path import dirname, join, exists, basename, isfile
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
@@ -44,14 +44,16 @@ class SACStationS():
 
 
 class SACStation(object):
-    def __init__(self, evt_lst, only_r=False):
+    def __init__(self, data_path, only_r=False):
         """
         :param evt_lst: event list in RF data dir. Column as date string, phase, evt lat, evt lon, evt dep,
                         distance, back-azimuth, ray parameter, magnitude and gauss factor.
         """
         self.only_r = only_r
-        data_path = dirname(evt_lst)
+        if isfile(data_path):
+            data_path = dirname(data_path)
         self.staname = basename(data_path)
+        evt_lst = join(data_path, self.staname+'finallist.dat')
         dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
