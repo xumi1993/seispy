@@ -2,6 +2,8 @@ language: python
 
 install:
   - pip install .
+
+before_script:
   - git clone https://github.com/xumi1993/seispy-test test
 
 jobs:
