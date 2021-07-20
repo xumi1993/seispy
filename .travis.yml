@@ -24,7 +24,7 @@ jobs:
     - stage: deploy
       provide: pypi
       username: "__token__"
-      password: "pypi-AgEIcHlwaS5vcmcCJGU4YWFhZGZiLWJhMWYtNDc2Ny05MGE4LTI1ZGQ0YzdhOTlmYQACPnsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJweXRob24tc2Vpc3B5Il19LCAidmVyc2lvbiI6IDF9AAAGIB2ym-ryHlelQcHNzDEIta7v33GmhDcrjfuX05-JswJv"
+      password: "pypi-AgEIcHlwaS5vcmcCJGYyMTBiN2I0LTdmMjAtNGU2MS04YTYzLWU3MTUwNjFhNDliZQACPnsicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJweXRob24tc2Vpc3B5Il19LCAidmVyc2lvbiI6IDF9AAAGIOMKxAfuV86HTU-hsz2k9Xi-G0-C_wW0hhe3SCuUVcDn"
       on:
         python: 3.8
         branch: master
