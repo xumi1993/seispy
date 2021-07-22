@@ -10,6 +10,7 @@ class CCPPara(object):
         self.depthdat = 'RFdepth.mat'
         self.stackfile = 'ccp.dat'
         self.stalist = 'sta.lst'
+        self.peakfile = 'good_410_660.dat'
         self.velmod = ''
         self.stack_sta_list = ''
         self.domperiod = 5
@@ -22,10 +23,9 @@ class CCPPara(object):
         self.stack_range = np.array([])
         self.center_bin = []
         self.dep_val = 0
-        self.stack_val = 0
+        self.stack_val = 1
         self.boot_samples = None
         
-
     @property
     def bin_radius(self):
         return self._bin_radius
@@ -69,6 +69,7 @@ def ccppara(cfg_file):
     cpara.stackfile = cf.get('FileIO', 'stackfile')
     cpara.stalist = cf.get('FileIO', 'stalist')
     cpara.stack_sta_list = cf.get('FileIO', 'stack_sta_list')
+    cpara.peakfile = cf.get('FileIO', 'peakfile')
     velmod = cf.get('FileIO', 'velmod')
     if velmod == '':
         cpara.velmod = join(dirname(__file__), 'data', 'iasp91.vel')

@@ -1,4 +1,3 @@
-from numpy.ma import count
 from seispy.ccp import stack
 import numpy as np
 from seispy.geo import km2deg, latlon_from, cosd, extrema
@@ -6,6 +5,8 @@ from seispy import distaz
 from seispy.rfcorrect import DepModel
 from seispy.setuplog import setuplog
 from seispy.bootstrap import ci
+from seispy.ccppara import ccppara, CCPPara
+from seispy.signal import smooth
 from scipy.io import loadmat
 
 
@@ -85,21 +86,32 @@ def boot_bin_stack(data_bin, n_samples=3000):
 
 
 class CCP3D():
-    def __init__(self, cpara, log=None):
-        self.cpara = cpara
+    def __init__(self, cfg_file=None, log=None):
         if log is None:
             self.logger = setuplog()
         else:
             self.logger = log
-        self.logger.CCPlog.info('Loading RFdepth data from {}'.format(cpara.depthdat))
+        if cfg_file is None:
+            self.cpara = CCPPara()
+        elif isinstance(cfg_file, str):
+            try:
+                self.ccppara(cfg_file)
+            except Exception as e:
+                self.logger.CCPlog('Cannot open configure file {}'.format(cfg_file))
+                raise FileNotFoundError('{}'.format(e))
+        else:
+            raise ValueError('cfg_file must be str format.')
+        self.stack_data = []
+        
+    def initial_grid(self):
         try:
-            self.rfdep = loadmat(cpara.depthdat)['RFdepth'][0, :]
+            self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
+            self.rfdep = loadmat(self.cpara.depthdat)['RFdepth'][0, :]
         except Exception as e:
             self.logger.CCPlog.error('{}'.format(e))
-            raise FileNotFoundError('Cannot open file of {}'.format(cpara.depthdat))
-        self.bin_loca = gen_center_bin(*cpara.center_bin)
-        self.fzone = bin_shape(cpara)
-        self.stack_data = []
+            raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
+        self.bin_loca = gen_center_bin(*self.cpara.center_bin)
+        self.fzone = bin_shape(self.cpara)
 
     def stack(self):
         for i, bin_info in enumerate(self.bin_loca):
@@ -116,7 +128,7 @@ class CCP3D():
                     fall_idx = np.where(distaz(sta['Piercelat'][0, 0][:, idx], sta['Piercelon'][0, 0][:, idx],
                                         bin_info[0], bin_info[1]).delta < self.fzone[j])[0]
                     bin_dep_amp = np.append(bin_dep_amp, sta['moveout_correct'][0,0][fall_idx, idx])
-                bin_mu[i], bin_ci[i], bin_count[i] = boot_bin_stack(bin_dep_amp, n_samples=self.cpara.boot_samples)
+                bin_mu[j], bin_ci[j], bin_count[j] = boot_bin_stack(bin_dep_amp, n_samples=self.cpara.boot_samples)
             boot_stack['bin_lat'] = bin_info[0]
             boot_stack['bin_lon'] = bin_info[1]
             boot_stack['mu'] = bin_mu
@@ -128,6 +140,7 @@ class CCP3D():
         np.save(fname, self.stack_data)
     
     def _search_peak(self, tr, peak_410_min=380, peak_410_max=440, peak_660_min=630, peak_660_max=690):
+        tr = smooth(tr, half_len=4)
         idx_all = extrema(tr)
         idx_ex = np.where(tr[idx_all] > 0)[0]
         #idx = idx_all[idx_ex]
@@ -169,9 +182,16 @@ class CCP3D():
                     idx = int((good_peak[1]-self.cpara.stack_range[0]) / self.cpara.stack_val)
                     ci_660 = self.stack_data[i]['ci'][idx]
                     count_660 = self.stack_data[i]['count'][idx]
-                f.write('{:.3f} {:.3f} {:.0f} {:.4f} {:.4f} {:.0f} {:.0f} {:.4f} {:.4f} {:.0f}\n'.format(
+                f.write('{:.3f} {:.3f} {:.0f} {:.4f} {:.4f} {:.0f} {:.0f} {:.4f} {:.4f} {:.0f}\n'.format(   
                         self.bin_loca[i, 0], self.bin_loca[i, 1], good_peak[0], ci_410[0], ci_410[1], count_410,
                         good_peak[1], ci_660[0], ci_660[1], count_660))
+
+    @classmethod
+    def read_stack_data(cls, stack_data_path, cfg_file=None):
+        ccp = cls(cfg_file)
+        ccp.stack_data = np.load(stack_data_path, allow_pickle=True)
+        ccp.bin_loca = np.array([[sta['bin_lat'], sta['bin_lon']] for sta in ccp.stack_data])
+        return ccp
 
 
 if __name__ == '__main__':
