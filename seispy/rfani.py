@@ -8,7 +8,6 @@ from seispy.geo import cosd, sind
 from seispy.decov import decovit
 from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map
-import argparse
 
 
 def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):

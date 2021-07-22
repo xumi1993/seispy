@@ -20,8 +20,11 @@ class CCPPara(object):
         self.line = np.array([])
         self.depth_axis = np.array([])
         self.stack_range = np.array([])
+        self.center_bin = []
         self.dep_val = 0
         self.stack_val = 0
+        self.boot_samples = None
+        
 
     @property
     def bin_radius(self):
@@ -100,4 +103,16 @@ def ccppara(cfg_file):
     stack_end = cf.getfloat('stack', 'stack_end')
     cpara.stack_val = cf.getfloat('stack', 'stack_val')
     cpara.stack_range = np.append(np.arange(stack_start, stack_end, cpara.stack_val), stack_end)
+    try:
+        cpara.boot_samples = cf.getint('stack', 'boot_samples')
+    except:
+        cpara.boot_samples = None
+    # para for center bins
+    cla = cf.getfloat('spacedbins', 'center_lat')
+    clo = cf.getfloat('spacedbins', 'center_lon')
+    hlla = cf.getfloat('spacedbins', 'half_len_lat')
+    hllo = cf.getfloat('spacedbins', 'half_len_lon')
+    space_val = cf.getfloat('spacedbins', 'interval')
+    cpara.center_bin = [cla, clo, hlla, hllo, space_val]
+
     return cpara
