@@ -1,6 +1,5 @@
-from seispy.ccp import stack
 import numpy as np
-from seispy.geo import km2deg, latlon_from, cosd, extrema
+from seispy.geo import km2deg, latlon_from, cosd, extrema, skm2srad, rad2deg
 from seispy import distaz
 from seispy.rfcorrect import DepModel
 from seispy.setuplog import setuplog
@@ -85,8 +84,26 @@ def boot_bin_stack(data_bin, n_samples=3000):
     return mu, cci, count
 
 
+def _get_sta(rfdep):
+    return np.array([[sta['stalat'][0, 0][0, 0], sta['stalon'][0, 0][0, 0]] for sta in rfdep])
+
+
+def _sta_val(stack_range, radius):
+    dep_mod = DepModel(stack_range)
+    x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (skm2srad(0.08) ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
+    dis = radius + rad2deg(x_s[-1]) + 0.5
+    return dis
+
+
 class CCP3D():
     def __init__(self, cfg_file=None, log=None):
+        """Class for 3-D CCP stacking, Usually used to study mantle transition zone structure.
+
+        :param cfg_file: Path to configure file. If not defined a instance of CCP3D.cpara will be initialed, defaults to None
+        :type cfg_file: str, optional
+        :param log: A logger instance. If not defined, seispy.sutuplog.logger will be initialed, defaults to None
+        :type log: seispy.sutuplog.logger , optional
+        """
         if log is None:
             self.logger = setuplog()
         else:
@@ -94,14 +111,17 @@ class CCP3D():
         if cfg_file is None:
             self.cpara = CCPPara()
         elif isinstance(cfg_file, str):
-            try:
-                self.ccppara(cfg_file)
-            except Exception as e:
-                self.logger.CCPlog('Cannot open configure file {}'.format(cfg_file))
-                raise FileNotFoundError('{}'.format(e))
+            self.load_para(cfg_file)
         else:
             raise ValueError('cfg_file must be str format.')
         self.stack_data = []
+
+    def load_para(self, cfg_file):
+        try:
+            self.cpara = ccppara(cfg_file)
+        except Exception as e:
+            self.logger.CCPlog('Cannot open configure file {}'.format(cfg_file))
+            raise FileNotFoundError('{}'.format(e))
         
     def initial_grid(self):
         try:
@@ -112,6 +132,11 @@ class CCP3D():
             raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
         self.bin_loca = gen_center_bin(*self.cpara.center_bin)
         self.fzone = bin_shape(self.cpara)
+        self.stalst = _get_sta(self.rfdep)
+        self.dismin = _sta_val(self.cpara.stack_range, self.fzone[-1])
+
+    def _select_sta(self, bin_lat, bin_lon):
+        return np.where(distaz(bin_lat, bin_lon, self.stalst[:, 0], self.stalst[:, 1]).delta <= self.dismin)[0]
 
     def stack(self):
         for i, bin_info in enumerate(self.bin_loca):
@@ -121,13 +146,14 @@ class CCP3D():
             bin_count = np.zeros(self.cpara.stack_range.size)
             self.logger.CCPlog.info('{}/{} bin at lat: {:.3f} lon: {:.3f}'.format(i + 1, self.bin_loca.shape[0],
                                                                                   bin_info[0], bin_info[1]))
+            idxs = self._select_sta(bin_info[0], bin_info[1])
             for j, dep in enumerate(self.cpara.stack_range):
                 idx = j * self.cpara.stack_val + self.cpara.stack_range[0]
                 bin_dep_amp = np.array([])
-                for sta in self.rfdep:
-                    fall_idx = np.where(distaz(sta['Piercelat'][0, 0][:, idx], sta['Piercelon'][0, 0][:, idx],
+                for k in idxs:
+                    fall_idx = np.where(distaz(self.rfdep[k]['Piercelat'][0, 0][:, idx], self.rfdep[k]['Piercelon'][0, 0][:, idx],
                                         bin_info[0], bin_info[1]).delta < self.fzone[j])[0]
-                    bin_dep_amp = np.append(bin_dep_amp, sta['moveout_correct'][0,0][fall_idx, idx])
+                    bin_dep_amp = np.append(bin_dep_amp, self.rfdep[k]['moveout_correct'][0, 0][fall_idx, idx])
                 bin_mu[j], bin_ci[j], bin_count[j] = boot_bin_stack(bin_dep_amp, n_samples=self.cpara.boot_samples)
             boot_stack['bin_lat'] = bin_info[0]
             boot_stack['bin_lon'] = bin_info[1]
@@ -137,7 +163,17 @@ class CCP3D():
             self.stack_data.append(boot_stack)   
  
     def save_stack_data(self, fname):
-        np.save(fname, self.stack_data)
+        """Save stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
+        data['cpara'] is the parameters when CCP stacking.
+        data['stack_data'] is the result of stacked data.
+
+        :param fname: file name of stacked data
+        :type fname: str
+        """
+        if not isinstance(fname, str):
+            self.logger.CCPlog.error('fname should be in \'str\'')
+            raise ValueError('fname should be in \'str\'')
+        np.savez(fname, cpara=self.cpara, stack_data=self.stack_data)
     
     def _search_peak(self, tr, peak_410_min=380, peak_410_max=440, peak_660_min=630, peak_660_max=690):
         tr = smooth(tr, half_len=4)
@@ -189,8 +225,10 @@ class CCP3D():
     @classmethod
     def read_stack_data(cls, stack_data_path, cfg_file=None):
         ccp = cls(cfg_file)
-        ccp.stack_data = np.load(stack_data_path, allow_pickle=True)
-        ccp.bin_loca = np.array([[sta['bin_lat'], sta['bin_lon']] for sta in ccp.stack_data])
+        data = np.load(stack_data_path, allow_pickle=True)
+        ccp.stack_data = data['stack_data']
+        ccp.cpara = data['cpara']
+        ccp.bin_loca = np.array([[bin_info['bin_lat'], bin_info['bin_lon']] for bin_info in ccp.stack_data])
         return ccp
 
 

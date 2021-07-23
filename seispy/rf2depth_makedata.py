@@ -9,6 +9,7 @@ from scipy.io import savemat
 import argparse
 import sys
 import glob
+import pickle
 
 
 class Station(object):
@@ -111,6 +112,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         rfdep['Piercelon'] = piercelon
         rfdep['StopIndex'] = end_index
         RFdepth.append(rfdep)
+    
     savemat(cpara.depthdat, {'RFdepth': RFdepth})
     # np.save(cpara.depthdat, RFdepth)
 
