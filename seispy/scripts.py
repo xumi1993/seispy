@@ -34,6 +34,7 @@ def ccp3d():
                         metavar='d410min/d410max/d660min/d660max', default=None)
     arg = parser.parse_args()
     ccp = CCP3D(arg.cfg_file)
+    ccp.initial_grid()
     ccp.stack()
     ccp.save_stack_data(ccp.cpara.stackfile)
     if arg.s:

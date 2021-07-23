@@ -85,7 +85,7 @@ def boot_bin_stack(data_bin, n_samples=3000):
 
 
 def _get_sta(rfdep):
-    return np.array([[sta['stalat'][0, 0][0, 0], sta['stalon'][0, 0][0, 0]] for sta in rfdep])
+    return np.array([[sta['stalat'], sta['stalon']] for sta in rfdep])
 
 
 def _sta_val(stack_range, radius):
@@ -122,14 +122,21 @@ class CCP3D():
         except Exception as e:
             self.logger.CCPlog('Cannot open configure file {}'.format(cfg_file))
             raise FileNotFoundError('{}'.format(e))
-        
-    def initial_grid(self):
+    
+    def read_rfdep(self):
         try:
             self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
-            self.rfdep = loadmat(self.cpara.depthdat)['RFdepth'][0, :]
-        except Exception as e:
-            self.logger.CCPlog.error('{}'.format(e))
-            raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
+            # self.rfdep = loadmat(self.cpara.depthdat)['RFdepth'][0, :]
+            self.rfdep = np.load(self.cpara.depthdat, allow_pickle=True)
+        except:
+            try:
+                self.rfdep = np.load(self.cpara.depthdat+'.npy', allow_pickle=True)
+            except Exception as e:
+                self.logger.CCPlog.error('{}'.format(e))
+                raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
+
+    def initial_grid(self):
+        self.read_rfdep()
         self.bin_loca = gen_center_bin(*self.cpara.center_bin)
         self.fzone = bin_shape(self.cpara)
         self.stalst = _get_sta(self.rfdep)
@@ -148,12 +155,12 @@ class CCP3D():
                                                                                   bin_info[0], bin_info[1]))
             idxs = self._select_sta(bin_info[0], bin_info[1])
             for j, dep in enumerate(self.cpara.stack_range):
-                idx = j * self.cpara.stack_val + self.cpara.stack_range[0]
+                idx = int(j * self.cpara.stack_val + self.cpara.stack_range[0])
                 bin_dep_amp = np.array([])
                 for k in idxs:
-                    fall_idx = np.where(distaz(self.rfdep[k]['Piercelat'][0, 0][:, idx], self.rfdep[k]['Piercelon'][0, 0][:, idx],
+                    fall_idx = np.where(distaz(self.rfdep[k]['piercelat'][:, idx], self.rfdep[k]['piercelon'][:, idx],
                                         bin_info[0], bin_info[1]).delta < self.fzone[j])[0]
-                    bin_dep_amp = np.append(bin_dep_amp, self.rfdep[k]['moveout_correct'][0, 0][fall_idx, idx])
+                    bin_dep_amp = np.append(bin_dep_amp, self.rfdep[k]['moveout_correct'][fall_idx, idx])
                 bin_mu[j], bin_ci[j], bin_count[j] = boot_bin_stack(bin_dep_amp, n_samples=self.cpara.boot_samples)
             boot_stack['bin_lat'] = bin_info[0]
             boot_stack['bin_lon'] = bin_info[1]

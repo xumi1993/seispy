@@ -1,6 +1,7 @@
 import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
+from seispy.geo import km2deg
 
 
 class CCPPara(object):
@@ -69,7 +70,8 @@ def ccppara(cfg_file):
     cpara.stackfile = cf.get('FileIO', 'stackfile')
     cpara.stalist = cf.get('FileIO', 'stalist')
     cpara.stack_sta_list = cf.get('FileIO', 'stack_sta_list')
-    cpara.peakfile = cf.get('FileIO', 'peakfile')
+    if cf.has_option('FileIO', 'peakfile'):
+        cpara.peakfile = cf.get('FileIO', 'peakfile')
     velmod = cf.get('FileIO', 'velmod')
     if velmod == '':
         cpara.velmod = join(dirname(__file__), 'data', 'iasp91.vel')
@@ -79,7 +81,10 @@ def ccppara(cfg_file):
         cpara.velmod = velmod
     # para for bin section
     cpara.shape = cf.get('bin', 'shape')
-    cpara.domperiod = cf.getfloat('bin', 'domperiod')
+    try:
+        cpara.domperiod = cf.getfloat('bin', 'domperiod')
+    except:
+        cpara.domperiod = None
     try:
         cpara.width = cf.getfloat('bin', 'width')
     except:
@@ -109,11 +114,11 @@ def ccppara(cfg_file):
     except:
         cpara.boot_samples = None
     # para for center bins
-    cla = cf.getfloat('spacedbins', 'center_lat')
-    clo = cf.getfloat('spacedbins', 'center_lon')
-    hlla = cf.getfloat('spacedbins', 'half_len_lat')
-    hllo = cf.getfloat('spacedbins', 'half_len_lon')
-    space_val = cf.getfloat('spacedbins', 'interval')
-    cpara.center_bin = [cla, clo, hlla, hllo, space_val]
+    if cf.has_section('spacedbins'):
+        cla = cf.getfloat('spacedbins', 'center_lat')
+        clo = cf.getfloat('spacedbins', 'center_lon')
+        hlla = cf.getfloat('spacedbins', 'half_len_lat')
+        hllo = cf.getfloat('spacedbins', 'half_len_lon')
+        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slid_val)]
 
     return cpara

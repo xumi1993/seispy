@@ -99,7 +99,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
-        rfdep['Station'] = sta_info.station[i]
+        rfdep['station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]
         rfdep['stalon'] = sta_info.stlo[i]
         # rfdep['Depthrange'] = cpara.depth_axis
@@ -108,13 +108,12 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         rfdep['rayp'] = stadatar.rayp
         # rfdep['phases'] = _convert_str_mat(stadatar.phase)
         rfdep['moveout_correct'] = PS_RFdepth
-        rfdep['Piercelat'] = piercelat
-        rfdep['Piercelon'] = piercelon
-        rfdep['StopIndex'] = end_index
+        rfdep['piercelat'] = piercelat
+        rfdep['piercelon'] = piercelon
+        rfdep['stopindex'] = end_index
         RFdepth.append(rfdep)
-    
-    savemat(cpara.depthdat, {'RFdepth': RFdepth})
-    # np.save(cpara.depthdat, RFdepth)
+    # savemat(cpara.depthdat, {'RFdepth': RFdepth})
+    np.save(cpara.depthdat, RFdepth)
 
 
 def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
