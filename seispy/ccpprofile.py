@@ -117,14 +117,15 @@ class CCPProfile():
         if exists(self.cpara.stack_sta_list):
             self.logger.CCPlog.info('Use stacking stations in {}'.format(self.cpara.stack_sta_list))
             staname = list(np.loadtxt(self.cpara.stack_sta_list, dtype=np.dtype('U10'), usecols=(0,), ndmin=1, unpack=True))
-            self.idxs = np.array([])
+            self.idxs = []
             for sta in staname:
                 try:
-                    idx = self.station(sta)
-                    self.idxs = np.append(self.idxs, idx)
+                    idx = self.station.index(sta)
+                    self.idxs.append(idx)
                 except ValueError:
                     self.logger.CCPlog.warning('{} does not in RFdepth structure'.format(sta))
-                self._pierce_project(self.rfdep[idx])
+                if self.cpara.shape == 'rect':
+                    self._pierce_project(self.rfdep[idx])
         elif self.cpara.width is None and self.cpara.shape == 'circle':
             dep_mod = DepModel(self.cpara.stack_range)
             x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (skm2srad(0.085) ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
@@ -160,7 +161,7 @@ class CCPProfile():
         sta_dis = sind(daz.baz-sta_daz.az) * sta_daz.degreesToKilometers()
         proj_idx = np.where(np.abs(sta_dis) < width)[0]
         tmp_idx = np.intersect1d(tmp_idx_begin, tmp_idx_end)
-        final_idx = np.intersect1d(tmp_idx, proj_idx)
+        final_idx = np.intersect1d(tmp_idx, proj_idx).astype(int)
         if not final_idx.any():
             self.logger.CCPlog.error('No stations within the profile belt with width of {}'.format(width))
             raise ValueError('Satisfied stations not found')
@@ -208,9 +209,12 @@ class CCPProfile():
             self.stack_data.append(boot_stack)   
 
     def save_stack_data(self, format='npz'):
-        """Save stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
+        """If format is \'npz\', saving stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
         data['cpara'] is the parameters when CCP stacking.
         data['stack_data'] is the result of stacked data.
+
+        If format is \'dat\' the stacked data will be save into a txt file with 8 columns, including bin_lat, bin_lon, profile_dis, depth, amp, ci_low, ci_high and count.
+        where bin_lat and bin_lon represent the position of each bin; profile_dis represents the distance in km between each bin and the start point of the profile; depth represents depth of each bin; amp means the stacked amplitude; ci_low and ci_high mean confidence interval with bootstrap method; count represents stacking number of each bin.
 
         :param fname: file name of stacked data
         :type fname: str

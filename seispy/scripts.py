@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 from seispy.rfcorrect import SACStation
 from seispy.ccp3d import CCP3D
+from seispy.ccpprofile import CCPProfile
 
 
 def rfani():
@@ -29,7 +30,7 @@ def rfani():
 
 def ccp3d():
     parser = argparse.ArgumentParser(description="3-D CCP stacking with spaced grid bins.")
-    parser.add_argument('cfg_file', type=str, help='Path to configure file')
+    parser.add_argument('cfg_file', type=str, help='Path to CCP configure file')
     parser.add_argument('-s', help='Range for searching depth of D410 and D660, The results would be saved to \'peakfile\' in cfg_file',
                         metavar='d410min/d410max/d660min/d660max', default=None)
     arg = parser.parse_args()
@@ -41,4 +42,21 @@ def ccp3d():
         search_range = np.array(arg.s.split('/')).astype(float)
         ccp.search_good_410_660(*search_range)
         ccp.save_good_410_660(ccp.cpara.peakfile)
+
+
+def ccp_profile():
+    parser = argparse.ArgumentParser(description="Stack PRFS along a profile")
+    # parser.add_argument('-d', help='Path to 3d vel model in npz file', dest='vel3dpath', type=str, default='')
+    parser.add_argument('cfg_file', type=str, help='Path to CCP configure file')
+    parser.add_argument('-t', help='Output as a text file', dest='isdat', action='store_true')
+    arg = parser.parse_args()
+    if arg.isdat:
+        typ = 'dat'
+    else:
+        typ = 'npz'
+    ccp = CCPProfile(arg.cfg_file)
+    ccp.initial_profile()
+    ccp.stack()
+    ccp.save_stack_data(format=typ)
+
     

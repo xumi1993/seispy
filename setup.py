@@ -5,7 +5,7 @@ packages = find_packages()
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-VERSION = "1.1.26"
+VERSION = "1.1.27"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -32,7 +32,7 @@ setup(name='python-seispy',
                                         'updatecatalog=seispy.updatecatalog:main',
                                         'ndk2dat=seispy.updatecatalog:ndk2dat',
                                         'lsnc=seispy.io:lsnc',
-                                        'ccp_profile=seispy.ccp:ccp_profile',
+                                        'ccp_profile=seispy.scripts:ccp_profile',
                                         'hk=seispy.hk:hk',
                                         'pickrf=seispy.pickui:main',
                                         'rfani=seispy.scripts:rfani',
