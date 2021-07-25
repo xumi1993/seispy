@@ -9,7 +9,7 @@ def rfani():
     parser = argparse.ArgumentParser(description="Estimate crustal anisotropy with a Joint inversion method. See Liu and Niu (2012) in detail.")
     parser.add_argument('rfpath', type=str, help="Path to PRFs")
     parser.add_argument('-c', help="If the option was specified, directly output results without commentary", action='store_true', default=False)
-    parser.add_argument('-o', dest='outpath', help="Directory to the image.")
+    parser.add_argument('-o', dest='outpath', help="Directory to the image.", default='./')
     parser.add_argument('-p', help="Plot energy of anisotropy and show via Matplotlib",
                         dest="isplot", action='store_true', default=False)
     parser.add_argument('-t', help="Time window cut from tb to te", metavar='tb/te', required=True)

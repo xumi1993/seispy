@@ -202,7 +202,7 @@ class RFAni():
         if show:
             plt.show()
         else:
-            fig.savefig(join(outpath, 'joint_ani_'+self.sacdatar.staname+'.png'), bbox_inches='tight')
+            fig.savefig(join(outpath, 'joint_ani_'+self.sacdatar.staname+'.png'), dpi=400, bbox_inches='tight')
 
 
 

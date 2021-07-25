@@ -34,33 +34,32 @@ def read_process_data(lst, resamp_dt=0.1):
     stadata.bazi = stadata.bazi[idx]
     stadata.datar = stadata.datar[idx]
     stadata.datat = stadata.datat[idx]
-    time_axis = np.arange(stadata.RFlength) * stadata.sampling - stadata.shift
-    return stadata, time_axis
+    return stadata
 
 
-def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=3):
-    bound = np.zeros(stadata.RFlength)
+def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=3):
+    bound = np.zeros(stadata.rflength)
     for i in range(stadata.ev_num):
         datar = stadata.datar[i] * enf + (i + 1)
         datat = stadata.datat[i] * enf + (i + 1)
         # axr.plot(time_axis, stadata.datar[i], linewidth=0.2, color='black')
-        axr.fill_between(time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
+        axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
                          alpha=0.7)
-        axr.fill_between(time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
+        axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
                          alpha=0.7)
         # axt.plot(time_axis, stadata.datat[i], linewidth=0.2, color='black')
-        axt.fill_between(time_axis, datat, bound + i + 1, where=datat > i+1, facecolor='red',
+        axt.fill_between(stadata.time_axis, datat, bound + i + 1, where=datat > i+1, facecolor='red',
                          alpha=0.7)
-        axt.fill_between(time_axis, datat, bound + i + 1, where=datat < i+1, facecolor='blue',
+        axt.fill_between(stadata.time_axis, datat, bound + i + 1, where=datat < i+1, facecolor='blue',
                          alpha=0.7)
     datar = np.mean(stadata.datar, axis=0)
     datar /= np.max(datar)
     datat = np.mean(stadata.datat, axis=0)
     datat /= np.max(datar)
-    axr_sum.fill_between(time_axis, datar, bound, where=datar > 0, facecolor='red', alpha=0.7)
-    axr_sum.fill_between(time_axis, datar, bound, where=datar < 0, facecolor='blue', alpha=0.7)
-    axt_sum.fill_between(time_axis, datat, bound, where=datat > 0, facecolor='red', alpha=0.7)
-    axt_sum.fill_between(time_axis, datat, bound, where=datat < 0, facecolor='blue', alpha=0.7)
+    axr_sum.fill_between(stadata.time_axis, datar, bound, where=datar > 0, facecolor='red', alpha=0.7)
+    axr_sum.fill_between(stadata.time_axis, datar, bound, where=datar < 0, facecolor='blue', alpha=0.7)
+    axt_sum.fill_between(stadata.time_axis, datat, bound, where=datat > 0, facecolor='red', alpha=0.7)
+    axt_sum.fill_between(stadata.time_axis, datat, bound, where=datat < 0, facecolor='blue', alpha=0.7)
     axb.scatter(stadata.bazi, np.arange(stadata.ev_num) + 1, s=7)
 
 
@@ -132,8 +131,8 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
     if not exists(out_path):
         raise FileExistsError('The output path {} not exists'.format(out_path))
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
-    stadata, time_axis = read_process_data(lst)
-    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=enf)
+    stadata = read_process_data(lst)
+    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
     if outformat == 'g':
         h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=200)

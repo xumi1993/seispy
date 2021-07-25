@@ -90,6 +90,7 @@ class SACStation(object):
             self.datat = resample(self.datat, npts, axis=1)
         self.sampling = dt
         self.rflength = npts
+        self.time_axis = np.arange(npts) * dt - self.shift
 
     def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91'):
         rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, velmod=velmod)
