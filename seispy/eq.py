@@ -1,4 +1,5 @@
 import numpy as np
+from numpy.core.getlimits import _KNOWN_TYPES
 import obspy
 from obspy.io.sac import SACTrace
 from obspy.signal.rotate import rotate2zne, rotate_zne_lqt
@@ -151,6 +152,7 @@ class eq(object):
             self.rf.rotate('RT->NE', back_azimuth=bazi)
         elif method == 'ZNE->LQT':
             self.rf.rotate('ZNE->LQT', back_azimuth=bazi, inclination=inc)
+            self.rf[1].data *= -1
         elif method == 'LQT->ZNE':
             self.rf.rotate('LQT->ZNE', back_azimuth=bazi, inclination=inc)
         else:
@@ -215,26 +217,43 @@ class eq(object):
         else:
             self.rf = self.st.copy().trim(t1, t2)
 
-    def deconvolute(self, shift, time_after, f0, phase='P', only_r=False, itmax=400, minderr=0.001, target_dt=None):
+    def deconvolute(self, shift, time_after, f0=2, phase='P', method='iter', only_r=False, itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
         if self.rf == obspy.Stream():
-            raise ValueError('Please run eq.trim at first')
-        if phase == 'P':
-            self.rf[1].data, self.rms, self.it = seispy.decov.decovit(self.rf[1].data, self.rf[2].data, self.rf[1].stats.delta,
-                                 self.rf[1].data.shape[0], shift, f0, itmax, minderr)
-            if not only_r:
-                self.rf[0].data, self.rms, self.it = seispy.decov.decovit(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta,
-                                     self.rf[1].data.shape[0], shift, f0, itmax, minderr)
+            raise ValueError('Please run eq.trim first')
+        if method == 'iter':
+            kwargs = {'method': method,
+                      'f0': f0,
+                      'tshift': shift,
+                      'itmax': itmax,
+                      'minderr': minderr}
+        elif method == 'water':
+            kwargs = {'method': method,
+                      'f0': f0,
+                      'tshift': shift,
+                      'wlevel': wlevel}
         else:
-            # if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
+            raise ValueError('method must be in \'iter\' or \'water\'')
+
+        if phase == 'P':
+            decon_out_r = seispy.decon.deconvolute(self.rf[1].data, self.rf[2].data, self.rf[1].stats.delta, **kwargs)
+            self.rf[1].data = decon_out_r[0]
+            self.rms = decon_out_r[1]
+            if method == 'iter':
+                self.it = decon_out_r[2]
+            if not only_r:
+                decon_out_t = seispy.decon.deconvolute(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta, **kwargs)
+                self.rf[0].data = decon_out_t[0]
+        else:
+            # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
             #     raise ValueError('Please rotate component to \'LQT\'')
             Q = np.flip(self.rf[1].data, axis=0)
             L = np.flip(self.rf[2].data, axis=0)
-            self.rf[2].data, self.rms, self.it = seispy.decov.decovit(L, -Q, self.rf[1].stats.delta,
+            self.rf[2].data, self.rms, self.it = seispy.decon.deconit(L, -Q, self.rf[1].stats.delta,
                                                          self.rf[1].data.shape[0], shift,
                                                          f0, itmax, minderr, phase='S')
-            # self.rf[2].data = seispy.decov.deconv_waterlevel(L, -Q, self.rf[1].stats.delta, 
+            # self.rf[2].data = seispy.decon.deconv_waterlevel(L, -Q, self.rf[1].stats.delta, 
             #                                                  self.rf[1].data.shape[0], tshift=shift,
             #                                                  gauss=f0)
             # self.rms = [0]

@@ -5,7 +5,7 @@ from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 from os.path import join, abspath, dirname
 from seispy.geo import cosd, sind
-from seispy.decov import decovit
+from seispy.decon import deconit
 from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map
 
@@ -203,9 +203,6 @@ class RFAni():
             plt.show()
         else:
             fig.savefig(join(outpath, 'joint_ani_'+self.sacdatar.staname+'.png'), dpi=400, bbox_inches='tight')
-
-
-
 
 
 if __name__ == "__main__":

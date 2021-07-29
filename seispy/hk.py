@@ -178,7 +178,7 @@ def hksta(hpara, isplot=False, isdisplay=False):
     if isdisplay:
         print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
     if isplot:
-        img_path = join(hpara.hkpath, station+'.pdf')
+        img_path = join(hpara.hkpath, station+'_Hk.pdf')
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title, path=img_path)
     else:
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title)

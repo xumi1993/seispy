@@ -39,7 +39,7 @@ python setup.py install
   * `seispy.distaz`: Calculate distance and azimuth (by [the lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/)).<br />
   * `seispy.geo`: Tiny codes of geophysics.
   * `seispy.bootstrap`: Bootstrap confidence interval estimation (by [scikits-bootstrap](https://github.com/cgevans/scikits-bootstrap))
-  * `seispy.decov`: Iterative time domain deconvolution method (Ligorria and Ammon's 1999 BSSA)
+  * `seispy.decon`: Iterative time domain deconvolution method (Ligorria and Ammon's 1999 BSSA)
   * `seispy.rfcorrect`: Subsequent process of PRFs includeing moveout correct and time to depth conversion (1D and 3D) (see [Mijian Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
   * `seispy.ccp`: CCP stacking along a profile.
 

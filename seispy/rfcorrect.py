@@ -62,7 +62,12 @@ class SACStation(object):
         # self.phase = [ph.decode() for ph in self.phase]
         self.rayp = skm2srad(self.rayp)
         self.ev_num = self.evla.shape[0]
-        sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
+        try:
+            sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
+            self.comp = 'R'
+        except:
+            sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_Q.sac'))
+            self.comp = 'Q'
         self.stla = sample_sac.stla
         self.stlo = sample_sac.stlo
         self.rflength = sample_sac.npts
@@ -74,13 +79,13 @@ class SACStation(object):
         if not only_r:
             self.datat = np.empty([self.ev_num, self.rflength])
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
-                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
+                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
                 self.datar[_i] = sac.data
                 self.datat[_i] = sact.data
         else:
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
-                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_R.sac'))
+                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 self.datar[_i] = sac.data
 
     def resample(self, dt):

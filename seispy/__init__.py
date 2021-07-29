@@ -1,4 +1,4 @@
-from seispy import decov
+from seispy import decon
 from seispy.distaz import distaz
 from seispy import geo
 from seispy import bootstrap

@@ -71,7 +71,9 @@ def ccppara(cfg_file):
     cpara.stalist = cf.get('FileIO', 'stalist')
     cpara.stack_sta_list = cf.get('FileIO', 'stack_sta_list')
     if cf.has_option('FileIO', 'peakfile'):
-        cpara.peakfile = cf.get('FileIO', 'peakfile')
+        fname = cf.get('FileIO', 'peakfile')
+        if fname != '':
+            cpara.peakfile = fname
     velmod = cf.get('FileIO', 'velmod')
     if velmod == '':
         cpara.velmod = join(dirname(__file__), 'data', 'iasp91.vel')

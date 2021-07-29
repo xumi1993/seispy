@@ -160,6 +160,8 @@ def CfgParser(cfg_file):
                 pa.__dict__[key] = cf.getboolean(sec, 'only_r')
             elif key == 'criterion':
                 pa.criterion = value
+            elif key == 'decon_method':
+                pa.decon_method = value
             else:
                 try:
                     pa.__dict__[key] = float(value)
@@ -356,7 +358,7 @@ class RF(object):
     #         sys.exit(1)
 
     def rotate(self, method='NE->RT', search_inc=False):
-        self.logger.RFlog.info('Rotate {0} phase {1}'.format(self.para.phase, method))
+        self.logger.RFlog.info('Rotate {0} phase to {1}'.format(self.para.phase, method))
         drop_idx = []
         for i, row in self.eqs.iterrows():
             try:
@@ -380,6 +382,7 @@ class RF(object):
         self.logger.RFlog.info('{0} events left after SNR calculation'.format(self.eqs.shape[0]))
 
     def trim(self):
+        self.logger.RFlog.info('Trim waveforms from {:.2f} before P to {:.2f} after P'.format(self.para.time_before, self.para.time_after))
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
     
@@ -387,11 +390,7 @@ class RF(object):
         pickphase(self.eqs, self.para)
         self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
 
-    def deconv(self, itmax=None, minderr=None):
-        if itmax is None:
-            itmax = self.para.itmax
-        if minderr is None:
-            minderr = self.para.minderr
+    def deconv(self):
         if self.para.phase == 'P':
             shift = self.para.time_before
             time_after = self.para.time_after
@@ -406,10 +405,15 @@ class RF(object):
         for i, row in self.eqs.iterrows():
             count += 1
             try:
-                row['data'].deconvolute(shift, time_after, self.para.gauss, phase=self.para.phase,
-                                    only_r=self.para.only_r, itmax=itmax, minderr=minderr, target_dt=self.para.target_dt)
-                self.logger.RFlog.info('Iterative Decon {0} ({3}/{4}) iterations: {1}; final RMS: {2:.4f}'.format(
-                    row['data'].datestr, row['data'].it, row['data'].rms[-1], count, self.eqs.shape[0]))
+                row['data'].deconvolute(shift, time_after, method=self.para.decon_method, f0=self.para.gauss, phase=self.para.phase,
+                                    only_r=self.para.only_r, itmax=self.para.itmax, minderr=self.para.minderr,
+                                    wlevel=self.para.wlevel, target_dt=self.para.target_dt)
+                if self.para.decon_method == 'iter':
+                    self.logger.RFlog.info('Iterative Decon {0} ({3}/{4}) iterations: {1}; final RMS: {2:.4f}'.format(
+                        row['data'].datestr, row['data'].it, row['data'].rms[-1], count, self.eqs.shape[0]))
+                elif self.para.decon_method == 'water':
+                    self.logger.RFlog.info('Water level Decon {} ({}/{}); RMS: {:.4f}'.format(
+                        row['data'].datestr, count, self.eqs.shape[0], row['data'].rms))
             except Exception as e:
                 self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_lst.append(i)
@@ -485,7 +489,13 @@ def prf():
     else:
         pass
     pjt.trim()
-    pjt.rotate()
+    targ_comp = ''.join(sorted(pjt.para.comp.upper()))
+    if targ_comp == 'RTZ':
+        pjt.rotate(method='NE->RT')
+    elif targ_comp == 'LQT':
+        pjt.rotate(method='ZNE->LQT')
+    else:
+        raise ValueError('comp must be in RTZ or LQT.')
     pjt.deconv()
     pjt.saverf()
 

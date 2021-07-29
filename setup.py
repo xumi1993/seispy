@@ -5,7 +5,7 @@ packages = find_packages()
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-VERSION = "1.1.27"
+VERSION = "1.1.28"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',

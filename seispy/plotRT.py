@@ -26,8 +26,8 @@ def init_figure():
     return h, axr, axt, axb, axr_sum, axt_sum
 
 
-def read_process_data(lst, resamp_dt=0.1):
-    stadata = SACStation(lst)
+def read_process_data(path, resamp_dt=0.1):
+    stadata = SACStation(path)
     stadata.resample(resamp_dt)
     idx = np.argsort(stadata.bazi)
     stadata.event = stadata.event[idx]
@@ -63,7 +63,7 @@ def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=3):
     axb.scatter(stadata.bazi, np.arange(stadata.ev_num) + 1, s=7)
 
 
-def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30):
+def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30, comp='R'):
     y_range = np.arange(stadata.ev_num) + 1
     x_range = np.arange(0, xmax+2, 2)
     space = 2
@@ -80,7 +80,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axr.add_line(Line2D([0, 0], axr.get_ylim(), color='black'))
 
     # set axr_sum
-    axr_sum.set_title('R components ({})'.format(station), fontsize=16)
+    axr_sum.set_title('{} components ({})'.format(comp, station), fontsize=16)
     axr_sum.set_xlim(xmin, xmax)
     axr_sum.set_xticks(x_range)
     axr_sum.set_xticklabels([])
@@ -124,6 +124,19 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
 
 
 def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
+    """[summary]
+
+    :param rfpath: [description]
+    :type rfpath: [type]
+    :param enf: [description], defaults to 3
+    :type enf: int, optional
+    :param out_path: [description], defaults to './'
+    :type out_path: str, optional
+    :param outformat: [description], defaults to 'g'
+    :type outformat: str, optional
+    :raises FileExistsError: [description]
+    :raises FileExistsError: [description]
+    """
     station = basename(rfpath)
     lst = join(rfpath, station+'finallist.dat')
     if not exists(lst):
@@ -131,7 +144,7 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
     if not exists(out_path):
         raise FileExistsError('The output path {} not exists'.format(out_path))
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
-    stadata = read_process_data(lst)
+    stadata = read_process_data(rfpath)
     plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
     if outformat == 'g':
@@ -141,11 +154,12 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Plot R&T components for P receiver functions (PRFs)")
+    parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
     parser.add_argument('path', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
-    parser.add_argument('-e', help='Enlargement factor default is 3', dest='enf', type=int, default=3)
-    parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str)
-    parser.add_argument('-t', help='Specify figure format. f = .pdf, g = .png', dest='format', default='g', type=str)
+    parser.add_argument('-e', help='Enlargement factor, default to 3', dest='enf', type=int, default=3, metavar='enf')
+    parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str, metavar='outpath')
+    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
+                        dest='format', default='g', type=str, metavar='f|g')
     arg = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()

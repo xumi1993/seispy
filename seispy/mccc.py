@@ -36,4 +36,4 @@ def mccc(seis, dt, twin=0):
     for i in np.arange(0, ns):
         tdel[i] = (-np.sum(tcc[0:i+1, i]) + np.sum(tcc[i, i+1:ns]))/ns
 
-    return(tdel)
+    return tdel

@@ -122,7 +122,7 @@ class MatplotlibWidget(QMainWindow):
         self.key_space.activated.connect(self.plot_ui)
 
     def add_btn(self):
-        pre_btn = QPushButton("Previous (z)")
+        pre_btn = QPushButton("Back (z)")
         pre_btn.clicked.connect(self.previous_connect)
         next_btn = QPushButton("Next (c)")
         next_btn.clicked.connect(self.next_connect)
