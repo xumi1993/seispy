@@ -197,6 +197,7 @@ def hk():
                         dest='isdisplay', action='store_true')
     arg = parser.parse_args()
     hpara = hkpara(arg.cfg_file)
+    print(hpara.hklist)
     # if arg.station != '':
     #     hpara.rfpath = arg.station
     # if arg.H != '':
