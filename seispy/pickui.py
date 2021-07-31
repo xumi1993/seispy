@@ -97,7 +97,7 @@ class MatplotlibWidget(QMainWindow):
         if not hasattr(self.mpl.rffig, 'plotfig'):
             self.mpl.rffig.plot()
         try:
-            self.mpl.rffig.plotfig.savefig(fileName_choose)
+            self.mpl.rffig.plotfig.savefig(fileName_choose, dpi=500, bbox_inches='tight')
             self.mpl.rffig.log.RFlog.info('Figure saved to {}'.format(fileName_choose))
         except Exception as e:
             self.mpl.rffig.log.RFlog.error('{}'.format(e))

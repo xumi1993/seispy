@@ -4,7 +4,7 @@ from os.path import join, basename
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 from os.path import join, abspath, dirname
-from seispy.geo import cosd, sind
+from seispy.geo import cosd, sind, extrema
 from seispy.decon import deconit
 from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map
@@ -18,17 +18,20 @@ def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
 
 
 class RFAni():
-    def __init__(self, sacdatar, tb, te, val=10):
+    def __init__(self, sacdatar, tb, te, tlen=3, val=10):
         self.tb = tb
         self.te = te
+        self.tlen = tlen
         self.sacdatar = sacdatar
+        self.sacdatar.resample(0.1)
+        self.nbs = int((self.tb + self.sacdatar.shift) / self.sacdatar.sampling)
+        self.nes = int((self.te + self.sacdatar.shift) / self.sacdatar.sampling)
         self.baz_stack(val=val)
+        self.search_peak_amp()
         # self.para = readpara(para=join(path, 'raysum-params'))
         # self.baz, self.datar, self.datat = readrf(path, self.para, join(path, 'sample.geom'))
         self.init_ani_para()
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
-        self.nb = int((self.tb + self.sacdatar.shift) / self.sacdatar.sampling)
-        self.ne = int((self.te + self.sacdatar.shift) / self.sacdatar.sampling)
 
     def baz_stack(self, val=10):
         self.stack_range = np.arange(0, 360, val)
@@ -42,6 +45,16 @@ class RFAni():
             if idx.size != 0:
                 self.rft_baz[i] = np.mean(self.sacdatar.datat[idx], axis=0)
                 self.rfr_baz[i] = np.mean(self.sacdatar.datar[idx], axis=0)
+
+    def search_peak_amp(self):
+        mean_rf = np.mean(self.rfr_baz, axis=0)
+        nmax = extrema(mean_rf[self.nbs:self.nes])+self.nbs
+        if nmax.size > 1:
+            nps = nmax[np.nanargmax(mean_rf[nmax])]
+        else:
+            nps = nmax[0]
+        self.nb = int(nps - self.tlen / self.sacdatar.sampling)
+        self.ne = int(nps + self.tlen / self.sacdatar.sampling)
 
     def init_ani_para(self):
         self.deltat_1d = np.arange(0, 1.55, 0.05)
@@ -102,6 +115,52 @@ class RFAni():
         energy_tc /= np.max(np.abs(energy_tc))
         return self.xyz2grd(energy_cc), self.xyz2grd(energy_tc)
 
+    def plot_stack_baz(self, enf=60, outpath='./'):
+        ml = MultipleLocator(5)
+        bound = np.zeros_like(self.sacdatar.time_axis)
+        plt.style.use("bmh")
+        plt.rc('grid', color='white', linestyle='-', linewidth=0.7)
+        plt.rcParams["axes.grid.axis"] = "x"
+        fig = plt.figure(figsize=(15, 8))
+        axr = plt.subplot(1, 2, 1)
+        for i, baz in enumerate(self.stack_range):
+            if np.mean(self.rfr_baz[i]) == 0:
+                continue
+            amp = self.rfr_baz[i] * enf + baz
+            # axr.plot(time_axis, amp, linewidth=0.2, color='black')
+            axr.fill_between(self.sacdatar.time_axis, amp, bound + baz, where=amp > self.stack_range[i], facecolor='red', alpha=0.7)
+            axr.fill_between(self.sacdatar.time_axis, amp, bound + baz, where=amp < self.stack_range[i], facecolor='#1193F4', alpha=0.7)
+        axr.plot([0, 0], [0, 360], linewidth=1, color='black')
+        axr.set_xlim([-1, 15])
+        axr.xaxis.set_major_locator(MultipleLocator(2))
+        axr.set_ylim(0, 360)
+        axr.set_yticks(np.arange(0, 360+30, 30))
+        axr.yaxis.set_minor_locator(ml)
+        axr.set_ylabel('Back-azimuth ($^\circ$)')
+        axr.set_xlabel('Time after P(s)')
+        axr.set_title('{} component ({})'.format(self.sacdatar.comp, self.sacdatar.staname))
+
+        axt = plt.subplot(1, 2, 2)
+        # axt.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
+        for i, baz in enumerate(self.stack_range):
+            if np.mean(self.rft_baz[i]) == 0:
+                continue
+            amp = self.rft_baz[i] * enf + baz
+            # axt.plot(time_axis, amp, linewidth=0.2, color='black')
+            axt.fill_between(self.sacdatar.time_axis, amp, bound + baz, where=amp > baz, facecolor='red', alpha=0.7)
+            axt.fill_between(self.sacdatar.time_axis, amp, bound + baz, where=amp < baz, facecolor='#1193F4', alpha=0.7)
+        axt.plot([0, 0], [0, 360], linewidth=1, color='black')
+        axt.set_xlim([-1, 15])
+        # axt.set_xticks(np.arange(0, 5))
+        axt.xaxis.set_major_locator(MultipleLocator(2))
+        axt.set_ylim(0, 360)
+        axt.set_yticks(np.arange(0, 360+30, 30))
+        axt.yaxis.set_minor_locator(ml)
+        # axt.set_ylabel('Back-azimuth ($^\circ$)')
+        axt.set_xlabel('Time after P(s)')
+        axt.set_title('T component ({})'.format(self.sacdatar.staname))
+        fig.savefig(join(outpath, '{}_baz_stack.png'.format(self.sacdatar.staname)), dpi=400, bbox_inches='tight')
+
     def plot_correct(self, fvd=0, dt=0.44, enf=80, outpath=None):
         nt_corr = int((dt/2 / self.sacdatar.sampling))
         nt_fast = np.arange(self.nb, self.ne) + nt_corr
@@ -148,7 +207,6 @@ class RFAni():
             ind = np.argwhere(energy == np.min(energy))
         else:
             raise ValueError('\'opt\' must be max or min')
-        print(ind.shape)
         return self.ani_points[ind][:, 0], self.ani_points[ind][:, 1]
 
     def search_peak(self, energy, opt='max'):
@@ -206,14 +264,4 @@ class RFAni():
 
 
 if __name__ == "__main__":
-    path = join(thispath, 'ani_0_4')
-    rfani = RFAni(path, 3, 7)
-    energy_r = rfani.radial_energy_max()
-    energy_cc, energy_tc = rfani.rotate_to_fast_slow()
-    energy_joint = rfani.joint(energy_r, energy_cc, energy_tc)
-    bf, bt = rfani.search_peak(energy_joint, opt='max')
-    # bft, btt = rfani.search_peak(energy_tc, opt='min')
-    # print(bft, btt)
-    rfani.plot_polar(energy_joint, bf, bt)
-    # rfani1 = RFAni(path, -2, 30)
-    # rfani1.plot_correct()
+    pass

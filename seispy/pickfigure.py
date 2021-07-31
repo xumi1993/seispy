@@ -129,7 +129,7 @@ class RFFigure(Figure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.sort_baz_()
-    
+
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
         self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
@@ -201,7 +201,7 @@ class RFFigure(Figure):
             return
         self.set_ylabels()
         self.set_figure()
-    
+
     def enlarge(self):
         self.enf += 1
         self.axr.cla()
@@ -226,7 +226,7 @@ class RFFigure(Figure):
     def finish(self):
         badidx = np.where(self.goodrf == 0)[0]
         self.log.RFlog.info("%d RFs are rejected" % len(badidx))
-        with open(os.path.join(self.rfpath, basename(self.rfpath)+"finallist.dat"), 'w+') as fid:
+        with open(os.path.join(self.rfpath, self.staname+"finallist.dat"), 'w+') as fid:
             for i in range(self.evt_num):
                 if self.goodrf[i] == 0:
                     files = glob.glob(join(self.rfpath, self.filenames[i]+'*.sac'))
@@ -243,7 +243,7 @@ class RFFigure(Figure):
                     mag = self.rrf[i].stats.sac.mag
                     gauss = self.rrf[i].stats.sac.user1
                     fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
-    
+
     def plot(self):
         plt.ion()
         plt.rcParams['toolbar'] = 'None'

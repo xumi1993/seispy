@@ -105,7 +105,7 @@ class SACStation(object):
         self.dep_range = dep_range
         rfdepth, _, _, _ = psrf2depth(self, dep_range, sampling=self.sampling, shift=self.shift, velmod=velmod, srayp=srayp)
         return rfdepth
-    
+
     def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
         self.dep_range = dep_range
         pplat_s, pplon_s, _ , _, _, _, tpds = psrf_1D_raytracing(self, dep_range, velmod=velmod, srayp=srayp)
@@ -125,8 +125,8 @@ class SACStation(object):
         rfdepth, _ = time2depth(self, dep_range, tps)
         return rfdepth
 
-    def jointani(self, tb, te, stack_baz_val=10, weight=[0.4, 0.3, 0.3]):
-        self.ani = RFAni(self, tb, te)
+    def jointani(self, tb, te, tlen=3, stack_baz_val=10, weight=[0.4, 0.4, 0.2]):
+        self.ani = RFAni(self, tb, te, tlen=tlen)
         self.ani.baz_stack(val=stack_baz_val)
         best_f, best_t = self.ani.joint_ani(weight=weight)
         return best_f, best_t
