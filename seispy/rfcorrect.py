@@ -53,7 +53,13 @@ class SACStation(object):
         if isfile(data_path):
             data_path = dirname(data_path)
         self.staname = basename(data_path)
-        evt_lst = join(data_path, self.staname+'finallist.dat')
+        evt_lsts = glob.glob(join(data_path, '*finallist.dat'))
+        if len(evt_lsts) == 0:
+            raise FileNotFoundError("No such *finallist.dat in the {}".format(data_path))
+        elif len(evt_lsts) > 1:
+            raise ValueError("More than one finallist.dat in the {}".format(data_path))
+        else:
+            evt_lst = evt_lsts[0]
         dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
