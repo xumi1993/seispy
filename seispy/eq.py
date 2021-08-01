@@ -297,7 +297,7 @@ class eq(object):
             tr.o = 0
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
-    def judge_rf(self, shift, npts, criterion='crust'):
+    def judge_rf(self, shift, npts, criterion='crust', rmsgate=None):
         if not isinstance(criterion, (str, type(None))):
             raise TypeError('criterion should be string in [\'crust\', \'mtz\']')
         elif criterion is None:
@@ -309,11 +309,21 @@ class eq(object):
 
         if self.rf[1].stats.npts != npts:
             return False
+        
+        if rmsgate is not None:
+            if type(self.rms) == np.ndarray:
+                rms = self.rms[-1]
+            else:
+                rms = self.rms
+            rmspass = rms < rmsgate
+        else:
+            rmspass = True
+
         if criterion == 'crust':
             time_P1 = int(np.floor((-2+shift)/self.rf[1].stats.delta))
             time_P2 = int(np.floor((4+shift)/self.rf[1].stats.delta))
             max_P = np.max(self.rf[1].data[time_P1:time_P2])
-            if max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
+            if max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1 and rmspass:
                 return True
             else:
                 return False
@@ -322,13 +332,13 @@ class eq(object):
             time_P1 = int(np.floor((-5 + shift) / self.rf[1].stats.delta))
             time_P2 = int(np.floor((5 + shift) / self.rf[1].stats.delta))
             max_P = np.max(self.rf[1].data[time_P1:time_P2])
-            if self.rms[-1] < 0.4 and max_deep < max_P * 0.4 and \
+            if max_deep < max_P * 0.4 and rmspass and \
                   max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
                 return True
             else:
                 return False
         elif criterion is None:
-            return True
+            return rmspass
         else:
             pass
 

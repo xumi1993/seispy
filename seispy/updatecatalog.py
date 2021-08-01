@@ -68,9 +68,10 @@ def main():
 
 def ndk2dat():
     parser = argparse.ArgumentParser(description="Convert ndk file to dat catalog")
-    parser.add_argument('-i', help='Input Catalog', dest='inlog',
+    parser.add_argument('-i', help='Input Catalog', dest='inlog', metavar='input_catalog',
                         type=str)
-    parser.add_argument('-o', help='Onput Catalog', dest='outlog', type=str, default='EventCMT.dat')
+    parser.add_argument('-o', help='Onput Catalog', dest='outlog', metavar='output_catalog', 
+                        type=str, default='EventCMT.dat')
     arg = parser.parse_args()
     with open(arg.inlog) as f:
         content = f.read()

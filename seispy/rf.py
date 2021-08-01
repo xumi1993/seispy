@@ -170,6 +170,11 @@ def CfgParser(cfg_file):
                 pa.criterion = value
             elif key == 'decon_method':
                 pa.decon_method = value
+            elif key == 'rmsgate':
+                try:
+                    pa.rmsgate = cf.getfloat(sec, 'rmsgate')
+                except:
+                    pa.rmsgate = None
             else:
                 try:
                     pa.__dict__[key] = float(value)
@@ -443,9 +448,12 @@ class RF(object):
             pass
         good_lst = []
 
-        self.logger.RFlog.info('Save RFs with criterion of {}'.format(criterion))
+        if self.para.rmsgate is not None:
+            self.logger.RFlog.info('Save RFs with final RMS less than {:.2f} and criterion of {}'.format(self.para.rmsgate, criterion))
+        else:
+            self.logger.RFlog.info('Save RFs with and criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, npts, criterion=criterion):
+            if row['data'].judge_rf(shift, npts, criterion=criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)

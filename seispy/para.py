@@ -38,6 +38,7 @@ class para(object):
         self.minderr = 0.001
         self.criterion = 'crust'
         self.only_r = False
+        self.rmsgate = None
 
     def get_para(self):
         return self.__dict__
