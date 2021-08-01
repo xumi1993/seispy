@@ -97,7 +97,7 @@ class MatplotlibWidget(QMainWindow):
         if not hasattr(self.mpl.rffig, 'plotfig'):
             self.mpl.rffig.plot()
         try:
-            self.mpl.rffig.plotfig.savefig(fileName_choose)
+            self.mpl.rffig.plotfig.savefig(fileName_choose, dpi=500, bbox_inches='tight')
             self.mpl.rffig.log.RFlog.info('Figure saved to {}'.format(fileName_choose))
         except Exception as e:
             self.mpl.rffig.log.RFlog.error('{}'.format(e))
@@ -122,7 +122,7 @@ class MatplotlibWidget(QMainWindow):
         self.key_space.activated.connect(self.plot_ui)
 
     def add_btn(self):
-        pre_btn = QPushButton("Previous (z)")
+        pre_btn = QPushButton("Back (z)")
         pre_btn.clicked.connect(self.previous_connect)
         next_btn = QPushButton("Next (c)")
         next_btn.clicked.connect(self.next_connect)

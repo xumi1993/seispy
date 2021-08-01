@@ -31,6 +31,9 @@ class para(object):
         self.time_after = 120
         self.freqmin = 0.05
         self.freqmax = 1
+        self.comp = 'RTZ'
+        self.decon_method = 'iter'
+        self.wlevel = 0.05
         self.itmax = 400
         self.minderr = 0.001
         self.criterion = 'crust'
@@ -104,7 +107,22 @@ class para(object):
 
     @criterion.setter
     def criterion(self, value):
-        if value == '':
+        if ''.join(sorted(self.comp.upper())) == 'LQT':
             self._criterion = None
+        elif value == '':
+            self._criterion = None
+        elif value.lower() not in ['crust', 'mtz']:
+            raise ValueError('criterion should be string in \'crust\' or  \'mtz\'')
         else:
             self._criterion = value
+
+    @property
+    def decon_method(self):
+        return self._decon_method
+    
+    @decon_method.setter
+    def decon_method(self, value):
+        if value not in ['iter', 'water']:
+            raise ValueError('decon_method must be in \'iter\' or \'water\'')
+        else:
+            self._decon_method = value

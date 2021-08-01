@@ -26,45 +26,44 @@ def init_figure():
     return h, axr, axt, axb, axr_sum, axt_sum
 
 
-def read_process_data(lst, resamp_dt=0.1):
-    stadata = SACStation(lst)
+def read_process_data(path, resamp_dt=0.1):
+    stadata = SACStation(path)
     stadata.resample(resamp_dt)
     idx = np.argsort(stadata.bazi)
     stadata.event = stadata.event[idx]
     stadata.bazi = stadata.bazi[idx]
     stadata.datar = stadata.datar[idx]
     stadata.datat = stadata.datat[idx]
-    time_axis = np.arange(stadata.RFlength) * stadata.sampling - stadata.shift
-    return stadata, time_axis
+    return stadata
 
 
-def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=3):
-    bound = np.zeros(stadata.RFlength)
+def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=3):
+    bound = np.zeros(stadata.rflength)
     for i in range(stadata.ev_num):
         datar = stadata.datar[i] * enf + (i + 1)
         datat = stadata.datat[i] * enf + (i + 1)
         # axr.plot(time_axis, stadata.datar[i], linewidth=0.2, color='black')
-        axr.fill_between(time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
+        axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
                          alpha=0.7)
-        axr.fill_between(time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
+        axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
                          alpha=0.7)
         # axt.plot(time_axis, stadata.datat[i], linewidth=0.2, color='black')
-        axt.fill_between(time_axis, datat, bound + i + 1, where=datat > i+1, facecolor='red',
+        axt.fill_between(stadata.time_axis, datat, bound + i + 1, where=datat > i+1, facecolor='red',
                          alpha=0.7)
-        axt.fill_between(time_axis, datat, bound + i + 1, where=datat < i+1, facecolor='blue',
+        axt.fill_between(stadata.time_axis, datat, bound + i + 1, where=datat < i+1, facecolor='blue',
                          alpha=0.7)
     datar = np.mean(stadata.datar, axis=0)
     datar /= np.max(datar)
     datat = np.mean(stadata.datat, axis=0)
     datat /= np.max(datar)
-    axr_sum.fill_between(time_axis, datar, bound, where=datar > 0, facecolor='red', alpha=0.7)
-    axr_sum.fill_between(time_axis, datar, bound, where=datar < 0, facecolor='blue', alpha=0.7)
-    axt_sum.fill_between(time_axis, datat, bound, where=datat > 0, facecolor='red', alpha=0.7)
-    axt_sum.fill_between(time_axis, datat, bound, where=datat < 0, facecolor='blue', alpha=0.7)
+    axr_sum.fill_between(stadata.time_axis, datar, bound, where=datar > 0, facecolor='red', alpha=0.7)
+    axr_sum.fill_between(stadata.time_axis, datar, bound, where=datar < 0, facecolor='blue', alpha=0.7)
+    axt_sum.fill_between(stadata.time_axis, datat, bound, where=datat > 0, facecolor='red', alpha=0.7)
+    axt_sum.fill_between(stadata.time_axis, datat, bound, where=datat < 0, facecolor='blue', alpha=0.7)
     axb.scatter(stadata.bazi, np.arange(stadata.ev_num) + 1, s=7)
 
 
-def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30):
+def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30, comp='R'):
     y_range = np.arange(stadata.ev_num) + 1
     x_range = np.arange(0, xmax+2, 2)
     space = 2
@@ -81,7 +80,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
     axr.add_line(Line2D([0, 0], axr.get_ylim(), color='black'))
 
     # set axr_sum
-    axr_sum.set_title('R components ({})'.format(station), fontsize=16)
+    axr_sum.set_title('{} components ({})'.format(comp, station), fontsize=16)
     axr_sum.set_xlim(xmin, xmax)
     axr_sum.set_xticks(x_range)
     axr_sum.set_xticklabels([])
@@ -125,6 +124,19 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30)
 
 
 def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
+    """[summary]
+
+    :param rfpath: [description]
+    :type rfpath: [type]
+    :param enf: [description], defaults to 3
+    :type enf: int, optional
+    :param out_path: [description], defaults to './'
+    :type out_path: str, optional
+    :param outformat: [description], defaults to 'g'
+    :type outformat: str, optional
+    :raises FileExistsError: [description]
+    :raises FileExistsError: [description]
+    """
     station = basename(rfpath)
     lst = join(rfpath, station+'finallist.dat')
     if not exists(lst):
@@ -132,8 +144,8 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
     if not exists(out_path):
         raise FileExistsError('The output path {} not exists'.format(out_path))
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
-    stadata, time_axis = read_process_data(lst)
-    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, time_axis, enf=enf)
+    stadata = read_process_data(rfpath)
+    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
     if outformat == 'g':
         h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=200)
@@ -142,11 +154,12 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Plot R&T components for P receiver functions (PRFs)")
+    parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
     parser.add_argument('path', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
-    parser.add_argument('-e', help='Enlargement factor default is 3', dest='enf', type=int, default=3)
-    parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str)
-    parser.add_argument('-t', help='Specify figure format. f = .pdf, g = .png', dest='format', default='g', type=str)
+    parser.add_argument('-e', help='Enlargement factor, default to 3', dest='enf', type=int, default=3, metavar='enf')
+    parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str, metavar='outpath')
+    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
+                        dest='format', default='g', type=str, metavar='f|g')
     arg = parser.parse_args()
     if len(sys.argv) == 1:
         parser.print_help()

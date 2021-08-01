@@ -3,12 +3,11 @@ import re
 from obspy.io.sac.sactrace import SACTrace
 import matplotlib.pyplot as plt
 from os.path import dirname, join, basename
-from scipy.io import loadmat
-from matplotlib.colors import ListedColormap
 from seispy.rfcorrect import SACStation
 from seispy.hkpara import hkpara
 from seispy.geo import srad2skm
 import argparse
+from seispy.utils import load_cyan_map
 
 
 def transarray(array, axis=0):
@@ -101,12 +100,6 @@ def hkstack(seis, t0, dt, p, h, kappa, vp=6.3, weight=(0.7, 0.2, 0.1)):
     return stack, stackvar, Normed_stack, allstackvar
 
 
-def load_cyan_map():
-    path = join(dirname(__file__), 'data', 'cyan.mat')
-    carray = loadmat(path)['cyan']
-    return ListedColormap(carray)
-
-
 def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), title=None, path=None):
     f, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 8), sharex='col', sharey='row')
     xlim = (h[0], h[-1])
@@ -185,7 +178,7 @@ def hksta(hpara, isplot=False, isdisplay=False):
     if isdisplay:
         print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
     if isplot:
-        img_path = join(hpara.hkpath, station+'.pdf')
+        img_path = join(hpara.hkpath, station+'_Hk.pdf')
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title, path=img_path)
     else:
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title)
@@ -204,6 +197,7 @@ def hk():
                         dest='isdisplay', action='store_true')
     arg = parser.parse_args()
     hpara = hkpara(arg.cfg_file)
+    print(hpara.hklist)
     # if arg.station != '':
     #     hpara.rfpath = arg.station
     # if arg.H != '':

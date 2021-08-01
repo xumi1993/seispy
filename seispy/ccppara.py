@@ -1,6 +1,7 @@
 import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
+from seispy.geo import km2deg
 
 
 class CCPPara(object):
@@ -10,6 +11,7 @@ class CCPPara(object):
         self.depthdat = 'RFdepth.mat'
         self.stackfile = 'ccp.dat'
         self.stalist = 'sta.lst'
+        self.peakfile = 'good_410_660.dat'
         self.velmod = ''
         self.stack_sta_list = ''
         self.domperiod = 5
@@ -20,9 +22,11 @@ class CCPPara(object):
         self.line = np.array([])
         self.depth_axis = np.array([])
         self.stack_range = np.array([])
+        self.center_bin = []
         self.dep_val = 0
-        self.stack_val = 0
-
+        self.stack_val = 1
+        self.boot_samples = None
+        
     @property
     def bin_radius(self):
         return self._bin_radius
@@ -66,6 +70,10 @@ def ccppara(cfg_file):
     cpara.stackfile = cf.get('FileIO', 'stackfile')
     cpara.stalist = cf.get('FileIO', 'stalist')
     cpara.stack_sta_list = cf.get('FileIO', 'stack_sta_list')
+    if cf.has_option('FileIO', 'peakfile'):
+        fname = cf.get('FileIO', 'peakfile')
+        if fname != '':
+            cpara.peakfile = fname
     velmod = cf.get('FileIO', 'velmod')
     if velmod == '':
         cpara.velmod = join(dirname(__file__), 'data', 'iasp91.vel')
@@ -75,7 +83,10 @@ def ccppara(cfg_file):
         cpara.velmod = velmod
     # para for bin section
     cpara.shape = cf.get('bin', 'shape')
-    cpara.domperiod = cf.getfloat('bin', 'domperiod')
+    try:
+        cpara.domperiod = cf.getfloat('bin', 'domperiod')
+    except:
+        cpara.domperiod = None
     try:
         cpara.width = cf.getfloat('bin', 'width')
     except:
@@ -100,4 +111,16 @@ def ccppara(cfg_file):
     stack_end = cf.getfloat('stack', 'stack_end')
     cpara.stack_val = cf.getfloat('stack', 'stack_val')
     cpara.stack_range = np.append(np.arange(stack_start, stack_end, cpara.stack_val), stack_end)
+    try:
+        cpara.boot_samples = cf.getint('stack', 'boot_samples')
+    except:
+        cpara.boot_samples = None
+    # para for center bins
+    if cf.has_section('spacedbins'):
+        cla = cf.getfloat('spacedbins', 'center_lat')
+        clo = cf.getfloat('spacedbins', 'center_lon')
+        hlla = cf.getfloat('spacedbins', 'half_len_lat')
+        hllo = cf.getfloat('spacedbins', 'half_len_lon')
+        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slid_val)]
+
     return cpara

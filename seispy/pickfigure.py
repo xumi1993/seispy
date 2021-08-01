@@ -27,13 +27,14 @@ class StaData():
         goodidx = np.where(goodrf == 1)
         self.event = [filenames[i] for i in goodidx[0]]
         self.bazi = baz[goodidx]
-        self.RFlength = len(rrf[0].data)
+        self.rflength = len(rrf[0].data)
         self.ev_num = len(self.bazi)
-        self.datar = np.empty([self.ev_num, self.RFlength])
-        self.datat = np.empty([self.ev_num, self.RFlength])
+        self.datar = np.empty([self.ev_num, self.rflength])
+        self.datat = np.empty([self.ev_num, self.rflength])
         for i, idx in enumerate(goodidx[0]):
             self.datar[i, :] = rrf[idx].data
             self.datat[i, :] = trf[idx].data
+        self.time_axis = np.array([])
 
 
 class RFFigure(Figure):
@@ -42,13 +43,14 @@ class RFFigure(Figure):
         
         self.log = setuplog()
         self.rfpath = rfpath
-        self.enf = 3
+        self.enf = 3.5
         self.ipage = 0
         self.maxidx = 20
         self.xlim = [-2, 30]
 
         self.init_figure(width=21, height=11, dpi=100)
         self.read_sac()
+        self.set_figure()
         self.set_page()
         self.init_variables()
         self.plotwave()
@@ -98,7 +100,6 @@ class RFFigure(Figure):
         self.axt = self.fig.add_axes([0.47, 0.05, 0.35, 0.84])
         self.axb = self.fig.add_axes([0.855, 0.05, 0.12, 0.84])
         self.axg = self.axb.twiny()
-        self.set_figure()
 
     def set_figure(self):
         self.axr.grid(b=True, which='major', axis='x')
@@ -106,23 +107,29 @@ class RFFigure(Figure):
         self.axb.grid(b=True, which='major')
         self.axr.set_ylabel("Event")
         self.axr.set_xlabel("Time after P (s)")
-        self.axr.set_title("R component")
+        self.axr.set_title("{} component".format(self.comp))
         self.axt.set_xlabel("Time after P (s)")
         self.axt.set_title("T component")
         self.axb.set_xlabel("Backazimuth (\N{DEGREE SIGN})")
         self.axg.set_xlabel('Distance (\N{DEGREE SIGN})')
 
-    def read_sac(self, dt=0.2):
+    def read_sac(self, dt=0.1):
+        if len(glob.glob(join(self.rfpath, '*_R.sac'))) == 0:
+            tmp_files = glob.glob(join(self.rfpath, '*_Q.sac'))
+            self.comp = 'Q'
+        else:
+            tmp_files = glob.glob(join(self.rfpath, '*_R.sac'))  
+            self.comp = 'R'  
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
-        self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(glob.glob(join(self.rfpath, '*_R.sac')))]
-        self.rrf = obspy.read(join(self.rfpath, '*_R.sac')).sort(['starttime']).resample(1/dt)
+        self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
+        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
         self.trf = obspy.read(join(self.rfpath, '*_T.sac')).sort(['starttime']).resample(1/dt)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
         self.evt_num = len(self.rrf)
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.sort_baz_()
-    
+
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
         self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
@@ -194,7 +201,7 @@ class RFFigure(Figure):
             return
         self.set_ylabels()
         self.set_figure()
-    
+
     def enlarge(self):
         self.enf += 1
         self.axr.cla()
@@ -219,7 +226,7 @@ class RFFigure(Figure):
     def finish(self):
         badidx = np.where(self.goodrf == 0)[0]
         self.log.RFlog.info("%d RFs are rejected" % len(badidx))
-        with open(os.path.join(self.rfpath, basename(self.rfpath)+"finallist.dat"), 'w+') as fid:
+        with open(os.path.join(self.rfpath, self.staname+"finallist.dat"), 'w+') as fid:
             for i in range(self.evt_num):
                 if self.goodrf[i] == 0:
                     files = glob.glob(join(self.rfpath, self.filenames[i]+'*.sac'))
@@ -236,11 +243,12 @@ class RFFigure(Figure):
                     mag = self.rrf[i].stats.sac.mag
                     gauss = self.rrf[i].stats.sac.user1
                     fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
-    
+
     def plot(self):
         plt.ion()
         plt.rcParams['toolbar'] = 'None'
         stadata = StaData(self.filenames, self.rrf, self.trf, self.baz, self.goodrf)
+        stadata.time_axis = self.time_axis
         self.plotfig, axr, axt, axb, axr_sum, axt_sum = init_figure()
-        plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, self.time_axis, enf=self.enf)
+        plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=self.enf)
         set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, self.staname)
