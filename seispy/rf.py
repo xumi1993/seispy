@@ -29,6 +29,12 @@ def pickphase(eqs, para):
         return
 
 
+class SACFileNotFoundError(Exception):
+    def __init__(self, matchkey):
+        self.matchkey = matchkey
+    def __str__(self):
+        print('No sac files found with {}'.format(self.matchkey))
+
 def datestr2regex(datestr):
     pattern = datestr.replace('%Y', r'\d{4}')
     pattern = pattern.replace('%m', r'\d{2}')
@@ -76,6 +82,8 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
              tolerance=210, dateformat='%Y.%j.%H.%M.%S', switchEN=False, reverseE=False, reverseN=False):
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
+    if len(ref_eqs) == 0:
+        raise SACFileNotFoundError(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
     sac_files = []
     for ref_sac in ref_eqs:
         try:
@@ -89,7 +97,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
                 tr = obspy.read(ref_sac)[0]
             except TypeError:
                 continue
-            sac_files.append([datestr, tr.stats.starttime, tr.stats.sac.o])
+            sac_files.append([datestr, tr.stats.starttime-tr.stats.sac.b, tr.stats.sac.o])
         else:
             raise TypeError('offset should be int or float type')
     new_col = ['dis', 'bazi', 'data']
@@ -265,7 +273,11 @@ class RF(object):
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise e
-        self.logger.RFlog.info('{0} earthquakes matched'.format(self.eqs.shape[0]))
+        if self.eqs.shape[0] == 0:
+            self.logger.RFlog.warning('No earthquakes matched, please check configurations.'.format(self.eqs.shape[0]))
+            sys.exit(1)
+        else:
+            self.logger.RFlog.info('{0} earthquakes matched'.format(self.eqs.shape[0]))
         
     '''
     def save(self, path=''):
