@@ -93,7 +93,6 @@ class CCPProfile():
     def read_rfdep(self):
         try:
             self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
-            # self.rfdep = loadmat(self.cpara.depthdat)['RFdepth'][0, :]
             self.rfdep = np.load(self.cpara.depthdat, allow_pickle=True)
         except:
             try:
@@ -104,7 +103,7 @@ class CCPProfile():
     
     def initial_profile(self):
         self.read_rfdep()
-        self.bin_loca, self.profile_range = init_profile(*self.cpara.line, self.cpara.slid_val)
+        self.bin_loca, self.profile_range = init_profile(*self.cpara.line, self.cpara.slide_val)
         self.fzone = bin_shape(self.cpara)
         self._get_sta()
         self._select_sta()

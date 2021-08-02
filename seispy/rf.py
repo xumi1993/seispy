@@ -145,7 +145,6 @@ def CfgParser(cfg_file):
         raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
     pa.datapath = cf.get('path', 'datapath')
     pa.rfpath = cf.get('path', 'rfpath')
-    pa.imagepath = cf.get('path', 'imagepath')
     logpath = cf.get('path', 'catalogpath')
     if logpath != '':
         pa.catalogpath = cf.get('path', 'catalogpath')

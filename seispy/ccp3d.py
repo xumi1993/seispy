@@ -6,39 +6,37 @@ from seispy.setuplog import setuplog
 from seispy.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
-from scipy.io import loadmat
-
 
 
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
     """
-    Create spaced grid point with coordinates of the center point in the area in spherical coordinates.
-    ---------------------------------------------------------
-    |                           |                           |
-    |                           |                           |
-    |                        len_lon                        |
-    |                           |                           |
-    |                           |                           |
-    ---- len_lat --- (center_lon, center_lat) --- len_lat ---
-    |                           |                           |
-    |                           |                           |
-    |                        len_lon                        |
-    |                           |                           |
-    |                           |                           |
-    ---------------------------------------------------------
+Create spaced grid point with coordinates of the center point in the area in spherical coordinates.
+---------------------------------------------------------
+|                           |                           |
+|                           |                           |
+|                        len_lon                        |
+|                           |                           |
+|                           |                           |
+---- len_lat --- (center_lon, center_lat) --- len_lat ---
+|                           |                           |
+|                           |                           |
+|                        len_lon                        |
+|                           |                           |
+|                           |                           |
+---------------------------------------------------------
 
-    :param center_lat: Latitude of the center point.
-    :type center_lat: float
-    :param center_lon: Longitude of the center point.
-    :type center_lon: float
-    :param len_lat: Half length in degree along latitude axis.
-    :type len_lat: float
-    :param len_lon: Half length in degree along longitude axis.
-    :type len_lon: float
-    :param val: Interval in degree between adjacent grid point.
-    :type val: float
-    :return: Coordinates of Grid points.
-    :rtype: 2-D ndarray of floats with shape (n, 2), where n is the number of grid points.
+:param center_lat: Latitude of the center point.
+:type center_lat: float
+:param center_lon: Longitude of the center point.
+:type center_lon: float
+:param len_lat: Half length in degree along latitude axis.
+:type len_lat: float
+:param len_lon: Half length in degree along longitude axis.
+:type len_lon: float
+:param val: Interval in degree between adjacent grid point.
+:type val: float
+:return: Coordinates of Grid points.
+:rtype: 2-D ndarray of floats with shape (n, 2), where n is the number of grid points.
     """
     lats = np.arange(0, 2*len_lat, val)
     lons = np.arange(0, 2*len_lon, val)
@@ -126,7 +124,6 @@ class CCP3D():
     def read_rfdep(self):
         try:
             self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
-            # self.rfdep = loadmat(self.cpara.depthdat)['RFdepth'][0, :]
             self.rfdep = np.load(self.cpara.depthdat, allow_pickle=True)
         except:
             try:

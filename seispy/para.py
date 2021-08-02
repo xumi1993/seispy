@@ -7,7 +7,6 @@ class para(object):
     def __init__(self):
         self.datapath = expanduser('~')
         self.rfpath = expanduser('~')
-        self.imagepath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
         self.catalog_server = 'IRIS'
         self.offset = None
@@ -73,24 +72,6 @@ class para(object):
                 self._rfpath = value
         else:
             self._rfpath = value
-
-    @property
-    def imagepath(self):
-        return self._imagepath
-
-    @imagepath.setter
-    def imagepath(self, value):
-        if not isinstance(value, str):
-            raise TypeError('imagepath should be \'str\' type not \'{0}\''.format(type(value)))
-        elif not exists(value):
-            try:
-                os.makedirs(value)
-            except Exception as e:
-                Warning('Cannot create rfpath of {0}\n with error: {1}'.format(value, e))
-            finally:
-                self._imagepath = value
-        else:
-            self._imagepath = value
 
     @property
     def catalogpath(self):

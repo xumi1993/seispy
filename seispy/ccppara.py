@@ -16,7 +16,7 @@ class CCPPara(object):
         self.stack_sta_list = ''
         self.domperiod = 5
         self.shape = 'circle'
-        self.slid_val = 5
+        self.slide_val = 5
         self.width = 100
         self.bin_radius = 50
         self.line = np.array([])
@@ -95,7 +95,7 @@ def ccppara(cfg_file):
         cpara.bin_radius = cf.getfloat('bin', 'bin_radius')
     except:
         cpara.bin_radius = None
-    cpara.slid_val = cf.getfloat('bin', 'slid_val')
+    cpara.slide_val = cf.getfloat('bin', 'slide_val')
     # para for line section
     lat1 = cf.getfloat('line', 'profile_lat1')
     lon1 = cf.getfloat('line', 'profile_lon1')
@@ -121,6 +121,6 @@ def ccppara(cfg_file):
         clo = cf.getfloat('spacedbins', 'center_lon')
         hlla = cf.getfloat('spacedbins', 'half_len_lat')
         hllo = cf.getfloat('spacedbins', 'half_len_lon')
-        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slid_val)]
+        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slide_val)]
 
     return cpara
