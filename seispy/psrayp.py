@@ -60,10 +60,14 @@ class PsRayp(object):
 
 def gen_rayp_lib():
     parser = argparse.ArgumentParser(description="Gen a ray parameter lib for Pds phases")
-    parser.add_argument('-d', help='Distance range as \'min_dis/max_dis/interval\'', required=True, dest='dis_str', type=str)
-    parser.add_argument('-e', help='Event depth range as \'min_dep/max_dep/interval\'', required=True, dest='dep_str', type=str)
-    parser.add_argument('-l', help='layers range as \'min_layer/man_layer\'', dest='lay_str', type=str, default='0/800')
-    parser.add_argument('-o', help='Out path to Pds ray parameter lib', type=str, default='./Ps_rayp', dest='out_path')
+    parser.add_argument('-d', help='Distance range in degree ',
+                        metavar='min_dis/max_dis/interval', required=True, dest='dis_str', type=str)
+    parser.add_argument('-e', help='Event depth range in km',
+                        metavar='min_dep/max_dep/interval', required=True, dest='dep_str', type=str)
+    parser.add_argument('-l', help='layers range as in km, dfaults to 0/800',
+                        dest='lay_str', metavar='min_layer/man_layer', type=str, default='0/800')
+    parser.add_argument('-o', help='Out path to Pds ray parameter lib',
+                        metavar='outpath', type=str, default='./Ps_rayp', dest='out_path')
 
     arg = parser.parse_args()
     if len(sys.argv) == 1:

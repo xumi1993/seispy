@@ -155,17 +155,14 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
 
 def main():
     parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
-    parser.add_argument('path', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
-    parser.add_argument('-e', help='Enlargement factor, default to 3', dest='enf', type=int, default=3, metavar='enf')
-    parser.add_argument('-o', help='Output path without file name', dest='output', default='./', type=str, metavar='outpath')
+    parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
+    parser.add_argument('-e', help='Enlargement factor, defaults to 3', dest='enf', type=float, default=3, metavar='enf')
+    parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                         dest='format', default='g', type=str, metavar='f|g')
     arg = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
     if arg.format not in ('f', 'g'):
-        print('The format must be in \'f\' and \'g\'')
+        print('Errpr: The format must be in \'f\' and \'g\'')
         parser.print_help()
         sys.exit(1)
     plotrt(rfpath=arg.path, enf=arg.enf, out_path=arg.output, outformat=arg.format)

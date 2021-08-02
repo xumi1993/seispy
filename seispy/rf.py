@@ -333,7 +333,7 @@ class RF(object):
             row['data'].filter(freqmin=freqmin, freqmax=freqmax, order=order)
 
     def cal_phase(self):
-        self.logger.RFlog.info('Calculate arrivals and ray parameters for all data')
+        self.logger.RFlog.info('Calculate {} arrivals and ray parameters for all data'.format(self.para.phase))
         for _, row in self.eqs.iterrows():
             row['data'].get_arrival(self.model, row['evdp'], row['dis'])
             # row['data'].get_raypara(self.model, row['evdp'], row['dis'])
@@ -466,11 +466,12 @@ def prf():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
     parser.add_argument('-l', help="use local catalog. Default is false", dest='islocal', action='store_true')
-    parser.add_argument('-r', help='Reverse components: EN, E or N', dest='comp', default=None, type=str)
-    parser.add_argument('-s', help='Switch East and North components', dest='isswitch', action='store_true')
-    parser.add_argument('-b', help='Correct back-azimuth with minimal '
-                                   'energy of T component. "baz" is specified '
-                                   'as half-searching range. Default value is 90 deg',
+    parser.add_argument('-r', help='Reverse components: EN, E or N', dest='comp',
+                        metavar='N|E|NE', default=None, type=str)
+    parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
+    parser.add_argument('-b', help='Correct back-azimuth. \nIf "baz" is specified, the corr_baz = raw_baz + baz. \n'
+                                   'If no arguments following -b Back-azimuth will be corrected with minimal '
+                                   'energy of T component. The searching range is raw_baz +/- 90',
                                    dest='baz', nargs='?', const=0, type=float)
     arg = parser.parse_args()
     if arg.comp is not None:

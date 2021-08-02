@@ -310,6 +310,7 @@ class eq(object):
         if self.rf[1].stats.npts != npts:
             return False
         
+        # Final RMS
         if rmsgate is not None:
             if type(self.rms) == np.ndarray:
                 rms = self.rms[-1]
@@ -318,12 +319,21 @@ class eq(object):
             rmspass = rms < rmsgate
         else:
             rmspass = True
+        
+        # R energy
+        nt1 = int(np.floor((5+shift)/self.rf[1].stats.delta))
+        reng = np.sum(np.sqrt(self.rf[1].data[nt1:] ** 2))
+        if reng < 0.1:
+            rengpass = False
+        else:
+            rengpass = True
 
+        # Max amplitude
         if criterion == 'crust':
             time_P1 = int(np.floor((-2+shift)/self.rf[1].stats.delta))
             time_P2 = int(np.floor((4+shift)/self.rf[1].stats.delta))
             max_P = np.max(self.rf[1].data[time_P1:time_P2])
-            if max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1 and rmspass:
+            if max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1 and rmspass and rengpass:
                 return True
             else:
                 return False
@@ -332,13 +342,13 @@ class eq(object):
             time_P1 = int(np.floor((-5 + shift) / self.rf[1].stats.delta))
             time_P2 = int(np.floor((5 + shift) / self.rf[1].stats.delta))
             max_P = np.max(self.rf[1].data[time_P1:time_P2])
-            if max_deep < max_P * 0.4 and rmspass and \
+            if max_deep < max_P * 0.4 and rmspass and rengpass and\
                   max_P == np.max(np.abs(self.rf[1].data)) and max_P < 1:
                 return True
             else:
                 return False
         elif criterion is None:
-            return rmspass
+            return rmspass and rengpass
         else:
             pass
 

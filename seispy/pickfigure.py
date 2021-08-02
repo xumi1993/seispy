@@ -38,17 +38,20 @@ class StaData():
 
 
 class RFFigure(Figure):
-    def __init__(self, rfpath, width=21, height=11, dpi=100):
+    def __init__(self, rfpath, width=21, height=11, dpi=100, xlim=[-2, 30]):
         super(RFFigure, self).__init__()
-        
+        self.width = width
+        self.height = height
+        self.dpi = dpi
         self.log = setuplog()
         self.rfpath = rfpath
         self.enf = 3.5
         self.ipage = 0
         self.maxidx = 20
-        self.xlim = [-2, 30]
+        self.xlim = xlim
 
-        self.init_figure(width=21, height=11, dpi=100)
+    def init_canvas(self):
+        self.init_figure(width=self.width, height=self.height, dpi=self.dpi)
         self.read_sac()
         self.set_figure()
         self.set_page()

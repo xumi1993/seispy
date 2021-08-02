@@ -8,7 +8,6 @@ import os
 
 
 def convertinfo(info):
-    print(info)
     if info[5] == '60.0':
         sec = 59
     else:
@@ -57,11 +56,11 @@ def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog='')
 
 def main():
     parser = argparse.ArgumentParser(description="Update CMT Catalog")
-    parser.add_argument('-i', help='Input Catalog', dest='inlog',
+    parser.add_argument('-i', help='Input Catalog', dest='inlog', metavar='input_catalog',
                         type=str, default=join(dirname(__file__), 'data', 'EventCMT.dat'))
-    parser.add_argument('-o', help='Onput Catalog', dest='outlog', type=str,
-                        default=join(dirname(__file__), 'data', 'EventCMT.dat'))
-    parser.add_argument('-u', help='url of ndk', type=str)
+    parser.add_argument('-o', help='Onput Catalog', dest='outlog', metavar='output_catalog', 
+                        type=str, default=join(dirname(__file__), 'data', 'EventCMT.dat'))
+    # parser.add_argument('-u', help='url of ndk', metavar='ndl_url', type=str)
     arg = parser.parse_args()
     fetch_cata(inlog=arg.inlog, outlog=arg.outlog)
 

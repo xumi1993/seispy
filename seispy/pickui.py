@@ -1,3 +1,4 @@
+from math import e
 import sys
 import os
 import argparse
@@ -11,14 +12,21 @@ from os.path import exists, dirname, join
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
 from seispy.pickfigure import RFFigure
+from seispy.rpickfigure import RPickFigure
+import glob
 
 
 class MyMplCanvas(FigureCanvas):
-    def __init__(self, parent=None, rfpath='', width=21, height=11, dpi=100):
+    def __init__(self, parent=None, rfpath='', only_r=False, width=21, height=11, dpi=100, xlim=[-2, 30]):
 
         plt.rcParams['axes.unicode_minus'] = False 
 
-        self.rffig = RFFigure(rfpath, width=width, height=height, dpi=dpi)
+        if only_r:
+            self.rffig = RPickFigure(rfpath, width=width, height=height, dpi=dpi, xlim=xlim)
+            self.rffig.init_canvas()
+        else:
+            self.rffig = RFFigure(rfpath, width=width, height=height, dpi=dpi, xlim=xlim)
+            self.rffig.init_canvas()
 
         FigureCanvas.__init__(self, self.rffig.fig)
         self.setParent(parent)
@@ -30,14 +38,15 @@ class MyMplCanvas(FigureCanvas):
 
 
 class MatplotlibWidget(QMainWindow):
-    def __init__(self, rfpath, parent=None):
+    def __init__(self, rfpath, only_r=False, xlim=[-2, 30], parent=None):
         super(MatplotlibWidget, self).__init__(parent)
-        self.initUi(rfpath)
+        self.only_r = only_r
+        self.initUi(rfpath, only_r, xlim)
 
-    def initUi(self, rfpath):
+    def initUi(self, rfpath, only_r, xlim):
         self.layout = QVBoxLayout()
         self.add_btn()
-        self.mpl = MyMplCanvas(self, rfpath=rfpath, width=21, height=11, dpi=100)
+        self.mpl = MyMplCanvas(self, rfpath=rfpath, only_r=only_r, width=21, height=11, dpi=100, xlim=xlim)
         self.layout.addWidget(self.mpl, 2)
         self.mpl.mpl_connect('button_press_event', self.on_click)
 
@@ -87,9 +96,13 @@ class MatplotlibWidget(QMainWindow):
         self.mpl.rffig.plot()
 
     def plot_save(self):
+        if self.only_r:
+            default_name = 'R_bazorder'
+        else:
+            default_name = 'RT_bazorder'
         fileName_choose, filetype = QFileDialog.getSaveFileName(self,
                                     "Save the figure",
-                                    os.path.join(os.getcwd(), self.mpl.rffig.staname + 'RT_bazorder'), 
+                                    os.path.join(os.getcwd(), self.mpl.rffig.staname + default_name), 
                                     "PDF Files (*.pdf);;Images (*.png);;All Files (*)")
 
         if fileName_choose == "":
@@ -155,12 +168,22 @@ class MatplotlibWidget(QMainWindow):
 def main():
     parser = argparse.ArgumentParser(description="User interface for picking PRFs")
     parser.add_argument('rf_path', type=str, help='Path to PRFs')
+    parser.add_argument('-x', help="Set the x limits of the current axes, defaults to 30s for RT, 85s for R.",
+                        dest='xlim', default=None, type=float, metavar='xmax')
     arg = parser.parse_args()
     rfpath = arg.rf_path
     if not exists(rfpath):
         raise FileNotFoundError('No such directory of {}'.format(rfpath))
+    if len(glob.glob(join(rfpath, '*_T.sac'))) == 0:
+        only_r = True
+        xlim = 85
+    else:
+        only_r = False
+        xlim = 30
+    if arg.xlim is not None:
+        xlim = arg.xlim
     app = QApplication(sys.argv)
-    ui = MatplotlibWidget(rfpath)
+    ui = MatplotlibWidget(rfpath, only_r=only_r, xlim=[-2, xlim])
     ui.show()
     sys.exit(app.exec_())
 

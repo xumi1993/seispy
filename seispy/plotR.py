@@ -1,3 +1,4 @@
+import re
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
@@ -20,29 +21,28 @@ def init_figure():
     return h, axr, axb
 
 
-def read_process_data(lst):
-    stadata = SACStation(lst, only_r=True)
+def read_process_data(rfpath):
+    stadata = SACStation(rfpath, only_r=True)
     idx = np.argsort(stadata.bazi)
     stadata.event = stadata.event[idx]
     stadata.bazi = stadata.bazi[idx]
     stadata.datar = stadata.datar[idx]
-    time_axis = np.arange(stadata.RFlength) * stadata.sampling - stadata.shift
-    return stadata, time_axis
+    return stadata
 
 
-def plot_waves(axr, axb, stadata, time_axis, enf=12):
-    bound = np.zeros(stadata.RFlength)
+def plot_waves(axr, axb, stadata, enf=12):
+    bound = np.zeros(stadata.rflength)
     for i in range(stadata.ev_num):
         datar = stadata.datar[i] * enf + (i + 1)
         # axr.plot(time_axis, stadata.datar[i], linewidth=0.2, color='black')
-        axr.fill_between(time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
+        axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
                          alpha=0.7)
-        axr.fill_between(time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
+        axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
                          alpha=0.7)
     axb.scatter(stadata.bazi, np.arange(stadata.ev_num) + 1, s=7)
 
 
-def set_fig(axr,  axb, stadata, station, xmin=-2, xmax=80):
+def set_fig(axr,  axb, stadata, xmin=-2, xmax=80):
     y_range = np.arange(stadata.ev_num) + 1
     x_range = np.arange(0, xmax+2, 5)
     space = 2
@@ -57,7 +57,7 @@ def set_fig(axr,  axb, stadata, station, xmin=-2, xmax=80):
     axr.set_xlabel('Time after P (s)', fontsize=13)
     axr.set_ylabel('Event', fontsize=13)
     axr.add_line(Line2D([0, 0], axr.get_ylim(), color='black'))
-    axr.set_title('R components ({})'.format(station), fontsize=16)
+    axr.set_title('R components ({})'.format(stadata.staname), fontsize=16)
 
     # set axb
     axb.set_xlim(0, 360)
@@ -69,31 +69,37 @@ def set_fig(axr,  axb, stadata, station, xmin=-2, xmax=80):
     axb.set_xlabel(r'Back-azimuth ($^\circ$)', fontsize=13)
 
 
-def plotr(station, cfg_file, enf=6):
-    pa = CfgParser(cfg_file)
-    # pa.rfpath = join(pa.rfpath, station)
-    lst = join(pa.rfpath, station + 'finallist.dat')
+def plotr(rfpath, outpath='./', xlim=[-2, 80], enf=6, format='pdf'):
     h, axr, axb = init_figure()
-    stadata, time_axis = read_process_data(lst)
-    plot_waves(axr, axb, stadata, time_axis, enf=enf)
-    set_fig(axr, axb, stadata, station)
-    h.savefig(join(pa.imagepath, station + '_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
-    plt.show()
+    stadata = read_process_data(rfpath)
+    plot_waves(axr, axb, stadata, enf=enf)
+    set_fig(axr, axb, stadata, xlim[0], xlim[1])
+    h.savefig(join(outpath, stadata.staname + '_R_bazorder_{:.1f}.{}'.format(
+              stadata.f0[0], format)), format=format, dpi=500)
 
 
 def main():
     parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
-    parser.add_argument('-s', help='Station as folder name of RFs and list', dest='station', type=str)
-    parser.add_argument('-e', help='Enlargement factor', dest='enf', type=int, default=6)
-    parser.add_argument('cfg_file', type=str, help='Path to configure file')
+    parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
+    parser.add_argument('-w', help="Time window from t1 to t2, defaults to -2/80", type=str, default='-2/80', metavar='t1/t2')
+    parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
+    parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
+    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
+                    dest='format', default='g', type=str, metavar='f|g')
     arg = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
-    plotr(arg.station, arg.cfg_file, enf=arg.enf)
+    try:
+        xlim = [float(v) for v in arg.w.split('/')]
+    except:
+        raise ValueError("Error format in time window")
+    if arg.format not in ('f', 'g'):
+        raise ValueError('Error: The format must be in \'f\' and \'g\'')
+    elif arg.format == 'g':
+        fmt = 'png'
+    elif arg.format == 'f':
+        fmt = 'pdf'
+    plotr(arg.rfpath, arg.output, enf=arg.enf, xlim=xlim, format=fmt)
+
 
 
 if __name__ == '__main__':
-    station = 'XE.ES01'
-    cfg_file = '/Users/xumj/Researches/Tibet_MTZ/process/paraRF.cfg'
-    plotr(station, cfg_file)
+    pass

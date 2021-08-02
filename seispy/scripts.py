@@ -60,3 +60,25 @@ def ccp_profile():
     ccp.initial_profile()
     ccp.stack()
     ccp.save_stack_data(format=typ)
+
+
+def get_pierce_points():
+    parser = argparse.ArgumentParser(description="Get pierce points with assumed depth")
+    parser.add_argument('rfdepth_path', help="path to rfdepth file")
+    parser.add_argument('-d', help="The depth in km, value should be an integer", type=int, metavar='depth')
+    parser.add_argument('-o', help="filename of output file, defaults to ./pierce_points.dat",
+                        default='./pierce_points.dat', metavar='filename')
+    arg = parser.parse_args()
+    try:
+        rfdep = np.load(arg.rfdepth_path, allow_pickle=True)
+    except Exception as e:
+        raise FileNotFoundError('{}'.format(e))
+    if arg.d > rfdep[0]['piercelat'].shape[1]:
+        raise ValueError('The depth exceed max depth in {}'.format(arg.rfdepth_path))
+    with open(arg.o, 'w') as f:
+        for sta in rfdep:
+            plat = sta['piercelat'][:, arg.d]
+            plon = sta['piercelon'][:, arg.d]
+            for la, lo in zip(plat, plon):
+                f.write('{:.4f} {:.4f}\n'.format(lo, la))
+    

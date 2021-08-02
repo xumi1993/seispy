@@ -94,6 +94,13 @@ class SACStation(object):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 self.datar[_i] = sac.data
 
+    def normalize(self):
+        maxamp = np.nanmax(np.abs(self.datar), axis=1)
+        for i in range(self.ev_num):
+            self.datar[i] /= maxamp[i]
+            if not self.only_r:
+                self.datat[i] /= maxamp[i]
+
     def resample(self, dt):
         npts = int(self.rflength * (self.sampling / dt)) + 1
         self.datar = resample(self.datar, npts, axis=1)

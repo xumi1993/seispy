@@ -137,7 +137,7 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
             newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
                                         tpds, cpara.depth_axis, mod3d)
         amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
-        rfdep['Station'] = sta_info.station[i]
+        rfdep['station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]
         rfdep['stalon'] = sta_info.stlo[i]
         # rfdep['Depthrange'] = cpara.depth_axis
@@ -146,9 +146,9 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
         rfdep['rayp'] = stadatar.rayp
         # rfdep['phases'] = _convert_str_mat(stadatar.phase)
         rfdep['moveout_correct'] = amp3d
-        rfdep['Piercelat'] = pplat_s
-        rfdep['Piercelon'] = pplon_s
-        rfdep['StopIndex'] = end_index
+        rfdep['piercelat'] = pplat_s
+        rfdep['piercelon'] = pplon_s
+        rfdep['stopindex'] = end_index
         RFdepth.append(rfdep)
     try:
         savemat(cpara.depthdat, {'RFdepth': RFdepth})
@@ -160,9 +160,12 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
 
 def rf2depth():
     parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
-    parser.add_argument('-d', help='Path to 3d vel model in npz file for moveout correcting', type=str, default='')
-    parser.add_argument('-m', help='Folder path to 1d vel model files with staname.vel as the file name', type=str, default='')
-    parser.add_argument('-r', help='Path to 3d vel model in npz file for 3D ray tracing', type=str, default='')
+    parser.add_argument('-d', help='Path to 3d vel model in npz file for moveout correcting',
+                        metavar='3d_velmodel_path', type=str, default='')
+    parser.add_argument('-m', help='Folder path to 1d vel model files with staname.vel as the file name',
+                        metavar='1d_velmodel_folder', type=str, default='')
+    parser.add_argument('-r', help='Path to 3d vel model in npz file for 3D ray tracing',
+                        metavar='3d_velmodel_path', type=str, default='')
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     arg = parser.parse_args()
     if len(sys.argv) == 1:
