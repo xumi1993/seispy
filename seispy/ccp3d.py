@@ -42,8 +42,8 @@ Create spaced grid point with coordinates of the center point in the area in sph
     lons = np.arange(0, 2*len_lon, val)
     plat, plon = latlon_from(center_lat, center_lon, 0, 90)
     da = distaz(plat, plon, center_lat, center_lon)
-    begx = -len_lat 
-    begy = -len_lon
+    begx = -len_lon 
+    begy = -len_lat
     bin_loca = []
     for j in range(lats.size):
         delyinc = j * val + begy
@@ -231,13 +231,13 @@ class CCP3D():
         ccp = cls(cfg_file)
         data = np.load(stack_data_path, allow_pickle=True)
         ccp.stack_data = data['stack_data']
-        ccp.cpara = data['cpara']
+        ccp.cpara = data['cpara'].any()
         ccp.bin_loca = np.array([[bin_info['bin_lat'], bin_info['bin_lon']] for bin_info in ccp.stack_data])
         return ccp
 
 
 if __name__ == '__main__':
-    bin_loca = gen_center_bin(50, 100, 5, 6, 0.5)
-    with open('bin_loca.dat', 'w') as f:
+    bin_loca = gen_center_bin(48.5, 100, 5, 8, km2deg(55))
+    with open('/workspace/WMHG_MTZ/ccp_results/bin_loca.dat', 'w') as f:
         for binin in bin_loca:
             f.write('{} {}\n'.format(binin[1], binin[0]))
