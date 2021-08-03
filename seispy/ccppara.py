@@ -2,6 +2,7 @@ import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
 from seispy.geo import km2deg
+from seispy.utils import check_path
 
 
 class CCPPara(object):
@@ -60,7 +61,7 @@ def ccppara(cfg_file):
     except Exception:
         raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
     # para for FileIO section
-    cpara.rfpath = cf.get('FileIO', 'rfpath')
+    cpara.rfpath = check_path('rfpath', cf.get('FileIO', 'rfpath'))
     rayp_lib = cf.get('FileIO', 'rayp_lib')
     if rayp_lib == '':
         cpara.rayp_lib = None

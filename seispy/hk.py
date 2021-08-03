@@ -191,13 +191,10 @@ def hk():
                         # dest='station', type=str, default='')
     # parser.add_argument('-H', help='Range for searching best H: <hmin>/<hmax>', type=str, default='')
     # parser.add_argument('-K', help='Range for searching best K: <kmin>/<kmax>', type=str, default='')
-    parser.add_argument('-p', help='Whether to save the image',
-                        dest='isplot', action='store_true')
     parser.add_argument('-v', help='Display results to standard output',
                         dest='isdisplay', action='store_true')
     arg = parser.parse_args()
     hpara = hkpara(arg.cfg_file)
-    print(hpara.hklist)
     # if arg.station != '':
     #     hpara.rfpath = arg.station
     # if arg.H != '':
@@ -206,7 +203,7 @@ def hk():
     # if arg.K != '':
     #     kmin, kmax = [float(val) for val in arg.K.split('/')]
     #     hpara.krange = np.arange(kmin, kmax, 0.1)
-    hksta(hpara, isplot=arg.isplot, isdisplay=arg.isdisplay)
+    hksta(hpara, isplot=True, isdisplay=arg.isdisplay)
 
 
 def hktest():
