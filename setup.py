@@ -5,10 +5,12 @@ packages = find_packages()
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-VERSION = "1.1.29"
+VERSION = "1.2.0"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
+      long_description=long_description,
+      long_description_content_type="text/markdown",
       author_email='gomijianxu@gmail.com',
       license='GPLv3',
       packages=find_packages(),
