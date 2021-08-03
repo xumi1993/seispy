@@ -166,7 +166,7 @@ def print_result(besth, bestk, maxhsig, maxksig, print_comment=True):
 
 def hksta(hpara, isplot=False, isdisplay=False):
     station = basename(hpara.rfpath)
-    stadata = SACStation(join(hpara.rfpath, station+'finallist.dat'), only_r=True)
+    stadata = SACStation(hpara.rfpath, only_r=True)
     stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, srad2skm(stadata.rayp),
                                     hpara.hrange, hpara.krange, vp=hpara.vp, weight=hpara.weight)
     besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, hpara.hrange, hpara.krange, stadata.ev_num)

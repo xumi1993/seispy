@@ -46,8 +46,16 @@ class SACStationS():
 class SACStation(object):
     def __init__(self, data_path, only_r=False):
         """
-        :param evt_lst: event list in RF data dir. Column as date string, phase, evt lat, evt lon, evt dep,
-                        distance, back-azimuth, ray parameter, magnitude and gauss factor.
+        Class for derivative process of RFs.
+
+        :param data_path: Path to RF data with SAC format. A finallist.dat must be in this path.
+        :type data_path: str
+        :param only_r: [description], defaults to False
+        :type only_r: bool, optional
+
+        .. warning::
+
+            This Class will be renamed to ``RFStation`` in future versions.
         """
         self.only_r = only_r
         if isfile(data_path):
@@ -143,6 +151,18 @@ class SACStation(object):
         self.ani.baz_stack(val=stack_baz_val)
         best_f, best_t = self.ani.joint_ani(weight=weight)
         return best_f, best_t
+
+
+class RFStation(SACStation):
+    def __init__(self, data_path, only_r):
+        """Class for derivative process of RFs.
+
+        :param data_path: Path to RF data with SAC format. A finallist.dat must be in this path.
+        :type data_path: str
+        :param only_r: [description], defaults to False
+        :type only_r: bool, optional
+        """
+        super().__init__(data_path, only_r=only_r)
 
 
 class DepModel(object):

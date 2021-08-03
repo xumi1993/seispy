@@ -6,6 +6,7 @@ from seispy.rfcorrect import DepModel
 from seispy.ccppara import ccppara, CCPPara
 from seispy.bootstrap import ci
 from seispy.ccp3d import boot_bin_stack
+from seispy.utils import check_stack_val
 from os.path import exists, dirname, basename, join
 
 
@@ -87,9 +88,14 @@ class CCPProfile():
         try:
             self.cpara = ccppara(cfg_file)
         except Exception as e:
-            self.logger.CCPlog('Cannot open configure file {}'.format(cfg_file))
+            self.logger.CCPlog.error('Cannot open configure file {}'.format(cfg_file))
             raise FileNotFoundError('{}'.format(e))
-    
+        try:
+            self.stack_mul = check_stack_val(self.cpara.stack_val, self.cpara.dep_val)
+        except Exception as e:
+            self.logger.CCPlog.error('{}'.format(e))
+            raise ValueError('{}'.format(e))
+
     def read_rfdep(self):
         try:
             self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
@@ -133,10 +139,17 @@ class CCPProfile():
             self.idxs = []
             for i, bin_info in enumerate(self.bin_loca):
                 self.idxs.append(np.where(distaz(bin_info[0], bin_info[1], self.stalst[:, 0], self.stalst[:, 1]).delta <= dis)[0])
-        else:
+        elif self.cpara.width is not None and self.cpara.shape == 'rect':
             self.logger.CCPlog.info('Select stations within {} km perpendicular to the profile'.format(self.cpara.width))
             self.idxs = self._proj_sta()
             self._write_sta()  
+        else:
+            if self.cpara.width is not None:
+                self.logger.CCPlog.error('Width of profile was set, the bin shape of {} is invalid'.format(self.cpara.shape))
+                raise ValueError('Width of profile was set, the bin shape of {} is invalid'.format(self.cpara.shape))
+            else:
+                self.logger.CCPlog.error('Width of profile was not set, the bin shape of {} is invalid'.format(self.cpara.shape))
+                raise ValueError('Width of profile was not set, the bin shape of {} is invalid'.format(self.cpara.shape))
 
     def _write_sta(self):
         with open(self.cpara.stack_sta_list, 'w') as f:
@@ -169,7 +182,7 @@ class CCPProfile():
     def _pierce_project(self, rfsta):
         rfsta['projlat'] = np.zeros_like(rfsta['piercelat'])
         rfsta['projlon'] = np.zeros_like(rfsta['piercelon'])
-        for i, dep in enumerate(self.cpara.stack_range):
+        for i, dep in enumerate(self.cpara.depth_axis):
             rfsta['projlat'][:, i], rfsta['projlon'][:, i] = geoproject(rfsta['piercelat'][:, i], rfsta['piercelon'][:, i], *self.cpara.line)
 
     def stack(self):
@@ -192,7 +205,7 @@ class CCPProfile():
             else:
                 idxs = self.idxs
             for j, dep in enumerate(self.cpara.stack_range):
-                idx = int(j * self.cpara.stack_val + self.cpara.stack_range[0])
+                idx = int(j * self.stack_mul + self.cpara.stack_range[0]/self.cpara.dep_val)
                 bin_dep_amp = np.array([])
                 for k in idxs:
                     fall_idx = np.where(distaz(self.rfdep[k][field_lat][:, idx], self.rfdep[k][field_lon][:, idx],

@@ -6,6 +6,7 @@ from seispy.setuplog import setuplog
 from seispy.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
+from seispy.utils import check_stack_val
 
 
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
@@ -120,6 +121,11 @@ class CCP3D():
         except Exception as e:
             self.logger.CCPlog('Cannot open configure file {}'.format(cfg_file))
             raise FileNotFoundError('{}'.format(e))
+        try:
+            self.stack_mul = check_stack_val(self.cpara.stack_val, self.cpara.dep_val)
+        except Exception as e:
+            self.logger.CCPlog.error('{}'.format(e))
+            raise ValueError('{}'.format(e))
     
     def read_rfdep(self):
         try:
@@ -152,7 +158,7 @@ class CCP3D():
                                                                                   bin_info[0], bin_info[1]))
             idxs = self._select_sta(bin_info[0], bin_info[1])
             for j, dep in enumerate(self.cpara.stack_range):
-                idx = int(j * self.cpara.stack_val + self.cpara.stack_range[0])
+                idx = int(j * self.stack_mul + self.cpara.stack_range[0]/self.cpara.dep_val)
                 bin_dep_amp = np.array([])
                 for k in idxs:
                     fall_idx = np.where(distaz(self.rfdep[k]['piercelat'][:, idx], self.rfdep[k]['piercelon'][:, idx],

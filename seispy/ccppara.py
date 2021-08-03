@@ -24,7 +24,7 @@ class CCPPara(object):
         self.depth_axis = np.array([])
         self.stack_range = np.array([])
         self.center_bin = []
-        self.dep_val = 0
+        self.dep_val = 1
         self.stack_val = 1
         self.boot_samples = None
         
@@ -111,7 +111,7 @@ def ccppara(cfg_file):
     stack_start = cf.getfloat('stack', 'stack_start')
     stack_end = cf.getfloat('stack', 'stack_end')
     cpara.stack_val = cf.getfloat('stack', 'stack_val')
-    cpara.stack_range = np.append(np.arange(stack_start, stack_end, cpara.stack_val), stack_end)
+    cpara.stack_range = np.arange(stack_start, stack_end, cpara.stack_val)
     try:
         cpara.boot_samples = cf.getint('stack', 'boot_samples')
     except:
