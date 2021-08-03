@@ -102,7 +102,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         rfdep['station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]
         rfdep['stalon'] = sta_info.stlo[i]
-        # rfdep['Depthrange'] = cpara.depth_axis
+        rfdep['depthrange'] = cpara.depth_axis
         # rfdep['events'] = _convert_str_mat(stadatar.event)
         rfdep['bazi'] = stadatar.bazi
         rfdep['rayp'] = stadatar.rayp
@@ -140,7 +140,7 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
         rfdep['station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]
         rfdep['stalon'] = sta_info.stlo[i]
-        # rfdep['Depthrange'] = cpara.depth_axis
+        rfdep['depthrange'] = cpara.depth_axis
         # rfdep['events'] = _convert_str_mat(stadatar.event)
         rfdep['bazi'] = stadatar.bazi
         rfdep['rayp'] = stadatar.rayp

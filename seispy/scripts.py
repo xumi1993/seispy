@@ -3,6 +3,7 @@ import argparse
 from seispy.rfcorrect import SACStation
 from seispy.ccp3d import CCP3D
 from seispy.ccpprofile import CCPProfile
+from scipy.interpolate import interp1d
 
 
 def rfani():
@@ -65,7 +66,7 @@ def ccp_profile():
 def get_pierce_points():
     parser = argparse.ArgumentParser(description="Get pierce points with assumed depth")
     parser.add_argument('rfdepth_path', help="path to rfdepth file")
-    parser.add_argument('-d', help="The depth in km, value should be an integer", type=int, metavar='depth')
+    parser.add_argument('-d', help="The depth in km", type=float, metavar='depth')
     parser.add_argument('-o', help="filename of output file, defaults to ./pierce_points.dat",
                         default='./pierce_points.dat', metavar='filename')
     arg = parser.parse_args()
@@ -73,12 +74,12 @@ def get_pierce_points():
         rfdep = np.load(arg.rfdepth_path, allow_pickle=True)
     except Exception as e:
         raise FileNotFoundError('{}'.format(e))
-    if arg.d > rfdep[0]['piercelat'].shape[1]:
+    if arg.d > rfdep[0]['depthrange'][-1]:
         raise ValueError('The depth exceed max depth in {}'.format(arg.rfdepth_path))
     with open(arg.o, 'w') as f:
         for sta in rfdep:
-            plat = sta['piercelat'][:, arg.d]
-            plon = sta['piercelon'][:, arg.d]
-            for la, lo in zip(plat, plon):
+            for i in range(sta['piercelat'].shape[0]):
+                la = interp1d(sta['depthrange'], sta['piercelat'][i])(arg.d)
+                lo = interp1d(sta['depthrange'], sta['piercelon'][i])(arg.d)
                 f.write('{:.4f} {:.4f}\n'.format(lo, la))
     
