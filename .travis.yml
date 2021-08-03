@@ -31,7 +31,7 @@ jobs:
 
 script:
   - git clone https://github.com/xumi1993/seispy-test test
-  - bash test/run.sh
+  - cd test && bash run.sh
 
    
 
