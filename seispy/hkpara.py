@@ -47,8 +47,8 @@ def hkpara(cfg_file):
 
     # para for FileIO section
     hpara.rfpath = check_path('rfpath', cf.get('FileIO', 'rfpath'))
-    hpara.hkpath = check_path('hkpath', cf.get('FileIO', 'hkpath'))
-    hpara.hklist = check_path('hklst', cf.get('FileIO', 'hklst'))
+    hpara.hkpath = cf.get('FileIO', 'hkpath')
+    hpara.hklist = cf.get('FileIO', 'hklst')
 
     hmin = cf.getfloat('hk', 'hmin')
     hmax = cf.getfloat('hk', 'hmax')
