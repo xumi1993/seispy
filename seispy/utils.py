@@ -21,3 +21,12 @@ def check_stack_val(stack_val, dep_val):
         return stack_val/dep_val
     else:
         raise ValueError('stack_val must be a multiple of dep_val')
+
+def read_rfdep(path):
+    try:
+        return np.load(path, allow_pickle=True)
+    except:
+        try:
+            return np.load(path+'.npy', allow_pickle=True)
+        except Exception as e:
+            raise FileNotFoundError('Cannot open file of {}'.format(path))

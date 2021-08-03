@@ -6,7 +6,7 @@ from seispy.setuplog import setuplog
 from seispy.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
-from seispy.utils import check_stack_val
+from seispy.utils import check_stack_val, read_rfdep
 
 
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
@@ -128,15 +128,12 @@ class CCP3D():
             raise ValueError('{}'.format(e))
     
     def read_rfdep(self):
+        self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
         try:
-            self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
-            self.rfdep = np.load(self.cpara.depthdat, allow_pickle=True)
-        except:
-            try:
-                self.rfdep = np.load(self.cpara.depthdat+'.npy', allow_pickle=True)
-            except Exception as e:
-                self.logger.CCPlog.error('{}'.format(e))
-                raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
+            self.rfdep = read_rfdep(self.cpara.depthdat)
+        except FileNotFoundError as e:
+            self.logger.CCPlog.error('{}'.format(e))
+            raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
 
     def initial_grid(self):
         self.read_rfdep()

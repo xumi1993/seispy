@@ -6,7 +6,7 @@ from seispy.rfcorrect import DepModel
 from seispy.ccppara import ccppara, CCPPara
 from seispy.bootstrap import ci
 from seispy.ccp3d import boot_bin_stack
-from seispy.utils import check_stack_val
+from seispy.utils import check_stack_val, read_rfdep
 from os.path import exists, dirname, basename, join
 
 
@@ -97,15 +97,12 @@ class CCPProfile():
             raise ValueError('{}'.format(e))
 
     def read_rfdep(self):
+        self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
         try:
-            self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
-            self.rfdep = np.load(self.cpara.depthdat, allow_pickle=True)
-        except:
-            try:
-                self.rfdep = np.load(self.cpara.depthdat+'.npy', allow_pickle=True)
-            except Exception as e:
-                self.logger.CCPlog.error('{}'.format(e))
-                raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
+            self.rfdep = read_rfdep(self.cpara.depthdat)
+        except FileNotFoundError as e:
+            self.logger.CCPlog.error('{}'.format(e))
+            raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
     
     def initial_profile(self):
         self.read_rfdep()

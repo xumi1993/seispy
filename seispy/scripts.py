@@ -4,6 +4,7 @@ from seispy.rfcorrect import SACStation
 from seispy.ccp3d import CCP3D
 from seispy.ccpprofile import CCPProfile
 from scipy.interpolate import interp1d
+from seispy.utils import read_rfdep
 
 
 def rfani():
@@ -70,10 +71,7 @@ def get_pierce_points():
     parser.add_argument('-o', help="filename of output file, defaults to ./pierce_points.dat",
                         default='./pierce_points.dat', metavar='filename')
     arg = parser.parse_args()
-    try:
-        rfdep = np.load(arg.rfdepth_path, allow_pickle=True)
-    except Exception as e:
-        raise FileNotFoundError('{}'.format(e))
+    rfdep = read_rfdep(arg.rfdepth_path)
     if arg.d > rfdep[0]['depthrange'][-1]:
         raise ValueError('The depth exceed max depth in {}'.format(arg.rfdepth_path))
     with open(arg.o, 'w') as f:
