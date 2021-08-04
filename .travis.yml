@@ -25,7 +25,7 @@ jobs:
     password: 
       secure: "BsDdKkZlOSxIgfM/es1ta7S0UMxxnZFuHsvXZBfJlDYq2vI8zTi3IezB9BXCHx5MNxZJVC+LucE8mpFyJ6X5I6O0psFEHra/RDDt5wKo8FLSpqQzC8sGb+Bxc1o6BG6oVwbbvvYoZHxnLU4gDtnOcbUMVolHdIeXtR17zudyWhohN735/2cg1KSQg9wmk6d42Ze+BlNcZ6KWzoQPyyNf2j/7KLIhn6dZhj7oaj/Ib+z28xo4vi74EgGkCB4NRuoWl5ZyJWAUWBWnOUbw1QlgAQiEsgy5WW15JWhfCyCZ9xOtbu6ZW/+hsvMgic188tf8COUg2r8aAowQU2NAnVb5oGPvMrCyAQD93wd1ra2zvkXBY0/haFeNDeHeGE2XnZ70vg/YJdWEk+3i3WZTFTcXC9FsEZpnGUllBN0hE+1awfasv0nIRXM8Doo78wmXvkSUoAMc9DYEr+BMttwoWXK3hBJxTFCHym8up4Udm0oacw0Z7vGjH5pN1q/Ibn1NLc8lUbjXs/Sovz4d75yigWkH7kzqnfOq9JYxEsyPghtb9uXXiZ4nWw8PetROqGhsWZRYBFrCt2A543yxJmCvn2hl/1UkeeKp1943qaQ/iBHgwy2cu2XZAyO6/4vBDLs61cQ5Jcxmrn++9E8K1vLR1c9WZAAFezL/NVQnIKhWq2Ur87E="
     on:
-      tag: true
+      tags: true
       stage: deploy
       branch: master
 
