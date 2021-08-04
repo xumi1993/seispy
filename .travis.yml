@@ -8,24 +8,21 @@ jobs:
   include:
   - stage: test
     python: '3.7'
-    deploy: skip
 
   - stage: test
     python: '3.8'
-    deploy: skip
 
 
   - stage: test
     python: '3.9'
-    deploy: skip
 
 
   - stage: doc
     script: bash -c "$(curl -fsSL https://git.nju.edu.cn/xumi1993/source/-/raw/master/trigger.sh)"
     deploy: skip
   
-  - stage: deploy
-    script: skip
+  # - stage: deploy
+  #   script: skip
 
 deploy:
   provider: pypi
