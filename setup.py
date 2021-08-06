@@ -5,7 +5,7 @@ packages = find_packages()
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-VERSION = "1.2.0"
+VERSION = "1.2.1"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -24,7 +24,7 @@ setup(name='python-seispy',
                 'numpy>=1.19.0',
                 'scipy>=1.1.0',
                 'matplotlib>=3.2.0',
-                'pyqt5>=5.15.0'],
+                'pyqt5>=5.12.0'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.rf:prf',
                                         'setpar=seispy.rf:setpar',
