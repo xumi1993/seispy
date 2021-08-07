@@ -1,4 +1,4 @@
-# Seispy
+# <img src="https://user-images.githubusercontent.com/7437523/128596331-dc5c5e40-93e1-4d9e-b92d-9c53fe51145a.png" width="500"/> 
 
 [![pipeline status](https://img.shields.io/travis/com/xumi1993/seispy)](https://travis-ci.com/xumi1993/seispy)
 [![Build Status](https://img.shields.io/travis/com/xumi1993/seispy-doc.post?label=doc)](https://seispy.xumijian.me)
@@ -26,7 +26,7 @@ Seispy is a Python module for processing seismological data and calculating Rece
   * [NumPy](http://www.numpy.org/) >= 1.16
   * [SciPy](http://www.scipy.org/) >= 1.2.0
   * [matplotlib](https://matplotlib.org/) >= 3.0.0
-  * [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.15.0
+  * [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
   
 ## Installation
 ```
