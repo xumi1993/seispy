@@ -148,9 +148,9 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
     plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=enf)
     set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
     if outformat == 'g':
-        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=200)
+        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=400, bbox_inches='tight')
     elif outformat == 'f':
-        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf')
+        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf', bbox_inches='tight')
 
 
 def main():

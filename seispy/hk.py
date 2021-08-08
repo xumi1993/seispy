@@ -129,7 +129,7 @@ def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), 
     if path is None:
         plt.show()
     else:
-        f.savefig(path, format='pdf', bbox_inches='tight')
+        f.savefig(path, format='png', dpi=400, bbox_inches='tight')
 
 
 def ci(allstack, h, kappa, ev_num):
@@ -178,7 +178,7 @@ def hksta(hpara, isplot=False, isdisplay=False):
     if isdisplay:
         print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
     if isplot:
-        img_path = join(hpara.hkpath, station+'_Hk.pdf')
+        img_path = join(hpara.hkpath, station+'_Hk.png')
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title, path=img_path)
     else:
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title)
