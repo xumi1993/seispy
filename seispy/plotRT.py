@@ -124,18 +124,16 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30,
 
 
 def plotrt(rfpath, enf=3, out_path='./', outformat='g', xmax=30):
-    """[summary]
+    """Plot PRFs with R and T components
 
-    :param rfpath: [description]
-    :type rfpath: [type]
-    :param enf: [description], defaults to 3
+    :param rfpath: Path to PRFs
+    :type rfpath: str
+    :param enf: The enlarge factor, defaults to 3
     :type enf: int, optional
-    :param out_path: [description], defaults to './'
+    :param out_path: The output path, defaults to current directory
     :type out_path: str, optional
-    :param outformat: [description], defaults to 'g'
+    :param outformat: File format of the image file, g as \'png\', f as \'pdf\', defaults to 'g'
     :type outformat: str, optional
-    :raises FileExistsError: [description]
-    :raises FileExistsError: [description]
     """
     station = basename(rfpath)
     lst = join(rfpath, station+'finallist.dat')
