@@ -142,7 +142,7 @@ class RFFigure(Figure):
         self.baz = self.baz[idx]
         self.rrf = [self.rrf[i] for i in idx]
         self.trf = [self.trf[i] for i in idx]
-        self.gcarc = [self.rrf[i].stats.sac.gcarc for i in idx]
+        self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
         self.filenames = [self.filenames[i] for i in idx]
 
     def plotwave(self):
