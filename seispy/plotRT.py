@@ -123,7 +123,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30,
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
+def plotrt(rfpath, enf=3, out_path='./', outformat='g', xmax=30):
     """[summary]
 
     :param rfpath: [description]
@@ -146,7 +146,7 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g'):
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
     stadata = read_process_data(rfpath)
     plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=enf)
-    set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station)
+    set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmax=xmax, comp=stadata.comp)
     if outformat == 'g':
         h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=400, bbox_inches='tight')
     elif outformat == 'f':
@@ -160,12 +160,11 @@ def main():
     parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                         dest='format', default='g', type=str, metavar='f|g')
+    parser.add_argument('-x', help='The max time scale in sec, defaults to 30s', default=30, type=float, metavar='max_time')
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
-        print('Errpr: The format must be in \'f\' and \'g\'')
-        parser.print_help()
-        sys.exit(1)
-    plotrt(rfpath=arg.path, enf=arg.enf, out_path=arg.output, outformat=arg.format)
+        raise ValueError('Error: The format must be in \'f\' and \'g\'')
+    plotrt(rfpath=arg.rfpath, enf=arg.enf, out_path=arg.output, outformat=arg.format, xmax=arg.x)
 
 
 if __name__ == '__main__':

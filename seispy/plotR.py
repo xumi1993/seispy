@@ -81,23 +81,20 @@ def plotr(rfpath, outpath='./', xlim=[-2, 80], enf=6, format='pdf'):
 def main():
     parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
-    parser.add_argument('-w', help="Time window from t1 to t2, defaults to -2/80", type=str, default='-2/80', metavar='t1/t2')
     parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
     parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                     dest='format', default='g', type=str, metavar='f|g')
+    parser.add_argument('-x', help='The max time scale in sec, defaults to 85s', default=85, type=float, metavar='max_time')
+
     arg = parser.parse_args()
-    try:
-        xlim = [float(v) for v in arg.w.split('/')]
-    except:
-        raise ValueError("Error format in time window")
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
     elif arg.format == 'g':
         fmt = 'png'
     elif arg.format == 'f':
         fmt = 'pdf'
-    plotr(arg.rfpath, arg.output, enf=arg.enf, xlim=xlim, format=fmt)
+    plotr(arg.rfpath, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
 
 
 
