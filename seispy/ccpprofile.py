@@ -4,7 +4,7 @@ from seispy.setuplog import setuplog
 from seispy.distaz import distaz
 from seispy.rfcorrect import DepModel
 from seispy.ccppara import ccppara, CCPPara
-from seispy.bootstrap import ci
+from scikits.bootstrap import ci
 from seispy.ccp3d import boot_bin_stack
 from seispy.utils import check_stack_val, read_rfdep
 from os.path import exists, dirname, basename, join
