@@ -32,6 +32,7 @@ Seispy is a Python module for processing seismological data and calculating Rece
   * [SciPy](http://www.scipy.org/) >= 1.2.0
   * [matplotlib](https://matplotlib.org/) >= 3.0.0
   * [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
+  * [scikits.bootstrap](https://github.com/cgevans/scikits-bootstrap) >= 1.0.0
   
 ## Installation
 ```
@@ -45,8 +46,6 @@ python setup.py install
 -   `seispy.distaz`: Calculate distance and azimuth (by the
     [lithospheric seismology program at USC][]).
 -   `seispy.geo`: Tiny codes of geophysics.
--   `seispy.bootstrap`: Bootstrap confidence interval estimation (by
-    [scikits-bootstrap][])
 -   `seispy.decon`: Functions of deconvolution transferred from
     [iwbailey/processRFmatlab][] including
     -   Iterative time domain deconvolution method (Ligorría and Ammon
