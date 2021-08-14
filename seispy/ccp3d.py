@@ -3,7 +3,7 @@ from seispy.geo import km2deg, latlon_from, cosd, extrema, skm2srad, rad2deg
 from seispy import distaz
 from seispy.rfcorrect import DepModel
 from seispy.setuplog import setuplog
-from seispy.bootstrap import ci
+from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
 from seispy.utils import check_stack_val, read_rfdep
