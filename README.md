@@ -64,6 +64,7 @@ python setup.py install
 -   `seispy.ccpprofile`: CCP stacking along a profile.
 -   `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and
     D660.
+-   `seispy.get_cpt`: Convert color map from the `cpt` format to the `matplotlib.cmap` modified from [bouziot/get-cpt](https://github.com/bouziot/get-cpt) based on the GPLv3 license.
 
   [lithospheric seismology program at USC]: http://www.seis.sc.edu/software/distaz/
   [scikits-bootstrap]: https://github.com/cgevans/scikits-bootstrap
