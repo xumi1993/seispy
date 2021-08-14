@@ -167,7 +167,7 @@ class CCP3D():
             boot_stack['mu'] = bin_mu
             boot_stack['ci'] = bin_ci
             boot_stack['count'] = bin_count
-            self.stack_data.append(boot_stack)   
+            self.stack_data.append(boot_stack)
  
     def save_stack_data(self, fname):
         """Save stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
