@@ -59,8 +59,7 @@ python setup.py install
     `obspy.io.sac`, `obspy.signal`, `obspy.taup` and `obspy.core.Stream`
     from the [Obspy][].
 -   `seispy.rfcorrect`: Subsequent process of RFs including moveout
-    correction and time to depth conversion (1D and 3D) (see [Xu et al.,
-    2018 EPSL][])
+    correction and time to depth conversion (1D and 3D) (see [Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
 -   `seispy.ccpprofile`: CCP stacking along a profile.
 -   `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and
     D660.
