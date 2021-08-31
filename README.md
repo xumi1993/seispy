@@ -32,6 +32,7 @@ Seispy is a Python module for processing seismological data and calculating Rece
   * [SciPy](http://www.scipy.org/) >= 1.2.0
   * [matplotlib](https://matplotlib.org/) >= 3.0.0
   * [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
+  * [scikits.bootstrap](https://github.com/cgevans/scikits-bootstrap) >= 1.0.0
   
 ## Installation
 ```
@@ -45,8 +46,6 @@ python setup.py install
 -   `seispy.distaz`: Calculate distance and azimuth (by the
     [lithospheric seismology program at USC][]).
 -   `seispy.geo`: Tiny codes of geophysics.
--   `seispy.bootstrap`: Bootstrap confidence interval estimation (by
-    [scikits-bootstrap][])
 -   `seispy.decon`: Functions of deconvolution transferred from
     [iwbailey/processRFmatlab][] including
     -   Iterative time domain deconvolution method (Ligorría and Ammon
@@ -60,11 +59,11 @@ python setup.py install
     `obspy.io.sac`, `obspy.signal`, `obspy.taup` and `obspy.core.Stream`
     from the [Obspy][].
 -   `seispy.rfcorrect`: Subsequent process of RFs including moveout
-    correction and time to depth conversion (1D and 3D) (see [Xu et al.,
-    2018 EPSL][])
+    correction and time to depth conversion (1D and 3D) (see [Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
 -   `seispy.ccpprofile`: CCP stacking along a profile.
 -   `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and
     D660.
+-   `seispy.get_cpt`: Convert color map from the `cpt` format to the `matplotlib.cmap` modified from [bouziot/get-cpt](https://github.com/bouziot/get-cpt) based on the GPLv3 license.
 
   [lithospheric seismology program at USC]: http://www.seis.sc.edu/software/distaz/
   [scikits-bootstrap]: https://github.com/cgevans/scikits-bootstrap

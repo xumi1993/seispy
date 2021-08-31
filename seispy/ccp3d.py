@@ -3,7 +3,7 @@ from seispy.geo import km2deg, latlon_from, cosd, extrema, skm2srad, rad2deg
 from seispy import distaz
 from seispy.rfcorrect import DepModel
 from seispy.setuplog import setuplog
-from seispy.bootstrap import ci
+from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
 from seispy.utils import check_stack_val, read_rfdep
@@ -167,7 +167,7 @@ class CCP3D():
             boot_stack['mu'] = bin_mu
             boot_stack['ci'] = bin_ci
             boot_stack['count'] = bin_count
-            self.stack_data.append(boot_stack)   
+            self.stack_data.append(boot_stack)
  
     def save_stack_data(self, fname):
         """Save stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
