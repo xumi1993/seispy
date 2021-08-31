@@ -150,12 +150,7 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
         rfdep['piercelon'] = pplon_s
         rfdep['stopindex'] = end_index
         RFdepth.append(rfdep)
-    try:
-        savemat(cpara.depthdat, {'RFdepth': RFdepth})
-    except FileNotFoundError:
-        log.RF2depthlog.warning('No such file or directory: {}'.format(dirname(cpara.depthdat)))
-        rfdep_path = input('Enter a exist path:')
-        savemat(rfdep_path, {'RFdepth': RFdepth})
+    np.save(cpara.depthdat, RFdepth)
 
 
 def rf2depth():
