@@ -319,8 +319,14 @@ class RF(object):
     
     def detrend(self):
         self.logger.RFlog.info('Detrend all data')
-        for _, row in self.eqs.iterrows():
-            row['data'].detrend()
+        drop_idx = []
+        for i, row in self.eqs.iterrows():
+            try:
+                row['data'].detrend()
+            except:
+                self.logger.RFlog.error('Data error in {}'.format(row['date'].strftime('%Y.%j.%H.%M.%S')))
+                drop_idx.append(i)
+        self.eqs.drop(drop_idx, inplace=True)
 
     def filter(self, freqmin=None, freqmax=None, order=4):
         if freqmin is None:
