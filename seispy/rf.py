@@ -1,23 +1,26 @@
+from genericpath import exists
 import obspy
+from obspy import UTCDateTime
 from obspy.io.sac import SACTrace
+from obspy.taup import TauPyModel
 import re
-from seispy.io import wsfetch
 from os.path import join
+from seispy.io import wsfetch
 from seispy.para import para
-import seispy
+from seispy import distaz
 from seispy.eq import eq
 from seispy.setuplog import setuplog
+from seispy.sviewerui import MatplotlibWidget
 import glob
 import numpy as np
 from datetime import timedelta
 import pandas as pd
-from obspy.taup import TauPyModel
 import configparser
 import argparse
 import sys
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
-from seispy.sviewerui import MatplotlibWidget
+import pickle
 
 
 def pickphase(eqs, para):
@@ -53,13 +56,13 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
         lines = f.readlines()
         for line in lines:
             line_sp = line.strip().split()
-            date_now = obspy.UTCDateTime.strptime('.'.join(line_sp[0:3]) + 'T' + '.'.join(line_sp[4:7]),
+            date_now = UTCDateTime.strptime('.'.join(line_sp[0:3]) + 'T' + '.'.join(line_sp[4:7]),
                                                   '%Y.%m.%dT%H.%M.%S')
             evla = float(line_sp[7])
             evlo = float(line_sp[8])
             evdp = float(line_sp[9])
             mw = float(line_sp[10])
-            dis = seispy.distaz(stla, stlo, evla, evlo).delta
+            dis = distaz(stla, stlo, evla, evlo).delta
             # bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
             if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
                 this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw]], columns=col)
@@ -79,7 +82,7 @@ def load_station_info(pathname, ref_comp, suffix):
 
 
 def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=None,
-             tolerance=210, dateformat='%Y.%j.%H.%M.%S', switchEN=False, reverseE=False, reverseN=False):
+             tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
     if len(ref_eqs) == 0:
@@ -91,7 +94,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         except IndexError:
             raise IndexError('Error data format of {} in {}'.format(dateformat, ref_sac))
         if isinstance(offset, (int, float)):
-            sac_files.append([datestr, obspy.UTCDateTime.strptime(datestr, dateformat), -offset])
+            sac_files.append([datestr, UTCDateTime.strptime(datestr, dateformat), -offset])
         elif offset is None:
             try:
                 tr = obspy.read(ref_sac)[0]
@@ -100,7 +103,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
             sac_files.append([datestr, tr.stats.starttime-tr.stats.sac.b, tr.stats.sac.o])
         else:
             raise TypeError('offset should be int or float type')
-    new_col = ['dis', 'bazi', 'data']
+    new_col = ['dis', 'bazi', 'data', 'datestr']
     eq_match = pd.DataFrame(columns=new_col)
     for datestr, b_time, offs in sac_files:
         date_range_begin = b_time + timedelta(seconds=offs - tolerance)
@@ -109,14 +112,14 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         if len(results) != 1:
             continue
         try:
-            this_eq = eq(pathname, datestr, suffix, switchEN=switchEN, reverseE=reverseE, reverseN=reverseN)
+            this_eq = eq(pathname, datestr, suffix)
         except Exception as e:
             continue
         this_eq.get_time_offset(results.iloc[0]['date'])
-        daz = seispy.distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
-        this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq]], columns=new_col, index=results.index.values)
+        daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
+        this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=results.index.values)
         eq_match = eq_match.append(this_df)
-    ind = eq_match.index.drop_duplicates(False)
+    ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
@@ -153,9 +156,9 @@ def CfgParser(cfg_file):
     for sec in sections:
         for key, value in cf.items(sec):
             if key == 'date_begin':
-                pa.__dict__[key] = obspy.UTCDateTime(value)
+                pa.__dict__[key] = UTCDateTime(value)
             elif key == 'date_end':
-                pa.__dict__[key] = obspy.UTCDateTime(value)
+                pa.__dict__[key] = UTCDateTime(value)
             elif key == 'offset':
                 try:
                     pa.__dict__[key] = float(value)
@@ -275,7 +278,7 @@ class RF(object):
             self.eqs = match_eq(self.eq_lst, self.para.datapath, self.stainfo.stla, self.stainfo.stlo,
                                 ref_comp=self.para.ref_comp, suffix=self.para.suffix,
                                 offset=self.para.offset, tolerance=self.para.tolerance,
-                                dateformat=self.para.dateformat, switchEN=switchEN, reverseE=reverseE, reverseN=reverseN)
+                                dateformat=self.para.dateformat)
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise e
@@ -285,37 +288,44 @@ class RF(object):
         else:
             self.logger.RFlog.info('{0} earthquakes matched'.format(self.eqs.shape[0]))
         
-    '''
     def save(self, path=''):
         if path == '':
-            path = '{0}.{1}.h5'.format(self.stainfo.network, self.stainfo.station)
-
-        d = {'para': self.para.__dict__, 'stainfo': self.stainfo.__dict__, 'eq_lst': self.eq_lst, 'eqs': self.eqs}
+            path = '{0}.{1}_matched.pkl'.format(self.stainfo.network, self.stainfo.station)
         try:
             self.logger.RFlog.info('Saving project to {0}'.format(path))
-            dd.io.save(path, d)
-        except PerformanceWarning:
-            pass
+            save_eqs = self.eqs[['date', 'evla', 'evlo', 'evdp', 'mag', 'bazi', 'dis', 'datestr']]
+            with open(path, 'wb') as f:
+                pickle.dump({'para': self.para, 'eqs': save_eqs}, f, -1)
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise IOError(e)
 
     def load(self, path):
-        try:
-            self.logger.RFlog.info('Loading {0}'.format(path))
-            fdd = dd.io.load(path)
-        except Exception as e:
-            self.logger.RFlog.error('{0}'.format(e))
-            raise IOError('Cannot read {0}'.format(path))
+        with open(path, 'rb') as f:
+            rfdata = pickle.load(f)
+        self.para = rfdata['para']
+        if not exists(self.para.datapath):
+            self.logger.RFlog.error('Data path {} was not found'.format(self.para.datapath))
+            sys.exit(1)
+        self.eqs = rfdata['eqs']
+        eqs = []
+        for i, row in self.eqs.iterrows():
+            try:
+                this_eq = eq(self.para.datapath, row['datestr'], self.para.suffix)
+            except Exception as e:
+                self.logger.RFlog.warning('Cannot read {}, skipping'.format(row['datestr']))
+                continue
+            this_eq.get_time_offset(row['date'])
+            eqs.append(this_eq)
+        self.eqs.insert(1, 'data', eqs)
 
-        try:
-            self.para.__dict__.update(fdd['para'])
-            self.stainfo.__dict__.update(fdd['stainfo'])
-            self.eq_lst = fdd['eq_lst']
-            self.eqs = fdd['eqs']
-        except Exception as e:
-            raise ValueError(e)
-    '''
+    def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
+        self.logger.RFlog.info('Correct components with switchEN: {}, reverseE: {}, reverseN: {}'.format(switchEN, reverseE, reverseN))
+        self.para.switchEN = switchEN
+        self.para.reverseE = reverseE
+        self.para.reverseN = reverseN
+        for _, row in self.eqs.iterrows():
+            row['data'].channel_correct(switchEN, reverseE, reverseN)
     
     def detrend(self):
         self.logger.RFlog.info('Detrend all data')
@@ -367,19 +377,14 @@ class RF(object):
             self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(baz_shift))
             self.eqs['bazi'] = np.mod(self.eqs['bazi'] + baz_shift, 360)
 
-    # def _baz_confirm(self, offset, ampt_all):
-    #     y = np.arange(self.eqs.shape[0])
-    #     x = np.linspace(-offset, offset, ampt_all.shape[1])
-    #     fig = _plotampt(x, y, ampt_all)
-    #     if messagebox.askyesno('Back-azimuth correction',
-    #                            'Would you like to keep this correction?'):
-    #         fig.close()
-    #     else:
-    #         self.logger.RFlog.error('Manual interruption.')
-    #         fig.close()
-    #         sys.exit(1)
-
-    def rotate(self, method='NE->RT', search_inc=False):
+    def rotate(self, search_inc=False):
+        targ_comp = ''.join(sorted(self.para.comp.upper()))
+        if targ_comp == 'RTZ':
+            method='NE->RT'
+        elif targ_comp == 'LQT':
+            method='ZNE->LQT'
+        else:
+            raise ValueError('comp must be in RTZ or LQT.')
         self.logger.RFlog.info('Rotate {0} phase to {1}'.format(self.para.phase, method))
         drop_idx = []
         for i, row in self.eqs.iterrows():
@@ -413,14 +418,8 @@ class RF(object):
         self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
 
     def deconv(self):
-        if self.para.phase == 'P':
-            shift = self.para.time_before
-            time_after = self.para.time_after
-        elif self.para.phase == 'S':
-            shift = self.para.time_after
-            time_after = self.para.time_before
-        else:
-            pass
+        shift = self.para.time_before
+        time_after = self.para.time_after
         drop_lst = []
 
         count = 0
@@ -458,7 +457,7 @@ class RF(object):
         else:
             self.logger.RFlog.info('Save RFs with and criterion of {}'.format(criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, npts, criterion=criterion, rmsgate=self.para.rmsgate):
+            if row['data'].judge_rf(shift, npts, phase=self.para.phase, criterion=criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
@@ -503,7 +502,8 @@ def prf():
     pjt = RF(cfg_file=arg.cfg_file)
     pjt.load_stainfo()
     pjt.search_eq(local=arg.islocal)
-    pjt.match_eq(switchEN=arg.isswitch, reverseN=reverseN, reverseE=reverseE)
+    pjt.match_eq()
+    pjt.channel_correct(switchEN=arg.isswitch, reverseN=reverseN, reverseE=reverseE)
     pjt.detrend()
     pjt.filter()
     pjt.cal_phase()
@@ -515,13 +515,7 @@ def prf():
     else:
         pass
     pjt.trim()
-    targ_comp = ''.join(sorted(pjt.para.comp.upper()))
-    if targ_comp == 'RTZ':
-        pjt.rotate(method='NE->RT')
-    elif targ_comp == 'LQT':
-        pjt.rotate(method='ZNE->LQT')
-    else:
-        raise ValueError('comp must be in RTZ or LQT.')
+    pjt.rotate()
     pjt.deconv()
     pjt.saverf()
 

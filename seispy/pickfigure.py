@@ -31,7 +31,7 @@ class StaData():
         self.ev_num = len(self.bazi)
         self.datar = np.empty([self.ev_num, self.rflength])
         self.datat = np.empty([self.ev_num, self.rflength])
-        for i, idx in enumerate(goodidx[0]):
+        for i, idx in enumerate(goodidx[0]):    
             self.datar[i, :] = rrf[idx].data
             self.datat[i, :] = trf[idx].data
         self.time_axis = np.array([])
@@ -117,12 +117,15 @@ class RFFigure(Figure):
         self.axg.set_xlabel('Distance (\N{DEGREE SIGN})')
 
     def read_sac(self, dt=0.1):
-        if len(glob.glob(join(self.rfpath, '*_R.sac'))) == 0:
-            tmp_files = glob.glob(join(self.rfpath, '*_Q.sac'))
-            self.comp = 'Q'
-        else:
+        if len(glob.glob(join(self.rfpath, '*_R.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*_R.sac'))  
-            self.comp = 'R'  
+            self.comp = 'R'
+        elif len(glob.glob(join(self.rfpath, '*_L.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*_L.sac'))
+            self.comp = 'L'
+        else:
+            tmp_files = glob.glob(join(self.rfpath, '*_Z.sac'))
+            self.comp = 'Z' 
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
         self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
