@@ -413,9 +413,14 @@ class RF(object):
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
     
-    def pick(self):
-        pickphase(self.eqs, self.para)
+    def pick(self, prepick=True, stl=5, ltl=10):
+        if prepick:
+            self.logger.RFlog.info('Pre-pick {} arrival using STA/LTA method'.format(self.para.phase))
+            for _, row in self.eqs.iterrows():
+                row['data'].phase_trigger(self.para.time_before, self.para.time_after,
+                                        self.para.phase, stl=stl, ltl=ltl)
         self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
+        pickphase(self.eqs, self.para)
 
     def deconv(self):
         shift = self.para.time_before
@@ -474,7 +479,7 @@ def prf():
                         metavar='N|E|NE', default=None, type=str)
     parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
     parser.add_argument('-b', help='Correct back-azimuth. \nIf "baz" is specified, the corr_baz = raw_baz + baz. \n'
-                                   'If no arguments following -b Back-azimuth will be corrected with minimal '
+                                   'If there is no argument, the back-azimuth will be corrected with minimal '
                                    'energy of T component. The searching range is raw_baz +/- 90',
                                    dest='baz', nargs='?', const=0, type=float)
     arg = parser.parse_args()
@@ -514,8 +519,8 @@ def prf():
         pjt.baz_correct()
     else:
         pass
-    pjt.trim()
     pjt.rotate()
+    pjt.trim()
     pjt.deconv()
     pjt.saverf()
 
