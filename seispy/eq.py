@@ -231,12 +231,15 @@ class eq(object):
         self.t_trigger = t1 + n_trigger/df
         self.trigger_shift = n_trigger/df - time_before
 
-    def trim(self, time_before, time_after, phase='P'):
+    def trim(self, time_before, time_after, phase='P', isreturn=False):
         """
         offset = sac.b - real o
         """
         t1, t2 = self._get_time(time_before, time_after, phase)
-        self.st.trim(t1, t2)
+        if isreturn:
+            return self.st.copy().trim(t1, t2)
+        else:
+            self.st.trim(t1, t2)
 
     def deconvolute(self, shift, time_after, f0=2, phase='P', method='iter', only_r=False, itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
         self.rf = self.st.copy()

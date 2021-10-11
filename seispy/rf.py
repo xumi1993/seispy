@@ -320,13 +320,14 @@ class RF(object):
         self.eqs.insert(1, 'data', eqs)
 
     def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
-        self.logger.RFlog.info('Correct components with switchEN: {}, reverseE: {}, reverseN: {}'.format(switchEN, reverseE, reverseN))
         self.para.switchEN = switchEN
         self.para.reverseE = reverseE
         self.para.reverseN = reverseN
-        for _, row in self.eqs.iterrows():
-            row['data'].channel_correct(switchEN, reverseE, reverseN)
-    
+        if switchEN or reverseN or reverseE:
+            self.logger.RFlog.info('Correct components with switchEN: {}, reverseE: {}, reverseN: {}'.format(switchEN, reverseE, reverseN))
+            for _, row in self.eqs.iterrows():
+                row['data'].channel_correct(switchEN, reverseE, reverseN)
+        
     def detrend(self):
         self.logger.RFlog.info('Detrend all data')
         drop_idx = []
