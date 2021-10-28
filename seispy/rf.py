@@ -81,7 +81,7 @@ def load_station_info(pathname, ref_comp, suffix):
     return ex_tr.knetwk, ex_tr.kstnm, ex_tr.stla, ex_tr.stlo, ex_tr.stel
 
 
-def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=None,
+def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', offset=None,
              tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
@@ -114,7 +114,7 @@ def match_eq(eq_lst, pathname, stla, stlo, ref_comp='Z', suffix='SAC', offset=No
         try:
             this_eq = eq(pathname, datestr, suffix)
         except Exception as e:
-            continue
+            logger.RF.error(''.format(e))
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=results.index.values)
@@ -272,10 +272,10 @@ class RF(object):
                 raise e
         self.logger.RFlog.info('Found {} earthquakes'.format(self.eq_lst.shape[0]))
 
-    def match_eq(self, switchEN=False, reverseE=False, reverseN=False):
+    def match_eq(self):
         try:
             self.logger.RFlog.info('Match SAC files')
-            self.eqs = match_eq(self.eq_lst, self.para.datapath, self.stainfo.stla, self.stainfo.stlo,
+            self.eqs = match_eq(self.eq_lst, self.para.datapath, self.stainfo.stla, self.stainfo.stlo, self.logger,
                                 ref_comp=self.para.ref_comp, suffix=self.para.suffix,
                                 offset=self.para.offset, tolerance=self.para.tolerance,
                                 dateformat=self.para.dateformat)

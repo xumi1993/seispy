@@ -29,8 +29,13 @@ class eq(object):
     def __init__(self, pathname, datestr, suffix):
         self.datestr = datestr
         self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
-        if len(self.st) != 3:
-            raise ValueError('Sismogram must be in 3 components, but there are {} of {}'.format(len(self.st), datestr))
+        if len(self.st) < 3:
+            channel = ' '.join([tr.stats.channel for tr in self.st])
+            raise ValueError('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, datestr))
+        elif len(self.st) > 3:
+            raise ValueError('{} has more than 3 components, please select to delete redundant seismic components'.format(datestr))
+        else:
+            pass
         # if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
         #     raise ValueError('Samples are different in 3 components')
         self.st.sort()
