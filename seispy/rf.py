@@ -115,6 +115,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
             this_eq = eq(pathname, datestr, suffix)
         except Exception as e:
             logger.RF.error(''.format(e))
+            continue
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=results.index.values)
