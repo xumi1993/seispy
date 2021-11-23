@@ -154,7 +154,7 @@ class SACStation(object):
 
 
 class RFStation(SACStation):
-    def __init__(self, data_path, only_r):
+    def __init__(self, data_path, only_r=False):
         """Class for derivative process of RFs.
 
         :param data_path: Path to RF data with SAC format. A finallist.dat must be in this path.
