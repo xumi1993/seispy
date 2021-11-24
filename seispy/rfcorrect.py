@@ -58,6 +58,7 @@ class SACStation(object):
 
             This Class will be renamed to ``RFStation`` in future versions.
         """
+        
         self.only_r = only_r
         if isfile(data_path):
             data_path = dirname(data_path)
@@ -102,6 +103,7 @@ class SACStation(object):
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 self.datar[_i] = sac.data
+        raise FutureWarning('This "SACStation" class will be removed in the new version and replaced by "RFStation"')
 
     def normalize(self):
         maxamp = np.nanmax(np.abs(self.datar), axis=1)
