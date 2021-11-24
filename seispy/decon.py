@@ -136,7 +136,7 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
     return RFI, rms, it 
     
 
-def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False):
+def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, phase='P'):
     """
     Frequency-domain deconvolution using waterlevel method.
 
@@ -213,7 +213,7 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False):
         gnorm = np.sum(gaussF) * delf * dt
         rft = rft.real / gnorm
 
-    return rft, rms 
+    return rft, rms, np.nan
 
 def _add_zeros(a, numl, numr):
     """Add zeros at left and rigth side of array a"""

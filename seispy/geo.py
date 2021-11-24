@@ -184,33 +184,3 @@ def extrema(x, opt='max'):
         raise ImportError('Wrong Options!!!')
     return idx
 
-
-def slantstack(seis, timeaxis, dis, ref_dis=65, rayp_range=np.arange(-0.35, 0.35, 0.01), tau_range=np.arange(0, 100)):
-    """Slant stack. Refer to Tauzin et al., 2008 JGR in detail.
-
-    :param seis: [description]
-    :type seis: [type]
-    :param timeaxis: [description]
-    :type timeaxis: [type]
-    :param dis: [description]
-    :type dis: [type]
-    :param ref_dis: [description], defaults to 65
-    :type ref_dis: int, optional
-    :param rayp_range: [description], defaults to np.arange(-0.35, 0.35, 0.01)
-    :type rayp_range: [type], optional
-    :param tau_range: [description], defaults to np.arange(0, 100)
-    :type tau_range: [type], optional
-    :return: [description]
-    :rtype: [type]
-    """
-    EV_num = seis.shape[0]
-    tmp = np.zeros([EV_num, tau_range.shape[0]])
-    amp = np.zeros([rayp_range.shape[0], tau_range.shape[0]])
-    for j in range(rayp_range.shape[0]):
-        for i in range(EV_num):
-            seis[i, :] = seis[i, :] / np.max(np.abs(seis[i, :]))
-            tps = tau_range - rayp_range[j] * (dis[i] - ref_dis)
-            tmp[i, :] = interpolate.interp1d(timeaxis, seis[i, :], fill_value='extrapolate')(tps)
-        amp[j, :] = np.mean(tmp, axis=0)
-    return amp
-

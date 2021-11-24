@@ -7,6 +7,7 @@ from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
 from seispy.rfani import RFAni
+from seispy.slantstack import SlantStack
 import matplotlib.pyplot as plt
 import warnings
 import glob
@@ -57,6 +58,7 @@ class SACStation(object):
 
             This Class will be renamed to ``RFStation`` in future versions.
         """
+        
         self.only_r = only_r
         if isfile(data_path):
             data_path = dirname(data_path)
@@ -101,6 +103,7 @@ class SACStation(object):
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 self.datar[_i] = sac.data
+        raise FutureWarning('This "SACStation" class will be removed in the new version and replaced by "RFStation"')
 
     def normalize(self):
         maxamp = np.nanmax(np.abs(self.datar), axis=1)
@@ -152,14 +155,19 @@ class SACStation(object):
         best_f, best_t = self.ani.joint_ani(weight=weight)
         return best_f, best_t
 
+    def slantstack(self, ref_dis=None, rayp_range=None, tau_range=None):
+        self.slant = SlantStack(self.datar, self.time_axis, self.dis)
+        self.slant.stack(ref_dis, rayp_range, tau_range)
+        return self.slant.stack_amp
+
 
 class RFStation(SACStation):
-    def __init__(self, data_path, only_r):
+    def __init__(self, data_path, only_r=False):
         """Class for derivative process of RFs.
 
         :param data_path: Path to RF data with SAC format. A finallist.dat must be in this path.
         :type data_path: str
-        :param only_r: [description], defaults to False
+        :param only_r: Wether only read R component, defaults to False
         :type only_r: bool, optional
         """
         super().__init__(data_path, only_r=only_r)

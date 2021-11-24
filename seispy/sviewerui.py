@@ -1,7 +1,5 @@
-import sys
-import os
-import argparse
 # matplotlib.use("Qt5Agg")
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
                             QSizePolicy, QWidget, QDesktopWidget, \
@@ -12,6 +10,8 @@ from seispy.setuplog import setuplog
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 
 
@@ -19,6 +19,8 @@ class SFigure(Figure):
     def __init__(self, eqs, para, width=21, height=11, dpi=100):
         self.eqs = eqs
         self.row_num = eqs.shape[0]
+        self.picker_time = pd.DataFrame({'trigger_shift': np.array([eqs.iloc[i]['data'].trigger_shift for i in range(self.row_num)])})
+        self.picker_time.set_index(eqs.index, inplace=True)
         self.para = para
         self.log = setuplog()
         self.idx = 0
@@ -29,6 +31,14 @@ class SFigure(Figure):
 
     def init_figure(self, width=21, height=11, dpi=100):
         self.fig, self.axs = plt.subplots(3, 1, sharex=True, figsize=(width, height), dpi=dpi, tight_layout=True)
+
+    def set_cross_hair_visible(self, visible):
+        need_redraw = self.cursor[0].get_visible() != visible
+        # self.horizontal_line.set_visible(visible)
+        for cursor in self.cursor:
+            cursor.set_visible(visible)
+        # self.text.set_visible(visible)
+        return need_redraw
     
     def set_properties(self):
         date = self.eqs.iloc[self.idx]['date'].strftime("%Y.%m.%dT%H:%M:%S")
@@ -39,6 +49,7 @@ class SFigure(Figure):
         self.fig.suptitle(title)
         for ax in self.axs:
             ax.set(xlim=[-self.para.time_before, self.para.time_after])
+            ax.autoscale(enable=True,axis='y', tight=True)
             ax.minorticks_on()
         self.axs[2].set_xlabel('Time (s)')
 
@@ -47,11 +58,15 @@ class SFigure(Figure):
             ax.cla()
 
     def plot(self, lc='tab:blue'):
-        st = self.eqs.iloc[self.idx]['data'].rf
+        st = self.eqs.iloc[self.idx]['data'].st_pick
+        # t1, t2 = self.eqs.iloc[self.idx]['data'].t1_pick, st = self.eqs.iloc[self.idx]['data'].t2_pick
         self.time_axis = st[0].times()-self.para.time_before
+        self.picker = []
         for i in range(3):
             self.axs[i].plot(self.time_axis, st[i].data, color=lc)
-            self.axs[i].axvline(x=0, lw=1, ls='--', color='r')
+            self.picker.append(self.axs[i].axvline(self.picker_time.iloc[self.idx]['trigger_shift'], color='k', lw=1.5, visible=True))
+            # self.axs[i].axvline(x=trigger, lw=1, alpha=0.3, color='g')
+            self.axs[i].axvline(x=0, lw=1.5, alpha=0.3, color='r')
             self.axs[i].set_ylabel(st[i].stats.channel)
         self.set_properties()
 
@@ -64,6 +79,31 @@ class SFigure(Figure):
             self.plot(lc=self.drop_color)
         else:
             self.plot()
+    
+    def on_mouse_move(self, event):
+        if not event.inaxes:
+            need_redraw = self.set_cross_hair_visible(False)
+            if need_redraw:
+                for ax in self.axs:
+                    ax.figure.canvas.draw()
+        else:
+            self.set_cross_hair_visible(True)
+            x = event.xdata
+            # update the line positions
+            # self.horizontal_line.set_ydata(y)
+            for cursor in self.cursor:
+                cursor.set_xdata(x)
+                # ax.figure.canvas.draw()
+            # self.cursor[1].set_xdata(x)
+            # self.axs[1].figure.canvas.draw()
+        
+    def on_click(self, event):
+        if not event.inaxes:
+            return
+        self.picker_time.iloc[self.idx]['trigger_shift'] = event.xdata
+        for picker in self.picker:
+            picker.set_xdata(self.picker_time.iloc[self.idx]['trigger_shift'])
+            picker.set_visible(True)
 
     def back_action(self):
         self.clear()
@@ -89,6 +129,8 @@ class SFigure(Figure):
 
     def finish(self):
         self.eqs.drop(self.drop_lst, inplace=True)
+        for i, row in self.eqs.iterrows():
+            row['data'].trigger_shift = self.picker_time['trigger_shift'][i]
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, eqs=None, para=None, width=21, height=11, dpi=100):
@@ -111,6 +153,9 @@ class MatplotlibWidget(QMainWindow):
 
     def initUi(self, eqs, para):
         self.mpl = MyMplCanvas(self, eqs=eqs, para=para, width=21, height=11, dpi=100)
+        # self.mpl.mpl_connect('motion_notify_event', self.on_mouse_move)
+        self.mpl.mpl_connect('button_press_event', self.on_click)
+        self.setCursor(Qt.CrossCursor)
         self.layout = QVBoxLayout()
         self.layout.addWidget(self.mpl, 2)
 
@@ -125,6 +170,14 @@ class MatplotlibWidget(QMainWindow):
 
     def exit_app(self):
         self.close()
+
+    def on_click(self, event):
+        self.mpl.sfig.on_click(event)
+        self.mpl.draw()
+    
+    def on_mouse_move(self, event):
+        self.mpl.sfig.on_mouse_move(event)
+        self.mpl.draw()
 
     def next_connect(self):
         self.mpl.sfig.next_action()
@@ -144,7 +197,8 @@ class MatplotlibWidget(QMainWindow):
     
     def finish_connect(self):
         self.mpl.sfig.finish()
-        QApplication.quit()
+        self.close()
+        # QApplication.quit()
     
     def _define_global_shortcuts(self):
         self.key_c = QShortcut(QKeySequence('c'), self)

@@ -38,6 +38,9 @@ class para(object):
         self.criterion = 'crust'
         self.only_r = False
         self.rmsgate = None
+        self.switchEN=False
+        self.reverseE=False
+        self.reverseN=False
 
     def get_para(self):
         return self.__dict__
