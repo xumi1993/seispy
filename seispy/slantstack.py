@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
-from os.path import join
 
 class SlantStack():
     def __init__(self, seis, timeaxis, dis) -> None:
@@ -44,11 +43,22 @@ class SlantStack():
                 tmp[i, :] = interp1d(self.time_axis, self.datar[i, :], fill_value='extrapolate')(tps)
             self.stack_amp[j, :] = np.mean(tmp, axis=0)
         
-    def plot(self, cmap='jet', xlim=None, figpath=None):
-        maxamp = np.max(np.abs(self.stack_amp))
+    def plot(self, cmap='jet', xlim=None, vmin=None, vmax=None, figpath=None):
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot()
-        cs = self.ax.pcolor(self.tau_range, self.rayp_range, self.stack_amp, vmax=maxamp, vmin=-maxamp, cmap=cmap)
+        if vmin is None and vmax is None:
+            vmax = np.max(np.abs(self.stack_amp))
+            vmin = -vmax
+        elif vmin is None and isinstance(vmax, (int, float)):
+            vmin = np.min(self.stack_amp)
+        elif vmax is None and isinstance(vmin, (int, float)):
+            vmax = np.max(self.stack_amp)
+        elif isinstance(vmax, (int, float)) and isinstance(vmin, (int, float)):
+            pass
+        else:
+            raise TypeError('vmin and vmax must be in int or in float type')
+        cs = self.ax.pcolor(self.tau_range, self.rayp_range, self.stack_amp,
+                            vmax=vmax, vmin=vmin, cmap=cmap)
         self.ax.colorbar(cs)
         if xlim is not None and isinstance(xlim, (list, np.ndarray)):
             self.ax.set_xlim(xlim)
