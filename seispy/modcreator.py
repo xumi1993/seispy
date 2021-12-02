@@ -1,11 +1,16 @@
 import numpy as np
 from scipy.interpolate import griddata, interp1d
 from seispy.rfcorrect import DepModel
+from seispy.setuplog import setuplog
 import argparse
 
 
 class ModCreator():
-    def __init__(self):
+    def __init__(self, log=None):
+        if log is None:
+            self.logger = setuplog()
+        else:
+            self.logger = log
         self.lats = np.array([])
         self.lons = np.array([])
         self.deps = np.array([])
@@ -15,6 +20,7 @@ class ModCreator():
                                  [1.85, 1.75, 1.75, 1.75, 1.79, 1.75, 2, 1.79, 1.61, 1.67, 1.67, 2.13]])
 
     def init_grid(self, latmin, latmax, lonmin, lonmax, depmin=0, depmax=850, horival=0.5, depval=50):
+        self.logger.ModCreatorlog.info('Setting up grids.')
         self.lat_inter = np.arange(latmin, latmax, horival)
         self.lon_inter = np.arange(lonmin, lonmax, horival)
         self.dep_inter = np.arange(depmin, depmax, depval)
@@ -22,6 +28,7 @@ class ModCreator():
         self.depmod = DepModel(self.dep_inter)
 
     def gridvel(self, **kwargs):
+        self.logger.ModCreatorlog.info('Interpolating unstructured velocity to grid')
         points = np.array([self.deps, self.lats, self.lons]).T
         self.vp_grid = griddata(points, self.vps, (self.dep_grid, self.lat_grid, self.lon_grid), **kwargs)
         self.fill_1d()
