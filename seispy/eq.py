@@ -6,7 +6,7 @@ from obspy.io.sac import SACTrace
 from obspy.signal.rotate import rotate2zne, rotate_zne_lqt
 from scipy.signal import resample
 from os.path import dirname, join, expanduser
-from seispy.decon import deconvolute
+from seispy.decon import RFTrace
 from seispy.geo import snr, srad2skm, rotateSeisENtoTR, skm2srad, \
                        rssq, extrema
 from obspy.signal.trigger import recursive_sta_lta
@@ -267,14 +267,12 @@ class eq(object):
             raise ValueError('method must be in \'iter\' or \'water\'')
 
         if phase == 'P':
-            decon_out_r = deconvolute(self.rf[1].data, self.rf[2].data, self.rf[1].stats.delta, **kwargs)
-            self.rf[1].data = decon_out_r[0]
-            self.rms = decon_out_r[1]
+            self.rf[1] = RFTrace.deconvolute(self.rf[1], self.rf[2], **kwargs)
+            self.rms = self.rf[1].stats.rms
             if method == 'iter':
-                self.it = decon_out_r[2]
+                self.it = self.rf[1].stats.iter
             if not only_r:
-                decon_out_t = deconvolute(self.rf[0].data, self.rf[2].data, self.rf[1].stats.delta, **kwargs)
-                self.rf[0].data = decon_out_t[0]
+                self.rf[0] = RFTrace.deconvolute(self.rf[0], self.rf[2], **kwargs)
         else:
             # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
             #     raise ValueError('Please rotate component to \'LQT\'')
@@ -291,16 +289,15 @@ class eq(object):
         if self.comp == 'lqt':
             win = self.rf.select(channel='*Q')[0]
             uin = self.rf.select(channel='*L')[0]
-            wdat = win.data
         else:
             win = self.rf.select(channel='*R')[0]
             uin = self.rf.select(channel='*Z')[0]
-            wdat = -win.data
-        udat = uin.data
-        wdat[0:int((tshift-4)/win.stats.delta)] = 0
-        srf, self.rms, self.it = deconvolute(udat, wdat, win.stats.delta,
-                                             phase='S', tshift=tshift, **kwargs)
-        uin.data = np.flip(srf)
+            win.data *= -1
+        win.data[0:int((tshift-4)/win.stats.delta)] = 0
+        uin = RFTrace.deconvolute(uin, win, phase='S', tshift=tshift, **kwargs)
+        self.rms = uin.stats.rms
+        self.it = uin.stats.iter
+        uin.data = np.flip(uin.data)
 
     def saverf(self, path, evtstr=None, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
