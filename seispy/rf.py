@@ -438,10 +438,11 @@ class RF(object):
                                     wlevel=self.para.wlevel, target_dt=self.para.target_dt)
                 if self.para.decon_method == 'iter':
                     self.logger.RFlog.info('Iterative Decon {0} ({3}/{4}) iterations: {1}; final RMS: {2:.4f}'.format(
-                        row['data'].datestr, row['data'].it, row['data'].rms[-1], count, self.eqs.shape[0]))
+                        row['data'].datestr, row['data'].rf[0].stats.iter,
+                        row['data'].rf[0].stats.rms[-1], count, self.eqs.shape[0]))
                 elif self.para.decon_method == 'water':
                     self.logger.RFlog.info('Water level Decon {} ({}/{}); RMS: {:.4f}'.format(
-                        row['data'].datestr, count, self.eqs.shape[0], row['data'].rms))
+                        row['data'].datestr, count, self.eqs.shape[0], row['data'].rf[0].stats.rms))
             except Exception as e:
                 self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_lst.append(i)

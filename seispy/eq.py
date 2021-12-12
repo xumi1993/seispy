@@ -246,11 +246,9 @@ class eq(object):
             self.st.trim(t1, t2)
 
     def deconvolute(self, shift, time_after, f0=2, phase='P', method='iter', only_r=False, itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
-        self.rf = self.st.copy()
+        self.method = method
         if phase not in ['P', 'S']:
             raise ValueError('Phase must in \'P\' or \'S\'')
-        if self.rf == obspy.Stream():
-            raise ValueError('Please run eq.trim first')
         if method == 'iter':
             kwargs = {'method': method,
                       'f0': f0,
@@ -266,12 +264,9 @@ class eq(object):
             raise ValueError('method must be in \'iter\' or \'water\'')
 
         if phase == 'P':
-            self.rf[1] = RFTrace.deconvolute(self.rf[1], self.rf[2], **kwargs)
-            self.rms = self.rf[1].stats.rms
-            if method == 'iter':
-                self.it = self.rf[1].stats.iter
+            self.decon_p(**kwargs)
             if not only_r:
-                self.rf[0] = RFTrace.deconvolute(self.rf[0], self.rf[2], **kwargs)
+                self.decon_p(tcomp=True, **kwargs)
         else:
             # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
             #     raise ValueError('Please rotate component to \'LQT\'')
@@ -283,28 +278,49 @@ class eq(object):
                     # tr.data = tr.data[0:-1]
                     tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
                     tr.stats.delta = target_dt
+    
+    def decon_p(self, tshift, tcomp=False, **kwargs):
+        if self.comp == 'lqt':
+            win = self.st.select(channel='*L')[0]
+            if tcomp:
+                uin = self.st.select(channel='*T')[0]
+            else:
+                uin = self.st.select(channel='*Q')[0]
+        else:
+            win = self.st.select(channel='*Z')[0]
+            if tcomp:
+                uin = self.st.select(channel='*T')[0]
+            else:
+                uin = self.st.select(channel='*R')[0]
+        uout = RFTrace.deconvolute(uin, win, phase='P', tshift=tshift, **kwargs)
+        self.rf.append(uout)
+
 
     def decon_s(self, tshift, **kwargs):
         if self.comp == 'lqt':
-            win = self.rf.select(channel='*Q')[0]
-            uin = self.rf.select(channel='*L')[0]
+            win = self.st.select(channel='*Q')[0]
+            uin = self.st.select(channel='*L')[0]
         else:
-            win = self.rf.select(channel='*R')[0]
-            uin = self.rf.select(channel='*Z')[0]
+            win = self.st.select(channel='*R')[0]
+            uin = self.st.select(channel='*Z')[0]
             win.data *= -1
         win.data[0:int((tshift-4)/win.stats.delta)] = 0
-        uin = RFTrace.deconvolute(uin, win, phase='S', tshift=tshift, **kwargs)
-        self.rms = uin.stats.rms
-        self.it = uin.stats.iter
-        uin.data = np.flip(uin.data)
+        uout = RFTrace.deconvolute(uin, win, phase='S', tshift=tshift, **kwargs)
+        uout.data = np.flip(uout.data)
+        self.rf.append(uout)
+
 
     def saverf(self, path, evtstr=None, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
         if phase == 'P':
-            if only_r:
-                loop_lst = ['R']
+            if self.comp == 'lqt':
+                svcomp = 'Q'
             else:
-                loop_lst = ['R', 'T']
+                svcomp = 'R'
+            if only_r:
+                loop_lst = [svcomp]
+            else:
+                loop_lst = [svcomp, 'T']
             rayp = srad2skm(self.PArrival.ray_param)
         elif phase == 'S':
             if self.comp == 'lqt':
@@ -342,8 +358,10 @@ class eq(object):
         else:
             criterion = criterion.lower()
         
-        if phase == 'P':
+        if phase == 'P' and self.comp == 'rtz':
             trrf = self.rf.select(channel='*R')[0]
+        elif phase == 'P' and self.comp == 'lqt':
+            trrf = self.rf.select(channel='*Q')[0]
         elif phase == 'S' and self.comp == 'lqt':
             trrf = self.rf.select(channel='*L')[0]
         elif phase == 'S' and self.comp == 'rtz':
@@ -353,10 +371,10 @@ class eq(object):
         
         # Final RMS
         if rmsgate is not None:
-            if isinstance(self.rms, np.ndarray):
-                rms = self.rms[-1]
+            if self.method == 'iter':
+                rms = self.rf[0].stats.rms[-1]
             else:
-                rms = self.rms
+                rms = self.rf[0].stats.rms
             rmspass = rms < rmsgate
         else:
             rmspass = True
@@ -389,6 +407,7 @@ class eq(object):
             else:
                 return False
         elif criterion is None:
+            print(rmspass, rengpass)
             return rmspass and rengpass
         else:
             pass
