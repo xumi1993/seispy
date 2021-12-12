@@ -1,5 +1,4 @@
 import numpy as np
-from numpy.core.getlimits import _KNOWN_TYPES
 from numpy.lib.arraysetops import isin
 import obspy
 from obspy.io.sac import SACTrace
@@ -354,7 +353,7 @@ class eq(object):
         
         # Final RMS
         if rmsgate is not None:
-            if isin(self.rms, np.ndarray):
+            if isinstance(self.rms, np.ndarray):
                 rms = self.rms[-1]
             else:
                 rms = self.rms
