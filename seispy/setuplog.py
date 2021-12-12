@@ -30,6 +30,10 @@ class setuplog(object):
         if not self.CCPlog.handlers:
             self.CCPlog.setLevel(logging.INFO)
             self.CCPlog.addHandler(ch)
+        self.ModCreatorlog = logging.getLogger('ModCreator')
+        if not self.ModCreatorlog.handlers:
+            self.ModCreatorlog.setLevel(logging.INFO)
+            self.ModCreatorlog.addHandler(ch)
 
 
 if __name__ == '__main__':

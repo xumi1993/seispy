@@ -17,16 +17,17 @@ import glob
 
 
 class MyMplCanvas(FigureCanvas):
-    def __init__(self, parent=None, rfpath='', only_r=False, width=21, height=11, dpi=100, xlim=[-2, 30]):
+    def __init__(self, parent=None, rfpath='', only_r=False, width=21, height=11,
+                 dpi=100, xlim=[-2, 30], order='baz'):
 
         plt.rcParams['axes.unicode_minus'] = False 
 
         if only_r:
             self.rffig = RPickFigure(rfpath, width=width, height=height, dpi=dpi, xlim=xlim)
-            self.rffig.init_canvas()
+            self.rffig.init_canvas(order=order)
         else:
             self.rffig = RFFigure(rfpath, width=width, height=height, dpi=dpi, xlim=xlim)
-            self.rffig.init_canvas()
+            self.rffig.init_canvas(order=order)
 
         FigureCanvas.__init__(self, self.rffig.fig)
         self.setParent(parent)
@@ -38,15 +39,17 @@ class MyMplCanvas(FigureCanvas):
 
 
 class MatplotlibWidget(QMainWindow):
-    def __init__(self, rfpath, only_r=False, xlim=[-2, 30], parent=None):
+    def __init__(self, rfpath, only_r=False, xlim=[-2, 30], 
+                 order='baz', parent=None):
         super(MatplotlibWidget, self).__init__(parent)
         self.only_r = only_r
-        self.initUi(rfpath, only_r, xlim)
+        self.initUi(rfpath, only_r, xlim, order=order)
 
-    def initUi(self, rfpath, only_r, xlim):
+    def initUi(self, rfpath, only_r, xlim, order='baz'):
         self.layout = QVBoxLayout()
         self.add_btn()
-        self.mpl = MyMplCanvas(self, rfpath=rfpath, only_r=only_r, width=21, height=11, dpi=100, xlim=xlim)
+        self.mpl = MyMplCanvas(self, rfpath=rfpath, only_r=only_r, width=21, height=11,
+                               dpi=100, xlim=xlim, order=order)
         self.layout.addWidget(self.mpl, 2)
         self.mpl.mpl_connect('button_press_event', self.on_click)
 
@@ -168,7 +171,9 @@ class MatplotlibWidget(QMainWindow):
 def main():
     parser = argparse.ArgumentParser(description="User interface for picking PRFs")
     parser.add_argument('rf_path', type=str, help='Path to PRFs')
-    parser.add_argument('-x', help="Set the x limits of the current axes, defaults to 30s for RT, 85s for R.",
+    parser.add_argument('-a', help='Arrangement of RFs, defaults to \'baz\'', dest='order',
+                        default='baz', type=str, metavar='baz|dis')
+    parser.add_argument('-x', help="Set x limits of the current axes, defaults to 30s for RT, 85s for R.",
                         dest='xlim', default=None, type=float, metavar='xmax')
     arg = parser.parse_args()
     rfpath = arg.rf_path
@@ -183,7 +188,7 @@ def main():
     if arg.xlim is not None:
         xlim = arg.xlim
     app = QApplication(sys.argv)
-    ui = MatplotlibWidget(rfpath, only_r=only_r, xlim=[-2, xlim])
+    ui = MatplotlibWidget(rfpath, only_r=only_r, xlim=[-2, xlim], order=arg.order)
     ui.show()
     sys.exit(app.exec_())
 

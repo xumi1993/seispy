@@ -49,10 +49,9 @@ def phaseshift(x, nfft, dt, tshift):
     return x
 
 
-def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, info=False, phase='P'):
+def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, phase='P'):
     """
     Created on Wed Sep 10 14:21:38 2014
-    [RFI, rms, it]=makeRFitdecon(uin,win,dt,nt,tshift,f0,itmax,minderr)
 
     In:
     uin = numerator (radial for PdS)
@@ -213,61 +212,7 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, p
         gnorm = np.sum(gaussF) * delf * dt
         rft = rft.real / gnorm
 
-    return rft, rms, np.nan
-
-def _add_zeros(a, numl, numr):
-    """Add zeros at left and rigth side of array a"""
-    return np.hstack([np.zeros(numl), a, np.zeros(numr)])
-
-
-def _acorrt(a, num):
-    """
-    Not normalized auto-correlation of signal a.
-    Sample 0 corresponds to zero lag time. Auto-correlation will consist of
-    num samples. Correlation is performed in time domain with scipy.
-    :param a: Data
-    :param num: Number of returned data points
-    :return: autocorrelation
-    """
-    return correlate(_add_zeros(a, 0, num - 1), a, 'valid')
-
-
-def _xcorrt(a, b, num, zero_sample=0):
-    """
-    Not normalized cross-correlation of signals a and b.
-    :param a,b: data
-    :param num: The cross-correlation will consist of num samples.\n
-        The sample with 0 lag time will be in the middle.
-    :param zero_sample: Signals a and b are aligned around the middle of their
-        signals.\n
-        If zero_sample != 0 a will be shifted additionally to the left.
-    :return: cross-correlation
-    """
-    if zero_sample > 0:
-        a = _add_zeros(a, 2 * abs(zero_sample), 0)
-    elif zero_sample < 0:
-        a = _add_zeros(a, 0, 2 * abs(zero_sample))
-    dif = len(a) - len(b) + 1 - num
-    if dif > 0:
-        b = _add_zeros(b, (dif + 1) // 2, dif // 2)
-    else:
-        a = _add_zeros(a, (-dif + 1) // 2, (-dif) // 2)
-    return correlate(a, b, 'valid')
-
-
-def decontime(uin, win, dt, tshift=10, spiking=1., normalize=True):
-    nt = uin.size
-    nshift = int(tshift * dt)
-    STS = _acorrt(win, nt)
-    STS = STS / STS[0]
-    STS[0] += spiking
-    STR = _xcorrt(uin, win, nt, nshift)
-    assert len(STR) == len(STS)
-    rf = solve_toeplitz(STS, STR)
-    if normalize:
-        norm = 1 / np.max(np.abs(rf))
-        rf *= norm
-    return rf
+    return rft, rms
 
 
 def deconvolute(uin, win, dt, method='iter', **kwargs):
@@ -276,7 +221,30 @@ def deconvolute(uin, win, dt, method='iter', **kwargs):
     elif method.lower() == 'water':
         return deconwater(uin, win, dt, **kwargs)
     else:
-        raise ValueError('method must be in the \'iter\' or \'water\'')
+        raise ValueError('method must be \'iter\' or \'water\'')
+
+
+class RFTrace(obspy.Trace):
+    def __init__(self, data=..., header=None):
+        super().__init__(data=data, header=header)
+
+    @classmethod
+    def deconvolute(cls, utr, wtr, method='iter', **kwargs):
+        header = utr.stats.__getstate__()
+        for key, value in kwargs.items():
+            header[key] = value
+        if method.lower() == 'iter':
+            rf, rms, it = deconit(utr.data, wtr.data, utr.stats.delta, **kwargs)
+            header['rms'] = rms
+            header['iter'] = it
+        elif method.lower() == 'water':
+            rf, rms = deconwater(utr.data, wtr.data, utr.stats.delta, **kwargs)
+            header['rms'] = rms
+            header['iter'] = np.nan
+        else:
+            raise ValueError('method must be \'iter\' or \'water\'')
+        return cls(rf, header)
+        
 
 
 if __name__ == '__main__':

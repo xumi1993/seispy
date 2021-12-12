@@ -138,7 +138,7 @@ class CCPProfile():
                 self.idxs.append(np.where(distaz(bin_info[0], bin_info[1], self.stalst[:, 0], self.stalst[:, 1]).delta <= dis)[0])
         elif self.cpara.width is not None and self.cpara.shape == 'rect':
             self.logger.CCPlog.info('Select stations within {} km perpendicular to the profile'.format(self.cpara.width))
-            self.idxs = self._proj_sta()
+            self.idxs = self._proj_sta(self.cpara.width)
             self._write_sta()  
         else:
             if self.cpara.width is not None:

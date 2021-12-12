@@ -3,7 +3,7 @@ from obspy import UTCDateTime
 import numpy as np
 import argparse
 from obspy.clients.fdsn import Client
-from netCDF4 import Dataset
+# from netCDF4 import Dataset
 import sys
 
 
@@ -48,19 +48,19 @@ def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, max
     return cut_data, cut_dep, cut_lat, cut_lon
 
 
-def lsnc():
-    parser = argparse.ArgumentParser(description="List all fields of netCDF file")
-    parser.add_argument('-k', help='Key name of fields', type=str, dest='key', default=None)
-    parser.add_argument('ncfile', type=str, help='Path to netCDF file')
-    arg = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
-    ncdata = Dataset(arg.ncfile)
-    if arg.key is None:
-        print(ncdata.variables)
-    else:
-        print(ncdata.variables[arg.key])
+# def lsnc():
+#     parser = argparse.ArgumentParser(description="List all fields of netCDF file")
+#     parser.add_argument('-k', help='Key name of fields', type=str, dest='key', default=None)
+#     parser.add_argument('ncfile', type=str, help='Path to netCDF file')
+#     arg = parser.parse_args()
+#     if len(sys.argv) == 1:
+#         parser.print_help()
+#         sys.exit(1)
+#     ncdata = Dataset(arg.ncfile)
+#     if arg.key is None:
+#         print(ncdata.variables)
+#     else:
+#         print(ncdata.variables[arg.key])
 
 
 if __name__ == '__main__':

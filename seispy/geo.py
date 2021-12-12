@@ -1,8 +1,6 @@
 import numpy as np
 from numpy import pi, mod
 from seispy import distaz
-from scipy import interpolate
-
 
 def sind(deg):
     rad = np.radians(deg)
@@ -82,12 +80,15 @@ def skm2srad(skm):
 
 def rot3D(bazi, inc):
     """
-    :param bazi:
-    :param inc:
-    :return:
+    Rotate components from ZRT to LQT
     M = [cos(inc)     -sin(inc)*sin(bazi)    -sin(inc)*cos(bazi);
         sin(inc)      cos(inc)*sin(bazi)     cos(inc)*cos(bazi);
         0              -cos(bazi)             sin(bazi)];
+    
+    :param bazi: back-azimuth of station-event pair
+    :param inc: Incidence angle
+    :return: Coefficient matrix M
+    
     """
 
     if isinstance(inc, float) or isinstance(inc, int):
@@ -181,6 +182,6 @@ def extrema(x, opt='max'):
     elif opt == 'min':
         idx = np.intersect1d(np.where(np.diff(x) < 0)[0]+1, np.where(np.diff(x) > 0)[0])
     else:
-        raise ImportError('Wrong Options!!!')
+        raise ValueError('opt must be \'max\' or \'min\'')
     return idx
 

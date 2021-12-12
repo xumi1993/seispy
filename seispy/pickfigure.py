@@ -50,9 +50,9 @@ class RFFigure(Figure):
         self.maxidx = 20
         self.xlim = xlim
 
-    def init_canvas(self):
+    def init_canvas(self, order='baz'):
         self.init_figure(width=self.width, height=self.height, dpi=self.dpi)
-        self.read_sac()
+        self.read_sac(order=order)
         self.set_figure()
         self.set_page()
         self.init_variables()
@@ -116,7 +116,13 @@ class RFFigure(Figure):
         self.axb.set_xlabel("Backazimuth (\N{DEGREE SIGN})")
         self.axg.set_xlabel('Distance (\N{DEGREE SIGN})')
 
-    def read_sac(self, dt=0.1):
+    def read_sac(self, dt=0.1, order='baz'):
+        if not isinstance(order, str):
+            raise TypeError('The order must be str type')
+        elif not order in ['baz', 'dis']:
+            raise ValueError('The order must be \'baz\' or \'dis\'')
+        else:
+            pass
         if len(glob.glob(join(self.rfpath, '*_R.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*_R.sac'))  
             self.comp = 'R'
@@ -134,18 +140,24 @@ class RFFigure(Figure):
         self.evt_num = len(self.rrf)
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
-        self.sort_baz_()
-
+        self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
+        self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
         self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
 
-    def sort_baz_(self):
-        idx = np.argsort(self.baz)
+    def _sort(self, order):
+        if order == 'baz':
+            idx = np.argsort(self.baz)
+        elif order == 'dis':
+            idx = np.argsort(self.gcarc)
+        else:
+            pass
         self.baz = self.baz[idx]
+        self.gcarc = self.gcarc[idx]
         self.rrf = [self.rrf[i] for i in idx]
         self.trf = [self.trf[i] for i in idx]
-        self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
+        # self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
         self.filenames = [self.filenames[i] for i in idx]
 
     def plotwave(self):
