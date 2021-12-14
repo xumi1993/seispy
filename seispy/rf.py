@@ -477,8 +477,8 @@ class RF(object):
 def prf():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
-    parser.add_argument('-l', help="use local catalog. Default is false", dest='islocal', action='store_true')
-    parser.add_argument('-r', help='Reverse components: EN, E or N', dest='comp',
+    parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
+    parser.add_argument('-r', help='Reverse components: N, E or NE', dest='comp',
                         metavar='N|E|NE', default=None, type=str)
     parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
     parser.add_argument('-b', help='Correct back-azimuth. \nIf "baz" is specified, the corr_baz = raw_baz + baz. \n'
