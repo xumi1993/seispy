@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 import obspy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -123,15 +124,21 @@ class RFFigure(Figure):
             raise ValueError('The order must be \'baz\' or \'dis\'')
         else:
             pass
-        if len(glob.glob(join(self.rfpath, '*_R.sac'))) != 0:
-            tmp_files = glob.glob(join(self.rfpath, '*_R.sac'))  
+        if len(glob.glob(join(self.rfpath, '*P_R.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*P_R.sac'))  
             self.comp = 'R'
-        elif len(glob.glob(join(self.rfpath, '*_L.sac'))) != 0:
-            tmp_files = glob.glob(join(self.rfpath, '*_L.sac'))
+        elif len(glob.glob(join(self.rfpath, '*P_Q.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*P_Q.sac'))
+            self.comp = 'Q'
+        elif len(glob.glob(join(self.rfpath, '*S_L.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*S_L.sac'))
             self.comp = 'L'
-        else:
-            tmp_files = glob.glob(join(self.rfpath, '*_Z.sac'))
+        elif len(glob.glob(join(self.rfpath, '*S_Z.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*S_Z.sac'))
             self.comp = 'Z' 
+        else:
+            self.log.RFlog.error('No valid RFs in {}'.format(self.rfpath))
+            sys.exit(1)
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
         self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
@@ -144,7 +151,8 @@ class RFFigure(Figure):
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
-        self.fig.suptitle("%s (Latitude: %5.2f\N{DEGREE SIGN}, Longitude: %5.2f\N{DEGREE SIGN})" % (self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
+        self.fig.suptitle("{} (Latitude: {:.2f}\N{DEGREE SIGN}, Longitude: {:.2f}\N{DEGREE SIGN})".format(
+                          self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
 
     def _sort(self, order):
         if order == 'baz':
