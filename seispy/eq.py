@@ -286,6 +286,7 @@ class eq(object):
                 uin = self.st.select(channel='*T')[0]
             else:
                 uin = self.st.select(channel='*Q')[0]
+                uin.data *= -1
         else:
             win = self.st.select(channel='*Z')[0]
             if tcomp:
@@ -407,7 +408,6 @@ class eq(object):
             else:
                 return False
         elif criterion is None:
-            print(rmspass, rengpass)
             return rmspass and rengpass
         else:
             pass

@@ -163,8 +163,8 @@ class RFAni():
 
     def plot_correct(self, fvd=0, dt=0.44, enf=80, outpath=None):
         nt_corr = int((dt/2 / self.sacdatar.sampling))
-        nt_fast = np.arange(self.nb, self.ne) + nt_corr
-        nt_slow = np.arange(self.nb, self.ne) - nt_corr
+        # nt_fast = np.arange(self.nb, self.ne) + nt_corr
+        # nt_slow = np.arange(self.nb, self.ne) - nt_corr
         time_axis = np.arange(self.nb, self.ne) * self.sacdatar.sampling - self.sacdatar.shift
         bound = np.zeros_like(time_axis)
         ml = MultipleLocator(5)

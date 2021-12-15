@@ -2,7 +2,6 @@ import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
 from seispy.geo import km2deg
-from seispy.utils import check_path
 
 
 class CCPPara(object):
