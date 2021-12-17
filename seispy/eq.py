@@ -27,7 +27,8 @@ def rotateZNE(st):
 class eq(object):
     def __init__(self, pathname, datestr, suffix):
         self.datestr = datestr
-        self.st = obspy.read(join(pathname, '*' + datestr + '*' + suffix))
+        self.filestr = join(pathname, '*' + datestr + '*' + suffix)
+        self.st = obspy.read(self.filestr)
         if len(self.st) < 3:
             channel = ' '.join([tr.stats.channel for tr in self.st])
             raise ValueError('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, datestr))
@@ -47,6 +48,14 @@ class eq(object):
         self.SArrival = None
         self.SRaypara = None
         self.trigger_shift = 0
+    
+    def readstream(self):
+        self.st = obspy.read(self.filestr)
+        self.rf = obspy.Stream()
+    
+    def cleanstream(self):
+        self.st = obspy.Stream()
+        self.rf = obspy.Stream()
 
     def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
         if reverseE:
@@ -223,8 +232,9 @@ class eq(object):
 
     def phase_trigger(self, time_before, time_after, phase='S', stl=5, ltl=10):
         t1, t2 = self._get_time(time_before, time_after, phase)
-        self.t1_pick, self.t2_pick = t1, t2
         self.st_pick = self.st.copy().trim(t1, t2)
+        if len(self.st_pick) == 0:
+            return
         if phase == 'P':
             tr = self.st_pick.select(channel='*Z')[0]
         else:
@@ -296,7 +306,6 @@ class eq(object):
         uout = RFTrace.deconvolute(uin, win, phase='P', tshift=tshift, **kwargs)
         self.rf.append(uout)
 
-
     def decon_s(self, tshift, **kwargs):
         if self.comp == 'lqt':
             win = self.st.select(channel='*Q')[0]
@@ -309,7 +318,6 @@ class eq(object):
         uout = RFTrace.deconvolute(uin, win, phase='S', tshift=tshift, **kwargs)
         uout.data = np.flip(uout.data)
         self.rf.append(uout)
-
 
     def saverf(self, path, evtstr=None, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
@@ -349,16 +357,15 @@ class eq(object):
             tr.o = 0
             tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
 
-    def judge_rf(self, shift, npts, phase='P', criterion='crust', rmsgate=None):
-        if not isinstance(criterion, (str, type(None))):
-            raise TypeError('criterion should be string in [\'crust\', \'mtz\']')
-        elif criterion is None:
-            pass
-        elif criterion.lower() not in ['crust', 'mtz']:
-            raise ValueError('criterion should be string in [\'crust\', \'mtz\']')
+    def s_condition(self, trrf, shift):
+        nt0 = int(np.floor((shift)/trrf.stats.delta))
+        nt25 = int(np.floor((shift+25)/trrf.stats.delta))
+        if rssq(trrf.data[nt0:nt25]) > rssq(trrf.data[nt25:]):
+            return True
         else:
-            criterion = criterion.lower()
-        
+            return False
+
+    def judge_rf(self, shift, npts, phase='P', criterion='crust', rmsgate=None):
         if phase == 'P' and self.comp == 'rtz':
             trrf = self.rf.select(channel='*R')[0]
         elif phase == 'P' and self.comp == 'lqt':
@@ -394,7 +401,7 @@ class eq(object):
             time_P2 = int(np.floor((4+shift)/trrf.stats.delta))
             max_P = np.max(trrf.data[time_P1:time_P2])
             if max_P == np.max(np.abs(trrf.data)) and max_P < 1 and rmspass and rengpass:
-                return True
+                return True and rengpass
             else:
                 return False
         elif criterion == 'mtz':
@@ -404,9 +411,11 @@ class eq(object):
             max_P = np.max(trrf.data[time_P1:time_P2])
             if max_deep < max_P * 0.4 and rmspass and rengpass and\
                   max_P == np.max(np.abs(trrf.data)) and max_P < 1:
-                return True
+                return True and rengpass
             else:
                 return False
+        elif criterion == "lab":
+            return self.s_condition(trrf, shift) and rengpass
         elif criterion is None:
             return rmspass and rengpass
         else:

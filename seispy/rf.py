@@ -23,9 +23,9 @@ from PyQt5.QtWidgets import QApplication
 import pickle
 
 
-def pickphase(eqs, para):
+def pickphase(eqs, para, logger):
     app = QApplication(sys.argv)
-    ui = MatplotlibWidget(eqs, para)
+    ui = MatplotlibWidget(eqs, para, logger)
     ui.show()
     if app.exec_() == 0:
         ui.exit_app()
@@ -114,7 +114,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         try:
             this_eq = eq(pathname, datestr, suffix)
         except Exception as e:
-            logger.RF.error(''.format(e))
+            logger.RFlog.error(''.format(e))
             continue
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
@@ -140,9 +140,10 @@ class stainfo():
         (self.network, self.station, self.stla, self.stlo, self.stel) = load_station_info(pathname, ref_comp, suffix)
 
 
-def CfgParser(cfg_file):
+def CfgParser(cfg_file, phase='P'):
     cf = configparser.RawConfigParser()
     pa = para()
+    pa.phase = phase
     try:
         cf.read(cfg_file)
     except Exception:
@@ -205,11 +206,12 @@ def _plotampt(x, y, ampt, shift_all):
 
 
 class RF(object):
-    def __init__(self, cfg_file=None, log=None):
+    def __init__(self, phase='P', cfg_file=None, log=None):
         if cfg_file is None:
             self.para = para()
+            self.para.phase = phase
         elif isinstance(cfg_file, str):
-            self.para = CfgParser(cfg_file)
+            self.para = CfgParser(cfg_file, phase)
         else:
             raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg_file)))
         if not isinstance(self.para, para):
@@ -271,7 +273,7 @@ class RF(object):
             except Exception as e:
                 self.logger.RFlog.error('{0}'.format(e))
                 raise e
-        self.logger.RFlog.info('Found {} earthquakes'.format(self.eq_lst.shape[0]))
+        self.logger.RFlog.info('{} earthquakes are found'.format(self.eq_lst.shape[0]))
 
     def match_eq(self):
         try:
@@ -287,16 +289,15 @@ class RF(object):
             self.logger.RFlog.warning('No earthquakes matched, please check configurations.'.format(self.eqs.shape[0]))
             sys.exit(1)
         else:
-            self.logger.RFlog.info('{0} earthquakes matched'.format(self.eqs.shape[0]))
-        
-    def save(self, path=''):
-        if path == '':
-            path = '{0}.{1}_matched.pkl'.format(self.stainfo.network, self.stainfo.station)
+            self.logger.RFlog.info('{0} earthquakes are matched'.format(self.eqs.shape[0]))
+
+    def save(self):
+        for _, row in self.eqs.iterrows():
+            row['data'].cleanstream()
         try:
-            self.logger.RFlog.info('Saving project to {0}'.format(path))
-            save_eqs = self.eqs[['date', 'evla', 'evlo', 'evdp', 'mag', 'bazi', 'dis', 'datestr']]
-            with open(path, 'wb') as f:
-                pickle.dump({'para': self.para, 'eqs': save_eqs}, f, -1)
+            self.logger.RFlog.info('Saving project to {0}'.format(self.para.pjtpath))
+            with open(self.para.pjtpath, 'wb') as f:
+                pickle.dump({'para': self.para, 'eqs': self.eqs}, f, -1)
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise IOError(e)
@@ -309,25 +310,19 @@ class RF(object):
             self.logger.RFlog.error('Data path {} was not found'.format(self.para.datapath))
             sys.exit(1)
         self.eqs = rfdata['eqs']
-        eqs = []
-        for i, row in self.eqs.iterrows():
+        for _, row in self.eqs.iterrows():
             try:
-                this_eq = eq(self.para.datapath, row['datestr'], self.para.suffix)
+                row['data'].readstream()
             except Exception as e:
-                self.logger.RFlog.warning('Cannot read {}, skipping'.format(row['datestr']))
+                self.logger.RFlog.warning('Cannot read {}, skipping'.format(row['data'].filestr))
                 continue
-            this_eq.get_time_offset(row['date'])
-            eqs.append(this_eq)
-        self.eqs.insert(1, 'data', eqs)
 
-    def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
-        self.para.switchEN = switchEN
-        self.para.reverseE = reverseE
-        self.para.reverseN = reverseN
-        if switchEN or reverseN or reverseE:
-            self.logger.RFlog.info('Correct components with switchEN: {}, reverseE: {}, reverseN: {}'.format(switchEN, reverseE, reverseN))
+    def channel_correct(self):
+        if self.para.switchEN or self.para.reverseN or self.para.reverseE:
+            self.logger.RFlog.info('Correct components with switchEN: {}, reverseE: {}, reverseN: {}'.format(
+                                    self.para.switchEN, self.para.reverseE, self.para.reverseN))
             for _, row in self.eqs.iterrows():
-                row['data'].channel_correct(switchEN, reverseE, reverseN)
+                row['data'].channel_correct(self.para.switchEN, self.para.reverseE, self.para.reverseN)
         
     def detrend(self):
         self.logger.RFlog.info('Detrend all data')
@@ -411,7 +406,8 @@ class RF(object):
         self.logger.RFlog.info('{0} events left after SNR calculation'.format(self.eqs.shape[0]))
 
     def trim(self):
-        self.logger.RFlog.info('Trim waveforms from {:.2f} before P to {:.2f} after P'.format(self.para.time_before, self.para.time_after))
+        self.logger.RFlog.info('Trim waveforms from {0:.2f} before {2} to {1:.2f} after {2}'.format(
+                               self.para.time_before, self.para.time_after, self.para.phase))
         for _, row in self.eqs.iterrows():
             row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
     
@@ -422,7 +418,7 @@ class RF(object):
                 row['data'].phase_trigger(self.para.time_before, self.para.time_after,
                                         self.para.phase, stl=stl, ltl=ltl)
         self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
-        pickphase(self.eqs, self.para)
+        pickphase(self.eqs, self.para, self.logger)
 
     def deconv(self):
         shift = self.para.time_before
@@ -452,20 +448,18 @@ class RF(object):
         npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
         if self.para.phase == 'P':
             shift = self.para.time_before
-            criterion = self.para.criterion
         elif self.para.phase == 'S':
             shift = self.para.time_after
-            criterion = None
         else:
             pass
         good_lst = []
 
         if self.para.rmsgate is not None:
-            self.logger.RFlog.info('Save RFs with final RMS less than {:.2f} and criterion of {}'.format(self.para.rmsgate, criterion))
+            self.logger.RFlog.info('Save RFs with final RMS less than {:.2f} and criterion of {}'.format(self.para.rmsgate, self.para.criterion))
         else:
-            self.logger.RFlog.info('Save RFs with and criterion of {}'.format(criterion))
+            self.logger.RFlog.info('Save RFs with and criterion of {}'.format(self.para.criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, npts, phase=self.para.phase, criterion=criterion, rmsgate=self.para.rmsgate):
+            if row['data'].judge_rf(shift, npts, phase=self.para.phase, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
@@ -474,7 +468,7 @@ class RF(object):
         self.eqs = self.eqs.loc[good_lst]
 
 
-def prf():
+def common_parser():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
     parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
@@ -485,16 +479,19 @@ def prf():
                                    'If there is no argument, the back-azimuth will be corrected with minimal '
                                    'energy of T component. The searching range is raw_baz +/- 90',
                                    dest='baz', nargs='?', const=0, type=float)
-    arg = parser.parse_args()
-    if arg.comp is not None:
-        arg.comp = arg.comp.upper()
-        if arg.comp == 'NE' or arg.comp == 'EN':
+    parser.add_argument('-w', help='Write project to localfile', action='store_true')
+    return parser
+
+def parse_common_args(args):
+    if args.comp is not None:
+        args.comp = args.comp.upper()
+        if args.comp == 'NE' or args.comp == 'EN':
             reverseE = True
             reverseN = True
-        elif arg.comp == 'E':
+        elif args.comp == 'E':
             reverseE = True
             reverseN = False
-        elif arg.comp == 'N':
+        elif args.comp == 'N':
             reverseE = False
             reverseN = True
         else:
@@ -502,16 +499,50 @@ def prf():
     else:
         reverseN = False
         reverseE = False
-    # if arg.baz is not None:
-    #     try:
-    #         baz_corr = [float(val) for val in arg.b.split('/')]
-    #     except:
-    #         raise ValueError('Format of baz correction must be as 10/20/45')
+    return reverseE, reverseN
+
+def prf():
+    parser = common_parser()
+    arg = parser.parse_args()
+
     pjt = RF(cfg_file=arg.cfg_file)
+    pjt.para.switchEN = arg.isswitch
+    pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
     pjt.load_stainfo()
     pjt.search_eq(local=arg.islocal)
     pjt.match_eq()
-    pjt.channel_correct(switchEN=arg.isswitch, reverseN=reverseN, reverseE=reverseE)
+    pjt.channel_correct()
+    pjt.detrend()
+    pjt.filter()
+    pjt.cal_phase()
+    pjt.drop_eq_snr()
+    if arg.baz is not None and arg.baz != 0:
+        pjt.baz_correct(correct_angle=arg.baz)
+    elif arg.baz is not None and arg.baz == 0:
+        pjt.baz_correct()
+    else:
+        pass
+    if arg.w:
+        pjt.save()
+    pjt.rotate()
+    pjt.trim()
+    pjt.deconv()
+    pjt.saverf()
+
+
+def srf():
+    parser = common_parser()
+    parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround S phase with a GUI.',
+                        action='store_true')
+    arg = parser.parse_args()
+    pjt = RF(cfg_file=arg.cfg_file, phase='S')
+
+    pjt.para.switchEN = arg.isswitch
+    pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
+    pjt.load_stainfo()
+    pjt.search_eq(local=arg.islocal)
+    pjt.match_eq()
+    pjt.channel_correct()
     pjt.detrend()
     pjt.filter()
     pjt.cal_phase()
@@ -523,6 +554,10 @@ def prf():
     else:
         pass
     pjt.rotate()
+    if arg.p:
+        pjt.pick()
+    if arg.w:
+        pjt.save()
     pjt.trim()
     pjt.deconv()
     pjt.saverf()
