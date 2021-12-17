@@ -150,9 +150,8 @@ def CfgParser(cfg_file, phase='P'):
         raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
     pa.datapath = cf.get('path', 'datapath')
     pa.rfpath = cf.get('path', 'rfpath')
-    logpath = cf.get('path', 'catalogpath')
-    if logpath != '':
-        pa.catalogpath = cf.get('path', 'catalogpath')
+    pa.catalogpath = cf.get('path', 'catalogpath')
+    pa.pjtpath = cf.get('path', 'pjtpath')
     sections = cf.sections()
     sections.remove('path')
     for sec in sections:
@@ -291,31 +290,36 @@ class RF(object):
         else:
             self.logger.RFlog.info('{0} earthquakes are matched'.format(self.eqs.shape[0]))
 
-    def save(self):
-        for _, row in self.eqs.iterrows():
+    def savepjt(self):
+        eqs = self.eqs.copy()
+        for _, row in eqs.iterrows():
             row['data'].cleanstream()
         try:
             self.logger.RFlog.info('Saving project to {0}'.format(self.para.pjtpath))
             with open(self.para.pjtpath, 'wb') as f:
-                pickle.dump({'para': self.para, 'eqs': self.eqs}, f, -1)
+                pickle.dump({'para': self.para, 'eqs': eqs}, f, -1)
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise IOError(e)
-
-    def load(self, path):
+ 
+    @classmethod
+    def loadpjt(cls, path):
         with open(path, 'rb') as f:
             rfdata = pickle.load(f)
-        self.para = rfdata['para']
-        if not exists(self.para.datapath):
-            self.logger.RFlog.error('Data path {} was not found'.format(self.para.datapath))
+        pjt = cls(phase=rfdata['para'].phase)
+        pjt.para = rfdata['para']
+        if not exists(pjt.para.datapath):
+            pjt.logger.RFlog.error('Data path {} was not found'.format(pjt.para.datapath))
             sys.exit(1)
-        self.eqs = rfdata['eqs']
-        for _, row in self.eqs.iterrows():
+        pjt.load_stainfo()
+        pjt.eqs = rfdata['eqs']
+        for _, row in pjt.eqs.iterrows():
             try:
                 row['data'].readstream()
             except Exception as e:
-                self.logger.RFlog.warning('Cannot read {}, skipping'.format(row['data'].filestr))
+                pjt.logger.RFlog.warning('Cannot read {}, skipping'.format(row['data'].filestr))
                 continue
+        return pjt
 
     def channel_correct(self):
         if self.para.switchEN or self.para.reverseN or self.para.reverseE:
@@ -399,8 +403,8 @@ class RF(object):
         drop_lst = []
         for i, row in self.eqs.iterrows():
             snr_E, snr_N, snr_Z = row['data'].snr(length=length, phase=self.para.phase)
-            if (np.nan in (snr_E, snr_N, snr_Z) or snr_E < self.para.noisegate
-               or snr_N < self.para.noisegate or snr_Z < self.para.noisegate):
+            mean_snr = np.mean([snr_E, snr_N, snr_Z])
+            if mean_snr < self.para.noisegate:
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
         self.logger.RFlog.info('{0} events left after SNR calculation'.format(self.eqs.shape[0]))
@@ -523,7 +527,7 @@ def prf():
     else:
         pass
     if arg.w:
-        pjt.save()
+        pjt.savepjt()
     pjt.rotate()
     pjt.trim()
     pjt.deconv()
@@ -557,7 +561,7 @@ def srf():
     if arg.p:
         pjt.pick()
     if arg.w:
-        pjt.save()
+        pjt.savepjt()
     pjt.trim()
     pjt.deconv()
     pjt.saverf()

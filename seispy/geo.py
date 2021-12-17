@@ -138,9 +138,8 @@ def snr(x, y):
     spow = rssq(x)**2
     npow = rssq(y)**2
     if npow == 0:
-        return np.nan
-    else:
-        return 10 * np.log10(spow / npow)
+        npow = 0.001
+    return 10 * np.log10(spow / npow)
 
 
 def latlon_from(lat1, lon1, azimuth, gcarc_dist):

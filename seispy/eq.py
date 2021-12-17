@@ -54,8 +54,8 @@ class eq(object):
         self.rf = obspy.Stream()
     
     def cleanstream(self):
-        self.st = obspy.Stream()
-        self.rf = obspy.Stream()
+        self.st = None
+        self.rf = None
 
     def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
         if reverseE:
@@ -314,7 +314,7 @@ class eq(object):
             win = self.st.select(channel='*R')[0]
             uin = self.st.select(channel='*Z')[0]
             win.data *= -1
-        win.data[0:int((tshift-4)/win.stats.delta)] = 0
+        # win.data[0:int((tshift-4)/win.stats.delta)] = 0
         uout = RFTrace.deconvolute(uin, win, phase='S', tshift=tshift, **kwargs)
         uout.data = np.flip(uout.data)
         self.rf.append(uout)

@@ -155,7 +155,6 @@ class SFigure(Figure):
         self.eqs.drop(self.drop_lst, inplace=True)
         for i, row in self.eqs.iterrows():
             row['data'].trigger_shift = self.picker_time['trigger_shift'][i]
-            self.logger.RFlog.info('')
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, eqs=None, para=None, logger=None, width=21, height=11, dpi=100):
@@ -199,7 +198,7 @@ class MatplotlibWidget(QMainWindow):
         next_btn = QPushButton("Next (c)")
         # next_btn.setCursor(Qt.ArrowCursor)
         next_btn.clicked.connect(self.next_connect)
-        finish_btn = QPushButton("Finish")
+        finish_btn = QPushButton("Finish (Enter)")
         # finish_btn.setCursor(Qt.ArrowCursor)
         finish_btn.clicked.connect(self.finish_connect)
         btnbox = QHBoxLayout()
@@ -208,12 +207,12 @@ class MatplotlibWidget(QMainWindow):
         btnbox.addWidget(next_btn)
         btnbox.addWidget(finish_btn)
 
-        mark_btn = QPushButton("Mark to poor")
+        self.mark_btn = QPushButton("Mark to poor (d)")
         # mark_btn.setCursor(Qt.ArrowCursor)
-        mark_btn.setCheckable(True)
-        mark_btn.clicked.connect(lambda: self.mark_btn_connect(mark_btn))
+        self.mark_btn.setCheckable(True)
+        self.mark_btn.clicked.connect(self.drop_connect)
         pathbox = QHBoxLayout()
-        pathbox.addWidget(mark_btn)
+        pathbox.addWidget(self.mark_btn)
 
         ctrl_layout = QHBoxLayout()
         ctrl_layout.addLayout(pathbox)
@@ -221,11 +220,11 @@ class MatplotlibWidget(QMainWindow):
 
         self.layout.addLayout(ctrl_layout)
 
-    def mark_btn_connect(self, mark_btn):
-        if mark_btn.isChecked():
-            self.drop_connect()
-        else:
-            self.cancel_connect()
+    # def mark_btn_connect(self, mark_btn):
+    #     if mark_btn.isChecked():
+    #         self.drop_connect()
+    #     else:
+    #         self.cancel_connect()
 
     def exit_app(self):
         self.close()
@@ -238,21 +237,42 @@ class MatplotlibWidget(QMainWindow):
         self.mpl.sfig.on_mouse_move(event)
         self.mpl.draw()
 
+    def check_mark_btn(self):
+        sfig = self.mpl.sfig
+        if sfig.eqs.index[sfig.idx] in sfig.drop_lst:
+            self.mark_btn.setChecked(True)
+        else:
+            self.mark_btn.setChecked(False)
+
+    def check_drop(self):
+        sfig = self.mpl.sfig
+        if sfig.eqs.index[sfig.idx] in sfig.drop_lst:
+            self.mpl.sfig.cancel()
+            self.mark_btn.setChecked(False)
+        else:
+            self.mpl.sfig.drop()
+            self.mark_btn.setChecked(True)
+
     def next_connect(self):
         self.mpl.sfig.next_action()
         self.mpl.draw()
+        self.check_mark_btn()
     
     def back_connect(self):
         self.mpl.sfig.back_action()
         self.mpl.draw()
+        self.check_mark_btn()
     
     def drop_connect(self):
-        self.mpl.sfig.drop()
+        # self.mark_btn.setChecked(True)
+        # self.mpl.sfig.drop()
+        self.check_drop()
         self.mpl.draw()
     
-    def cancel_connect(self):
-        self.mpl.sfig.cancel()
-        self.mpl.draw()
+    # def cancel_connect(self):
+    #     self.mark_btn.setChecked(False)
+    #     self.mpl.sfig.cancel()
+    #     self.mpl.draw()
     
     def finish_connect(self):
         self.mpl.sfig.finish()
@@ -266,8 +286,8 @@ class MatplotlibWidget(QMainWindow):
         self.key_z.activated.connect(self.back_connect)
         self.key_d = QShortcut(QKeySequence('d'), self)
         self.key_d.activated.connect(self.drop_connect)
-        self.key_a = QShortcut(QKeySequence('a'), self)
-        self.key_a.activated.connect(self.cancel_connect)
+        # self.key_a = QShortcut(QKeySequence('a'), self)
+        # self.key_a.activated.connect(self.cancel_connect)
         self.key_enter = QShortcut(QKeySequence('Return'), self)
         self.key_enter.activated.connect(self.finish_connect)
 
