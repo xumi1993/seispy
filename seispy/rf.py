@@ -148,10 +148,11 @@ def CfgParser(cfg_file, phase='P'):
         cf.read(cfg_file)
     except Exception:
         raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
-    pa.datapath = cf.get('path', 'datapath')
-    pa.rfpath = cf.get('path', 'rfpath')
-    pa.catalogpath = cf.get('path', 'catalogpath')
-    pa.pjtpath = cf.get('path', 'pjtpath')
+    for key, value in cf.items('path'):
+        if value == '':
+            continue
+        else:
+            pa.__dict__[key] = value
     sections = cf.sections()
     sections.remove('path')
     for sec in sections:

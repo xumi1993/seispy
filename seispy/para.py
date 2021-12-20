@@ -54,8 +54,6 @@ class para(object):
     def datapath(self, value):
         if not isinstance(value, str):
             raise TypeError('datapath should be \'str\' type not \'{0}\''.format(type(value)))
-        elif not exists(value):
-                raise FileExistsError('No such find data path of {0}'.format(value))
         else:
             self._datapath = value
 
