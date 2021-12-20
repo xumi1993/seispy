@@ -31,4 +31,11 @@ jobs:
         run: |
           git clone https://github.com/xumi1993/seispy-test.git test
           cd test
-          pytest -v --cov=./ --cov-report=xml 
+          pytest -v --cov=seispy --cov-report=xml
+      - name: Upload to codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          files: ./coverage.xml # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
