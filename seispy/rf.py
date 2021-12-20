@@ -151,6 +151,12 @@ def CfgParser(cfg_file, phase='P'):
     for key, value in cf.items('path'):
         if value == '':
             continue
+        elif key == 'datapath':
+            pa.datapath = value
+        elif key == 'rfpath':
+            pa.rfpath = value
+        elif key == 'catalogpath':
+            pa.catalogpath = value
         else:
             pa.__dict__[key] = value
     sections = cf.sections()
