@@ -184,3 +184,38 @@ def extrema(x, opt='max'):
         raise ValueError('opt must be \'max\' or \'min\'')
     return idx
 
+
+def geo2sph(dep, lat, lon):
+    """Convert geographic coordinates to spherical coordinates.
+
+    :param dep: Depth from surface
+    :type dep: float or np.ndarray
+    :param lat: Latitude
+    :type lat: float or np.ndarray
+    :param lon: Longitude
+    :type lon: float or np.ndarray
+    :return: spherical coordinate r, theta, phi
+    :rtype: list
+    """
+    theta = np.radians(90. - lat)
+    phi = np.radians(lon)
+    r = 6371 - dep
+    return r, theta, phi
+
+def sph2geo(r, theta, phi):
+    """
+    Convert spherical coordinates to geographic coordinates.
+    :param float r: radial distance from coordinate system origin
+                    {**Units**: km, **Range**: [0, inf)}
+    :param float theta: polar angle {**Units**: radians, **Range**: [0,
+                        π]}
+    :param float phi: azimuthal angle {**Units**: radians, **Range**:
+                      [-π, π]}
+    :returns: geographic coordinate conversion *(lat, lon, depth)* of
+              spherical coordinates
+    :rtype: (float, float, float)
+    """
+    z = 6371 - r
+    lat = 90 - rad2deg(theta)
+    lon = rad2deg(phi)
+    return z, lat, lon

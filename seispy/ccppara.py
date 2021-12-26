@@ -12,6 +12,7 @@ class CCPPara(object):
         self.stackfile = 'ccp.dat'
         self.stalist = 'sta.lst'
         self.peakfile = 'good_410_660.dat'
+        self.adaptive= False
         self.velmod = ''
         self.stack_sta_list = ''
         self.domperiod = 5
@@ -83,6 +84,10 @@ def ccppara(cfg_file):
         cpara.velmod = velmod
     # para for bin section
     cpara.shape = cf.get('bin', 'shape')
+    try:
+        cpara.adaptive = cf.getboolean('bin', 'adaptive')
+    except:
+        cpara.adaptive = False
     try:
         cpara.domperiod = cf.getfloat('bin', 'domperiod')
     except:

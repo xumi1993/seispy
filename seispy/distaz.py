@@ -70,6 +70,9 @@ class distaz:
     Port to python, thus adding to the great list of languages to which
     distaz has been ported from the origin fortran: C, Tcl, Java and now python
     and I vaguely remember a perl port. Long live distaz! 
+
+    Mijian Xu, Jan 01, 2016
+    Add np.ndarray to availible input varible.
     """
 
     def __init__(self, lat1, lon1, lat2, lon2):
@@ -208,7 +211,7 @@ class distaz:
         
         la_idx = np.where(lat1 == lat2)[0]
         lo_idx = np.where(lon1 == lon2)[0]
-        idx = la_idx[np.where(la_idx == lo_idx)[0]]
+        idx = np.intersect1d(la_idx, lo_idx)
         if len(idx) != 0:
             if isinstance(self.delta, float):
                 self.delta = 0.
