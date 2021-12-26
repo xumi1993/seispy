@@ -16,35 +16,6 @@ import glob
 warnings.filterwarnings("ignore")
 
 
-class SACStationS():
-    def __init__(self, path):
-        fnames = sorted(glob.glob(join(path, '*S_*.sac')))
-        self.ev_num = len(fnames)
-        self.rayp = np.zeros(self.ev_num)
-        self.bazi = np.zeros(self.ev_num)
-        self.dis = np.zeros(self.ev_num)
-        self.evla = np.zeros(self.ev_num)
-        self.evlo = np.zeros(self.ev_num)
-        self.evdp = np.zeros(self.ev_num)
-        sample_sac = SACTrace.read(fnames[0])
-        self.sampling = sample_sac.delta
-        self.stla = sample_sac.stla
-        self.stlo = sample_sac.stlo
-        self.shift = -sample_sac.b
-        self.RFlength = sample_sac.npts
-        self.datal = np.zeros([self.ev_num, self.RFlength])
-        for i, sacfile in enumerate(fnames):
-            sac = SACTrace.read(sacfile)
-            self.rayp[i] = sac.user0
-            self.bazi[i] = sac.baz
-            self.dis[i] = sac.gcarc
-            self.evla[i] = sac.evla
-            self.evlo[i] = sac.evlo
-            self.evdp[i] = sac.evdp
-            self.datal[i] = sac.data
-        self.rayp = skm2srad(self.rayp)
-
-
 class SACStation(object):
     def __init__(self, data_path, only_r=False):
         """
@@ -160,6 +131,35 @@ class SACStation(object):
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
+
+class SRFStation(SACStation):
+    def __init__(self, path):
+        fnames = sorted(glob.glob(join(path, '*S_*.sac')))
+        self.ev_num = len(fnames)
+        self.rayp = np.zeros(self.ev_num)
+        self.bazi = np.zeros(self.ev_num)
+        self.dis = np.zeros(self.ev_num)
+        self.evla = np.zeros(self.ev_num)
+        self.evlo = np.zeros(self.ev_num)
+        self.evdp = np.zeros(self.ev_num)
+        sample_sac = SACTrace.read(fnames[0])
+        self.sampling = sample_sac.delta
+        self.stla = sample_sac.stla
+        self.stlo = sample_sac.stlo
+        self.shift = -sample_sac.b
+        self.rflength = sample_sac.npts
+        self.time_axis = np.arange(self.rflength) * self.sampling - self.shift
+        self.datal = np.zeros([self.ev_num, self.rflength])
+        for i, sacfile in enumerate(fnames):
+            sac = SACTrace.read(sacfile)
+            self.rayp[i] = sac.user0
+            self.bazi[i] = sac.baz
+            self.dis[i] = sac.gcarc
+            self.evla[i] = sac.evla
+            self.evlo[i] = sac.evlo
+            self.evdp[i] = sac.evdp
+            self.datal[i] = sac.data
+        self.rayp = skm2srad(self.rayp)
 
 class RFStation(SACStation):
     def __init__(self, data_path, only_r=False):

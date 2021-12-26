@@ -43,19 +43,26 @@ class RPickFigure(RFFigure):
             raise ValueError('The order must be \'baz\' or \'dis\'')
         else:
             pass
-        if len(glob.glob(join(self.rfpath, '*_R.sac'))) != 0:
+        if len(glob.glob(join(self.rfpath, '*P_R.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*_R.sac'))  
             self.comp = 'R'
-        elif len(glob.glob(join(self.rfpath, '*_L.sac'))) != 0:
-            tmp_files = glob.glob(join(self.rfpath, '*_L.sac'))
+        elif len(glob.glob(join(self.rfpath, '*P_Q.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*P_Q.sac'))
             self.comp = 'L'
+        elif len(glob.glob(join(self.rfpath, '*S_L.sac'))) != 0:
+            tmp_files = glob.glob(join(self.rfpath, '*S_L.sac'))
+            self.comp = 'L'
+            self.enf = 4
         else:
-            tmp_files = glob.glob(join(self.rfpath, '*_Z.sac'))
-            self.comp = 'Z' 
+            tmp_files = glob.glob(join(self.rfpath, '*S_Z.sac'))
+            self.comp = 'Z'
+            self.enf = 4
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
         self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
+        if self.xlim[1] > self.time_axis[-1]:
+            self.xlim[1] = self.time_axis[-1]
         self.evt_num = len(self.rrf)
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])

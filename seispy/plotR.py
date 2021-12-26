@@ -2,7 +2,7 @@ import re
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
-from seispy.rfcorrect import SACStation
+from seispy.rfcorrect import RFStation
 from seispy.rf import CfgParser
 import argparse
 import numpy as np
@@ -22,7 +22,7 @@ def init_figure():
 
 
 def read_process_data(rfpath):
-    stadata = SACStation(rfpath, only_r=True)
+    stadata = RFStation(rfpath, only_r=True)
     idx = np.argsort(stadata.bazi)
     stadata.event = stadata.event[idx]
     stadata.bazi = stadata.bazi[idx]

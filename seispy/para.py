@@ -8,6 +8,7 @@ class para(object):
         self.datapath = expanduser('~')
         self.rfpath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
+        self.pjtpath = 'rfpjt.pkl'
         self.catalog_server = 'IRIS'
         self.offset = None
         self.tolerance = 210
@@ -53,8 +54,6 @@ class para(object):
     def datapath(self, value):
         if not isinstance(value, str):
             raise TypeError('datapath should be \'str\' type not \'{0}\''.format(type(value)))
-        elif not exists(value):
-                raise FileExistsError('No such find data path of {0}'.format(value))
         else:
             self._datapath = value
 
@@ -92,14 +91,22 @@ class para(object):
 
     @criterion.setter
     def criterion(self, value):
-        if ''.join(sorted(self.comp.upper())) == 'LQT':
-            self._criterion = None
-        elif value == '':
-            self._criterion = None
-        elif value.lower() not in ['crust', 'mtz']:
-            raise ValueError('criterion should be string in \'crust\' or  \'mtz\'')
+        if self.phase == 'S':
+            if value == '':
+                self._criterion = None
+            elif value.lower() == 'lab':
+                self._criterion = 'lab'
+            else:
+                raise ValueError('criterion should be \'lab\'')
         else:
-            self._criterion = value
+            if ''.join(sorted(self.comp.upper())) == 'LQT':
+                self._criterion = None
+            elif value == '':
+                self._criterion = None
+            elif value.lower() not in ['crust', 'mtz']:
+                raise ValueError('criterion should be string in \'crust\' or  \'mtz\'')
+            else:
+                self._criterion = value.lower()
 
     @property
     def decon_method(self):

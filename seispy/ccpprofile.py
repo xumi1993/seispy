@@ -1,12 +1,14 @@
 import numpy as np
+import seispy
 from seispy.geo import km2deg, deg2km, latlon_from, geoproject, sind, rad2deg, skm2srad
 from seispy.setuplog import setuplog
 from seispy.distaz import distaz
 from seispy.rfcorrect import DepModel
+from seispy.rf2depth_makedata import Station
 from seispy.ccppara import ccppara, CCPPara
 from scikits.bootstrap import ci
 from seispy.ccp3d import boot_bin_stack
-from seispy.utils import check_stack_val, read_rfdep
+from seispy.utils import check_stack_val, read_rfdep, create_center_bin_profile
 from os.path import exists, dirname, basename, join
 
 
@@ -97,6 +99,10 @@ class CCPProfile():
             raise ValueError('{}'.format(e))
 
     def read_rfdep(self):
+        """Read RFdepth file
+
+        :raises FileNotFoundError: Not Found RFdepth file
+        """
         self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
         try:
             self.rfdep = read_rfdep(self.cpara.depthdat)
@@ -105,28 +111,40 @@ class CCPProfile():
             raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
     
     def initial_profile(self):
+        """Initialize bins of profile
+        """
         self.read_rfdep()
-        self.bin_loca, self.profile_range = init_profile(*self.cpara.line, self.cpara.slide_val)
+        if exists(self.cpara.stack_sta_list):
+            self.stations = Station(self.cpara.stack_sta_list)
+        if self.cpara.adaptive:
+            if not exists(self.cpara.stack_sta_list):
+                raise ValueError('Adaptive binning depends on existence of {} order by stations'.format(
+                    self.cpara.stack_sta_list))
+            lat, lon, self.profile_range = create_center_bin_profile(self.stations, self.cpara.slide_val)
+            self.bin_loca = np.vstack((lat, lon)).T
+        else:
+            self.bin_loca, self.profile_range = init_profile(*self.cpara.line, self.cpara.slide_val)
         self.fzone = bin_shape(self.cpara)
         self._get_sta()
         self._select_sta()
     
     def _get_sta(self):
-        self.station = [sta['station'] for sta in self.rfdep]
+        """Read station info from rfdep
+        """
+        self.staname = [sta['station'] for sta in self.rfdep]
         self.stalst = np.array([[sta['stalat'], sta['stalon']] for sta in self.rfdep])
 
     def _select_sta(self):
         if exists(self.cpara.stack_sta_list):
             self.logger.CCPlog.info('Use stacking stations in {}'.format(self.cpara.stack_sta_list))
-            staname = list(np.loadtxt(self.cpara.stack_sta_list, dtype=np.dtype('U10'), usecols=(0,), ndmin=1, unpack=True))
             self.idxs = []
-            for sta in staname:
+            for sta in self.stations.station:
                 try:
-                    idx = self.station.index(sta)
+                    idx = self.staname.index(sta)
                     self.idxs.append(idx)
                 except ValueError:
                     self.logger.CCPlog.warning('{} does not in RFdepth structure'.format(sta))
-                if self.cpara.shape == 'rect':
+                if self.cpara.shape == 'rect' and self.cpara.adaptive == False:
                     self._pierce_project(self.rfdep[idx])
         elif self.cpara.width is None and self.cpara.shape == 'circle':
             dep_mod = DepModel(self.cpara.stack_range)
@@ -151,7 +169,8 @@ class CCPProfile():
     def _write_sta(self):
         with open(self.cpara.stack_sta_list, 'w') as f:
             for idx in self.idxs:
-                f.write('{}\t{:.3f}\t{:.3f}\n'.format(self.station[idx], self.stalst[idx,0], self.stalst[idx, 1]))
+                f.write('{}\t{:.3f}\t{:.3f}\n'.format(self.staname[idx],
+                self.stalst[idx,0], self.stalst[idx, 1]))
                 self._pierce_project(self.rfdep[idx])      
 
     def _proj_sta(self, width):
@@ -183,12 +202,14 @@ class CCPProfile():
             rfsta['projlat'][:, i], rfsta['projlon'][:, i] = geoproject(rfsta['piercelat'][:, i], rfsta['piercelon'][:, i], *self.cpara.line)
 
     def stack(self):
-        if self.cpara.shape == 'rect': 
-            field_lat = 'projlat'
-            field_lon = 'projlon'
-        elif self.cpara.shape == 'circle':
+        """Stack RFs in bins
+        """
+        if self.cpara.shape == 'circle' or self.cpara.adaptive: 
             field_lat = 'piercelat'
             field_lon = 'piercelon'
+        elif self.cpara.shape == 'rect':
+            field_lat = 'projlat'
+            field_lon = 'projlon'
         else:
             pass
         for i, bin_info in enumerate(self.bin_loca):
@@ -225,18 +246,18 @@ class CCPProfile():
         If format is \'dat\' the stacked data will be save into a txt file with 8 columns, including bin_lat, bin_lon, profile_dis, depth, amp, ci_low, ci_high and count.
         where bin_lat and bin_lon represent the position of each bin; profile_dis represents the distance in km between each bin and the start point of the profile; depth represents depth of each bin; amp means the stacked amplitude; ci_low and ci_high mean confidence interval with bootstrap method; count represents stacking number of each bin.
 
-        :param fname: file name of stacked data
-        :type fname: str
+        :param format: Format for stacked data
+        :type format: str
         """
-        fname = fix_filename(self.cpara.stackfile, format)
-        self.logger.CCPlog.info('Saving stacked data to {}'.format(fname))
+        self.cpara.stackfile = fix_filename(self.cpara.stackfile, format)
+        self.logger.CCPlog.info('Saving stacked data to {}'.format(self.cpara.stackfile))
         if not isinstance(self.cpara.stackfile, str):
             self.logger.CCPlog.error('fname should be in \'str\'')
             raise ValueError('fname should be in \'str\'')
         if format == 'npz':
             np.savez(self.cpara.stackfile, cpara=self.cpara, stack_data=self.stack_data)
         elif format == 'dat':
-            with open(fname, 'w') as f:
+            with open(self.cpara.stackfile, 'w') as f:
                 for i, bin in enumerate(self.stack_data):
                     for j, dep in enumerate(self.cpara.stack_range):
                         if dep == self.cpara.stack_range[-1]:

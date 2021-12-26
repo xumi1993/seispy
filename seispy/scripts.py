@@ -10,10 +10,10 @@ from seispy.utils import read_rfdep
 def rfani():
     parser = argparse.ArgumentParser(description="Estimate crustal anisotropy with a Joint inversion method. See Liu and Niu (2012) in detail.")
     parser.add_argument('rfpath', type=str, help="Path to PRFs")
-    parser.add_argument('-t', help="Time window cut from tb to te", metavar='tb/te', required=True)
+    parser.add_argument('-t', help="Time window for searching Pms from tb to te", metavar='tb/te', required=True)
     parser.add_argument('-c', help="List file in text format for saving results, defaults to ./rfani.dat",
                         default="rfani.dat", metavar="list_file_name")
-    parser.add_argument('-l', help="Half length of time window when cut out Pms phases, defaults to 3s",
+    parser.add_argument('-l', help="Half length of time window cut around Pms phase, defaults to 3s",
                         default=3, metavar="half_time_length", type=float)
     parser.add_argument('-o', dest='outpath', help="Directory to the image, defaults to current directory.", default='./')
     parser.add_argument('-p', help="If plot RFs stacked by back-azimuth, defaults to \'False\'",
