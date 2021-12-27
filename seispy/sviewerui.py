@@ -116,7 +116,6 @@ class SFigure(Figure):
             return
         self.picker_time.iloc[self.idx]['trigger_shift'] = event.xdata
         for picker in self.picker:
-            # picker.set_visible(True)
             picker.set_xdata(self.picker_time.iloc[self.idx]['trigger_shift'])
             picker.set_visible(True)
 
@@ -187,7 +186,7 @@ class MatplotlibWidget(QMainWindow):
 
         self._set_geom_center()
         self._define_global_shortcuts()
-        self.setWindowTitle('Pick S Phease')
+        self.setWindowTitle('Pick S Phase')
         self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
 
     def add_btn(self):

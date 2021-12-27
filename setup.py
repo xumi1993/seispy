@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.2.13"
+VERSION = "1.2.14"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
