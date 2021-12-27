@@ -14,7 +14,6 @@ import numpy as np
 import pandas as pd
 
 
-
 class SFigure(Figure):
     def __init__(self, eqs, para, logger, width=21, height=11, dpi=100):
         self.eqs = eqs
@@ -117,7 +116,7 @@ class SFigure(Figure):
             return
         self.picker_time.iloc[self.idx]['trigger_shift'] = event.xdata
         for picker in self.picker:
-            picker.set_visible(True)
+            # picker.set_visible(True)
             picker.set_xdata(self.picker_time.iloc[self.idx]['trigger_shift'])
             picker.set_visible(True)
 
@@ -174,7 +173,7 @@ class MatplotlibWidget(QMainWindow):
         self.initUi(eqs, para, logger)
 
     def initUi(self, eqs, para, logger):
-        self.mpl = MyMplCanvas(self, eqs=eqs, para=para, logger=logger, width=21, height=11, dpi=100)
+        self.mpl = MyMplCanvas(self, eqs=eqs, para=para, logger=logger, width=8, height=4, dpi=50)
         # self.mpl.mpl_connect('motion_notify_event', self.on_mouse_move)
         self.mpl.mpl_connect('button_press_event', self.on_click)
         # self.setCursor(Qt.CrossCursor)
