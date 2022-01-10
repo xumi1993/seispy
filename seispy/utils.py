@@ -39,16 +39,26 @@ def read_rfdep(path):
 
 
 class DepModel(object):
-    def __init__(self, YAxisRange, velmod='iasp91'):
+    def __init__(self, YAxisRange, velmod='iasp91', elevation=0):
+        self.elevation = elevation
         VelocityModel = np.loadtxt(from_file(velmod))
         self.depthsraw = VelocityModel[:, 0]
         self.vpraw = VelocityModel[:, 1]
         self.vsraw = VelocityModel[:, 2]
-        self.vp = interp1d(self.depthsraw, self.vpraw, bounds_error=False, fill_value='extrapolate')(YAxisRange)
-        self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False, fill_value='extrapolate')(YAxisRange)
-        self.depths = YAxisRange
-        self.dz = np.append(0, np.diff(self.depths))
-        self.R = 6371 - self.depths
+        self.depths = YAxisRange.astype(float)
+        self.dep_val = np.average(np.diff(self.depths))
+        if elevation == 0:
+            self.depths_elev = self.depths
+        else:
+            dep_append = np.arange(self.depths[-1]+self.dep_val, 
+                               self.depths[-1]+self.dep_val+np.floor(elevation/self.dep_val+1), self.dep_val)
+            self.depths_elev = np.append(self.depths, dep_append) - elevation
+        self.dz = np.append(0, np.diff(self.depths_elev))
+        self.vp = interp1d(self.depthsraw, self.vpraw, bounds_error=False,
+                           fill_value=self.vpraw[0])(self.depths_elev)
+        self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False,
+                           fill_value=self.vsraw[0])(self.depths_elev)
+        self.R = 6371.0 - self.depths_elev
 
 
 def from_file(mode_name):
