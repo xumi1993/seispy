@@ -497,7 +497,7 @@ def time2depth(stadatar, YAxisRange, Tpds):
         TempTpds = Tpds[i, :]
         StopIndex = np.where(np.imag(TempTpds) == 1)[0]
         if StopIndex.size == 0:
-            EndIndex[i] = YAxisRange.shape[0]
+            EndIndex[i] = YAxisRange.shape[0] - 1
             DepthAxis = interp1d(TempTpds, YAxisRange, bounds_error=False)(time_axis)
         else:
             EndIndex[i] = StopIndex[0] - 1

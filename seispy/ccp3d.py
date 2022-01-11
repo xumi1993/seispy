@@ -146,6 +146,8 @@ class CCP3D():
         return np.where(distaz(bin_lat, bin_lon, self.stalst[:, 0], self.stalst[:, 1]).delta <= self.dismin)[0]
 
     def stack(self):
+        """Search conversion points falling within a bin and stack them with bootstrap method.
+        """
         for i, bin_info in enumerate(self.bin_loca):
             boot_stack = {}
             bin_mu = np.zeros(self.cpara.stack_range.size)
@@ -158,9 +160,10 @@ class CCP3D():
                 idx = int(j * self.stack_mul + self.cpara.stack_range[0]/self.cpara.dep_val)
                 bin_dep_amp = np.array([])
                 for k in idxs:
-                    fall_idx = np.where(distaz(self.rfdep[k]['piercelat'][:, idx], self.rfdep[k]['piercelon'][:, idx],
+                    stop_idx = np.where(self.rfdep[k]['stopindex'] >= idx)[0]
+                    fall_idx = np.where(distaz(self.rfdep[k]['piercelat'][stop_idx, idx], self.rfdep[k]['piercelon'][stop_idx, idx],
                                         bin_info[0], bin_info[1]).delta < self.fzone[j])[0]
-                    bin_dep_amp = np.append(bin_dep_amp, self.rfdep[k]['moveout_correct'][fall_idx, idx])
+                    bin_dep_amp = np.append(bin_dep_amp, self.rfdep[k]['moveout_correct'][stop_idx[fall_idx], idx])
                 bin_mu[j], bin_ci[j], bin_count[j] = boot_bin_stack(bin_dep_amp, n_samples=self.cpara.boot_samples)
             boot_stack['bin_lat'] = bin_info[0]
             boot_stack['bin_lon'] = bin_info[1]
