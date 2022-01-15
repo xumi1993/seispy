@@ -121,11 +121,10 @@ def parse_common_args(args):
 
 def prf():
     parser = common_parser()
-    parser.add_argument('-f', help='Specify finallist for re-calculating RFs and -b and -l are invalid in this pattern',
+    parser.add_argument('-f', help='Specify finallist for re-calculating RFs and -l is invalid in this pattern',
                         metavar='finallist', default=None)
     arg = parser.parse_args()
     if arg.f is not None:
-        arg.baz = None
         arg.islocal = False
         pjt = ReRF(arg.f, cfg_file=arg.cfg_file)
     else:
@@ -154,6 +153,8 @@ def prf():
     pjt.trim()
     pjt.deconv()
     pjt.saverf()
+    if arg.f is not None:
+        pjt.write_list()
 
 
 def srf():
