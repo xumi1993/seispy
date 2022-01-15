@@ -83,13 +83,10 @@ def test_sub04():
     rf.para.datapath = 'ex-prf/Data.CB.NJ2'
     rf.para.rfpath = 'ex-prf/RFresult/CB.NJ2_re'
     rf.para.decon_method = 'iter'
-    rf.para.criterion = 'crust'
     rf.para.gauss = 2.5
     rf.para.criterion = None
     rf.para.rmsgate = None
     rf.load_stainfo()
-    rf.match_eq()
-    rf.search_eq()
     rf.match_eq()
     rf.detrend()
     rf.filter()

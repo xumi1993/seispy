@@ -66,11 +66,12 @@ class ReRF(RF):
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
             np.loadtxt(finallist, dtype=dtype, unpack=True, ndmin=1)
-        cols = ['date', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'mag', 'magtype']
+        cols = ['date', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'magtype']
         lst = []
         for i, evt_str in enumerate(self.event):
             evtime = UTCDateTime.strptime(evt_str, '%Y.%j.%H.%M.%S')
-            lst.append([evtime, self.evla[i], self.evlo[i], self.evdp[i], self.dis[i], self.bazi[i], self.mag[i], 'mw'])
+            lst.append([evtime, self.evla[i], self.evlo[i], self.evdp[i],
+                       self.dis[i], self.bazi[i], self.rayp[i], self.mag[i], 'mw'])
         return pd.DataFrame(lst, columns=cols)
     
     def match_eq(self, **kwarg):
@@ -95,6 +96,6 @@ class ReRF(RF):
         with open(path, 'w') as f:
             for i, row in self.eqs.iterrows():
                 f.write('{} {} {:.3f} {:.3f} {:.3f} {:.3f} {:.3f} {:.5f} {:.3f} {:.3f}\n'.format(
-                    row['date'].strftime('%Y.%j.%H.%M.%S'), self.phase[i], row['evla'], row['evlo'],
-                    row['evdp'], row['dis'], row['bazi'], row['mag'], self.para.gauss
+                    row['date'].strftime('%Y.%j.%H.%M.%S'), self.para.phase, row['evla'], row['evlo'],
+                    row['evdp'], row['dis'], row['bazi'], row['rayp'], row['mag'], self.para.gauss
                 ))
