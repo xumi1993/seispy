@@ -13,5 +13,16 @@ dist/
 */__pycache__/
 
 *.egg
-
 *.egg-info
+
+.empty/
+
+test/ex-ccp.tar.gz
+test/ex-ccp/
+test/ex-rfani.tar.gz
+test/ex-rfani/
+test/ex-prf.tar.gz
+test/ex-prf/
+test/._*
+test/RFresult/
+test/RFdepth.npy
