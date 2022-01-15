@@ -24,7 +24,7 @@ def rotateZNE(st):
         tr.stats.channel = tr.stats.channel[:-1] + component
 
 
-class eq(object):
+class EQ(object):
     def __init__(self, pathname, datestr, suffix):
         self.datestr = datestr
         self.filestr = join(pathname, '*' + datestr + '*' + suffix)
