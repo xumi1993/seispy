@@ -60,7 +60,6 @@ class SACStation(object):
         self.stlo = sample_sac.stlo
         self.stel = sample_sac.stel
         self.rflength = sample_sac.npts
-        self.RFlength = self.rflength
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
         self.time_axis = np.arange(self.rflength) * self.sampling - self.shift
@@ -490,7 +489,7 @@ def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength
 
 
 def time2depth(stadatar, YAxisRange, Tpds):
-    time_axis = np.arange(0, stadatar.RFlength) * stadatar.sampling - stadatar.shift
+    time_axis = np.arange(0, stadatar.rflength) * stadatar.sampling - stadatar.shift
     PS_RFdepth = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     EndIndex = np.zeros(stadatar.ev_num)
     for i in range(stadatar.ev_num):
