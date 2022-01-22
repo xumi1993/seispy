@@ -5,6 +5,8 @@ from seispy.ccp3d import CCP3D
 from seispy.ccpprofile import CCPProfile
 from scipy.interpolate import interp1d
 from seispy.utils import read_rfdep
+from seispy.rf import RF
+from seispy.recalrf import ReRF
 
 
 def rfani():
@@ -81,3 +83,108 @@ def get_pierce_points():
                 lo = interp1d(sta['depthrange'], sta['piercelon'][i])(arg.d)
                 f.write('{:.4f} {:.4f}\n'.format(lo, la))
     
+
+def common_parser():
+    parser = argparse.ArgumentParser(description="Calculating RFs for single station")
+    parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
+    parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
+    parser.add_argument('-r', help='Reverse components: N, E or NE', dest='comp',
+                        metavar='N|E|NE', default=None, type=str)
+    parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
+    parser.add_argument('-b', help='Correct back-azimuth. \nIf "baz" is specified, the corr_baz = raw_baz + baz. \n'
+                                   'If there is no argument, the back-azimuth will be corrected with minimal '
+                                   'energy of T component. The searching range is raw_baz +/- 90',
+                                   dest='baz', nargs='?', const=0, type=float)
+    parser.add_argument('-w', help='Write project to localfile', action='store_true')
+    return parser
+
+
+def parse_common_args(args):
+    if args.comp is not None:
+        args.comp = args.comp.upper()
+        if args.comp == 'NE' or args.comp == 'EN':
+            reverseE = True
+            reverseN = True
+        elif args.comp == 'E':
+            reverseE = True
+            reverseN = False
+        elif args.comp == 'N':
+            reverseE = False
+            reverseN = True
+        else:
+            raise ValueError('component name must be in EN, E or N')
+    else:
+        reverseN = False
+        reverseE = False
+    return reverseE, reverseN
+
+
+def prf():
+    parser = common_parser()
+    parser.add_argument('-f', help='Specify finallist for re-calculating RFs and -l is invalid in this pattern',
+                        metavar='finallist', default=None)
+    arg = parser.parse_args()
+    if arg.f is not None:
+        arg.islocal = False
+        pjt = ReRF(arg.f, cfg_file=arg.cfg_file)
+    else:
+        pjt = RF(cfg_file=arg.cfg_file)
+    pjt.para.switchEN = arg.isswitch
+    pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
+    pjt.load_stainfo()
+    if arg.f is None:
+        pjt.search_eq(local=arg.islocal)
+    pjt.match_eq()
+    pjt.channel_correct()
+    pjt.detrend()
+    pjt.filter()
+    pjt.cal_phase()
+    if arg.f is None:
+        pjt.drop_eq_snr()
+    if arg.baz is not None and arg.baz != 0:
+        pjt.baz_correct(correct_angle=arg.baz)
+    elif arg.baz is not None and arg.baz == 0:
+        pjt.baz_correct()
+    else:
+        pass
+    if arg.w:
+        pjt.savepjt()
+    pjt.rotate()
+    pjt.trim()
+    pjt.deconv()
+    pjt.saverf()
+    if arg.f is not None:
+        pjt.write_list()
+
+
+def srf():
+    parser = common_parser()
+    parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround S phase with a GUI.',
+                        action='store_true')
+    arg = parser.parse_args()
+    pjt = RF(cfg_file=arg.cfg_file, phase='S')
+
+    pjt.para.switchEN = arg.isswitch
+    pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
+    pjt.load_stainfo()
+    pjt.search_eq(local=arg.islocal)
+    pjt.match_eq()
+    pjt.channel_correct()
+    pjt.detrend()
+    pjt.filter()
+    pjt.cal_phase()
+    pjt.drop_eq_snr()
+    if arg.baz is not None and arg.baz != 0:
+        pjt.baz_correct(correct_angle=arg.baz)
+    elif arg.baz is not None and arg.baz == 0:
+        pjt.baz_correct()
+    else:
+        pass
+    pjt.rotate()
+    if arg.p:
+        pjt.pick()
+    if arg.w:
+        pjt.savepjt()
+    pjt.trim()
+    pjt.deconv()
+    pjt.saverf()

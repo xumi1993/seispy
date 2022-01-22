@@ -92,7 +92,7 @@ class para(object):
     @criterion.setter
     def criterion(self, value):
         if self.phase == 'S':
-            if value == '':
+            if value == '' or value is None:
                 self._criterion = None
             elif value.lower() == 'lab':
                 self._criterion = 'lab'
@@ -101,7 +101,7 @@ class para(object):
         else:
             if ''.join(sorted(self.comp.upper())) == 'LQT':
                 self._criterion = None
-            elif value == '':
+            elif value == '' or value is None:
                 self._criterion = None
             elif value.lower() not in ['crust', 'mtz']:
                 raise ValueError('criterion should be string in \'crust\' or  \'mtz\'')

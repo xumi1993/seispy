@@ -17,9 +17,13 @@ class Station(object):
         """
         Read station list
         """
-        dtype = {'names': ('station', 'evla', 'evlo'), 'formats': ('U20', 'f4', 'f4')}
-        self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
-        #self.station = [sta.decode() for sta in self.station]
+        dtype = {'names': ('station', 'stla', 'stlo', 'stel'), 'formats': ('U20', 'f4', 'f4', 'f2')}
+        try:
+            self.station, self.stla, self.stlo, self.stel = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
+        except:
+            dtype = {'names': ('station', 'stla', 'stlo'), 'formats': ('U20', 'f4', 'f4')}
+            self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
+            self.stel = np.zeros(self.stla.size)
         self.sta_num = self.stla.shape[0]
 
 
@@ -91,10 +95,10 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
                 mod1d = _load_mod(modfolder1d, sta_info.station[i])
             else:
                 mod1d = 'iasp91'
-            PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, 
+            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
                                               velmod=mod1d, srayp=cpara.rayp_lib)
         else:
-            PS_RFdepth, end_index, x_s, x_p = psrf2depth(stadatar, cpara.depth_axis, stadatar.sampling, stadatar.shift, cpara.velmod, 
+            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis, cpara.velmod, 
                                               velmod_3d=model_3d, srayp=cpara.rayp_lib)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
