@@ -37,6 +37,7 @@ jobs:
       - name: Install package
         run: |
           git pull origin master
+          git config pull.rebase true
           git checkout master
           python -m pip install --upgrade pip
           pip install .
