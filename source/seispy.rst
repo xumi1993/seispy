@@ -1,16 +1,8 @@
 seispy package
 ==============
 
-seispy.bootstrap module
------------------------
-
-.. automodule:: seispy.bootstrap
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 seispy.ccpprofile module
------------------
+-------------------------
 
 .. automodule:: seispy.ccpprofile
     :members:
@@ -18,7 +10,7 @@ seispy.ccpprofile module
     :show-inheritance:
 
 seispy.cc3d module
------------------
+----------------------
 
 .. automodule:: seispy.ccp3d
     :members:

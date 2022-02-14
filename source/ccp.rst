@@ -17,18 +17,26 @@ seispy.rf2depth\_makedata module
     :undoc-members:
     :show-inheritance:
 
-seispy.ccp module
------------------
-
-.. automodule:: seispy.ccp
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 seispy.ccppara module
 ---------------------
 
 .. automodule:: seispy.ccppara
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seispy.ccpprofile module
+-----------------
+
+.. automodule:: seispy.ccpprofile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+seispy.cc3d module
+-----------------
+
+.. automodule:: seispy.ccp3d
     :members:
     :undoc-members:
     :show-inheritance:

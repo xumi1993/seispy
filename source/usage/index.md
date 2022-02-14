@@ -4,7 +4,7 @@
 :maxdepth: 1
 
 installation
-calrf
+PRF_Process
 rf-sta
 pickrf
 ccp
