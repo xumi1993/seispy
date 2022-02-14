@@ -34,6 +34,13 @@ jobs:
           miniforge-variant: Mambaforge
           use-mamba: true
       
+      - name: prod-check
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          echo "Deploying to production server on branch $GITHUB_REF"
+          git pull origin docs
+          git checkout docs
+
       - name: Build documentation
         run: |
           make html
