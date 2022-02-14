@@ -4,25 +4,54 @@
 name: Seispy docs
 
 on:
+  push:
+    branches: [ docs ]
   pull_request:
     branches: [ master ]
     
 
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  build:
-
+  deploy:
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - uses: actions/checkout@v2
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.9.1
+
+      - name: Checkout
+        uses: actions/checkout@v2.4.0
+
+      - name: Setup Mambaforge
+        uses: conda-incubator/setup-miniconda@v2.1.1
         with:
-          fetch-depth: 1
+          activate-environment: docs
+          environment-file: environment.yml
+          miniforge-variant: Mambaforge
+          use-mamba: true
       
-      - name: dispatch event to doc-post repository
-        env:
-          GITHUB_TOKEN: ${{ secrets.API_TOKEN_GITHUB }}
-          EVENT: doc_build
-          ORG: xumi1993
-          REPO: seispy-doc.post
+      - name: Install package
         run: |
-          curl -d "{\"event_type\": \"${EVENT}\"}" -H "Content-Type: application/json" -H "Authorization: token ${GITHUB_TOKEN}" -H "Accept: application/vnd.github.everest-preview+json" "https://api.github.com/repos/${ORG}/${REPO}/dispatches"
+          git checkout -b master
+          python -m pip install --upgrade pip
+          pip install .
+      
+      - name: Build documentation
+        run: |
+          git checkout docs
+          make html
+        
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/html
+          # Only keep the latest commit to avoid bloating the repository
+          force_orphan: true
+          cname: seispy.xumijian.me
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'

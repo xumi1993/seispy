@@ -1,0 +1,19 @@
+name: docs-post
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  - python=3.9
+  - pip
+  - sphinx
+  - sphinx-copybutton
+  - sphinx-design
+  - myst-nb
+  - obspy=1.2.2
+  - seispy
+  - pip:
+    - sphinx-gallery
+    - sphinx-cjkspace
+    - pydata-sphinx-theme
+    - sphinx-icon
+    - furo
