@@ -15,4 +15,4 @@ dependencies:
     - sphinx-cjkspace
     - pydata-sphinx-theme
     - sphinx-icon
-    - furo
+    - python-seispy
