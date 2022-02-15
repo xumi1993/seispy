@@ -4,9 +4,8 @@
    contain the root `toctree` directive. -->
 
 # Seispy Documentation
-<img src="_static/seispy-long.png" width=500/>
 
---------------------------
+-----------------------
 
 [![CRV test](https://github.com/xumi1993/seispy/actions/workflows/test.yml/badge.svg?branch=dev)](https://github.com/xumi1993/seispy/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/xumi1993/seispy/branch/dev/graph/badge.svg?token=XN3E3N6S3V)](https://codecov.io/gh/xumi1993/seispy)
