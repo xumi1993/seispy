@@ -52,8 +52,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_cjkspace.cjkspace",
     "sphinx_copybutton",
-    "sphinx_design",
+    "sphinx_panels",
+    # "sphinx_design",
+    
+
 ]
+
+panels_add_bootstrap_css = False
 
 myst_enable_extensions = [
   "colon_fence",
