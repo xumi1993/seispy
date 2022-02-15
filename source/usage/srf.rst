@@ -1,20 +1,20 @@
-Calculate S wave Receiver Functions (SRF) for sigle station
+Calculate S wave Receiver Functions (SRF) for single station
 ---------------------------------------------------------------
 
-Version after 1.2.13 has involved functions for SRF calculation. The workflow is similiar to PRF calculation. 
+Version after 1.2.13 has involved functions for SRF calculation. The workflow is similar to PRF calculation. 
 
 Materials
 ==========
 
-Users should prepare following marterals.
+Users should prepare following materials.
 
-- SAC files of teleseismic events including S wave. Refer to :ref:`Prepare a configure file <cfg>`.
-- A configure file with the same content with that of PRF. Refer to :ref:`Prepare seismic records order by stations <events>`.
+- SAC files of teleseismic events including S wave. Refer to :doc:`../notes/rf_cfg`.
+- A configure file with the same content with that of PRF. Refer to :doc:`./rf-sta`.
 
 Run in command line
 ===================
 
-Similiar to the workflow for PRFs, we have provided a command ``srf`` for quickly calculating SRFs.
+Similar to the workflow for PRFs, we have provided a command ``srf`` for quickly calculating SRFs.
 
 ::
 
@@ -32,12 +32,12 @@ Similiar to the workflow for PRFs, we have provided a command ``srf`` for quickl
     -s          Switch the East and North components
     -b [BAZ]    Correct back-azimuth. If "baz" is specified, the corr_baz = raw_baz + baz. If there is no argument, the back-azimuth will be corrected with minimal energy of T
                 component. The searching range is raw_baz +/- 90
-    -w          Write project to localfile
-    -p          Wether or not manually pick arrival time and waveforms arround S phase with a GUI.
+    -w          Write project to local file
+    -p          Wether or not manually pick arrival time and waveforms around S phase with a GUI.
 
 .. note::
 
-    Both ``TRZ`` and ``LQT`` are available for SRF calculation. the Z or L component of RF is deconvoluted by R or Q component.
+    Both ``TRZ`` and ``LQT`` are available for SRF calculation. the Z or L component of RF is deconvolved by R or Q component.
 
 GUI for visual checking S wave
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -49,7 +49,7 @@ Compared with ``prf``, ``srf`` has a new option of ``-p`` for visual checking se
 
     GUI for checking SRFs. Black lines denote manually picked arrival time. Red lines denote theoretical arrival time.
 
-- This GUI is open after arrival time calculation and rotation. The seismic waveforms in 3 components are cut arround theoretical S wave arrival time (the red line). A pre-picking is preformed with a STA/LTA method in T component (the black line).
+- This GUI is open after arrival time calculation and rotation. The seismic waveforms in 3 components are cut around theoretical S wave arrival time (the red line). A pre-picking is preformed with a STA/LTA method in T component (the black line).
 
 - If the current event has a low quality, users can mark the event to "poor" via button ``mark to poor`` or hotkey ``d``.
 

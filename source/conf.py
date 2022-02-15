@@ -139,7 +139,7 @@ html_theme_options = {
 }
 #
 # html_sidebars = {}
-html_favicon = os.path.abspath(os.path.join('.', '_static', 'seispy_100.png'))
+html_favicon = os.path.abspath(os.path.join('.', '_static', 'seispy-long.png'))
 html_logo = os.path.abspath(os.path.join('.', '_static', 'seispy_100.png'))
 
 # -- Options for HTMLHelp output ---------------------------------------------

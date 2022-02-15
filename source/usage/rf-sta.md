@@ -195,7 +195,7 @@ The process of pretreatment include detrend, bandpass filter, calculating arriva
 ### Filter
 
 
-We will aply a bandpass filter on seismic records. Two corners should be specified.
+We will apply a bandpass filter on seismic records. Two corners should be specified.
 
 - `para.freqmin`: Pass band low corner frequency.
 - `para.freqmax`: Pass band high corner frequency.
