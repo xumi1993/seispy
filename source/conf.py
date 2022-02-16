@@ -52,9 +52,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_cjkspace.cjkspace",
     "sphinx_copybutton",
+    "sphinx_design",
     "sphinx_panels",
-    # "sphinx_design",
-    
 
 ]
 
