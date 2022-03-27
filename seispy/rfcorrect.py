@@ -21,7 +21,7 @@ class SACStation(object):
 
         :param data_path: Path to RF data with SAC format. A finallist.dat must be in this path.
         :type data_path: str
-        :param only_r: [description], defaults to False
+        :param only_r: Whether reading transverse RFs, defaults to False
         :type only_r: bool, optional
 
         .. warning::
@@ -86,13 +86,21 @@ class SACStation(object):
             self._stel = value/1000
 
     def normalize(self):
+        """Normalize amplitude of each RFs.
+        """
         maxamp = np.nanmax(np.abs(self.datar), axis=1)
         for i in range(self.ev_num):
-            self.datar[i] /= maxamp[i]
+            self.__dict__['data{}'.format(self.comp.lower())][i] /= maxamp[i]
+            # self.datar[i] /= maxamp[i]
             if not self.only_r:
                 self.datat[i] /= maxamp[i]
 
     def resample(self, dt):
+        """Resample RFs with specified dt
+
+        :param dt: Target sampling interval in sec
+        :type dt: float
+        """
         npts = int(self.rflength * (self.sampling / dt)) + 1
         self.datar = resample(self.datar, npts, axis=1)
         if not self.only_r:
@@ -102,6 +110,21 @@ class SACStation(object):
         self.time_axis = np.arange(npts) * dt - self.shift
 
     def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91', replace=False):
+        """Moveout correction with specified reference ray-parameter and depth
+
+        :param ref_rayp: reference ray-parameter, defaults to 0.06
+        :type ref_rayp: float, optional
+        :param dep_range: Depth range used for extracting velocity in velocity model, defaults to np.arange(0, 150)
+        :type dep_range: numpy.ndarray, optional
+        :param velmod: Velocity model for moveout correction. 'iasp91', 'prem' 
+                      and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
+                      The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
+        :type velmod: str, optional
+        :param replace: whether replace original data, False to return new array, defaults to False
+        :type replace: bool, optional
+        :return: rf_corr, t_corr
+        :rtype: list
+        """
         if not self.only_r:
             t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod)
         else:
@@ -123,11 +146,39 @@ class SACStation(object):
             return rf_corr, t_corr
 
     def psrf2depth(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
+        """Time-to-depth conversion with specified depth series.
+
+        :param dep_range: Discret conversion depth, defaults to np.arange(0, 150)
+        :type dep_range: numpy.ndarray, optional
+        :param velmod: Velocity model for time-to-depth conversion. 'iasp91', 'prem' 
+                      and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
+                      The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
+        :type velmod: str, optional
+        :param srayp: Ray-parameter lib for Ps phases, If set up to None the rayp of direct is used, defaults to None
+        :type srayp: numpy.lib.npyio.NpzFile, optional
+        :return: 2D array of RFs in depth
+        :rtype: numpy.ndarray
+        """
         self.dep_range = dep_range
         rfdepth, _, _, _ = psrf2depth(self, dep_range, velmod=velmod, srayp=srayp)
         return rfdepth
 
     def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
+        """1D back ray tracing to obtained Ps conversion points at discret depthes
+
+        :param dep_range: Discret conversion depth, defaults to np.arange(0, 150)
+        :type dep_range: numpy.ndarray, optional
+        :param velmod: Velocity model for time-to-depth conversion. 'iasp91', 'prem' 
+                      and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
+                      The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
+        :type velmod: str, optional
+        :param srayp: Ray-parameter lib for Ps phases, If set up to None the rayp of direct is used, defaults to None
+        :type srayp: numpy.lib.npyio.NpzFile, optional
+        :return pplat_s: Latitude of conversion points
+        :return pplon_s: Longitude of conversion points
+        :return tpds: Time difference of Ps at each depth
+        :rtype: list
+        """
         self.dep_range = dep_range
         pplat_s, pplon_s, _ , _, _, _, tpds = psrf_1D_raytracing(self, dep_range, velmod=velmod, srayp=srayp)
         return pplat_s, pplon_s, tpds
@@ -151,7 +202,7 @@ class SACStation(object):
         return rfdepth
 
     def jointani(self, tb, te, tlen=3., stack_baz_val=10, rayp=0.06,
-                 model='iasp91', weight=[0.4, 0.4, 0.2]):
+                 velmodel='iasp91', weight=[0.4, 0.4, 0.2]):
         """Eastimate crustal anisotropy with a joint method. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
 
         :param tb: Time before Pms for search Ps peak
@@ -164,16 +215,16 @@ class SACStation(object):
         :type stack_baz_val: float, optional
         :param rayp: Reference ray-parameter for moveout correction, defaults to 0.06
         :type rayp: float, optional
-        :param model: velocity model for moveout correction. 'iasp91', 'prem' 
+        :param velmodel: velocity model for moveout correction. 'iasp91', 'prem' 
                       and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
                       The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
-        :type model: str, optional
+        :type velmodel: str, optional
         :param weight: Weight for three different method, defaults to [0.4, 0.4, 0.2]
         :type weight: list, optional
         :return: Dominant fast velocity direction and time delay
         :rtype: list, list
         """
-        self.ani = RFAni(self, tb, te, tlen=tlen, rayp=rayp, model=model)
+        self.ani = RFAni(self, tb, te, tlen=tlen, rayp=rayp, model=velmodel)
         self.ani.baz_stack(val=stack_baz_val)
         best_f, best_t = self.ani.joint_ani(weight=weight)
         return best_f, best_t
@@ -298,12 +349,11 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
 
 def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     """
-    :param stadatar:
-    :param YAxisRange:
-    :param sampling:
-    :param shift:
-    :param velmod:
-    :return:
+    :param stadatar: data class of SACStation
+    :param YAxisRange: Depth range in nd.array type
+    :param velmod: Path to velocity model
+    :param srayp: Ray-parameter lib for Ps phases
+    :return: ps_rfdepth, endindex, x_s, x_p
     """
     if exists(velmod):
         try:

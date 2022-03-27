@@ -14,21 +14,6 @@ def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
     """
 Create spaced grid point with coordinates of the center point in the area in spherical coordinates.
 
-:: 
-    ---------------------------------------------------------
-    |                           |                           |
-    |                           |                           |
-    |                        len_lon                        |
-    |                           |                           |
-    |                           |                           |
-    ---- len_lat --- (center_lon, center_lat) --- len_lat ---
-    |                           |                           |
-    |                           |                           |
-    |                        len_lon                        |
-    |                           |                           |
-    |                           |                           |
-    ---------------------------------------------------------
-
 :param center_lat: Latitude of the center point.
 :type center_lat: float
 :param center_lon: Longitude of the center point.

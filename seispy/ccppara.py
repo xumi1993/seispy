@@ -8,7 +8,7 @@ class CCPPara(object):
     def __init__(self):
         self.rfpath = expanduser('~')
         self.rayp_lib = None
-        self.depthdat = 'RFdepth.mat'
+        self.depthdat = 'RFdepth.npy'
         self.stackfile = 'ccp.dat'
         self.stalist = 'sta.lst'
         self.peakfile = 'good_410_660.dat'
