@@ -6,7 +6,7 @@ seispy.rfcorrect module
 
 .. automodule:: seispy.rfcorrect
     :members:
-    :undoc-members:
+    :undoc-members: psrf_3D_moveoutcorrect, stel, xps_tps_map
     :show-inheritance:
 
 seispy.rf2depth\_makedata module
@@ -14,15 +14,7 @@ seispy.rf2depth\_makedata module
 
 .. automodule:: seispy.rf2depth_makedata
     :members:
-    :undoc-members:
-    :show-inheritance:
-
-seispy.ccppara module
----------------------
-
-.. automodule:: seispy.ccppara
-    :members:
-    :undoc-members:
+    :undoc-members: rf2depth
     :show-inheritance:
 
 seispy.ccpprofile module

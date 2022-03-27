@@ -54,7 +54,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_design",
     "sphinx_panels",
-
+    "numpydoc",
 ]
 
 panels_add_bootstrap_css = False

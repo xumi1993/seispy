@@ -9,7 +9,7 @@ dependencies:
   - sphinx-copybutton
   - sphinx-design
   - myst-nb
-  - obspy=1.2.2
+  - obspy=1.3.0
   - pip:
     - sphinx-gallery
     - sphinx-cjkspace
@@ -17,3 +17,4 @@ dependencies:
     - sphinx-panels
     - sphinx-icon
     - python-seispy
+    - numpydoc
