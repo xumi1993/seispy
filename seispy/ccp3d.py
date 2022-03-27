@@ -7,24 +7,27 @@ from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
 from seispy.utils import check_stack_val, read_rfdep
+import warnings
 
 
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
     """
 Create spaced grid point with coordinates of the center point in the area in spherical coordinates.
----------------------------------------------------------
-|                           |                           |
-|                           |                           |
-|                        len_lon                        |
-|                           |                           |
-|                           |                           |
----- len_lat --- (center_lon, center_lat) --- len_lat ---
-|                           |                           |
-|                           |                           |
-|                        len_lon                        |
-|                           |                           |
-|                           |                           |
----------------------------------------------------------
+
+:: 
+    ---------------------------------------------------------
+    |                           |                           |
+    |                           |                           |
+    |                        len_lon                        |
+    |                           |                           |
+    |                           |                           |
+    ---- len_lat --- (center_lon, center_lat) --- len_lat ---
+    |                           |                           |
+    |                           |                           |
+    |                        len_lon                        |
+    |                           |                           |
+    |                           |                           |
+    ---------------------------------------------------------
 
 :param center_lat: Latitude of the center point.
 :type center_lat: float
@@ -70,6 +73,7 @@ def bin_shape(cpara):
 
 
 def boot_bin_stack(data_bin, n_samples=3000):
+    warnings.filterwarnings("ignore")
     count = data_bin.shape[0]
     if count > 1:
         if n_samples is not None:

@@ -126,8 +126,8 @@ class MatplotlibWidget(QMainWindow):
         frame_width = int(screen_width * width)
 
         self.setGeometry(0, 0, frame_width, frame_height)
-        self.move((screen_width / 2) - (self.frameSize().width() / 2),
-                  (screen_height / 2) - (self.frameSize().height() / 2))
+        self.move(int((screen_width / 2) - (self.frameSize().width() / 2)),
+                  int((screen_height / 2) - (self.frameSize().height() / 2)))
 
     def _define_global_shortcuts(self):
         self.key_c = QShortcut(QKeySequence('c'), self)

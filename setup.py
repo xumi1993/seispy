@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.2.14"
+VERSION = "1.2.15"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -25,6 +25,7 @@ setup(name='python-seispy',
                 'scipy>=1.1.0',
                 'matplotlib>=3.2.0',
                 'pyqt5>=5.12.0',
+                'numba>=0.54.0'
                 'scikits.bootstrap>=1.0.0'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.scripts:prf',

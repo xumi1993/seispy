@@ -1,13 +1,12 @@
 import numpy as np
 from obspy.io.sac import SACTrace
-from os.path import join, basename
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 from os.path import join, abspath, dirname
 from seispy.geo import cosd, sind, extrema
-from seispy.decon import deconit
 from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map
+from numba import jit
 
 
 def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
@@ -17,8 +16,19 @@ def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
     return np.exp(np.log(energy_r) * weight[0] + np.log(energy_cc) * weight[1] - np.log(energy_tc) * weight[2])
 
 
+def average_delay(fd, td):
+    uniq_fd = np.unique(fd)
+    if uniq_fd.size > 2:
+        raise ValueError('FVD do not converge, {} gotten'.format(uniq_fd))
+    uniq_td = []
+    for i, fv in enumerate(uniq_fd):
+        idx = np.where(fd==fv)[0]
+        uniq_td.append(np.mean(td[idx]))
+    return uniq_fd, np.array(uniq_td)
+
+
 class RFAni():
-    def __init__(self, sacdatar, tb, te, tlen=3, val=10):
+    def __init__(self, sacdatar, tb, te, tlen=3, val=10, rayp=0.06, model='iasp91'):
         self.tb = tb
         self.te = te
         self.tlen = tlen
@@ -26,6 +36,7 @@ class RFAni():
         self.sacdatar.resample(0.1)
         self.nbs = int((self.tb + self.sacdatar.shift) / self.sacdatar.sampling)
         self.nes = int((self.te + self.sacdatar.shift) / self.sacdatar.sampling)
+        self.sacdatar.moveoutcorrect(ref_rayp=rayp, velmod=model, replace=True)
         self.baz_stack(val=val)
         self.search_peak_amp()
         # self.para = readpara(para=join(path, 'raysum-params'))
@@ -67,6 +78,7 @@ class RFAni():
                 engr[i, j, :] = self.rfr_baz[idx, nb[i, j]:ne[i, j]]
         return engr
 
+    @jit
     def radial_energy_max(self):
         energy = np.zeros([self.fvd.shape[0], self.fvd.shape[1], self.ne-self.nb])
         # tmp_data = np.zeros(self.ne-self.nb)
@@ -84,6 +96,7 @@ class RFAni():
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
         return griddata(self.ani_points, energy, (self.fvd, self.deltat))
 
+    @jit
     def rotate_to_fast_slow(self):
         self.ani_points = np.empty([0, 2])
         for f in self.fvd_1d:
@@ -198,7 +211,7 @@ class RFAni():
         axr.set_title('R component')
         axt.set_title('T component')
         if outpath is not None and isinstance(outpath, str):
-            plt.savefig(join(outpath, 'rf_corrected.pdf'))
+            plt.savefig(join(outpath, 'rf_corrected.png'), dpi=400, bbox_inches='tight')
 
     def search_peak_list(self, energy, opt='max'):
         if opt == 'max':
@@ -221,7 +234,8 @@ class RFAni():
         for i, j in ind:
             best_fvd.append(self.fvd[i, j])
             best_dt.append(self.deltat[i, j])
-        return np.array(best_fvd), np.array(best_dt)
+        uniq_fd, uniq_td = average_delay(np.array(best_fvd), np.array(best_dt))
+        return uniq_fd, uniq_td
 
     def joint_ani(self, weight=[0.5, 0.3, 0.2]):
         self.energy_r = self.radial_energy_max()
