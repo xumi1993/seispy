@@ -17,6 +17,12 @@ def rfani():
                         default="rfani.dat", metavar="list_file_name")
     parser.add_argument('-l', help="Half length of time window cut around Pms phase, defaults to 3s",
                         default=3, metavar="half_time_length", type=float)
+    parser.add_argument('-r', help='Ray-parameter for moveout correction, defaults to 0.06 s/km',
+                        default=0.06, metavar="rayp")
+    parser.add_argument('-m', help='velocity model for moveout correction. \'iasp91\', \'prem\''
+                        'and \'ak135\' is valid for internal model. Specify path to velocity model for the customized model.' 
+                        'The format is the same as in Taup, but the depth should be monotonically increasing, defaults to \'iasp91\'',
+                        default='iasp91', metavar="velocity_model")
     parser.add_argument('-o', dest='outpath', help="Directory to the image, defaults to current directory.", default='./')
     parser.add_argument('-p', help="If plot RFs stacked by back-azimuth, defaults to \'False\'",
                         dest="isplot", action='store_true', default=False)
@@ -28,8 +34,8 @@ def rfani():
     rfsta = SACStation(arg.rfpath)
     bf, bt = rfsta.jointani(timewin[0], timewin[1], tlen=arg.l, weight=weights)
     with open(arg.c, 'a+') as fid:
-        for f, t in zip(bf, bt):
-            fid.write('{}\t{:.3f}\t{:.3f}\t{:.2f}\t{:.2f}\n'.format(rfsta.staname, rfsta.stla, rfsta.stlo, f, t))
+        fid.write('{}\t{:.3f}\t{:.3f}\t{:.2f}\t{:.2f}\t{:.2f}\t{:.2f}\n'.format(
+                  rfsta.staname, rfsta.stla, rfsta.stlo, bf[0], bt[0], bf[1], bt[1]))
     if arg.isplot:
         rfsta.ani.plot_stack_baz(outpath=arg.outpath)
     rfsta.ani.plot_polar(outpath=arg.outpath)

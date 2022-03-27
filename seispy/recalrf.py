@@ -1,4 +1,3 @@
-import imp
 from seispy.rf import RF, datestr2regex, SACFileNotFoundError
 from seispy.eq import EQ
 import numpy as np

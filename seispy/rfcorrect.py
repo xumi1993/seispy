@@ -2,7 +2,7 @@ from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
 from scipy.signal import resample
-from os.path import dirname, join, exists, basename, isfile
+from os.path import dirname, join, exists, basename, isfile, abspath
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
@@ -12,8 +12,6 @@ from seispy.slantstack import SlantStack
 from seispy.utils import DepModel, tpds, Mod3DPerturbation
 import warnings
 import glob
-
-warnings.filterwarnings("ignore")
 
 
 class SACStation(object):
@@ -33,8 +31,8 @@ class SACStation(object):
         
         self.only_r = only_r
         if isfile(data_path):
-            data_path = dirname(data_path)
-        self.staname = basename(data_path)
+            data_path = dirname(abspath(data_path))
+        self.staname = basename(abspath(data_path))
         evt_lsts = glob.glob(join(data_path, '*finallist.dat'))
         if len(evt_lsts) == 0:
             raise FileNotFoundError("No such *finallist.dat in the {}".format(data_path))
@@ -103,13 +101,30 @@ class SACStation(object):
         self.rflength = npts
         self.time_axis = np.arange(npts) * dt - self.shift
 
-    def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91'):
-        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, velmod=velmod)
-        return rf_corr
+    def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91', replace=False):
+        if not self.only_r:
+            t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod)
+        else:
+            t_corr = None
+        if 'datar' in self.__dict__:
+            chan = 'r'
+        elif 'dataz' in self.__dict__:
+            chan = 'z'
+        elif 'datal' in self.__dict__:
+            chan = 'l'
+        else:
+            pass
+        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan=chan, velmod=velmod)
+        if replace:
+            self.__dict__['data{}'.format(chan)] = rf_corr
+            if not self.only_r:
+                self.datat = t_corr
+        else:
+            return rf_corr, t_corr
 
     def psrf2depth(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
         self.dep_range = dep_range
-        rfdepth, _, _, _ = psrf2depth(self, dep_range, sampling=self.sampling, shift=self.shift, velmod=velmod, srayp=srayp)
+        rfdepth, _, _, _ = psrf2depth(self, dep_range, velmod=velmod, srayp=srayp)
         return rfdepth
 
     def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
@@ -123,7 +138,11 @@ class SACStation(object):
         pplat_s, pplon_s, _, _, tpds = psrf_3D_raytracing(self, dep_range, mod3d, srayp=srayp)
         return pplat_s, pplon_s, tpds
 
-    def psrf_3D_moveoutcorrect(self,  mod3dpath, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
+    def psrf_3D_moveoutcorrect(self, mod3dpath, **kwargs):
+        warnings.warn('The fuction will be change to RFStation.psrf_3D_timecorrect in the future')
+        self.psrf_3D_timecorrect(mod3dpath, **kwargs)
+
+    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
         pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(self, dep_range, velmod=velmod, srayp=srayp)
@@ -131,8 +150,30 @@ class SACStation(object):
         rfdepth, _ = time2depth(self, dep_range, tps)
         return rfdepth
 
-    def jointani(self, tb, te, tlen=3, stack_baz_val=10, weight=[0.4, 0.4, 0.2]):
-        self.ani = RFAni(self, tb, te, tlen=tlen)
+    def jointani(self, tb, te, tlen=3., stack_baz_val=10, rayp=0.06,
+                 model='iasp91', weight=[0.4, 0.4, 0.2]):
+        """Eastimate crustal anisotropy with a joint method. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
+
+        :param tb: Time before Pms for search Ps peak
+        :type tb: float
+        :param te: Time after Pms for search Ps peak
+        :type te: float
+        :param tlen: Half time length for cut out Ps phase, defaults to 3.0
+        :type tlen: float, optional
+        :param stack_baz_val: The interval for stacking binned by back-azimuth, defaults to 10
+        :type stack_baz_val: float, optional
+        :param rayp: Reference ray-parameter for moveout correction, defaults to 0.06
+        :type rayp: float, optional
+        :param model: velocity model for moveout correction. 'iasp91', 'prem' 
+                      and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
+                      The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
+        :type model: str, optional
+        :param weight: Weight for three different method, defaults to [0.4, 0.4, 0.2]
+        :type weight: list, optional
+        :return: Dominant fast velocity direction and time delay
+        :rtype: list, list
+        """
+        self.ani = RFAni(self, tb, te, tlen=tlen, rayp=rayp, model=model)
         self.ani.baz_stack(val=stack_baz_val)
         best_f, best_t = self.ani.joint_ani(weight=weight)
         return best_f, best_t
@@ -191,21 +232,27 @@ def _imag2nan(arr):
     return arr
 
 
-def moveoutcorrect_ref(stadatar, raypref, YAxisRange, sampling=None, shift=None, velmod='iasp91'):
+def moveoutcorrect_ref(stadatar, raypref, YAxisRange, 
+                       chan='r', velmod='iasp91'):
     """Moveout correction refer to a specified ray-parameter
     
     :param stadatar: data class of SACStation
     :param raypref: referred ray parameter in rad
     :param YAxisRange: Depth range in nd.array type
     :param velmod: Path to velocity model
+    :param chan: channel name for correction, 'r', 't'...
 
     :return: Newdatar, EndIndex
     """
     sampling = stadatar.sampling
     shift = stadatar.shift
-    if 'datar' in stadatar.__dict__:
+    if chan == 'r':
         data = stadatar.datar
-    elif 'datal' in stadatar.__dict__:
+    elif chan == 't':
+        data = stadatar.datat
+    elif chan == 'z':
+        data = stadatar.dataz
+    elif chan == 'l':
         data = stadatar.datal
     else:
         raise ValueError('Field \'datar\' or \'datal\' must be in the SACStation')
@@ -384,21 +431,19 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
 
 def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0):
     """
-Back ray trace the S wavs with a assumed ray parameter of P.
+    Back ray trace the S wavs with a assumed ray parameter of P.
 
-Parameters
---------------
-stla: float
-    The latitude of the station
-stlo: float
-    The longitude of the station
-stadatar: object SACStation
-    The data class including PRFs and more parameters
-YAxisRange: array_like
-    The depth array with the same intervals
-mod3d: 'Mod3DPerturbation' object
-    The 3D velocity model with fields of ``dep``, ``lat``,
-    ``lon``, ``vp`` and ``vs``.
+    :param stadatar: The data class including PRFs and more parameters
+    :type stadatar: object RFStation
+    :param YAxisRange: The depth array with the same intervals
+    :type YAxisRange: numpy.ndarray
+    :param mod3d:  The 3D velocity model with fields of ``dep``, ``lat``,
+                    ``lon``, ``vp`` and ``vs``.
+    :type mod3d: 'Mod3DPerturbation' object
+    :param elevation: Elevation of this station relative to sea level
+    :type elevation: float
+    :return: pplat_s, pplon_s, pplat_p, pplon_p, tps
+    :type: numpy.ndarray * 5
     """
     R = 6371.0 - YAxisRange + elevation
     dep_range = YAxisRange.copy()
