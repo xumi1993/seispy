@@ -6,7 +6,6 @@ from os.path import join, abspath, dirname
 from seispy.geo import cosd, sind, extrema
 from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map
-from numba import jit
 
 
 def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
@@ -78,7 +77,6 @@ class RFAni():
                 engr[i, j, :] = self.rfr_baz[idx, nb[i, j]:ne[i, j]]
         return engr
 
-    @jit
     def radial_energy_max(self):
         energy = np.zeros([self.fvd.shape[0], self.fvd.shape[1], self.ne-self.nb])
         # tmp_data = np.zeros(self.ne-self.nb)
@@ -96,7 +94,6 @@ class RFAni():
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
         return griddata(self.ani_points, energy, (self.fvd, self.deltat))
 
-    @jit
     def rotate_to_fast_slow(self):
         self.ani_points = np.empty([0, 2])
         for f in self.fvd_1d:

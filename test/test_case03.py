@@ -43,4 +43,5 @@ def test_sub03():
     os.remove(ccp.cpara.stackfile)
 
 if __name__ == '__main__':
-    test_sub03()
+    # test_download()
+    test_sub01()

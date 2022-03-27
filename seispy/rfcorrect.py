@@ -12,7 +12,6 @@ from seispy.slantstack import SlantStack
 from seispy.utils import DepModel, tpds, Mod3DPerturbation
 import warnings
 import glob
-from numba import jit
 
 
 class SACStation(object):
@@ -233,7 +232,6 @@ def _imag2nan(arr):
     return arr
 
 
-@jit
 def moveoutcorrect_ref(stadatar, raypref, YAxisRange, 
                        chan='r', velmod='iasp91'):
     """Moveout correction refer to a specified ray-parameter
@@ -298,7 +296,6 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     return Newdatar, EndIndex
 
 
-@jit
 def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     """
     :param stadatar:
@@ -374,7 +371,6 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     # return PS_RFdepth, EndIndex, x_s, x_p
 
 
-@jit
 def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
     x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (srayp ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
     x_p = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (prayp ** 2. * (dep_mod.R / dep_mod.vp) ** -2)) - 1))
@@ -395,7 +391,6 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
         return tps, x_s, x_p
 
 
-@jit
 def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     dep_mod = DepModel(YAxisRange, velmod, stadatar.stel)
 
@@ -434,7 +429,6 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     return pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps
 
 
-@jit
 def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0):
     """
     Back ray trace the S wavs with a assumed ray parameter of P.
@@ -523,7 +517,6 @@ def interp_depth_model(model, lat, lon, new_dep):
     return vp, vs
 
 
-@jit
 def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, YAxisRange, mod3d):
     ev_num, _ = raylength_p.shape
     timecorrections = np.zeros_like(raylength_p)
@@ -540,7 +533,6 @@ def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength
     return Tpds + timecorrections
 
 
-@jit
 def time2depth(stadatar, YAxisRange, Tpds):
     time_axis = np.arange(0, stadatar.rflength) * stadatar.sampling - stadatar.shift
     PS_RFdepth = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
