@@ -2,6 +2,8 @@ from seispy.rfcorrect import RFStation
 import pytest
 from os.path import exists
 from subprocess import Popen
+from seispy.plotR import plotr
+from seispy.plotRT import plotrt
 
 
 def test_download():
@@ -23,6 +25,7 @@ def test_sub02():
     rfs.moveoutcorrect()
     rfs.psrf2depth()
     rfs.psrf_1D_raytracing()
+    rfs.slantstack()
 
 
 def test_sub03():
@@ -31,3 +34,10 @@ def test_sub03():
     rfs.harmonic(-2, 12)
     rfs.harmo.write_constant()
     rfs.harmo.plot()
+
+
+def test_sub04():
+    rfs = RFStation('ex-rfani/SC.LTA')
+    rfs.resample(0.1)
+    plotr(rfs, outpath='./', xlim=[-2, 80], key='bazi', enf=6, format='pdf')
+    plotrt(rfs, enf=3, out_path='./', key='bazi', outformat='g', xmax=30)

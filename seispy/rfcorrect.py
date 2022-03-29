@@ -41,10 +41,10 @@ class RFStation(object):
             raise ValueError("More than one finallist.dat in the {}".format(data_path))
         else:
             evt_lst = evt_lsts[0]
-        dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
+        self.dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
-            np.loadtxt(evt_lst, dtype=dtype, unpack=True, ndmin=1)
+            np.loadtxt(evt_lst, dtype=self.dtype, unpack=True, ndmin=1)
         # self.event = [datestr.decode() for datestr in self.event]
         # self.phase = [ph.decode() for ph in self.phase]
         self.rayp = skm2srad(self.rayp)
@@ -112,6 +112,19 @@ class RFStation(object):
         self.sampling = dt
         self.rflength = npts
         self.time_axis = np.arange(npts) * dt - self.shift
+
+    def sort(self, key='bazi'):
+        """Sort RFs by keys in given 'evt', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag'
+
+        :param key: key to sort, defaults to 'bazi'
+        :type key: str, optional
+        """
+        idx = np.argsort(self.__dict__[key])
+        for keyarg in self.dtype['names']:
+            self.__dict__[keyarg] = self.__dict__[keyarg][idx]
+        self.__dict__['data{}'.format(self.comp.lower())] = self.__dict__['data{}'.format(self.comp.lower())][idx]
+        if not self.only_r:
+            self.datat = self.datat[idx]
 
     def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91', replace=False):
         """Moveout correction with specified reference ray-parameter and depth
@@ -239,6 +252,23 @@ class RFStation(object):
         return self.slant.stack_amp
 
     def harmonic(self, tb=-5, te=10):
+        """Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
+
+        :param tb: Start time relative to P, defaults to -5
+        :type tb: float, optional
+        :param te: End time relative to P, defaults to 10
+        :type te: float, optional
+
+        Returns
+        -------
+        harmonic_trans: numpy.ndarray, float
+                Harmonic components with shape of ``(5, nsamp)``, ``nsamp = (te-tb)/RFStation.sampling``
+
+        unmodel_trans: numpy.ndarray, float
+                Unmodel components with shape same as harmonic_trans.
+        """
+        if self.only_r:
+            raise ValueError('Transverse RFs are nessary for harmonic decomposition')
         self.harmo = Harmonics(self, tb, te)
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans

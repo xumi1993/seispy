@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
-from seispy.rfcorrect import SACStation
+from seispy.rfcorrect import RFStation, SACStation
 from seispy.rf import CfgParser
 import argparse
 import numpy as np
@@ -123,7 +123,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30,
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(rfpath, enf=3, out_path='./', outformat='g', xmax=30):
+def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xmax=30):
     """Plot PRFs with R and T components
 
     :param rfpath: Path to PRFs
@@ -135,20 +135,14 @@ def plotrt(rfpath, enf=3, out_path='./', outformat='g', xmax=30):
     :param outformat: File format of the image file, g as \'png\', f as \'pdf\', defaults to 'g'
     :type outformat: str, optional
     """
-    station = basename(rfpath)
-    lst = join(rfpath, station+'finallist.dat')
-    if not exists(lst):
-        raise FileExistsError('No such a final list as {}'.format(lst))
-    if not exists(out_path):
-        raise FileExistsError('The output path {} not exists'.format(out_path))
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
-    stadata = read_process_data(rfpath)
-    plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=enf)
-    set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmax=xmax, comp=stadata.comp)
+    rfsta.sort(key)
+    plot_waves(axr, axt, axb, axr_sum, axt_sum, rfsta, enf=enf)
+    set_fig(axr, axt, axb, axr_sum, axt_sum, rfsta, rfsta.staname, xmax=xmax, comp=rfsta.comp)
     if outformat == 'g':
-        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.png'.format(stadata.f0[0])), dpi=400, bbox_inches='tight')
+        h.savefig(join(out_path, rfsta.staname+'_RT_bazorder_{:.1f}.png'.format(rfsta.f0[0])), dpi=400, bbox_inches='tight')
     elif outformat == 'f':
-        h.savefig(join(out_path, station+'_RT_bazorder_{:.1f}.pdf'.format(stadata.f0[0])), format='pdf', bbox_inches='tight')
+        h.savefig(join(out_path, rfsta.staname+'_RT_bazorder_{:.1f}.pdf'.format(rfsta.f0[0])), format='pdf', bbox_inches='tight')
 
 
 def main():
@@ -162,7 +156,8 @@ def main():
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
-    plotrt(rfpath=arg.rfpath, enf=arg.enf, out_path=arg.output, outformat=arg.format, xmax=arg.x)
+    rfsta = RFStation(arg.rfpath)
+    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xmax=arg.x)
 
 
 if __name__ == '__main__':
