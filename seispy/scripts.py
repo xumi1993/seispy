@@ -1,12 +1,31 @@
 import numpy as np
 import argparse
-from seispy.rfcorrect import SACStation
+from seispy.rfcorrect import RFStation
 from seispy.ccp3d import CCP3D
 from seispy.ccpprofile import CCPProfile
 from scipy.interpolate import interp1d
 from seispy.utils import read_rfdep
 from seispy.rf import RF
 from seispy.recalrf import ReRF
+
+
+def rfharmo():
+    parser = argparse.ArgumentParser('Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs')
+    parser.add_argument('rfpath', type=str, help="Path to PRFs")
+    parser.add_argument('-t', help="Time window from tb to te for triming RFs, NOTE: do not insert space before this argument, defaults to -2/10",
+                        metavar='tb/te', default='-2/10')
+    parser.add_argument('-s', help="Resample RFs with sampling interval of dt", metavar='dt', default=None, type=float)
+    parser.add_argument('-o', help="Specify output path for saving constant component.", metavar='outpath', default=None, type=str)
+    parser.add_argument('-p', help='Figure output path, defaults to ./', metavar='figure_path', default='./', type=str)
+    args = parser.parse_args()
+    rfsta = RFStation(args.rfpath)
+    if args.s is not None:
+        rfsta.resample(args.s)
+    twin = [float(v) for v in args.t.split('/')]
+    rfsta.harmo(twin[0], twin[1])
+    if args.o is not None:
+        rfsta.harmo.write_constant(args.o)
+    rfsta.harmo.plot(outpath=args.p)
 
 
 def rfani():
@@ -31,7 +50,7 @@ def rfani():
     arg = parser.parse_args()
     weights = np.array(arg.weight.split('/')).astype(float)
     timewin = np.array(arg.t.split('/')).astype(float)
-    rfsta = SACStation(arg.rfpath)
+    rfsta = RFStation(arg.rfpath)
     bf, bt = rfsta.jointani(timewin[0], timewin[1], tlen=arg.l, weight=weights)
     with open(arg.c, 'a+') as fid:
         fid.write('{}\t{:.3f}\t{:.3f}\t{:.2f}\t{:.2f}\t{:.2f}\t{:.2f}\n'.format(
@@ -81,7 +100,7 @@ def get_pierce_points():
     arg = parser.parse_args()
     rfdep = read_rfdep(arg.rfdepth_path)
     if arg.d > rfdep[0]['depthrange'][-1]:
-        raise ValueError('The depth exceed max depth in {}'.format(arg.rfdepth_path))
+        parser.error('The depth exceed max depth in {}'.format(arg.rfdepth_path))
     with open(arg.o, 'w') as f:
         for sta in rfdep:
             for i in range(sta['piercelat'].shape[0]):

@@ -8,13 +8,14 @@ from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
 from seispy.psrayp import get_psrayp
 from seispy.rfani import RFAni
 from seispy.slantstack import SlantStack
+from seispy.harmonics import Harmonics
 # import matplotlib.pyplot as plt
 from seispy.utils import DepModel, tpds, Mod3DPerturbation
 import warnings
 import glob
 
 
-class SACStation(object):
+class RFStation(object):
     def __init__(self, data_path, only_r=False):
         """
         Class for derivative process of RFs.
@@ -56,7 +57,10 @@ class SACStation(object):
             self.comp = 'Q'
         self.stla = sample_sac.stla
         self.stlo = sample_sac.stlo
-        self.stel = sample_sac.stel
+        if sample_sac.stel is None:
+            self.stel = 0.
+        else:
+            self.stel = sample_sac.stel
         self.rflength = sample_sac.npts
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
@@ -234,8 +238,13 @@ class SACStation(object):
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
+    def harmonic_trans(self, tb=-5, te=10):
+        self.harmo = Harmonics(self, tb, te)
+        self.harmo_trans()
+        return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
-class SRFStation(SACStation):
+
+class SRFStation(RFStation):
     def __init__(self, path):
         fnames = sorted(glob.glob(join(path, '*S_*.sac')))
         self.ev_num = len(fnames)
@@ -264,7 +273,7 @@ class SRFStation(SACStation):
             self.datal[i] = sac.data
         self.rayp = skm2srad(self.rayp)
 
-class RFStation(SACStation):
+class SACStation(RFStation):
     def __init__(self, data_path, only_r=False):
         """Class for derivative process of RFs.
 
@@ -287,7 +296,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
                        chan='r', velmod='iasp91'):
     """Moveout correction refer to a specified ray-parameter
     
-    :param stadatar: data class of SACStation
+    :param stadatar: data class of RFStation
     :param raypref: referred ray parameter in rad
     :param YAxisRange: Depth range in nd.array type
     :param velmod: Path to velocity model
@@ -395,31 +404,6 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     ps_rfdepth, endindex = time2depth(stadatar, dep_mod.depths, tps)
     return ps_rfdepth, endindex, x_s, x_p
 
-    # time_axis = np.arange(0, stadatar.rflength) * sampling - shift
-    # PS_RFdepth = np.zeros([stadatar.ev_num, dep_mod.depths.shape[0]])
-    # EndIndex = np.zeros(stadatar.ev_num)
-    # for i in range(stadatar.ev_num):
-    #     TempTpds = Tpds[i, :]
-    #     StopIndex = np.where(np.imag(TempTpds) == 1)[0]
-    #     if StopIndex.size == 0:
-    #         EndIndex[i] = dep_mod.depths.shape[0]
-    #         DepthAxis = interp1d(TempTpds, dep_mod.depths, bounds_error=False)(time_axis)
-    #     else:
-    #         EndIndex[i] = StopIndex[0] - 1
-    #         DepthAxis = interp1d(TempTpds[0:StopIndex], dep_mod.depths[0: StopIndex], bounds_error=False)(time_axis)
-
-    #     PS_RFTempAmps = stadatar.datar[i]
-    #     ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
-
-    #     if ValueIndices.size == 0:
-    #         continue
-    #     elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
-    #         continue
-    #     else:
-    #         PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
-    #         PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
-    # return PS_RFdepth, EndIndex, x_s, x_p
-
 
 def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
     x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (srayp ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
@@ -429,12 +413,12 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
         raylength_p = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vs) ** 2) - (prayp ** 2)) * dep_mod.vs)
     tps = tpds(dep_mod, srayp, prayp)
     if dep_mod.elevation != 0:
-        x_s = interp1d(dep_mod.depths_elev, x_s)(dep_mod.depths)
-        x_p = interp1d(dep_mod.depths_elev, x_p)(dep_mod.depths)
-        tps = interp1d(dep_mod.depths_elev, tps)(dep_mod.depths)
+        x_s = interp1d(dep_mod.depths_elev, x_s, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
+        x_p = interp1d(dep_mod.depths_elev, x_p, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
+        tps = interp1d(dep_mod.depths_elev, tps, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
         if is_raylen:
-            raylength_s = interp1d(dep_mod.depths_elev, raylength_s)(dep_mod.depths)
-            raylength_p = interp1d(dep_mod.depths_elev, raylength_p)(dep_mod.depths)         
+            raylength_s = interp1d(dep_mod.depths_elev, raylength_s, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
+            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=np.nan)(dep_mod.depths)         
     if is_raylen:
         return tps, x_s, x_p, raylength_s, raylength_p
     else:
