@@ -238,9 +238,9 @@ class RFStation(object):
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
-    def harmonic_trans(self, tb=-5, te=10):
+    def harmonic(self, tb=-5, te=10):
         self.harmo = Harmonics(self, tb, te)
-        self.harmo_trans()
+        self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
 

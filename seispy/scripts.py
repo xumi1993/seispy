@@ -22,7 +22,7 @@ def rfharmo():
     if args.s is not None:
         rfsta.resample(args.s)
     twin = [float(v) for v in args.t.split('/')]
-    rfsta.harmo(twin[0], twin[1])
+    rfsta.harmonic(twin[0], twin[1])
     if args.o is not None:
         rfsta.harmo.write_constant(args.o)
     rfsta.harmo.plot(outpath=args.p)

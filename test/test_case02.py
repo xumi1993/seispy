@@ -28,6 +28,6 @@ def test_sub02():
 def test_sub03():
     rfs = RFStation('ex-rfani/SC.LTA')
     rfs.resample(0.1)
-    rfs.harmo(-2, 12)
+    rfs.harmonic(-2, 12)
     rfs.harmo.write_constant()
     rfs.harmo.plot()
