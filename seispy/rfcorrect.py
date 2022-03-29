@@ -41,7 +41,7 @@ class RFStation(object):
             raise ValueError("More than one finallist.dat in the {}".format(data_path))
         else:
             evt_lst = evt_lsts[0]
-        self.dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
+        self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
             np.loadtxt(evt_lst, dtype=self.dtype, unpack=True, ndmin=1)
@@ -114,9 +114,10 @@ class RFStation(object):
         self.time_axis = np.arange(npts) * dt - self.shift
 
     def sort(self, key='bazi'):
-        """Sort RFs by keys in given 'evt', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag'
+        """Sort RFs by keys in given ``event``, ``evla``, ``evlo``, ``evdp``,
+        ``dis``, ``bazi``, ``rayp``, ``mag``, ``f0``
 
-        :param key: key to sort, defaults to 'bazi'
+        :param key: key to sort, defaults to ``bazi``
         :type key: str, optional
         """
         idx = np.argsort(self.__dict__[key])
@@ -139,8 +140,13 @@ class RFStation(object):
         :type velmod: str, optional
         :param replace: whether replace original data, False to return new array, defaults to False
         :type replace: bool, optional
-        :return: rf_corr, t_corr
-        :rtype: list
+
+        Return
+        -------
+        rf_corr: Corrected RFs with component of ``RFStation.comp``
+
+        t_corr: Corrected RFs in transverse component. If ``only_r`` is ``True``, this variable is ``None``
+        
         """
         if not self.only_r:
             t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod)

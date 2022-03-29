@@ -161,5 +161,4 @@ def main():
 
 
 if __name__ == '__main__':
-    # plotrt('XHL01')
     pass
