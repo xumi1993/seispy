@@ -413,12 +413,12 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
         raylength_p = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vs) ** 2) - (prayp ** 2)) * dep_mod.vs)
     tps = tpds(dep_mod, srayp, prayp)
     if dep_mod.elevation != 0:
-        x_s = interp1d(dep_mod.depths_elev, x_s, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
-        x_p = interp1d(dep_mod.depths_elev, x_p, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
-        tps = interp1d(dep_mod.depths_elev, tps, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
+        x_s = interp1d(dep_mod.depths_elev, x_s, bounds_error=False, fill_value=(np.nan, x_s[-1]))(dep_mod.depths)
+        x_p = interp1d(dep_mod.depths_elev, x_p, bounds_error=False, fill_value=(np.nan, x_p[-1]))(dep_mod.depths)
+        tps = interp1d(dep_mod.depths_elev, tps, bounds_error=False, fill_value=(np.nan, tps[-1]))(dep_mod.depths)
         if is_raylen:
-            raylength_s = interp1d(dep_mod.depths_elev, raylength_s, bounds_error=False, fill_value=np.nan)(dep_mod.depths)
-            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=np.nan)(dep_mod.depths)         
+            raylength_s = interp1d(dep_mod.depths_elev, raylength_s, bounds_error=False, fill_value=(np.nan, raylength_s[-1]))(dep_mod.depths)
+            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=(np.nan, raylength_p[-1]))(dep_mod.depths)         
     if is_raylen:
         return tps, x_s, x_p, raylength_s, raylength_p
     else:
