@@ -48,7 +48,7 @@ class RPickFigure(RFFigure):
             self.comp = 'R'
         elif len(glob.glob(join(self.rfpath, '*P_Q.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*P_Q.sac'))
-            self.comp = 'L'
+            self.comp = 'Q'
         elif len(glob.glob(join(self.rfpath, '*S_L.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*S_L.sac'))
             self.comp = 'L'
