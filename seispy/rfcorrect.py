@@ -407,7 +407,6 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize=True
     if srayp is None:
         for i in range(stadatar.ev_num):
             tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], sphere=sphere)
-            print(np.where(np.isnan(tps[i])), stadatar.rayp[i], sphere)
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
         if isinstance(srayp, str):
             if not exists(srayp):
