@@ -1,4 +1,3 @@
-from importlib_metadata import _top_level_declared
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn

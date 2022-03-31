@@ -1,4 +1,3 @@
-from math import e
 import sys
 import os
 import argparse

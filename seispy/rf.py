@@ -17,7 +17,6 @@ import pandas as pd
 import configparser
 import argparse
 import sys
-import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
 import pickle
 
