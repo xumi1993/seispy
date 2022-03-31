@@ -19,7 +19,8 @@ def test_download():
     proc.communicate()
 
 def init_RF():
-    rf = RF(phase='P', cfg_file='ex-prf/rf.cfg')
+    rf = RF(cfg_file='ex-prf/rf.cfg')
+    rf.para.phase = 'P'
     rf.para.datapath = 'ex-prf/Data.CB.NJ2'
     rf.para.rfpath = 'ex-prf/RFresult/CB.NJ2'
     rf.load_stainfo()
@@ -80,6 +81,7 @@ def test_sub03():
 def test_sub04():
     rf = ReRF('ex-prf/RFresult/CB.NJ2/CB.NJ2finallist.dat',
               cfg_file='ex-prf/rf.cfg')
+    rf.para.phase = 'P'
     rf.para.datapath = 'ex-prf/Data.CB.NJ2'
     rf.para.rfpath = 'ex-prf/RFresult/CB.NJ2_re'
     rf.para.decon_method = 'iter'

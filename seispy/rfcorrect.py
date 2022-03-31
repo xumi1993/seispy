@@ -229,12 +229,12 @@ class RFStation(object):
         warnings.warn('The fuction will be change to RFStation.psrf_3D_timecorrect in the future')
         self.psrf_3D_timecorrect(mod3dpath, **kwargs)
 
-    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), **kwargs):
+    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), normalize=True, **kwargs):
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
         pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(self, dep_range, **kwargs)
         tps = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, dep_range, mod3d)
-        rfdepth, _ = time2depth(self, dep_range, tps, **kwargs)
+        rfdepth, _ = time2depth(self, dep_range, tps, normalize=normalize)
         return rfdepth
 
     def jointani(self, tb, te, tlen=3., stack_baz_val=10, rayp=0.06,
