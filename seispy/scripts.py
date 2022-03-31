@@ -186,8 +186,10 @@ def srf():
     parser = common_parser()
     parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround S phase with a GUI.',
                         action='store_true')
+    parser.add_argument('-i', help='Wether grid search incidence angle',
+                        action='store_true')
     arg = parser.parse_args()
-    pjt = RF(cfg_file=arg.cfg_file, phase='S')
+    pjt = RF(cfg_file=arg.cfg_file)
 
     pjt.para.switchEN = arg.isswitch
     pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
@@ -205,7 +207,7 @@ def srf():
         pjt.baz_correct()
     else:
         pass
-    pjt.rotate()
+    pjt.rotate(search_inc=arg.i)
     if arg.p:
         pjt.pick()
     if arg.w:

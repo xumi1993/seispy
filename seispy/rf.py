@@ -1,10 +1,9 @@
-from genericpath import exists
 import obspy
 from obspy import UTCDateTime
 from obspy.io.sac import SACTrace
 from obspy.taup import TauPyModel
 import re
-from os.path import join
+from os.path import join, exists
 from seispy.io import wsfetch
 from seispy.para import para
 from seispy import distaz
@@ -39,7 +38,8 @@ class SACFileNotFoundError(Exception):
         print('No sac files found with {}'.format(self.matchkey))
 
 def datestr2regex(datestr):
-    pattern = datestr.replace('%Y', r'\d{4}')
+    pattern = datestr.replace('%y', r'\d{2}')
+    pattern = pattern.replace('%Y', r'\d{4}')
     pattern = pattern.replace('%m', r'\d{2}')
     pattern = pattern.replace('%d', r'\d{2}')
     pattern = pattern.replace('%j', r'\d{3}')
@@ -92,7 +92,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         try:
             datestr = re.findall(pattern, ref_sac)[0]
         except IndexError:
-            raise IndexError('Error data format of {} in {}'.format(dateformat, ref_sac))
+            raise IndexError('Error data format of {} in {}'.format(pattern, ref_sac))
         if isinstance(offset, (int, float)):
             sac_files.append([datestr, UTCDateTime.strptime(datestr, dateformat), -offset])
         elif offset is None:
@@ -119,7 +119,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=results.index.values)
-        eq_match = eq_match.append(this_df)
+        eq_match = pd.concat([eq_match, this_df])
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
@@ -140,10 +140,9 @@ class stainfo():
         (self.network, self.station, self.stla, self.stlo, self.stel) = load_station_info(pathname, ref_comp, suffix)
 
 
-def CfgParser(cfg_file, phase='P'):
+def CfgParser(cfg_file):
     cf = configparser.RawConfigParser()
     pa = para()
-    pa.phase = phase
     try:
         cf.read(cfg_file)
     except Exception:
@@ -203,21 +202,12 @@ def CfgModify(cfg_file, session, key, value):
     cf.write(open(cfg_file, 'w'))
 
 
-def _plotampt(x, y, ampt, shift_all):
-    xx, yy = np.meshgrid(x, y)
-    f = plt.figure(figsize=(8, 8))
-    plt.pcolor(xx, yy, ampt)
-    plt.scatter(shift_all, y)
-    return f
-
-
 class RF(object):
-    def __init__(self, phase='P', cfg_file=None, log=None):
+    def __init__(self, cfg_file=None, log=None):
         if cfg_file is None:
             self.para = para()
-            self.para.phase = phase
         elif isinstance(cfg_file, str):
-            self.para = CfgParser(cfg_file, phase)
+            self.para = CfgParser(cfg_file)
         else:
             raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg_file)))
         if not isinstance(self.para, para):
@@ -358,8 +348,7 @@ class RF(object):
     def cal_phase(self):
         self.logger.RFlog.info('Calculate {} arrivals and ray parameters for all data'.format(self.para.phase))
         for _, row in self.eqs.iterrows():
-            row['data'].get_arrival(self.model, row['evdp'], row['dis'])
-            # row['data'].get_raypara(self.model, row['evdp'], row['dis'])
+            row['data'].get_arrival(self.model, row['evdp'], row['dis'], phase=self.para.phase)
 
     def baz_correct(self, time_b=10, time_e=20, offset=90, correct_angle=None):
         if correct_angle is not None:
@@ -397,10 +386,14 @@ class RF(object):
         drop_idx = []
         for i, row in self.eqs.iterrows():
             try:
-                row['data'].rotate(row['bazi'], method=method, phase=self.para.phase, search_inc=search_inc)
+                row['data'].rotate(row['bazi'], method=method, search_inc=search_inc)
             except Exception as e:
                 self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_idx.append(i)
+                continue
+            if search_inc:
+                self.logger.RFlog.info('The incidence angle of {} was corrected by {:.1f} deg'.format(
+                                       row['data'].datestr, row['data'].inc_correction))
         self.eqs.drop(drop_idx, inplace=True)
 
     def drop_eq_snr(self, length=None):
@@ -409,7 +402,7 @@ class RF(object):
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
-            snr_E, snr_N, snr_Z = row['data'].snr(length=length, phase=self.para.phase)
+            snr_E, snr_N, snr_Z = row['data'].snr(length=length)
             mean_snr = np.mean([snr_E, snr_N, snr_Z])
             if mean_snr < self.para.noisegate:
                 drop_lst.append(i)
@@ -420,14 +413,14 @@ class RF(object):
         self.logger.RFlog.info('Trim waveforms from {0:.2f} before {2} to {1:.2f} after {2}'.format(
                                self.para.time_before, self.para.time_after, self.para.phase))
         for _, row in self.eqs.iterrows():
-            row['data'].trim(self.para.time_before, self.para.time_after, self.para.phase)
+            row['data'].trim(self.para.time_before, self.para.time_after)
     
     def pick(self, prepick=True, stl=5, ltl=10):
         if prepick:
             self.logger.RFlog.info('Pre-pick {} arrival using STA/LTA method'.format(self.para.phase))
             for _, row in self.eqs.iterrows():
                 row['data'].phase_trigger(self.para.time_before, self.para.time_after,
-                                        self.para.phase, stl=stl, ltl=ltl)
+                                          stl=stl, ltl=ltl)
         self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
         pickphase(self.eqs, self.para, self.logger)
 
@@ -440,9 +433,9 @@ class RF(object):
         for i, row in self.eqs.iterrows():
             count += 1
             try:
-                row['data'].deconvolute(shift, time_after, method=self.para.decon_method, f0=self.para.gauss, phase=self.para.phase,
-                                    only_r=self.para.only_r, itmax=self.para.itmax, minderr=self.para.minderr,
-                                    wlevel=self.para.wlevel, target_dt=self.para.target_dt)
+                row['data'].deconvolute(shift, time_after, method=self.para.decon_method, f0=self.para.gauss,
+                                        only_r=self.para.only_r, itmax=self.para.itmax, minderr=self.para.minderr,
+                                        wlevel=self.para.wlevel, target_dt=self.para.target_dt)
                 if self.para.decon_method == 'iter':
                     self.logger.RFlog.info('Iterative Decon {0} ({3}/{4}) iterations: {1}; final RMS: {2:.4f}'.format(
                         row['data'].datestr, row['data'].rf[0].stats.iter,
@@ -457,9 +450,9 @@ class RF(object):
 
     def saverf(self):
         npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
-        if self.para.phase == 'P':
+        if self.para.phase[-1] == 'P':
             shift = self.para.time_before
-        elif self.para.phase == 'S':
+        elif self.para.phase[-1] == 'S':
             shift = self.para.time_after
         else:
             pass
@@ -470,8 +463,8 @@ class RF(object):
         else:
             self.logger.RFlog.info('Save RFs with and criterion of {}'.format(self.para.criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, npts, phase=self.para.phase, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
-                row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), phase=self.para.phase, shift=shift,
+            if row['data'].judge_rf(shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
+                row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
                 good_lst.append(i)

@@ -67,6 +67,7 @@ class RPickFigure(RFFigure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
+        self.phases = [tr.stats.sac.ka for tr in self.rrf]
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
@@ -81,6 +82,7 @@ class RPickFigure(RFFigure):
             pass
         self.baz = self.baz[idx]
         self.gcarc = self.gcarc[idx]
+        self.phases = [self.phases[i] for i in idx]
         self.rrf = [self.rrf[i] for i in idx]
         # self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
         self.filenames = [self.filenames[i] for i in idx]

@@ -2,7 +2,7 @@ from os.path import join, dirname, exists
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
 from seispy import geo
-from seispy.geo import geo2sph, km2deg, sph2geo
+from seispy.geo import geo2sph, km2deg, skm2srad, sph2geo, srad2skm
 from seispy import distaz
 import numpy as np
 from scipy.interpolate import interp1d, interpn, splev, splrep, splprep
@@ -71,15 +71,41 @@ def from_file(mode_name):
     return filename
 
 
-def tpds(dep_mod, rayps, raypp):
-    return np.cumsum((np.sqrt((dep_mod.R / dep_mod.vs) ** 2 - rayps ** 2) -
-                     np.sqrt((dep_mod.R / dep_mod.vp) ** 2 - raypp ** 2)) *
-                     (dep_mod.dz / dep_mod.R))
+def tpds(dep_mod, rayps, raypp, sphere=True):
+    if sphere:
+        radius = dep_mod.R
+    else:
+        radius = 6371.
+    tps = np.cumsum((np.sqrt((radius / dep_mod.vs) ** 2 - rayps ** 2) -
+                     np.sqrt((radius / dep_mod.vp) ** 2 - raypp ** 2)) *
+                     (dep_mod.dz / radius))
+    return tps
 
 
-def radius_s(dep_mod, rayps):
-    return np.cumsum((dep_mod.dz / dep_mod.R) /
-                     np.sqrt((1. / (rayps ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
+def radius_s(dep_mod, rayp, phase='P', sphere=True):
+    if phase == 'P':
+        vel = dep_mod.vp
+    else:
+        vel = dep_mod.vs
+    if sphere:
+        radius = dep_mod.R
+    else:
+        radius = 6371.
+    hor_dis = np.cumsum((dep_mod.dz / radius) / np.sqrt((1. / (rayp ** 2. * (radius / vel) ** -2)) - 1))
+    return hor_dis
+
+
+def raylength(dep_mod, rayp, phase='P', sphere=True):
+    if phase == 'P':
+        vel = dep_mod.vp
+    else:
+        vel = dep_mod.vs
+    if sphere:
+        radius = dep_mod.R
+    else:
+        radius = 6371.
+    raylen = (dep_mod.dz * radius) / (np.sqrt(((radius / dep_mod.vs) ** 2) - (rayp ** 2)) * vel)
+    return raylen
 
 
 class Mod3DPerturbation:

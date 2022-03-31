@@ -1,3 +1,4 @@
+from importlib_metadata import _top_level_declared
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
@@ -10,13 +11,13 @@ from seispy.rfani import RFAni
 from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
 # import matplotlib.pyplot as plt
-from seispy.utils import DepModel, tpds, Mod3DPerturbation
+from seispy.utils import DepModel, radius_s, raylength, tpds, Mod3DPerturbation
 import warnings
 import glob
 
 
 class RFStation(object):
-    def __init__(self, data_path, only_r=False):
+    def __init__(self, data_path, only_r=False, prime_comp='R'):
         """
         Class for derivative process of RFs.
 
@@ -24,6 +25,8 @@ class RFStation(object):
         :type data_path: str
         :param only_r: Whether reading transverse RFs, defaults to False
         :type only_r: bool, optional
+        :param prime_comp: Prime component in RF filename. ``R`` or ``Q`` for PRF and ``L`` or ``Z`` for SRF
+        :type prime_comp: str
 
         .. warning::
 
@@ -31,6 +34,8 @@ class RFStation(object):
         """
         
         self.only_r = only_r
+        self.comp = prime_comp
+        self._chech_comp()
         if isfile(data_path):
             data_path = dirname(abspath(data_path))
         self.staname = basename(abspath(data_path))
@@ -45,16 +50,28 @@ class RFStation(object):
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
             np.loadtxt(evt_lst, dtype=self.dtype, unpack=True, ndmin=1)
-        # self.event = [datestr.decode() for datestr in self.event]
-        # self.phase = [ph.decode() for ph in self.phase]
         self.rayp = skm2srad(self.rayp)
         self.ev_num = self.evla.shape[0]
-        try:
-            sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_R.sac'))
-            self.comp = 'R'
-        except:
-            sample_sac = SACTrace.read(join(data_path, self.event[0] + '_' + self.phase[0] + '_Q.sac'))
-            self.comp = 'Q'
+        self.read_sample(data_path)
+        self.__dict__['data{}'.format(self.comp.lower())] = np.empty([self.ev_num, self.rflength])
+        if not only_r:
+            self.datat = np.empty([self.ev_num, self.rflength])
+            for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
+                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
+                sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
+                self.__dict__['data{}'.format(self.comp.lower())][_i] = sac.data
+                self.datat[_i] = sact.data
+        else:
+            for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
+                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
+                self.__dict__['data{}'.format(self.comp.lower())][_i] = sac.data
+
+    def read_sample(self, data_path):
+        fname = glob.glob(join(data_path, self.event[0] + '_' + self.phase[0] + '_{}.sac'.format(self.comp)))
+        if len(fname) == 0:
+            raise FileNotFoundError('No such files with comp of {} in {}'.format(self.comp, data_path))
+        else:
+            sample_sac = SACTrace.read(fname[0])
         self.stla = sample_sac.stla
         self.stlo = sample_sac.stlo
         if sample_sac.stel is None:
@@ -65,18 +82,6 @@ class RFStation(object):
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
         self.time_axis = np.arange(self.rflength) * self.sampling - self.shift
-        self.datar = np.empty([self.ev_num, self.rflength])
-        if not only_r:
-            self.datat = np.empty([self.ev_num, self.rflength])
-            for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
-                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
-                sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
-                self.datar[_i] = sac.data
-                self.datat[_i] = sact.data
-        else:
-            for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
-                sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
-                self.datar[_i] = sac.data
 
     @property
     def stel(self):
@@ -89,10 +94,18 @@ class RFStation(object):
         else:
             self._stel = value/1000
 
+    def _chech_comp(self):
+        if self.comp in ['R', 'Q']:
+            self.phase = 'P'
+        elif self.comp in ['L', 'Z']:
+            self.phase = 'S'
+        else:
+            raise ValueError('prime component should be in \'R\', \'Q\', \'L\' and \'Z\'')
+
     def normalize(self):
         """Normalize amplitude of each RFs.
         """
-        maxamp = np.nanmax(np.abs(self.datar), axis=1)
+        maxamp = np.nanmax(np.abs(self.__dict__['data{}'.format(self.comp.lower())]), axis=1)
         for i in range(self.ev_num):
             self.__dict__['data{}'.format(self.comp.lower())][i] /= maxamp[i]
             # self.datar[i] /= maxamp[i]
@@ -106,7 +119,8 @@ class RFStation(object):
         :type dt: float
         """
         npts = int(self.rflength * (self.sampling / dt)) + 1
-        self.datar = resample(self.datar, npts, axis=1)
+        self.__dict__['data{}'.format(self.comp.lower())] = resample(
+            self.__dict__['data{}'.format(self.comp.lower())], npts, axis=1)
         if not self.only_r:
             self.datat = resample(self.datat, npts, axis=1)
         self.sampling = dt
@@ -130,7 +144,7 @@ class RFStation(object):
     def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91', replace=False):
         """Moveout correction with specified reference ray-parameter and depth
 
-        :param ref_rayp: reference ray-parameter, defaults to 0.06
+        :param ref_rayp: reference ray-parameter in s/km, defaults to 0.06
         :type ref_rayp: float, optional
         :param dep_range: Depth range used for extracting velocity in velocity model, defaults to np.arange(0, 150)
         :type dep_range: numpy.ndarray, optional
@@ -168,7 +182,7 @@ class RFStation(object):
         else:
             return rf_corr, t_corr
 
-    def psrf2depth(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
+    def psrf2depth(self, dep_range=np.arange(0, 150), **kwargs):
         """Time-to-depth conversion with specified depth series.
 
         :param dep_range: Discret conversion depth, defaults to np.arange(0, 150)
@@ -183,10 +197,10 @@ class RFStation(object):
         :rtype: numpy.ndarray
         """
         self.dep_range = dep_range
-        rfdepth, _, _, _ = psrf2depth(self, dep_range, velmod=velmod, srayp=srayp)
+        rfdepth, _, _, _ = psrf2depth(self, dep_range, **kwargs)
         return rfdepth
 
-    def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
+    def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), **kwargs):
         """1D back ray tracing to obtained Ps conversion points at discret depthes
 
         :param dep_range: Discret conversion depth, defaults to np.arange(0, 150)
@@ -203,7 +217,7 @@ class RFStation(object):
         :rtype: list
         """
         self.dep_range = dep_range
-        pplat_s, pplon_s, _ , _, _, _, tpds = psrf_1D_raytracing(self, dep_range, velmod=velmod, srayp=srayp)
+        pplat_s, pplon_s, _ , _, _, _, tpds = psrf_1D_raytracing(self, dep_range, **kwargs)
         return pplat_s, pplon_s, tpds
 
     def psrf_3D_raytracing(self, mod3dpath, dep_range=np.arange(0, 150), srayp=None):
@@ -216,12 +230,12 @@ class RFStation(object):
         warnings.warn('The fuction will be change to RFStation.psrf_3D_timecorrect in the future')
         self.psrf_3D_timecorrect(mod3dpath, **kwargs)
 
-    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), velmod='iasp91', srayp=None):
+    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), **kwargs):
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
-        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(self, dep_range, velmod=velmod, srayp=srayp)
+        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(self, dep_range, **kwargs)
         tps = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, dep_range, mod3d)
-        rfdepth, _ = time2depth(self, dep_range, tps)
+        rfdepth, _ = time2depth(self, dep_range, tps, **kwargs)
         return rfdepth
 
     def jointani(self, tb, te, tlen=3., stack_baz_val=10, rayp=0.06,
@@ -253,7 +267,7 @@ class RFStation(object):
         return best_f, best_t
 
     def slantstack(self, ref_dis=None, rayp_range=None, tau_range=None):
-        self.slant = SlantStack(self.datar, self.time_axis, self.dis)
+        self.slant = SlantStack(self.__dict__['data{}'.format(self.comp.lower())], self.time_axis, self.dis)
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
@@ -280,35 +294,6 @@ class RFStation(object):
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
 
-class SRFStation(RFStation):
-    def __init__(self, path):
-        fnames = sorted(glob.glob(join(path, '*S_*.sac')))
-        self.ev_num = len(fnames)
-        self.rayp = np.zeros(self.ev_num)
-        self.bazi = np.zeros(self.ev_num)
-        self.dis = np.zeros(self.ev_num)
-        self.evla = np.zeros(self.ev_num)
-        self.evlo = np.zeros(self.ev_num)
-        self.evdp = np.zeros(self.ev_num)
-        sample_sac = SACTrace.read(fnames[0])
-        self.sampling = sample_sac.delta
-        self.stla = sample_sac.stla
-        self.stlo = sample_sac.stlo
-        self.shift = -sample_sac.b
-        self.rflength = sample_sac.npts
-        self.time_axis = np.arange(self.rflength) * self.sampling - self.shift
-        self.datal = np.zeros([self.ev_num, self.rflength])
-        for i, sacfile in enumerate(fnames):
-            sac = SACTrace.read(sacfile)
-            self.rayp[i] = sac.user0
-            self.bazi[i] = sac.baz
-            self.dis[i] = sac.gcarc
-            self.evla[i] = sac.evla
-            self.evlo[i] = sac.evlo
-            self.evdp[i] = sac.evdp
-            self.datal[i] = sac.data
-        self.rayp = skm2srad(self.rayp)
-
 class SACStation(RFStation):
     def __init__(self, data_path, only_r=False):
         """Class for derivative process of RFs.
@@ -329,7 +314,7 @@ def _imag2nan(arr):
 
 
 def moveoutcorrect_ref(stadatar, raypref, YAxisRange, 
-                       chan='r', velmod='iasp91'):
+                       chan='r', velmod='iasp91', sphere=True):
     """Moveout correction refer to a specified ray-parameter
     
     :param stadatar: data class of RFStation
@@ -357,8 +342,8 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     # x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     tps = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     for i in range(stadatar.ev_num):
-        tps[i], _, _ = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i])
-    Tpds_ref, _, _ = xps_tps_map(dep_mod, raypref, raypref)
+        tps[i], _, _ = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], sphere=sphere)
+    Tpds_ref, _, _ = xps_tps_map(dep_mod, raypref, raypref, sphere=sphere)
     Newdatar = np.zeros([stadatar.ev_num, stadatar.rflength])
     EndIndex = np.zeros(stadatar.ev_num)
 #
@@ -392,7 +377,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     return Newdatar, EndIndex
 
 
-def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
+def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize=True, sphere=True):
     """
     :param stadatar: data class of SACStation
     :param YAxisRange: Depth range in nd.array type
@@ -422,7 +407,8 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     tps = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     if srayp is None:
         for i in range(stadatar.ev_num):
-            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i])
+            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], sphere=sphere)
+            print(np.where(np.isnan(tps[i])), stadatar.rayp[i], sphere)
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
         if isinstance(srayp, str):
             if not exists(srayp):
@@ -434,20 +420,20 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None):
         for i in range(stadatar.ev_num):
             rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths)
             rayp = skm2srad(sdeg2skm(rayp))
-            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i])
+            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], sphere=sphere)
     else:
         raise TypeError('srayp should be path to Ps rayp lib')
-    ps_rfdepth, endindex = time2depth(stadatar, dep_mod.depths, tps)
+    ps_rfdepth, endindex = time2depth(stadatar, dep_mod.depths, tps, normalize=normalize)
     return ps_rfdepth, endindex, x_s, x_p
 
 
-def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
-    x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (srayp ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
-    x_p = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (prayp ** 2. * (dep_mod.R / dep_mod.vp) ** -2)) - 1))
+def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True):
+    x_s = radius_s(dep_mod, prayp, phase='S', sphere=sphere)
+    x_p = radius_s(dep_mod, prayp, phase='P', sphere=sphere)
     if is_raylen:
-        raylength_s = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vs) ** 2) - (srayp ** 2)) * dep_mod.vs)
-        raylength_p = (dep_mod.dz * dep_mod.R) / (np.sqrt(((dep_mod.R / dep_mod.vs) ** 2) - (prayp ** 2)) * dep_mod.vs)
-    tps = tpds(dep_mod, srayp, prayp)
+        raylength_s = raylength(dep_mod, srayp, phase='S', sphere=sphere)
+        raylength_p = raylength(dep_mod, prayp, phase='P', sphere=sphere)
+    tps = tpds(dep_mod, srayp, prayp, sphere=sphere)
     if dep_mod.elevation != 0:
         x_s = interp1d(dep_mod.depths_elev, x_s, bounds_error=False, fill_value=(np.nan, x_s[-1]))(dep_mod.depths)
         x_p = interp1d(dep_mod.depths_elev, x_p, bounds_error=False, fill_value=(np.nan, x_p[-1]))(dep_mod.depths)
@@ -461,7 +447,7 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False):
         return tps, x_s, x_p
 
 
-def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
+def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere=True):
     dep_mod = DepModel(YAxisRange, velmod, stadatar.stel)
 
     # x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -475,7 +461,8 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     tps = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     if srayp is None:
         for i in range(stadatar.ev_num):
-            tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True)
+            tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(
+                dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True, sphere=sphere)
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))
             pplat_p[i], pplon_p[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_p))
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
@@ -489,7 +476,7 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
         for i in range(stadatar.ev_num):
             rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths)
             rayp = skm2srad(sdeg2skm(rayp))
-            tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], is_raylen=True)
+            tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], is_raylen=True, sphere=sphere)
             x_s = _imag2nan(x_s)
             x_p = _imag2nan(x_p)
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))
@@ -499,7 +486,7 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None):
     return pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps
 
 
-def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0):
+def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0, sphere=True):
     """
     Back ray trace the S wavs with a assumed ray parameter of P.
 
@@ -515,7 +502,10 @@ def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0):
     :return: pplat_s, pplon_s, pplat_p, pplon_p, tps
     :type: numpy.ndarray * 5
     """
-    R = 6371.0 - YAxisRange + elevation
+    if sphere:
+        R = 6371.0 - YAxisRange + elevation
+    else:
+        R = 6371.0 + elevation
     dep_range = YAxisRange.copy()
     YAxisRange -= elevation
     ddepth = np.mean(np.diff(YAxisRange))
@@ -603,30 +593,31 @@ def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength
     return Tpds + timecorrections
 
 
-def time2depth(stadatar, YAxisRange, Tpds):
-    time_axis = np.arange(0, stadatar.rflength) * stadatar.sampling - stadatar.shift
+def time2depth(stadatar, YAxisRange, Tpds, normalize=True):
     PS_RFdepth = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     EndIndex = np.zeros(stadatar.ev_num)
     for i in range(stadatar.ev_num):
         TempTpds = Tpds[i, :]
         StopIndex = np.where(np.imag(TempTpds) == 1)[0]
         if StopIndex.size == 0:
-            EndIndex[i] = YAxisRange.shape[0] - 1
-            DepthAxis = interp1d(TempTpds, YAxisRange, bounds_error=False)(time_axis)
+            EndIndex[i] = YAxisRange.size - 1
+            DepthAxis = interp1d(TempTpds, YAxisRange, bounds_error=False)(stadatar.time_axis)
         else:
             EndIndex[i] = StopIndex[0] - 1
-            DepthAxis = interp1d(TempTpds[0:StopIndex], YAxisRange[0: StopIndex], bounds_error=False)(time_axis)
+            DepthAxis = interp1d(TempTpds[0:StopIndex], YAxisRange[0: StopIndex], bounds_error=False)(stadatar.time_axis)
 
-        PS_RFTempAmps = stadatar.datar[i]
+        PS_RFTempAmps = stadatar.__dict__['data{}'.format(stadatar.comp.lower())][i]
         ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
-
         if ValueIndices.size == 0:
             continue
         elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
             continue
         else:
             PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
-            PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
+            if normalize:
+                PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
+            else:
+                PS_RFdepth[i] = PS_RFAmps
     return PS_RFdepth, EndIndex
 
 

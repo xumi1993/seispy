@@ -148,6 +148,7 @@ class RFFigure(Figure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
+        self.phases = [tr.stats.sac.ka for tr in self.rrf]
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
@@ -163,6 +164,7 @@ class RFFigure(Figure):
             pass
         self.baz = self.baz[idx]
         self.gcarc = self.gcarc[idx]
+        self.phases = [self.phases[i] for i in idx]
         self.rrf = [self.rrf[i] for i in idx]
         self.trf = [self.trf[i] for i in idx]
         # self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
@@ -263,12 +265,11 @@ class RFFigure(Figure):
                     evla = self.rrf[i].stats.sac.evla
                     evlo = self.rrf[i].stats.sac.evlo
                     evdp = self.rrf[i].stats.sac.evdp
-                    dist = self.rrf[i].stats.sac.gcarc
-                    baz = self.rrf[i].stats.sac.baz
                     rayp = self.rrf[i].stats.sac.user0
                     mag = self.rrf[i].stats.sac.mag
                     gauss = self.rrf[i].stats.sac.user1
-                    fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
+                    fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (
+                              self.filenames[i], self.phases[i], evla, evlo, evdp, self.gcarc[i], self.baz[i], rayp, mag, gauss))
 
     def plot(self):
         plt.ion()
