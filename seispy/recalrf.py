@@ -55,8 +55,8 @@ def match_eq(eq_lst, pathname, logger, ref_comp='Z', suffix='SAC', offset=0,
 
 
 class ReRF(RF):
-    def __init__(self, finallist, phase='P', cfg_file=None, log=None):
-        super().__init__(phase, cfg_file, log)
+    def __init__(self, finallist, cfg_file=None, log=None):
+        super().__init__(cfg_file, log)
         self.eq_lst = self.read_finallist(finallist)
     
     def read_finallist(self, finallist):
