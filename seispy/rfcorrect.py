@@ -10,7 +10,7 @@ from seispy.rfani import RFAni
 from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
 # import matplotlib.pyplot as plt
-from seispy.utils import DepModel, radius_s, raylength, tpds, Mod3DPerturbation
+from seispy.utils import DepModel, Mod3DPerturbation
 import warnings
 import glob
 
@@ -212,18 +212,18 @@ class RFStation(object):
         :type srayp: numpy.lib.npyio.NpzFile, optional
         :return pplat_s: Latitude of conversion points
         :return pplon_s: Longitude of conversion points
-        :return tpds: Time difference of Ps at each depth
+        :return tps: Time difference of Ps at each depth
         :rtype: list
         """
         self.dep_range = dep_range
-        pplat_s, pplon_s, _ , _, _, _, tpds = psrf_1D_raytracing(self, dep_range, **kwargs)
-        return pplat_s, pplon_s, tpds
+        pplat_s, pplon_s, _ , _, _, _, tps = psrf_1D_raytracing(self, dep_range, **kwargs)
+        return pplat_s, pplon_s, tps
 
     def psrf_3D_raytracing(self, mod3dpath, dep_range=np.arange(0, 150), srayp=None):
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
-        pplat_s, pplon_s, _, _, tpds = psrf_3D_raytracing(self, dep_range, mod3d, srayp=srayp)
-        return pplat_s, pplon_s, tpds
+        pplat_s, pplon_s, _, _, tps = psrf_3D_raytracing(self, dep_range, mod3d, srayp=srayp)
+        return pplat_s, pplon_s, tps
 
     def psrf_3D_moveoutcorrect(self, mod3dpath, **kwargs):
         warnings.warn('The fuction will be change to RFStation.psrf_3D_timecorrect in the future')
@@ -232,8 +232,8 @@ class RFStation(object):
     def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), normalize=True, **kwargs):
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
-        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds = psrf_1D_raytracing(self, dep_range, **kwargs)
-        tps = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, dep_range, mod3d)
+        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(self, dep_range, **kwargs)
+        tps = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps, dep_range, mod3d)
         rfdepth, _ = time2depth(self, dep_range, tps, normalize=normalize)
         return rfdepth
 
@@ -416,7 +416,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize=True
         else:
             rayp_lib = srayp
         for i in range(stadatar.ev_num):
-            rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths)
+            rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths_elev)
             rayp = skm2srad(sdeg2skm(rayp))
             tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], sphere=sphere)
     else:
@@ -426,12 +426,12 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize=True
 
 
 def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True):
-    x_s = radius_s(dep_mod, prayp, phase='S', sphere=sphere)
-    x_p = radius_s(dep_mod, prayp, phase='P', sphere=sphere)
+    x_s = dep_mod.radius_s(prayp, phase='S', sphere=sphere)
+    x_p = dep_mod.radius_s(prayp, phase='P', sphere=sphere)
     if is_raylen:
-        raylength_s = raylength(dep_mod, srayp, phase='S', sphere=sphere)
-        raylength_p = raylength(dep_mod, prayp, phase='P', sphere=sphere)
-    tps = tpds(dep_mod, srayp, prayp, sphere=sphere)
+        raylength_s = dep_mod.raylength(srayp, phase='S', sphere=sphere)
+        raylength_p = dep_mod.raylength(prayp, phase='P', sphere=sphere)
+    tps = dep_mod.tpds(srayp, prayp, sphere=sphere)
     if dep_mod.elevation != 0:
         x_s = interp1d(dep_mod.depths_elev, x_s, bounds_error=False, fill_value=(np.nan, x_s[-1]))(dep_mod.depths)
         x_p = interp1d(dep_mod.depths_elev, x_p, bounds_error=False, fill_value=(np.nan, x_p[-1]))(dep_mod.depths)
@@ -472,7 +472,7 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere
         else:
             rayp_lib = srayp
         for i in range(stadatar.ev_num):
-            rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths)
+            rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths_elev)
             rayp = skm2srad(sdeg2skm(rayp))
             tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], is_raylen=True, sphere=sphere)
             x_s = _imag2nan(x_s)

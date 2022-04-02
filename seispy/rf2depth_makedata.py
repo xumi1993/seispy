@@ -136,10 +136,10 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
         if raytracing3d:
             pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp)
         else:
-            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tpds = psrf_1D_raytracing(stadatar,
+            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(stadatar,
                                                                                                 cpara.depth_axis, srayp=srayp)
             newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
-                                        tpds, cpara.depth_axis, mod3d)
+                                        tps, cpara.depth_axis, mod3d)
         amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
         rfdep['station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]

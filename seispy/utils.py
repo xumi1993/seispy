@@ -41,7 +41,7 @@ def read_rfdep(path):
 class DepModel(object):
     def __init__(self, YAxisRange, velmod='iasp91', elevation=0):
         self.elevation = elevation
-        VelocityModel = np.loadtxt(from_file(velmod))
+        VelocityModel = np.loadtxt(self.from_file(velmod))
         self.depthsraw = VelocityModel[:, 0]
         self.vpraw = VelocityModel[:, 1]
         self.vsraw = VelocityModel[:, 2]
@@ -52,60 +52,57 @@ class DepModel(object):
         else:
             dep_append = np.arange(self.depths[-1]+self.dep_val, 
                                self.depths[-1]+self.dep_val+np.floor(elevation/self.dep_val+1), self.dep_val)
+            self.depths_extend = np.append(self.depths, dep_append)
             self.depths_elev = np.append(self.depths, dep_append) - elevation
-        self.dz = np.append(0, np.diff(self.depths_elev))
+        self.dz = np.append(0, np.diff(self.depths_extend))
         self.vp = interp1d(self.depthsraw, self.vpraw, bounds_error=False,
                            fill_value=self.vpraw[0])(self.depths_elev)
         self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False,
                            fill_value=self.vsraw[0])(self.depths_elev)
-        self.R = 6371.0 - self.depths_elev
+        self.R = 6371.0 - self.depths_extend
 
+    def from_file(self, mode_name):
+        if exists(mode_name):
+            filename = mode_name
+        elif exists(join(dirname(__file__), 'data', mode_name.lower()+'.vel')):
+            filename = join(dirname(__file__), 'data', mode_name.lower()+'.vel')
+        else:
+            raise ValueError('No such velocity mode')
+        return filename
 
-def from_file(mode_name):
-    if exists(mode_name):
-        filename = mode_name
-    elif exists(join(dirname(__file__), 'data', mode_name.lower()+'.vel')):
-        filename = join(dirname(__file__), 'data', mode_name.lower()+'.vel')
-    else:
-        raise ValueError('No such velocity mode')
-    return filename
+    def tpds(self, rayps, raypp, sphere=True):
+        if sphere:
+            radius = self.R
+        else:
+            radius = 6371.
+        tps = np.cumsum((np.sqrt((radius / self.vs) ** 2 - rayps ** 2) -
+                        np.sqrt((radius / self.vp) ** 2 - raypp ** 2)) *
+                        (self.dz / radius))
+        return tps
 
+    def radius_s(self, rayp, phase='P', sphere=True):
+        if phase == 'P':
+            vel = self.vp
+        else:
+            vel = self.vs
+        if sphere:
+            radius = self.R
+        else:
+            radius = 6371.
+        hor_dis = np.cumsum((self.dz / radius) / np.sqrt((1. / (rayp ** 2. * (radius / vel) ** -2)) - 1))
+        return hor_dis
 
-def tpds(dep_mod, rayps, raypp, sphere=True):
-    if sphere:
-        radius = dep_mod.R
-    else:
-        radius = 6371.
-    tps = np.cumsum((np.sqrt((radius / dep_mod.vs) ** 2 - rayps ** 2) -
-                     np.sqrt((radius / dep_mod.vp) ** 2 - raypp ** 2)) *
-                     (dep_mod.dz / radius))
-    return tps
-
-
-def radius_s(dep_mod, rayp, phase='P', sphere=True):
-    if phase == 'P':
-        vel = dep_mod.vp
-    else:
-        vel = dep_mod.vs
-    if sphere:
-        radius = dep_mod.R
-    else:
-        radius = 6371.
-    hor_dis = np.cumsum((dep_mod.dz / radius) / np.sqrt((1. / (rayp ** 2. * (radius / vel) ** -2)) - 1))
-    return hor_dis
-
-
-def raylength(dep_mod, rayp, phase='P', sphere=True):
-    if phase == 'P':
-        vel = dep_mod.vp
-    else:
-        vel = dep_mod.vs
-    if sphere:
-        radius = dep_mod.R
-    else:
-        radius = 6371.
-    raylen = (dep_mod.dz * radius) / (np.sqrt(((radius / dep_mod.vs) ** 2) - (rayp ** 2)) * vel)
-    return raylen
+    def raylength(self, rayp, phase='P', sphere=True):
+        if phase == 'P':
+            vel = self.vp
+        else:
+            vel = self.vs
+        if sphere:
+            radius = self.R
+        else:
+            radius = 6371.
+        raylen = (self.dz * radius) / (np.sqrt(((radius / self.vs) ** 2) - (rayp ** 2)) * vel)
+        return raylen
 
 
 class Mod3DPerturbation:
