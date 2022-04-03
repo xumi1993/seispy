@@ -49,6 +49,7 @@ class DepModel(object):
         self.dep_val = np.average(np.diff(self.depths))
         if elevation == 0:
             self.depths_elev = self.depths
+            self.depths_extend = self.depths
         else:
             dep_append = np.arange(self.depths[-1]+self.dep_val, 
                                self.depths[-1]+self.dep_val+np.floor(elevation/self.dep_val+1), self.dep_val)
