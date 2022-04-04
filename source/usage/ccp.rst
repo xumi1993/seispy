@@ -106,10 +106,10 @@ We also provide a command to grid velocity structure from a text file.
                           Method of interpolation. One of 'linear', 'nearest', 'cubic', defaults to 'linear'
     -o O                  output filename with 'npz' format, defaults to ./mod3d.npz
 
-1D velocity models in for stations
+1D velocity models of stations
 +++++++++++++++++++++++++++++++++++
 
-Sometimes 1D velocity model of each station is inverted by receiver functions or joint with surface wave dispersion. Seispy involves a time difference correction using 1D velocity model of each station. We need to create a folder with velocity model of stations as 
+Sometimes 1D velocity model of each station is inverted by receiver functions or joint with surface wave dispersion. Seispy involves a time difference correction using 1D velocity model of each station. We need to create a folder including velocity models of stations as 
 
 ::
 
@@ -123,6 +123,7 @@ Sometimes 1D velocity model of each station is inverted by receiver functions or
 
   - The number of files in vel_model must be the same as the number of stations in the station list.
   - The model file should have three columns: depth, Vp and Vs.
+  - The filename must be the same as the station name in the station list. The suffix of filename must be ``.vel``.
 
 Time-to-depth conversion
 ==============================
