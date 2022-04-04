@@ -18,7 +18,7 @@ Similar to the workflow for PRFs, we have provided a command ``srf`` for quickly
 
 ::
 
-    usage: srf [-h] [-l] [-r N|E|NE] [-s] [-b [BAZ]] [-w] [-p] cfg_file
+    usage: srf [-h] [-l] [-r N|E|NE] [-s] [-b [BAZ]] [-w] [-p] [-i] cfg_file
 
     Calculating RFs for single station
 
@@ -30,10 +30,11 @@ Similar to the workflow for PRFs, we have provided a command ``srf`` for quickly
     -l          use local catalog, defaults to false
     -r N|E|NE   Reverse components: N, E or NE
     -s          Switch the East and North components
-    -b [BAZ]    Correct back-azimuth. If "baz" is specified, the corr_baz = raw_baz + baz. If there is no argument, the back-azimuth will be corrected with minimal energy of T
-                component. The searching range is raw_baz +/- 90
-    -w          Write project to local file
-    -p          Wether or not manually pick arrival time and waveforms around S phase with a GUI.
+    -b [BAZ]    Correct back-azimuth. If "baz" is specified, the corr_baz = raw_baz + baz. If there is no argument, the back-azimuth will be corrected with
+                minimal energy of T component. The searching range is raw_baz +/- 90
+    -w          Write project to localfile
+    -p          Wether or not manually pick arrival time and waveforms arround S phase with a GUI.
+    -i          Wether grid search incidence angle
 
 .. note::
 

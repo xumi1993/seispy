@@ -21,7 +21,7 @@
 :::
 
 :::{card} 3D CCP stacking & extracting D410 and D660 depth
-:link: ex-ccp
+:link: ex-ccp3d
 :link-type: doc
 
 <div class="center">

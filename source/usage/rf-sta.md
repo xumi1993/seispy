@@ -1,7 +1,6 @@
 
 # Calculate PRFs for single station
 
-
 ## Prepare seismic records order by stations
 
 Seismic data including direct P arrival should be trimmed according earthquakes. Meanwhile, the data should be order by stations instead of events. For example, YN001 and YN002 are stations; the SAC files are teleseismic data records of these stations.
@@ -26,14 +25,11 @@ Seismic data including direct P arrival should be trimmed according earthquakes.
 
 ## Calculate PRFs using a simple command
 
-
 ### Prepare a configure file
 
 We should prepare a configure file as following including all parameters that will be set during the calculation. The format is following Python module of [configparser](https://docs.python.org/3/library/configparser.html). We have provided a template configure file in {any}`../notes/rf_cfg`. See comment in detail.
 
-
 ## Run in command line
-
 
 We have provided the command `prf`. The usage is shown as:
 
