@@ -1,4 +1,4 @@
-from seispy.rfcorrect import SACStation, psrf2depth, Mod3DPerturbation, psrf_1D_raytracing,\
+from seispy.rfcorrect import RFStation, psrf2depth, Mod3DPerturbation, psrf_1D_raytracing,\
     psrf_3D_migration, time2depth, psrf_3D_raytracing
 import numpy as np
 from seispy.ccppara import ccppara
@@ -86,20 +86,24 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
-        stadatar = SACStation(evt_lst, only_r=True)
+        stadatar = RFStation(evt_lst, only_r=True)
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
+        if stadatar.prime_phase == 'P':
+            sphere = True
+        else:
+            sphere = False
         if ismod1d:
             if modfolder1d is not None:
                 mod1d = _load_mod(modfolder1d, sta_info.station[i])
             else:
                 mod1d = 'iasp91'
             PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
-                                              velmod=mod1d, srayp=cpara.rayp_lib)
+                                              velmod=mod1d, srayp=cpara.rayp_lib, sphere=sphere)
         else:
-            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis, cpara.velmod, 
-                                              velmod_3d=model_3d, srayp=cpara.rayp_lib)
+            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,velmod=cpara.velmod, 
+                                              velmod_3d=model_3d, srayp=cpara.rayp_lib, sphere=sphere)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
@@ -110,7 +114,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         # rfdep['events'] = _convert_str_mat(stadatar.event)
         rfdep['bazi'] = stadatar.bazi
         rfdep['rayp'] = stadatar.rayp
-        # rfdep['phases'] = _convert_str_mat(stadatar.phase)
+        rfdep['phases'] = stadatar.phase[i]
         rfdep['moveout_correct'] = PS_RFdepth
         rfdep['piercelat'] = piercelat
         rfdep['piercelon'] = piercelon
@@ -131,13 +135,17 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
-        stadatar = SACStation(evt_lst, only_r=True)
+        stadatar = RFStation(evt_lst, only_r=True)
+        if stadatar.prime_phase == 'P':
+            sphere = True
+        else:
+            sphere = False
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         if raytracing3d:
-            pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp)
+            pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp, sphere=sphere)
         else:
             pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(stadatar,
-                                                                                                cpara.depth_axis, srayp=srayp)
+                                                                                                cpara.depth_axis, srayp=srayp, sphere=sphere)
             newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
                                         tps, cpara.depth_axis, mod3d)
         amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)

@@ -95,9 +95,9 @@ class RFStation(object):
 
     def _chech_comp(self):
         if self.comp in ['R', 'Q']:
-            self.phase = 'P'
+            self.prime_phase = 'P'
         elif self.comp in ['L', 'Z']:
-            self.phase = 'S'
+            self.prime_phase = 'S'
         else:
             raise ValueError('prime component should be in \'R\', \'Q\', \'L\' and \'Z\'')
 
