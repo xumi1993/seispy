@@ -98,7 +98,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
             if modfolder1d is not None:
                 mod1d = _load_mod(modfolder1d, sta_info.station[i])
             else:
-                mod1d = 'iasp91'
+                mod1d = cpara.velmod
             PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
                                               velmod=mod1d, srayp=cpara.rayp_lib, sphere=sphere)
         else:
