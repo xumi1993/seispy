@@ -114,7 +114,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         # rfdep['events'] = _convert_str_mat(stadatar.event)
         rfdep['bazi'] = stadatar.bazi
         rfdep['rayp'] = stadatar.rayp
-        rfdep['phases'] = stadatar.phase[i]
+        # rfdep['phases'] = stadatar.phase[i]
         rfdep['moveout_correct'] = PS_RFdepth
         rfdep['piercelat'] = piercelat
         rfdep['piercelon'] = piercelon
