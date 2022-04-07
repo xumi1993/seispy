@@ -5,11 +5,9 @@ from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog
 from seispy.geo import latlon_from, deg2km, rad2deg
 from os.path import join, dirname, exists
-from scipy.io import savemat
 import argparse
 import sys
 import glob
-import pickle
 
 
 class Station(object):

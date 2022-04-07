@@ -101,13 +101,24 @@ class RFStation(object):
         else:
             raise ValueError('prime component should be in \'R\', \'Q\', \'L\' and \'Z\'')
 
-    def normalize(self):
+    def normalize(self, method='single'):
         """Normalize amplitude of each RFs.
+        :param method: Method of normalization with ``single`` and ``average`` avaliable.
+                     - ``single`` for normalization with max amplitude of current RF.
+                     - ``average`` for normalization with average amplitude of current station.
+        :type method: str, optional
         """
-        maxamp = np.nanmax(np.abs(self.__dict__['data{}'.format(self.comp.lower())]), axis=1)
+        if not isinstance(method, str):
+            raise TypeError('\'type\' must be string, but {} type got'.format(type(method)))
+        if method == 'single':
+            maxamp = np.nanmax(np.abs(self.__dict__['data{}'.format(self.comp.lower())]), axis=1)
+        elif method == 'average':
+            amp = np.nanmax(np.abs(np.mean(self.__dict__['data{}'.format(self.comp.lower())], axis=0)))
+            maxamp = np.ones(self.ev_num) * amp
+        else:
+            raise ValueError('\'method\' must be in \'single\' and \'average\'')
         for i in range(self.ev_num):
             self.__dict__['data{}'.format(self.comp.lower())][i] /= maxamp[i]
-            # self.datar[i] /= maxamp[i]
             if not self.only_r:
                 self.datat[i] /= maxamp[i]
 
@@ -196,7 +207,7 @@ class RFStation(object):
         :rtype: numpy.ndarray
         """
         self.dep_range = dep_range
-        rfdepth, _, _, _ = psrf2depth(self, dep_range, **kwargs)
+        rfdepth, endindex, x_s, x_p = psrf2depth(self, dep_range, **kwargs)
         return rfdepth
 
     def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), **kwargs):
@@ -229,7 +240,7 @@ class RFStation(object):
         warnings.warn('The fuction will be change to RFStation.psrf_3D_timecorrect in the future')
         self.psrf_3D_timecorrect(mod3dpath, **kwargs)
 
-    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), normalize=True, **kwargs):
+    def psrf_3D_timecorrect(self,  mod3dpath, dep_range=np.arange(0, 150), normalize='single', **kwargs):
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
         pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(self, dep_range, **kwargs)
@@ -376,13 +387,34 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     return Newdatar, EndIndex
 
 
-def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize=True, sphere=True):
-    """
-    :param stadatar: data class of SACStation
-    :param YAxisRange: Depth range in nd.array type
-    :param velmod: Path to velocity model
-    :param srayp: Ray-parameter lib for Ps phases
-    :return: ps_rfdepth, endindex, x_s, x_p
+def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='single', sphere=True):
+    """ Time-to-depth conversion with S-wave backprojection.
+
+    :param stadatar: Data class of RFStation
+    :type stadatar: :meth:`RFStation.normalize`
+    :param YAxisRange: Depth range for converison
+    :type YAxisRange: numpy.ndarray
+    :param velmod: Velocity for conversion, whcih can be a path to velocity file, defaults to 'iasp91'
+    :type velmod: str, optional
+    :param srayp: ray-parameter library of conversion phases. See :meth:`seispy.psrayp` in detail, defaults to None
+    :type srayp: str or :meth:`seispy.psrayp.PsRayp`, optional
+    :param normalize: method of normalization, defaults to 'single'. Please refer to :meth:`RFStation.normalize`
+    :type normalize: str, optional
+    :param sphere: Wether do earth-flattening transformation, defaults to True
+    :type sphere: bool, optional
+
+    Returns
+    ------------
+
+    ps_rfdepth: 2-D numpy.ndarray, float
+                RFs in depth with shape of ``(stadatar.ev_num, YAxisRange.size)``, ``stadatar.ev_num`` is the number of RFs in current station.
+                ``YAxisRange.size`` is the size of depth axis.
+    endindex: numpy.ndarray, int
+                End index of each RF in depth
+    x_s: 2-D numpy.ndarray, float
+                Horizontal distance between station and S-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
+    x_p: 2-D numpy.ndarray, float
+                Horizontal distance between station and P-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
     """
     if exists(velmod):
         try:
@@ -591,7 +623,9 @@ def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength
     return Tpds + timecorrections
 
 
-def time2depth(stadatar, YAxisRange, Tpds, normalize=True):
+def time2depth(stadatar, YAxisRange, Tpds, normalize='single'):
+    if normalize:
+        stadatar.normalize(method=normalize)
     PS_RFdepth = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     EndIndex = np.zeros(stadatar.ev_num)
     for i in range(stadatar.ev_num):
@@ -612,10 +646,7 @@ def time2depth(stadatar, YAxisRange, Tpds, normalize=True):
             continue
         else:
             PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
-            if normalize:
-                PS_RFdepth[i] = PS_RFAmps / np.nanmax(PS_RFAmps)
-            else:
-                PS_RFdepth[i] = PS_RFAmps
+            PS_RFdepth[i] = PS_RFAmps
     return PS_RFdepth, EndIndex
 
 
