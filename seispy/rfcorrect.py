@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
@@ -9,7 +10,6 @@ from seispy.psrayp import get_psrayp
 from seispy.rfani import RFAni
 from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
-# import matplotlib.pyplot as plt
 from seispy.utils import DepModel, Mod3DPerturbation
 import warnings
 import glob
@@ -324,7 +324,7 @@ def _imag2nan(arr):
 
 
 def moveoutcorrect_ref(stadatar, raypref, YAxisRange, 
-                       chan='r', velmod='iasp91', sphere=True):
+                       chan='r', velmod='iasp91', sphere=True, phase=1):
     """Moveout correction refer to a specified ray-parameter
     
     :param stadatar: data class of RFStation
@@ -352,8 +352,8 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     # x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     tps = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     for i in range(stadatar.ev_num):
-        tps[i], _, _ = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], sphere=sphere)
-    Tpds_ref, _, _ = xps_tps_map(dep_mod, raypref, raypref, sphere=sphere)
+        tps[i], _, _ = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], sphere=sphere, phase=phase)
+    Tpds_ref, _, _ = xps_tps_map(dep_mod, raypref, raypref, sphere=sphere, phase=phase)
     Newdatar = np.zeros([stadatar.ev_num, stadatar.rflength])
     EndIndex = np.zeros(stadatar.ev_num)
 #
@@ -387,7 +387,7 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     return Newdatar, EndIndex
 
 
-def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='single', sphere=True):
+def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='single', sphere=True, phase=1):
     """ Time-to-depth conversion with S-wave backprojection.
 
     :param stadatar: Data class of RFStation
@@ -438,7 +438,8 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
     tps = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     if srayp is None:
         for i in range(stadatar.ev_num):
-            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, stadatar.rayp[i], stadatar.rayp[i], sphere=sphere)
+            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, stadatar.rayp[i], 
+                stadatar.rayp[i], sphere=sphere, phase=phase)
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
         if isinstance(srayp, str):
             if not exists(srayp):
@@ -450,20 +451,65 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
         for i in range(stadatar.ev_num):
             rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths_elev)
             rayp = skm2srad(sdeg2skm(rayp))
-            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], sphere=sphere)
+            tps[i], x_s[i], x_p[i] = xps_tps_map(dep_mod,
+                rayp, stadatar.rayp[i], sphere=sphere, phase=phase)
     else:
         raise TypeError('srayp should be path to Ps rayp lib')
     ps_rfdepth, endindex = time2depth(stadatar, dep_mod.depths, tps, normalize=normalize)
     return ps_rfdepth, endindex, x_s, x_p
 
 
-def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True):
+def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
+    """Calculate horizontal distance and time difference at depthes
+
+    :param dep_mod: 1D velocity model class 
+    :type dep_mod: :meth:`seispy.util.DepModel`
+    :param srayp: conversion phase ray-parameters
+    :type srayp: float
+    :param prayp: S-wave ray-parameters
+    :type prayp: float
+    :param is_raylen: Wether calculate ray length at depthes, defaults to False
+    :type is_raylen: bool, optional
+    :param sphere: Wether do earth-flattening transformation, defaults to True, defaults to True
+    :type sphere: bool, optional
+    :param phase: Phases to calculate 1 for ``Ps``, 2 for ``PpPs``, 3 for ``PsPs+PpSs``, defaults to 1
+    :type phase: int, optional
+
+    Returns
+    -----------
+    If ``is_raylen = False``
+
+    tps: 2-D numpy.ndarray, float
+                RFs in depth with shape of ``(stadatar.ev_num, YAxisRange.size)``, ``stadatar.ev_num`` is the number of RFs in current station.
+                ``YAxisRange.size`` is the size of depth axis.
+    
+    x_s: 2-D numpy.ndarray, float
+                Horizontal distance between station and S-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
+    x_p: 2-D numpy.ndarray, float
+                Horizontal distance between station and P-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
+
+    otherwise, two more variables will be returned
+
+    raylength_s: 2-D numpy.ndarray, float
+    
+    raylength_p: 2-D numpy.ndarray, float
+
+    :return: _description_
+    :rtype: _type_
+    """
     x_s = dep_mod.radius_s(prayp, phase='S', sphere=sphere)
     x_p = dep_mod.radius_s(prayp, phase='P', sphere=sphere)
     if is_raylen:
         raylength_s = dep_mod.raylength(srayp, phase='S', sphere=sphere)
         raylength_p = dep_mod.raylength(prayp, phase='P', sphere=sphere)
-    tps = dep_mod.tpds(srayp, prayp, sphere=sphere)
+    if phase == 1:
+        tps = dep_mod.tpds(srayp, prayp, sphere=sphere)
+    elif phase == 2:
+        tps = dep_mod.tpppds(srayp, prayp, sphere=sphere)
+    elif phase == 3:
+        tps = dep_mod.tpspds(srayp, sphere=sphere)
+    else:
+        raise ValueError('Phase must be in 1 for Ps, 2 for PpPs, 3 for PsPs+PpSs')
     if dep_mod.elevation != 0:
         x_s = interp1d(dep_mod.depths_elev, x_s, bounds_error=False, fill_value=(np.nan, x_s[-1]))(dep_mod.depths)
         x_p = interp1d(dep_mod.depths_elev, x_p, bounds_error=False, fill_value=(np.nan, x_p[-1]))(dep_mod.depths)
@@ -477,7 +523,7 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True):
         return tps, x_s, x_p
 
 
-def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere=True):
+def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere=True, phase=1):
     dep_mod = DepModel(YAxisRange, velmod, stadatar.stel)
 
     # x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -492,7 +538,7 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere
     if srayp is None:
         for i in range(stadatar.ev_num):
             tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(
-                dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True, sphere=sphere)
+                dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True, sphere=sphere, phase=phase)
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))
             pplat_p[i], pplon_p[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_p))
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
@@ -506,7 +552,8 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere
         for i in range(stadatar.ev_num):
             rayp = get_psrayp(rayp_lib, stadatar.dis[i], stadatar.evdp[i], dep_mod.depths_elev)
             rayp = skm2srad(sdeg2skm(rayp))
-            tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(dep_mod, rayp, stadatar.rayp[i], is_raylen=True, sphere=sphere)
+            tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(dep_mod, rayp, 
+                                        stadatar.rayp[i], is_raylen=True, sphere=sphere, phase=phase)
             x_s = _imag2nan(x_s)
             x_p = _imag2nan(x_p)
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))

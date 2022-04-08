@@ -5,7 +5,7 @@ from seispy import geo
 from seispy.geo import geo2sph, km2deg, skm2srad, sph2geo, srad2skm
 from seispy import distaz
 import numpy as np
-from scipy.interpolate import interp1d, interpn, splev, splrep, splprep
+from scipy.interpolate import interp1d, interpn
 import seispy
 
 
@@ -78,6 +78,25 @@ class DepModel(object):
             radius = 6371.
         tps = np.cumsum((np.sqrt((radius / self.vs) ** 2 - rayps ** 2) -
                         np.sqrt((radius / self.vp) ** 2 - raypp ** 2)) *
+                        (self.dz / radius))
+        return tps
+    
+    def tpppds(self, rayps, raypp, sphere=True):
+        if sphere:
+            radius = self.R
+        else:
+            radius = 6371.
+        tps = np.cumsum((np.sqrt((radius / self.vs) ** 2 - rayps ** 2) +
+                        np.sqrt((radius / self.vp) ** 2 - raypp ** 2)) *
+                        (self.dz / radius))
+        return tps
+    
+    def tpspds(self, rayps, sphere=True):
+        if sphere:
+            radius = self.R
+        else:
+            radius = 6371.
+        tps = np.cumsum(2*np.sqrt((radius / self.vs) ** 2 - rayps ** 2)*
                         (self.dz / radius))
         return tps
 

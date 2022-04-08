@@ -61,10 +61,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
     ismod1d = False
     if velmod3d is not None:
         if isinstance(velmod3d, str):
-            if exists(velmod3d):
-                model_3d = np.load(velmod3d)
-            else:
-                model_3d = None
+            velmod = velmod3d
         else:
             raise ValueError('Path to 3d velocity model should be in str')
     elif modfolder1d is not None:
@@ -94,14 +91,13 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
             sphere = False
         if ismod1d:
             if modfolder1d is not None:
-                mod1d = _load_mod(modfolder1d, sta_info.station[i])
+                velmod = _load_mod(modfolder1d, sta_info.station[i])
             else:
-                mod1d = cpara.velmod
-            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
-                                              velmod=mod1d, srayp=cpara.rayp_lib, sphere=sphere)
+                velmod = cpara.velmod
+            velmod3d= None
         else:
-            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,velmod=cpara.velmod, 
-                                              velmod_3d=model_3d, srayp=cpara.rayp_lib, sphere=sphere)
+            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
+                            velmod=velmod, srayp=cpara.rayp_lib, sphere=sphere, phase=cpara.phase)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
@@ -142,8 +138,8 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
         if raytracing3d:
             pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp, sphere=sphere)
         else:
-            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(stadatar,
-                                                                                                cpara.depth_axis, srayp=srayp, sphere=sphere)
+            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
+                stadatar, cpara.depth_axis, srayp=srayp, sphere=sphere, phase=cpara.phase)
             newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
                                         tps, cpara.depth_axis, mod3d)
         amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
