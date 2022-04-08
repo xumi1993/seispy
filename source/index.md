@@ -58,6 +58,11 @@ Further details are available in the [Installation Guide](installation).
 
 
 ## Learning resources
+
+:::{seealso}
+Access [here](https://www.koushare.com/video/videodetail/14734) for video tutorial in Chinese
+:::
+
 ::::{panels} 
 :container: full-width
 :column: col-lg-4 p-2

@@ -10,11 +10,11 @@ dependencies:
   - sphinx-design
   - myst-nb
   - obspy=1.3.0
+  - seispy
+  - numpydoc
   - pip:
     - sphinx-gallery
     - sphinx-cjkspace
     - pydata-sphinx-theme
     - sphinx-panels
     - sphinx-icon
-    - python-seispy
-    - numpydoc
