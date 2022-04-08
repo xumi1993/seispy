@@ -94,9 +94,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
                 velmod = _load_mod(modfolder1d, sta_info.station[i])
             else:
                 velmod = cpara.velmod
-            velmod3d= None
-        else:
-            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
+        PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
                             velmod=velmod, srayp=cpara.rayp_lib, sphere=sphere, phase=cpara.phase)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
