@@ -391,7 +391,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
     """ Time-to-depth conversion with S-wave backprojection.
 
     :param stadatar: Data class of RFStation
-    :type stadatar: :meth:`RFStation.normalize`
+    :type stadatar: :meth:`RFStation`
     :param YAxisRange: Depth range for converison
     :type YAxisRange: numpy.ndarray
     :param velmod: Velocity for conversion, whcih can be a path to velocity file, defaults to 'iasp91'
@@ -492,10 +492,7 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
 
     raylength_s: 2-D numpy.ndarray, float
     
-    raylength_p: 2-D numpy.ndarray, float
-
-    :return: _description_
-    :rtype: _type_
+    raylength_p: 2-D numpy.ndarray, float   
     """
     x_s = dep_mod.radius_s(prayp, phase='S', sphere=sphere)
     x_p = dep_mod.radius_s(prayp, phase='P', sphere=sphere)
