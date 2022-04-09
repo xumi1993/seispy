@@ -32,13 +32,6 @@ def init_mat(sta_num):
     return np.zeros([1, sta_num], dtype=dtype)
 
 
-def _convert_str_mat(instr):
-    mat = np.zeros((len(instr), 1), dtype='O')
-    for i in range(len(instr)):
-        mat[i, 0] = np.array(np.array([instr[i]]), dtype='O')
-    return mat
-
-
 def _load_mod(datapath, staname):
     """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
 

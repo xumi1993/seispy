@@ -125,8 +125,11 @@ class RFStation(object):
     def resample(self, dt):
         """Resample RFs with specified dt
 
-        :param dt: Target sampling interval in sec
-        :type dt: float
+
+        Parameters
+        ----------
+        dt : float
+            Target sampling interval in sec
         """
         npts = int(self.rflength * (self.sampling / dt)) + 1
         self.__dict__['data{}'.format(self.comp.lower())] = resample(
@@ -157,7 +160,7 @@ class RFStation(object):
         :param ref_rayp: reference ray-parameter in s/km, defaults to 0.06
         :type ref_rayp: float, optional
         :param dep_range: Depth range used for extracting velocity in velocity model, defaults to np.arange(0, 150)
-        :type dep_range: numpy.ndarray, optional
+        :type dep_range: :meth:`np.ndarray`, optional
         :param velmod: Velocity model for moveout correction. 'iasp91', 'prem' 
                       and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
                       The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
@@ -165,11 +168,13 @@ class RFStation(object):
         :param replace: whether replace original data, False to return new array, defaults to False
         :type replace: bool, optional
 
-        Return
+        Returns
         -------
-        rf_corr: Corrected RFs with component of ``RFStation.comp``
+        rf_corr: :meth:`np.ndarray` 
+            Corrected RFs with component of :meth:`RFStation.comp`
 
-        t_corr: Corrected RFs in transverse component. If ``only_r`` is ``True``, this variable is ``None``
+        t_corr: :meth:`np.ndarray` or ``None``
+            Corrected RFs in transverse component. If ``only_r`` is ``True``, this variable is ``None``
         
         """
         if not self.only_r:
@@ -196,7 +201,7 @@ class RFStation(object):
         """Time-to-depth conversion with specified depth series.
 
         :param dep_range: Discret conversion depth, defaults to np.arange(0, 150)
-        :type dep_range: numpy.ndarray, optional
+        :type dep_range: :meth:`np.ndarray` , optional
         :param velmod: Velocity model for time-to-depth conversion. 'iasp91', 'prem' 
                       and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
                       The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
@@ -204,7 +209,7 @@ class RFStation(object):
         :param srayp: Ray-parameter lib for Ps phases, If set up to None the rayp of direct is used, defaults to None
         :type srayp: numpy.lib.npyio.NpzFile, optional
         :return: 2D array of RFs in depth
-        :rtype: numpy.ndarray
+        :rtype: :meth:`np.ndarray`
         """
         self.dep_range = dep_range
         rfdepth, endindex, x_s, x_p = psrf2depth(self, dep_range, **kwargs)
@@ -480,13 +485,13 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
     If ``is_raylen = False``
 
     tps: 2-D numpy.ndarray, float
-                RFs in depth with shape of ``(stadatar.ev_num, YAxisRange.size)``, ``stadatar.ev_num`` is the number of RFs in current station.
-                ``YAxisRange.size`` is the size of depth axis.
+        RFs in depth with shape of ``(stadatar.ev_num, YAxisRange.size)``, ``stadatar.ev_num`` is the number of RFs in current station.
+        ``YAxisRange.size`` is the size of depth axis.
     
     x_s: 2-D numpy.ndarray, float
-                Horizontal distance between station and S-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
+        Horizontal distance between station and S-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
     x_p: 2-D numpy.ndarray, float
-                Horizontal distance between station and P-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
+        Horizontal distance between station and P-wave conversion points with shape of  ``(stadatar.ev_num, YAxisRange.size)``
 
     otherwise, two more variables will be returned
 
@@ -644,6 +649,26 @@ def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0, sph
 
 
 def interp_depth_model(model, lat, lon, new_dep):
+    """ Interpolate Vp and Vs from 3D velocity with a specified depth range.
+
+    Parameters
+    ----------
+    mod3d : :meth:`np.lib.npyio.NpzFile`
+        3D velocity loaded from a ``.npz`` file
+    lat : float
+        Latitude of position in 3D velocity model
+    lon : float
+        Longitude of position in 3D velocity model
+    new_dep : :meth:`np.ndarray`
+        1D array of depthes in km
+
+    Returns
+    -------
+    Vp : :meth:`np.ndarray`
+        Vp in ``new_dep``
+    Vs : :meth:`np.ndarray`
+        Vs in ``new_dep``
+    """
     #  model = np.load(modpath)
     points = [[depth, lat, lon] for depth in new_dep]
     vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False, fill_value=None)
@@ -651,13 +676,42 @@ def interp_depth_model(model, lat, lon, new_dep):
     return vp, vs
 
 
-def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, YAxisRange, mod3d):
+def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, dep_range, mod3d):
+    """ 3D time difference correction with specified ray path and 3D velocity model. 
+        The input parameters can be generated with :meth:`psrf_1D_raytracing`.
+
+    Parameters
+    ----------
+    pplat_s : :meth:`np.ndarray`
+        2D array of latitude of S-wave in ``dep_range``, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    pplon_s : :meth:`np.ndarray`
+        2D array of longitude of S-wave in ``dep_range``, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    pplat_p : :meth:`np.ndarray`
+        2D array of latitude of P-wave in ``dep_range``, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    pplon_p : :meth:`np.ndarray`
+        2D array of longitude of P-wave in ``dep_range``, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    raylength_s : :meth:`np.ndarray`
+        2D array of ray path length of S-wave in ``dep_range``, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    raylength_p : :meth:`np.ndarray`
+        2D array of ray path length of P-wave in ``dep_range``, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    Tpds : :meth:`np.ndarray`
+        1D array of time difference in ``dep_range`` (``dep_range.size``)
+    dep_range : :meth:`np.ndarray`
+        1D array of depthes in km, (``dep_range.size``)
+    mod3d : :meth:`np.lib.npyio.NpzFile`
+        3D velocity loaded from a ``.npz`` file
+
+    Returns
+    -------
+    :meth:`np.ndarray`
+        Corrected time difference in dep_range
+    """
     ev_num, _ = raylength_p.shape
     timecorrections = np.zeros_like(raylength_p)
     for i in range(ev_num):
-        points = np.array([YAxisRange, pplat_p[i], pplon_p[i]]).T
+        points = np.array([dep_range, pplat_p[i], pplon_p[i]]).T
         dvp = mod3d.interpdvp(points)
-        points = np.array([YAxisRange, pplat_s[i], pplon_s[i]]).T
+        points = np.array([dep_range, pplat_s[i], pplon_s[i]]).T
         dvs = mod3d.interpdvs(points)
         dlp = raylength_p[i]
         dls = raylength_s[i]
@@ -667,20 +721,41 @@ def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength
     return Tpds + timecorrections
 
 
-def time2depth(stadatar, YAxisRange, Tpds, normalize='single'):
+def time2depth(stadatar, dep_range, Tpds, normalize='single'):
+    """ Interpolate RF amplitude with specified time difference and depth range
+
+    Parameters
+    ----------
+    stadatar : :meth:`RFStation` 
+        Data class of :meth:`RFStation` 
+    dep_range : :meth:`np.ndarray`
+        1D array of depthes in km, (``dep_range.size``)
+    Tpds : :meth:`np.ndarray`
+        1D array of time difference in ``dep_range`` (``dep_range.size``)
+    normalize : str, optional
+        Normlization option, ``'sinlge'`` and ``'average'`` are available , by default 'single'
+        See :meth:`RFStation.normalize` in detail.
+
+    Returns
+    -------
+    PS_RFdepth: :meth:`np.ndarray`
+        2D array of RFs in depth, (:meth:`RFStation.ev_num`, ``dep_range.size``)
+    end_index: :meth:`np.ndarray`
+        1D array of the last digit of effective depth (:meth:`RFStation.ev_num`)
+    """
     if normalize:
         stadatar.normalize(method=normalize)
-    PS_RFdepth = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
+    PS_RFdepth = np.zeros([stadatar.ev_num, dep_range.shape[0]])
     EndIndex = np.zeros(stadatar.ev_num)
     for i in range(stadatar.ev_num):
         TempTpds = Tpds[i, :]
         StopIndex = np.where(np.imag(TempTpds) == 1)[0]
         if StopIndex.size == 0:
-            EndIndex[i] = YAxisRange.size - 1
-            DepthAxis = interp1d(TempTpds, YAxisRange, bounds_error=False)(stadatar.time_axis)
+            EndIndex[i] = dep_range.size - 1
+            DepthAxis = interp1d(TempTpds, dep_range, bounds_error=False)(stadatar.time_axis)
         else:
             EndIndex[i] = StopIndex[0] - 1
-            DepthAxis = interp1d(TempTpds[0:StopIndex], YAxisRange[0: StopIndex], bounds_error=False)(stadatar.time_axis)
+            DepthAxis = interp1d(TempTpds[0:StopIndex], dep_range[0: StopIndex], bounds_error=False)(stadatar.time_axis)
 
         PS_RFTempAmps = stadatar.__dict__['data{}'.format(stadatar.comp.lower())][i]
         ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
@@ -689,7 +764,7 @@ def time2depth(stadatar, YAxisRange, Tpds, normalize='single'):
         elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
             continue
         else:
-            PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(YAxisRange)
+            PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(dep_range)
             PS_RFdepth[i] = PS_RFAmps
     return PS_RFdepth, EndIndex
 
