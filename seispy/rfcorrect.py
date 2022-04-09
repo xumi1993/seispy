@@ -216,7 +216,7 @@ class RFStation(object):
         return rfdepth
 
     def psrf_1D_raytracing(self, dep_range=np.arange(0, 150), **kwargs):
-        """1D back ray tracing to obtained Ps conversion points at discret depthes
+        """1D back ray tracing to obtained Ps conversion points at discret depths
 
         :param dep_range: Discret conversion depth, defaults to np.arange(0, 150)
         :type dep_range: numpy.ndarray, optional
@@ -465,7 +465,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
 
 
 def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
-    """Calculate horizontal distance and time difference at depthes
+    """Calculate horizontal distance and time difference at depths
 
     :param dep_mod: 1D velocity model class 
     :type dep_mod: :meth:`seispy.util.DepModel`
@@ -473,7 +473,7 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
     :type srayp: float
     :param prayp: S-wave ray-parameters
     :type prayp: float
-    :param is_raylen: Wether calculate ray length at depthes, defaults to False
+    :param is_raylen: Wether calculate ray length at depths, defaults to False
     :type is_raylen: bool, optional
     :param sphere: Wether do earth-flattening transformation, defaults to True, defaults to True
     :type sphere: bool, optional
@@ -660,7 +660,7 @@ def interp_depth_model(model, lat, lon, new_dep):
     lon : float
         Longitude of position in 3D velocity model
     new_dep : :meth:`np.ndarray`
-        1D array of depthes in km
+        1D array of depths in km
 
     Returns
     -------
@@ -697,7 +697,7 @@ def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength
     Tpds : :meth:`np.ndarray`
         1D array of time difference in ``dep_range`` (``dep_range.size``)
     dep_range : :meth:`np.ndarray`
-        1D array of depthes in km, (``dep_range.size``)
+        1D array of depths in km, (``dep_range.size``)
     mod3d : :meth:`np.lib.npyio.NpzFile`
         3D velocity loaded from a ``.npz`` file
 
@@ -729,7 +729,7 @@ def time2depth(stadatar, dep_range, Tpds, normalize='single'):
     stadatar : :meth:`RFStation` 
         Data class of :meth:`RFStation` 
     dep_range : :meth:`np.ndarray`
-        1D array of depthes in km, (``dep_range.size``)
+        1D array of depths in km, (``dep_range.size``)
     Tpds : :meth:`np.ndarray`
         1D array of time difference in ``dep_range`` (``dep_range.size``)
     normalize : str, optional
