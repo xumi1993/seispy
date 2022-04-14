@@ -148,7 +148,12 @@ class RFFigure(Figure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
-        self.phases = [tr.stats.sac.ka for tr in self.rrf]
+        try:
+            self.phases = [tr.stats.sac.ka for tr in self.rrf]
+        except AttributeError as e:
+            self.log.RFlog.error('Please check \'ka\' in SAC header, which should be the same as'
+                                 'the phase in the filename (new feature after v1.2.16)')
+            sys.exit(1)
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
