@@ -141,6 +141,7 @@ class RFFigure(Figure):
             sys.exit(1)
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
+        self.phases = [basename(sac_file).split('_')[1] for sac_file in sorted(tmp_files)]
         self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
         self.trf = obspy.read(join(self.rfpath, '*_T.sac')).sort(['starttime']).resample(1/dt)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
@@ -148,12 +149,6 @@ class RFFigure(Figure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
-        try:
-            self.phases = [tr.stats.sac.ka for tr in self.rrf]
-        except AttributeError as e:
-            self.log.RFlog.error('Please check \'ka\' in SAC header, which should be the same as'
-                                 'the phase in the filename (new feature after v1.2.16)')
-            sys.exit(1)
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
