@@ -34,6 +34,9 @@ Create spaced grid point with coordinates of the center point in the area in sph
     begx = -len_lon 
     begy = -len_lat
     bin_loca = []
+    bin_mat = np.zeros([lats.size, lons.size, 2])
+    bin_map = np.zeros([lats.size, lons.size]).astype(int)
+    n = 0
     for j in range(lats.size):
         delyinc = j * val + begy
         delt = da.delta + delyinc
@@ -43,7 +46,11 @@ Create spaced grid point with coordinates of the center point in the area in sph
             if glon > 180:
                 glon -= 360
             bin_loca.append([glat, glon])
-    return np.array(bin_loca)
+            bin_mat[j, i, 0] = glat
+            bin_mat[j, i, 1] = glon
+            bin_map[j, i] = n
+            n += 1
+    return np.array(bin_loca), bin_mat, bin_map
 
 
 def bin_shape(cpara):
@@ -103,6 +110,9 @@ class CCP3D():
         else:
             raise ValueError('cfg_file must be str format.')
         self.stack_data = []
+        self.bin_loca = None
+        self.bin_mat = None
+        self.bin_map = None
 
     def load_para(self, cfg_file):
         try:
@@ -126,7 +136,7 @@ class CCP3D():
 
     def initial_grid(self):
         self.read_rfdep()
-        self.bin_loca = gen_center_bin(*self.cpara.center_bin)
+        self.bin_loca, self.bin_mat, self.bin_map = gen_center_bin(*self.cpara.center_bin)
         self.fzone = bin_shape(self.cpara)
         self.stalst = _get_sta(self.rfdep)
         self.dismin = _sta_val(self.cpara.stack_range, self.fzone[-1])
@@ -227,7 +237,7 @@ class CCP3D():
         data = np.load(stack_data_path, allow_pickle=True)
         ccp.stack_data = data['stack_data']
         ccp.cpara = data['cpara'].any()
-        ccp.bin_loca = np.array([[bin_info['bin_lat'], bin_info['bin_lon']] for bin_info in ccp.stack_data])
+        ccp.bin_loca, ccp.bin_mat, ccp.bin_map = gen_center_bin(*ccp.cpara.center_bin)
         return ccp
 
 

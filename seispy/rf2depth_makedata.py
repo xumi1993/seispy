@@ -75,6 +75,9 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         rfdep = {}
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
         stadatar = RFStation(evt_lst, only_r=True)
+        stadatar.stel = sta_info.stel[i]
+        stadatar.stla = sta_info.stla[i]
+        stadatar.stlo = sta_info.stlo[i]
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
@@ -121,6 +124,9 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
         rfdep = {}
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
         stadatar = RFStation(evt_lst, only_r=True)
+        stadatar.stel = sta_info.stel[i]
+        stadatar.stla = sta_info.stla[i]
+        stadatar.stlo = sta_info.stlo[i]
         if stadatar.prime_phase == 'P':
             sphere = True
         else:

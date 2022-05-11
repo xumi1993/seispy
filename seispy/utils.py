@@ -1,4 +1,4 @@
-from os.path import join, dirname, exists
+from os.path import join, dirname, exists, abspath
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
 from seispy import geo
@@ -60,7 +60,7 @@ class DepModel(object):
                            fill_value=self.vpraw[0])(self.depths_elev)
         self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False,
                            fill_value=self.vsraw[0])(self.depths_elev)
-        self.R = 6371.0 - self.depths_extend
+        self.R = 6371.0 - self.depths_elev
 
     def from_file(self, mode_name):
         if exists(mode_name):
@@ -68,7 +68,7 @@ class DepModel(object):
         elif exists(join(dirname(__file__), 'data', mode_name.lower()+'.vel')):
             filename = join(dirname(__file__), 'data', mode_name.lower()+'.vel')
         else:
-            raise ValueError('No such velocity mode')
+            raise ValueError('No such file of velocity model')
         return filename
 
     def tpds(self, rayps, raypp, sphere=True):

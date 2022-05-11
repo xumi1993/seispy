@@ -746,25 +746,25 @@ def time2depth(stadatar, dep_range, Tpds, normalize='single'):
     if normalize:
         stadatar.normalize(method=normalize)
     PS_RFdepth = np.zeros([stadatar.ev_num, dep_range.shape[0]])
-    EndIndex = np.zeros(stadatar.ev_num)
+    EndIndex = np.zeros(stadatar.ev_num).astype(int)
     for i in range(stadatar.ev_num):
         TempTpds = Tpds[i, :]
         StopIndex = np.where(np.imag(TempTpds) == 1)[0]
         if StopIndex.size == 0:
             EndIndex[i] = dep_range.size - 1
-            DepthAxis = interp1d(TempTpds, dep_range, bounds_error=False)(stadatar.time_axis)
+            # DepthAxis = interp1d(TempTpds, dep_range, bounds_error=False)(stadatar.time_axis)
         else:
             EndIndex[i] = StopIndex[0] - 1
-            DepthAxis = interp1d(TempTpds[0:StopIndex], dep_range[0: StopIndex], bounds_error=False)(stadatar.time_axis)
+            # DepthAxis = interp1d(TempTpds[0:StopIndex], dep_range[0: StopIndex], bounds_error=False)(stadatar.time_axis)
 
         PS_RFTempAmps = stadatar.__dict__['data{}'.format(stadatar.comp.lower())][i]
-        ValueIndices = np.where(np.logical_not(np.isnan(DepthAxis)))[0]
+        ValueIndices = np.where(np.logical_not(np.isnan(dep_range[0:EndIndex[i]+1])))[0]
         if ValueIndices.size == 0:
             continue
         elif np.max(ValueIndices) > PS_RFTempAmps.shape[0]:
             continue
         else:
-            PS_RFAmps = interp1d(DepthAxis[ValueIndices], PS_RFTempAmps[ValueIndices], bounds_error=False)(dep_range)
+            PS_RFAmps = interp1d(stadatar.time_axis, PS_RFTempAmps, bounds_error=False)(TempTpds[0:EndIndex[i]+1])
             PS_RFdepth[i] = PS_RFAmps
     return PS_RFdepth, EndIndex
 
