@@ -39,8 +39,8 @@ Seispy is a Python module for processing seismological data and calculating Rece
   
 ## Installation
 
-See [Installation](https://seispy.xumijian.me/installation.html)
-
+See [Seispy documentation](https://seispy.xumijian.me/installation.html) in detail.
+ 
 # Inclusion
 ## Libraries
 
