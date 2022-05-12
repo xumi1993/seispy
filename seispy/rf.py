@@ -140,7 +140,7 @@ class stainfo():
 
 
 def CfgParser(cfg_file):
-    cf = configparser.RawConfigParser()
+    cf = configparser.RawConfigParser(allow_no_value=True)
     pa = para()
     try:
         cf.read(cfg_file)

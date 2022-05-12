@@ -7,7 +7,9 @@ from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
 from seispy.utils import check_stack_val, read_rfdep
+from scipy.interpolate import interp1d
 import warnings
+import sys
 
 
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
@@ -110,6 +112,8 @@ class CCP3D():
         else:
             raise ValueError('cfg_file must be str format.')
         self.stack_data = []
+        self.good_410_660 = np.array([])
+        self.good_depth = np.array([])
         self.bin_loca = None
         self.bin_mat = None
         self.bin_map = None
@@ -232,14 +236,63 @@ class CCP3D():
                         good_peak[1], ci_660[0], ci_660[1], count_660))
 
     @classmethod
-    def read_stack_data(cls, stack_data_path, cfg_file=None):
+    def read_stack_data(cls, stack_data_path, cfg_file=None, good_depth_path=None, ismtz=False):
         ccp = cls(cfg_file)
         data = np.load(stack_data_path, allow_pickle=True)
         ccp.stack_data = data['stack_data']
         ccp.cpara = data['cpara'].any()
         ccp.bin_loca, ccp.bin_mat, ccp.bin_map = gen_center_bin(*ccp.cpara.center_bin)
+        if good_depth_path is not None:
+            if ismtz:
+                ccp.good_410_660[:, 0] =  np.loadtxt(good_depth_path, usecols=[2])
+                ccp.good_410_660[:, 0] =  np.loadtxt(good_depth_path, usecols=[6])
+            else:
+                ccp.good_depth = np.loadtxt(good_depth_path, usecols=[2])
         return ccp
 
+    def get_depth_err(self, type='std'):
+        moho_err = np.zeros([self.bin_loca.shape[0], 2])
+        self.logger.CCPlog.info('Computing errors of selected depth')
+        if self.good_depth.size == 0:
+            self.logger.CCPlog.error('Please load good depths before.')
+            sys.exit(1)
+        if np.isnan(self.stack_data['ci']).all() and type == 'ci':
+            self.logger.CCPlog.warning('No confidence intervals in stack data, using standard division instead.')
+            type = 'std'
+        for i, _ in enumerate(self.bin_loca):
+            if np.isnan(self.good_depth[i]):
+                moho_err[i, 0], moho_err[i, 1] = np.nan, np.nan
+            else:
+                idx = np.nanargmin(np.abs(self.cpara.stack_range-self.good_depth[i]))
+                mu = self.stack_data[i]['mu']
+                min_idxes = extrema(mu, opt='min')
+                try:
+                    low_idx = min_idxes[np.max(np.where((min_idxes - idx) < 0)[0])]
+                    up_idx = min_idxes[np.min(np.where((min_idxes - idx) > 0)[0])]
+                except:
+                    moho_err[i, 0], moho_err[i, 1] = np.nan, np.nan
+                    continue
+                if type == 'std':
+                    cvalue = mu[idx] - 1.645 * np.std(mu[low_idx:up_idx+1])/np.sqrt(up_idx-low_idx+1)
+                elif type == 'ci':
+                    cvalue = self.stack_data[i]['ci'][idx, 0]
+                else:
+                    self.logger.error('Reference type should be in \'std\' and \'ci\'')
+                    sys.exit(1)
+                moho_err[i, 0], moho_err[i, 1] = self._get_err(mu[low_idx:up_idx+1],
+                                    self.cpara.stack_range[low_idx:up_idx+1], cvalue)
+        return moho_err
+
+    def _get_err(self, tr, dep, cvalue):
+        result = np.array([])
+        for i, amp in enumerate(tr[:-1]):
+            if (amp <= cvalue < tr[i+1]) or (amp > cvalue >= tr[i+1]):
+                result = np.append(result, interp1d([amp, tr[i+1]], 
+                                  [dep[i], dep[i+1]])(cvalue))
+        if len(result) == 2:
+            return result[0], result[1]
+        else:
+            return np.nan, np.nan
 
 if __name__ == '__main__':
     bin_loca = gen_center_bin(48.5, 100, 5, 8, km2deg(55))
