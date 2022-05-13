@@ -203,18 +203,21 @@ def CfgModify(cfg_file, session, key, value):
 
 class RF(object):
     def __init__(self, cfg_file=None, log=None):
-        if cfg_file is None:
-            self.para = para()
-        elif isinstance(cfg_file, str):
-            self.para = CfgParser(cfg_file)
-        else:
-            raise TypeError('cfg should be \'str\' not \'{0}\''.format(type(cfg_file)))
-        if not isinstance(self.para, para):
-            raise TypeError('Input value should be class seispy.rf.para')
         if log is None:
             self.logger = setuplog()
         else:
             self.logger = log
+        if cfg_file is None:
+            self.para = para()
+        elif isinstance(cfg_file, str):
+            if not exists(cfg_file):
+                self.logger.RFlog.error('No such file of {}.'.format(cfg_file))
+                sys.exit(1)
+            self.para = CfgParser(cfg_file)
+        else:
+            raise TypeError('cfg should be in \'str\' format rather than \'{0}\''.format(type(cfg_file)))
+        if not isinstance(self.para, para):
+            raise TypeError('Input value should be class seispy.rf.para')
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()
         self.model = TauPyModel('iasp91')
