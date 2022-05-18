@@ -1,15 +1,13 @@
-from seispy.rfcorrect import SACStation, psrf2depth, Mod3DPerturbation, psrf_1D_raytracing,\
+from seispy.rfcorrect import RFStation, psrf2depth, Mod3DPerturbation, psrf_1D_raytracing,\
     psrf_3D_migration, time2depth, psrf_3D_raytracing
 import numpy as np
 from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog
 from seispy.geo import latlon_from, deg2km, rad2deg
 from os.path import join, dirname, exists
-from scipy.io import savemat
 import argparse
 import sys
 import glob
-import pickle
 
 
 class Station(object):
@@ -34,13 +32,6 @@ def init_mat(sta_num):
     return np.zeros([1, sta_num], dtype=dtype)
 
 
-def _convert_str_mat(instr):
-    mat = np.zeros((len(instr), 1), dtype='O')
-    for i in range(len(instr)):
-        mat[i, 0] = np.array(np.array([instr[i]]), dtype='O')
-    return mat
-
-
 def _load_mod(datapath, staname):
     """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
 
@@ -63,10 +54,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
     ismod1d = False
     if velmod3d is not None:
         if isinstance(velmod3d, str):
-            if exists(velmod3d):
-                model_3d = np.load(velmod3d)
-            else:
-                model_3d = None
+            velmod = velmod3d
         else:
             raise ValueError('Path to 3d velocity model should be in str')
     elif modfolder1d is not None:
@@ -86,20 +74,24 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
-        stadatar = SACStation(evt_lst, only_r=True)
+        stadatar = RFStation(evt_lst, only_r=True)
+        stadatar.stel = sta_info.stel[i]
+        stadatar.stla = sta_info.stla[i]
+        stadatar.stlo = sta_info.stlo[i]
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
         piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
+        if stadatar.prime_phase == 'P':
+            sphere = True
+        else:
+            sphere = False
         if ismod1d:
             if modfolder1d is not None:
-                mod1d = _load_mod(modfolder1d, sta_info.station[i])
+                velmod = _load_mod(modfolder1d, sta_info.station[i])
             else:
-                mod1d = 'iasp91'
-            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
-                                              velmod=mod1d, srayp=cpara.rayp_lib)
-        else:
-            PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis, cpara.velmod, 
-                                              velmod_3d=model_3d, srayp=cpara.rayp_lib)
+                velmod = cpara.velmod
+        PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
+                            velmod=velmod, srayp=cpara.rayp_lib, sphere=sphere, phase=cpara.phase)
         for j in range(stadatar.ev_num):
             piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
                                                      stadatar.bazi[j], rad2deg(x_s[j]))
@@ -110,7 +102,7 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
         # rfdep['events'] = _convert_str_mat(stadatar.event)
         rfdep['bazi'] = stadatar.bazi
         rfdep['rayp'] = stadatar.rayp
-        # rfdep['phases'] = _convert_str_mat(stadatar.phase)
+        # rfdep['phases'] = stadatar.phase[i]
         rfdep['moveout_correct'] = PS_RFdepth
         rfdep['piercelat'] = piercelat
         rfdep['piercelon'] = piercelon
@@ -131,15 +123,22 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
         evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
-        stadatar = SACStation(evt_lst, only_r=True)
+        stadatar = RFStation(evt_lst, only_r=True)
+        stadatar.stel = sta_info.stel[i]
+        stadatar.stla = sta_info.stla[i]
+        stadatar.stlo = sta_info.stlo[i]
+        if stadatar.prime_phase == 'P':
+            sphere = True
+        else:
+            sphere = False
         log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
         if raytracing3d:
-            pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp)
+            pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp, sphere=sphere)
         else:
-            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tpds = psrf_1D_raytracing(stadatar,
-                                                                                                cpara.depth_axis, srayp=srayp)
+            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
+                stadatar, cpara.depth_axis, srayp=srayp, sphere=sphere, phase=cpara.phase)
             newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
-                                        tpds, cpara.depth_axis, mod3d)
+                                        tps, cpara.depth_axis, mod3d)
         amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
         rfdep['station'] = sta_info.station[i]
         rfdep['stalat'] = sta_info.stla[i]

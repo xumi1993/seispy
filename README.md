@@ -34,15 +34,13 @@ Seispy is a Python module for processing seismological data and calculating Rece
   * [NumPy](http://www.numpy.org/) >= 1.16
   * [SciPy](http://www.scipy.org/) >= 1.2.0
   * [matplotlib](https://matplotlib.org/) >= 3.0.0
-  * [PyQt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
+  * [pyqt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
   * [scikits.bootstrap](https://github.com/cgevans/scikits-bootstrap) >= 1.0.0
   
 ## Installation
-```
-git clone https://github.com/xumi1993/seispy.git
-python setup.py install
-```
 
+See [Seispy documentation](https://seispy.xumijian.me/installation.html) in detail.
+ 
 # Inclusion
 ## Libraries
 
@@ -86,9 +84,14 @@ python setup.py install
  * `ccp_profile`: Stack PRFs along a profile with a CCP stacking method.
  * `ccp3d`: Stack PRFs with spaced bins.
  * `rfani`: Estimating crustal anisotropy with a joint method.
+ * `rfharmo`: Harmonic decomposition to extract constant component of RF and plot dip/anisotropic components.
 
 ### Others
+ * `veltxt2mod`: Create 3D velocity model with `numpy.lib.npyio.NpzFile` format from a ASCII table file.
  * `ndk2dat`: Convert the GCMT catalog file ("ndk" format) to the list file for the `prf` command.
  * `updatecatalog`: Automatically update the GCMT catalog.
  * `setpar`: Set up the values in configure files.
 
+### TODO
+
+- Download seismic data from web service for RF calculation.

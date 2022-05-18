@@ -8,7 +8,7 @@ class CCPPara(object):
     def __init__(self):
         self.rfpath = expanduser('~')
         self.rayp_lib = None
-        self.depthdat = 'RFdepth.mat'
+        self.depthdat = 'RFdepth.npy'
         self.stackfile = 'ccp.dat'
         self.stalist = 'sta.lst'
         self.peakfile = 'good_410_660.dat'
@@ -27,6 +27,7 @@ class CCPPara(object):
         self.dep_val = 1
         self.stack_val = 1
         self.boot_samples = None
+        self.phase = 1
         
     @property
     def bin_radius(self):
@@ -110,6 +111,10 @@ def ccppara(cfg_file):
     # para for depth section
     dep_end = cf.getfloat('depth', 'dep_end')
     cpara.dep_val = cf.getfloat('depth', 'dep_val')
+    try:
+        cpara.phase = cf.getint('depth', 'phase')
+    except:
+        cpara.phase = 1
     cpara.depth_axis = np.append(np.arange(0, dep_end, cpara.dep_val), dep_end)
 
     stack_start = cf.getfloat('stack', 'stack_start')

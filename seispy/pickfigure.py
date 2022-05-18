@@ -141,6 +141,7 @@ class RFFigure(Figure):
             sys.exit(1)
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
+        self.phases = [basename(sac_file).split('_')[1] for sac_file in sorted(tmp_files)]
         self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
         self.trf = obspy.read(join(self.rfpath, '*_T.sac')).sort(['starttime']).resample(1/dt)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
@@ -163,6 +164,7 @@ class RFFigure(Figure):
             pass
         self.baz = self.baz[idx]
         self.gcarc = self.gcarc[idx]
+        self.phases = [self.phases[i] for i in idx]
         self.rrf = [self.rrf[i] for i in idx]
         self.trf = [self.trf[i] for i in idx]
         # self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
@@ -263,12 +265,11 @@ class RFFigure(Figure):
                     evla = self.rrf[i].stats.sac.evla
                     evlo = self.rrf[i].stats.sac.evlo
                     evdp = self.rrf[i].stats.sac.evdp
-                    dist = self.rrf[i].stats.sac.gcarc
-                    baz = self.rrf[i].stats.sac.baz
                     rayp = self.rrf[i].stats.sac.user0
                     mag = self.rrf[i].stats.sac.mag
                     gauss = self.rrf[i].stats.sac.user1
-                    fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (self.filenames[i], 'P', evla, evlo, evdp, dist, baz, rayp, mag, gauss))
+                    fid.write('%s %s %6.3f %6.3f %6.3f %6.3f %6.3f %8.7f %6.3f %6.3f\n' % (
+                              self.filenames[i], self.phases[i], evla, evlo, evdp, self.gcarc[i], self.baz[i], rayp, mag, gauss))
 
     def plot(self):
         plt.ion()

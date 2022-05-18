@@ -3,11 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
 from seispy.rfcorrect import RFStation
-from seispy.rf import CfgParser
 import argparse
 import numpy as np
 from os.path import join
-import sys
 
 
 def init_figure():
@@ -19,15 +17,6 @@ def init_figure():
     axb = plt.subplot(gs[0, -1])
     axb.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
     return h, axr, axb
-
-
-def read_process_data(rfpath):
-    stadata = RFStation(rfpath, only_r=True)
-    idx = np.argsort(stadata.bazi)
-    stadata.event = stadata.event[idx]
-    stadata.bazi = stadata.bazi[idx]
-    stadata.datar = stadata.datar[idx]
-    return stadata
 
 
 def plot_waves(axr, axb, stadata, enf=12):
@@ -69,13 +58,13 @@ def set_fig(axr,  axb, stadata, xmin=-2, xmax=80):
     axb.set_xlabel(r'Back-azimuth ($^\circ$)', fontsize=13)
 
 
-def plotr(rfpath, outpath='./', xlim=[-2, 80], enf=6, format='pdf'):
+def plotr(rfsta, outpath='./', xlim=[-2, 80], key='bazi', enf=6, format='pdf'):
     h, axr, axb = init_figure()
-    stadata = read_process_data(rfpath)
-    plot_waves(axr, axb, stadata, enf=enf)
-    set_fig(axr, axb, stadata, xlim[0], xlim[1])
-    h.savefig(join(outpath, stadata.staname + '_R_bazorder_{:.1f}.{}'.format(
-              stadata.f0[0], format)), format=format, dpi=500)
+    rfsta.sort(key)
+    plot_waves(axr, axb, rfsta, enf=enf)
+    set_fig(axr, axb, rfsta, xlim[0], xlim[1])
+    h.savefig(join(outpath, rfsta.staname + '_R_bazorder_{:.1f}.{}'.format(
+              rfsta.f0[0], format)), format=format, dpi=500)
 
 
 def main():
@@ -89,12 +78,13 @@ def main():
 
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
-        raise ValueError('Error: The format must be in \'f\' and \'g\'')
+        parser.error('Error: The format must be in \'f\' and \'g\'')
     elif arg.format == 'g':
         fmt = 'png'
     elif arg.format == 'f':
         fmt = 'pdf'
-    plotr(arg.rfpath, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
+    rfsta = RFStation(arg.rfpath)
+    plotr(rfsta, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
 
 
 

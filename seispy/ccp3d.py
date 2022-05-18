@@ -7,27 +7,14 @@ from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
 from seispy.utils import check_stack_val, read_rfdep
+from scipy.interpolate import interp1d
 import warnings
+import sys
 
 
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
     """
 Create spaced grid point with coordinates of the center point in the area in spherical coordinates.
-
-:: 
-    ---------------------------------------------------------
-    |                           |                           |
-    |                           |                           |
-    |                        len_lon                        |
-    |                           |                           |
-    |                           |                           |
-    ---- len_lat --- (center_lon, center_lat) --- len_lat ---
-    |                           |                           |
-    |                           |                           |
-    |                        len_lon                        |
-    |                           |                           |
-    |                           |                           |
-    ---------------------------------------------------------
 
 :param center_lat: Latitude of the center point.
 :type center_lat: float
@@ -49,6 +36,9 @@ Create spaced grid point with coordinates of the center point in the area in sph
     begx = -len_lon 
     begy = -len_lat
     bin_loca = []
+    bin_mat = np.zeros([lats.size, lons.size, 2])
+    bin_map = np.zeros([lats.size, lons.size]).astype(int)
+    n = 0
     for j in range(lats.size):
         delyinc = j * val + begy
         delt = da.delta + delyinc
@@ -58,7 +48,11 @@ Create spaced grid point with coordinates of the center point in the area in sph
             if glon > 180:
                 glon -= 360
             bin_loca.append([glat, glon])
-    return np.array(bin_loca)
+            bin_mat[j, i, 0] = glat
+            bin_mat[j, i, 1] = glon
+            bin_map[j, i] = n
+            n += 1
+    return np.array(bin_loca), bin_mat, bin_map
 
 
 def bin_shape(cpara):
@@ -118,6 +112,11 @@ class CCP3D():
         else:
             raise ValueError('cfg_file must be str format.')
         self.stack_data = []
+        self.good_410_660 = np.array([])
+        self.good_depth = np.array([])
+        self.bin_loca = None
+        self.bin_mat = None
+        self.bin_map = None
 
     def load_para(self, cfg_file):
         try:
@@ -141,7 +140,7 @@ class CCP3D():
 
     def initial_grid(self):
         self.read_rfdep()
-        self.bin_loca = gen_center_bin(*self.cpara.center_bin)
+        self.bin_loca, self.bin_mat, self.bin_map = gen_center_bin(*self.cpara.center_bin)
         self.fzone = bin_shape(self.cpara)
         self.stalst = _get_sta(self.rfdep)
         self.dismin = _sta_val(self.cpara.stack_range, self.fzone[-1])
@@ -237,14 +236,63 @@ class CCP3D():
                         good_peak[1], ci_660[0], ci_660[1], count_660))
 
     @classmethod
-    def read_stack_data(cls, stack_data_path, cfg_file=None):
+    def read_stack_data(cls, stack_data_path, cfg_file=None, good_depth_path=None, ismtz=False):
         ccp = cls(cfg_file)
         data = np.load(stack_data_path, allow_pickle=True)
         ccp.stack_data = data['stack_data']
         ccp.cpara = data['cpara'].any()
-        ccp.bin_loca = np.array([[bin_info['bin_lat'], bin_info['bin_lon']] for bin_info in ccp.stack_data])
+        ccp.bin_loca, ccp.bin_mat, ccp.bin_map = gen_center_bin(*ccp.cpara.center_bin)
+        if good_depth_path is not None:
+            if ismtz:
+                ccp.good_410_660[:, 0] =  np.loadtxt(good_depth_path, usecols=[2])
+                ccp.good_410_660[:, 0] =  np.loadtxt(good_depth_path, usecols=[6])
+            else:
+                ccp.good_depth = np.loadtxt(good_depth_path, usecols=[2])
         return ccp
 
+    def get_depth_err(self, type='std'):
+        moho_err = np.zeros([self.bin_loca.shape[0], 2])
+        self.logger.CCPlog.info('Computing errors of selected depth')
+        if self.good_depth.size == 0:
+            self.logger.CCPlog.error('Please load good depths before.')
+            sys.exit(1)
+        if np.isnan(self.stack_data['ci']).all() and type == 'ci':
+            self.logger.CCPlog.warning('No confidence intervals in stack data, using standard division instead.')
+            type = 'std'
+        for i, _ in enumerate(self.bin_loca):
+            if np.isnan(self.good_depth[i]):
+                moho_err[i, 0], moho_err[i, 1] = np.nan, np.nan
+            else:
+                idx = np.nanargmin(np.abs(self.cpara.stack_range-self.good_depth[i]))
+                mu = self.stack_data[i]['mu']
+                min_idxes = extrema(mu, opt='min')
+                try:
+                    low_idx = min_idxes[np.max(np.where((min_idxes - idx) < 0)[0])]
+                    up_idx = min_idxes[np.min(np.where((min_idxes - idx) > 0)[0])]
+                except:
+                    moho_err[i, 0], moho_err[i, 1] = np.nan, np.nan
+                    continue
+                if type == 'std':
+                    cvalue = mu[idx] - 1.645 * np.std(mu[low_idx:up_idx+1])/np.sqrt(up_idx-low_idx+1)
+                elif type == 'ci':
+                    cvalue = self.stack_data[i]['ci'][idx, 0]
+                else:
+                    self.logger.error('Reference type should be in \'std\' and \'ci\'')
+                    sys.exit(1)
+                moho_err[i, 0], moho_err[i, 1] = self._get_err(mu[low_idx:up_idx+1],
+                                    self.cpara.stack_range[low_idx:up_idx+1], cvalue)
+        return moho_err
+
+    def _get_err(self, tr, dep, cvalue):
+        result = np.array([])
+        for i, amp in enumerate(tr[:-1]):
+            if (amp <= cvalue < tr[i+1]) or (amp > cvalue >= tr[i+1]):
+                result = np.append(result, interp1d([amp, tr[i+1]], 
+                                  [dep[i], dep[i+1]])(cvalue))
+        if len(result) == 2:
+            return result[0], result[1]
+        else:
+            return np.nan, np.nan
 
 if __name__ == '__main__':
     bin_loca = gen_center_bin(48.5, 100, 5, 8, km2deg(55))

@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.2.15"
+VERSION = "1.2.16"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -18,13 +18,14 @@ setup(name='python-seispy',
       package_dir={'seispy': 'seispy'},
       package_data={'': ['data/*']},
       install_requires=[
-                # 'netcdf4>=1.5.2',
                 'obspy>=1.3.0',
                 'pandas>=1.0.0',
                 'numpy>=1.19.0',
                 'scipy>=1.1.0',
                 'matplotlib>=3.2.0',
                 'pyqt5>=5.12.0',
+                # 'pyqtwebengine>=5.12.0'
+                # 'folium',
                 'scikits.bootstrap>=1.0.0'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.scripts:prf',
@@ -40,6 +41,7 @@ setup(name='python-seispy',
                                         'pickrf=seispy.pickui:main',
                                         'rfani=seispy.scripts:rfani',
                                         'ccp3d=seispy.scripts:ccp3d',
+                                        'rfharmo=seispy.scripts:rfharmo',
                                         'get_pierce_points=seispy.scripts:get_pierce_points',
                                         'veltxt2mod=seispy.modcreator:veltxt2mod']},
       #  include_package_data=True,

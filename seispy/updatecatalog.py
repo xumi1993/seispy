@@ -23,7 +23,16 @@ def ndkparse(ndk_str):
     return ndk_lst
 
 
-def fetch_cata(inlog=join(dirname(__file__), 'data', 'EventCMT.dat'), outlog=''):
+def fetch_cata(inlog=None, outlog=''):
+    """Fetch catalog from http://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_QUICK/qcmt.ndk, and append to ``inlog``
+
+    :param inlog: existed catalog file, defaults to None
+    :type inlog: str, optional
+    :param outlog: Output catalog file, defaults to ``inlog``
+    :type outlog: str, optional
+    """
+    if inlog == None:
+        inlog = join(dirname(__file__), 'data', 'EventCMT.dat')
     url = 'http://www.ldeo.columbia.edu/~gcmt/projects/CMT/catalog/NEW_QUICK/qcmt.ndk'
     try:
         print('Connecting to http://www.ldeo.columbia.edu/.../qcmt.ndk')

@@ -31,11 +31,12 @@ class ModCreator():
         self.logger.ModCreatorlog.info('Interpolating unstructured velocity to grid')
         points = np.array([self.deps, self.lats, self.lons]).T
         self.vp_grid = griddata(points, self.vps, (self.dep_grid, self.lat_grid, self.lon_grid), **kwargs)
-        self.fill_1d()
+        self.fill_1d('vp')
         if self.vss.size == 0:
             self.calc_vs()
         else:
             self.vs_grid = griddata(points, self.vss, (self.dep_grid, self.lat_grid, self.lon_grid), **kwargs)
+            self.fill_1d('vs')
 
     def calc_vs(self):
         inter_ddvsddvp = interp1d(self.ddvsddvp[0], self.ddvsddvp[1], fill_value="extrapolate")(self.dep_inter)
@@ -46,9 +47,9 @@ class ModCreator():
         self.dvs_grid = self.dvp_grid * mesh_ddvsddvp
         self.vs_grid = vs_grid1d * (self.dvs_grid*0.01+1)
     
-    def fill_1d(self):
+    def fill_1d(self, type='vp'):
         for i, _ in enumerate(self.dep_inter):
-            self.vp_grid[i][np.where(np.isnan(self.vp_grid[i, :, :]))] = self.depmod.vp[i]
+            self.__dict__[type+'_grid'][i][np.where(np.isnan(self.__dict__[type+'_grid'][i, :, :]))] = self.depmod.__dict__[type][i]
 
     def savenpz(self, filename):
         np.savez(filename, dep=self.dep_inter, lat=self.lat_inter, lon=self.lon_inter, vp=self.vp_grid, vs=self.vs_grid)
@@ -70,7 +71,7 @@ def veltxt2mod():
     parser.add_argument('velfile', help='velocity file in text format')
     parser.add_argument('-r', help='Range of the grid region with interval in degree',
                         type=str, required=True, metavar='lonmin/lonmax/latmin/latmax/val')
-    parser.add_argument('-c', help='Which columns to read, with 0 being the first, order by lat/lon/dep/vp/vs. If 4 columns were received,'
+    parser.add_argument('-c', help='Which columns to read, with 0 being the first, order by lat/lon/dep/vp/vs. If 4 columns are accepted,'
                         'the fourth column represents Vp, and the Vs will be calculated as a relationship between'
                         'the Vp/Vs and the depth in Cammarano et al., (2003), defaults to 0/1/2/3/4',
                         type=str, default='0/1/2/3/4', metavar='ncol_lat/ncol_lon/ncol_dep/ncol_vp[/ncol_vs]')

@@ -1,12 +1,11 @@
 import numpy as np
-from numpy.lib.arraysetops import isin
 import obspy
 from obspy.io.sac import SACTrace
 from obspy.signal.rotate import rotate2zne, rotate_zne_lqt
 from scipy.signal import resample
-from os.path import dirname, join, expanduser
+from os.path import join
 from seispy.decon import RFTrace
-from seispy.geo import snr, srad2skm, rotateSeisENtoTR, skm2srad, \
+from seispy.geo import snr, srad2skm, rotateSeisENtoTR, \
                        rssq, extrema
 from obspy.signal.trigger import recursive_sta_lta
 
@@ -25,7 +24,16 @@ def rotateZNE(st):
 
 
 class EQ(object):
-    def __init__(self, pathname, datestr, suffix):
+    def __init__(self, pathname, datestr, suffix='SAC'):
+        """Class for processing event data with 3 components, which read SAC files of ``pathname*datastr*suffix`` 
+
+        :param pathname: Directory to SAC files
+        :type pathname: string
+        :param datestr: date part in filename, e.g., ``2021.122.12.23.40``
+        :type datestr: string
+        :param suffix: suffix for SAC files, defaults to 'SAC'
+        :type suffix: str, optional
+        """
         self.datestr = datestr
         self.filestr = join(pathname, '*' + datestr + '*' + suffix)
         self.st = obspy.read(self.filestr)
@@ -36,18 +44,14 @@ class EQ(object):
             raise ValueError('{} has more than 3 components, please select to delete redundant seismic components'.format(datestr))
         else:
             pass
-        # if not (self.st[0].stats.npts == self.st[1].stats.npts == self.st[2].stats.npts):
-        #     raise ValueError('Samples are different in 3 components')
         self.st.sort()
         self.rf = obspy.Stream()
         self.timeoffset = 0
         self.rms = np.array([0])
         self.it = 0
-        self.PArrival = None
-        self.PRaypara = None
-        self.SArrival = None
-        self.SRaypara = None
         self.trigger_shift = 0
+        self.inc_correction = 0
+        self.set_comp()
     
     def readstream(self):
         self.st = obspy.read(self.filestr)
@@ -57,7 +61,26 @@ class EQ(object):
         self.st = None
         self.rf = None
 
+    def set_comp(self):
+        if self.st.select(channel='*[E2]'):
+            self.comp = 'enz'
+        elif self.st.select(channel='*R'):
+            self.comp = 'rtz'
+        elif self.st.select(channel='*Q'):
+            self.comp = 'lqt'
+        else:
+            raise ValueError('No such component in R, E or Q')
+
     def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
+        """_summary_
+
+        :param switchEN: _description_, defaults to False
+        :type switchEN: bool, optional
+        :param reverseE: _description_, defaults to False
+        :type reverseE: bool, optional
+        :param reverseN: _description_, defaults to False
+        :type reverseN: bool, optional
+        """
         if reverseE:
             self.st.select(channel='*[E2]')[0].data *= -1
         if reverseN:
@@ -79,34 +102,31 @@ class EQ(object):
     def filter(self, freqmin=0.05, freqmax=1, order=4):
         self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order, zerophase=True)
 
-    def get_arrival(self, model, evdp, dis):
-        arrivals = model.get_travel_times(evdp, dis, phase_list=['P', 'S'])
-        self.PArrival = arrivals[0]
-        self.SArrival = arrivals[1]
-
-    def get_raypara(self, model, evdp, dis):
-        raypara = model.get_ray_paths(evdp, dis, phase_list=['P', 'S'])
-        self.PRaypara = raypara[0]
-        self.SRaypara = raypara[1]
+    def get_arrival(self, model, evdp, dis, phase='P'):
+        arrivals = model.get_travel_times(evdp, dis, phase_list=[phase])
+        if not arrivals:
+            raise ValueError('The phase of {} is not exists'.format(phase))
+        if len(arrivals) > 1:
+            raise ValueError('More than one phase were calculated with distance of {} and focal depth of {}'.format(dis, evdp))
+        else:
+            # self.arrival = arrivals[0]
+            self.arr_time = arrivals[0].time
+            self.rayp = arrivals[0].ray_param
+            self.inc = arrivals[0].incident_angle
+            self.phase = phase
 
     def search_inc(self, bazi):
         inc_range = np.arange(0.1, 90, 0.1)
-        # bazi_range = np.repeat(bazi, len(inc_range))
-        # M_all = seispy.geo.rot3D(bazi=bazi_range, inc=inc_range)
-        # ZEN = np.array([self.rf[2].data, self.rf[0].data, self.rf[1].data])
-        s_range = self.trim(20, 20, phase='S', isreturn=True)
-        # LQT_all = np.zeros([ZEN.shape[0], ZEN.shape[1], M_all.shape[2]])
+        s_range = self.trim(20, 20, isreturn=True)
         power = np.zeros(inc_range.shape[0])
         for i in range(len(inc_range)):
-            # LQT_all[:, :, i] = M_all[:, :, i].dot(ZEN)
             l_comp, _, _ = rotate_zne_lqt(s_range[2].data, s_range[1].data, s_range[0].data, bazi, inc_range[i])
             power[i] = np.mean(l_comp ** 2)
 
-        # real_inc_idx = seispy.geo.extrema(power, opt='min')
         real_inc_idx = np.argmin(power)
-        # print(real_inc_idx)
         real_inc = inc_range[real_inc_idx]
-        return real_inc
+        self.inc_correction = real_inc - self.inc
+        self.inc = real_inc
 
     def search_baz(self, bazi, time_b=10, time_e=20, offset=90):
         p_arr, _ = self.arr_correct(write_to_sac=False)
@@ -144,25 +164,12 @@ class EQ(object):
         else:
             pass
 
-    def rotate(self, bazi, inc=None, method='NE->RT', phase='P', search_inc=False):
-        if phase not in ('P', 'S'):
-            raise ValueError('phase must be in [\'P\', \'S\']')
-
+    def rotate(self, bazi, inc=None, method='NE->RT', search_inc=False):
         if inc is None:
-            if self.PArrival is None or self.SArrival is None:
-                raise ValueError('inc must be specified')
-            elif phase == 'P':
-                inc = self.PArrival.incident_angle
-            elif phase == 'S':
-                if search_inc:
-                    inc = self.search_inc(bazi)
-                    #  if inc == 0.1 or inc == 89.9:
-                        #  print(self.datestr)
-                else:
-                    inc = self.SArrival.incident_angle
-                # inc = self.search_inc(bazi)
-            else:
-                pass
+            if self.phase[-1] == 'S' and search_inc:
+                inc = self.search_inc(bazi)
+        else:
+            self.inc = inc
 
         if method == 'NE->RT':
             self.comp = 'rtz'
@@ -171,15 +178,15 @@ class EQ(object):
             self.st.rotate('RT->NE', back_azimuth=bazi)
         elif method == 'ZNE->LQT':
             self.comp = 'lqt'
-            self.st.rotate('ZNE->LQT', back_azimuth=bazi, inclination=inc)
+            self.st.rotate('ZNE->LQT', back_azimuth=bazi, inclination=self.inc)
         elif method == 'LQT->ZNE':
-            self.st.rotate('LQT->ZNE', back_azimuth=bazi, inclination=inc)
+            self.st.rotate('LQT->ZNE', back_azimuth=bazi, inclination=self.inc)
         else:
             pass
 
-    def snr(self, length=50, phase='P'):
-        st_noise = self.trim(length, 0, phase=phase, isreturn=True)
-        st_signal = self.trim(0, length, phase=phase, isreturn=True)
+    def snr(self, length=50):
+        st_noise = self.trim(length, 0, isreturn=True)
+        st_signal = self.trim(0, length, isreturn=True)
         try:
             snr_E = snr(st_signal[0].data, st_noise[0].data)
         except IndexError:
@@ -194,48 +201,38 @@ class EQ(object):
             snr_Z = 0
         return snr_E, snr_N, snr_Z
     
-    def get_time_offset(self, event_time):
-        if not isinstance(event_time, obspy.core.utcdatetime.UTCDateTime):
+    def get_time_offset(self, event_time=None):
+        if event_time is not None and not isinstance(event_time, obspy.core.utcdatetime.UTCDateTime):
             raise TypeError('Event time should be UTCDateTime type in obspy')
-        self.timeoffset = self.st[2].stats.starttime - event_time
+        elif event_time is None:
+            self.timeoffset = self.st[2].stats.sac.b - self.st[2].stats.sac.o
+        else:
+            self.timeoffset = self.st[2].stats.starttime - event_time
 
     def arr_correct(self, write_to_sac=True):
         """
         offset = sac.b - real o
         """
-        try:
-            Parr_time = self.PArrival.time
-            Sarr_time = self.SArrival.time
-        except AttributeError:
-            raise Exception('Please calculate PArrival or SArrival first')
-
-        Pcorrect_time = Parr_time - self.timeoffset
-        Scorrect_time = Sarr_time - self.timeoffset
+        correct_time = self.arr_time - self.timeoffset
         if write_to_sac:
             for tr in self.st:
-                tr.stats.sac.t0 = Pcorrect_time
-                tr.stats.sac.kt0 = 'P'
-                tr.stats.sac.t1 = Scorrect_time
-                tr.stats.sac.kt1 = 'S'
+                tr.stats.sac.t0 = correct_time
+                tr.stats.sac.kt0 = self.phase
 
-        return Pcorrect_time, Scorrect_time
+        return correct_time
 
-    def _get_time(self, time_before, time_after, phase='P'):
-        if phase not in ['P', 'S']:
-            raise ValueError('Phase must in \'P\' or \'S\'')
-        P_arr, S_arr = self.arr_correct(write_to_sac=False)
-        time_dict = dict(zip(['P', 'S'], [P_arr, S_arr]))
-
-        t1 = self.st[2].stats.starttime + (time_dict[phase] + self.trigger_shift - time_before)
-        t2 = self.st[2].stats.starttime + (time_dict[phase] + self.trigger_shift + time_after)
+    def _get_time(self, time_before, time_after):
+        arr = self.arr_correct(write_to_sac=False)
+        t1 = self.st[2].stats.starttime + (arr + self.trigger_shift - time_before)
+        t2 = self.st[2].stats.starttime + (arr + self.trigger_shift + time_after)
         return t1, t2
 
-    def phase_trigger(self, time_before, time_after, phase='S', stl=5, ltl=10):
-        t1, t2 = self._get_time(time_before, time_after, phase)
+    def phase_trigger(self, time_before, time_after, stl=5, ltl=10):
+        t1, t2 = self._get_time(time_before, time_after)
         self.st_pick = self.st.copy().trim(t1, t2)
         if len(self.st_pick) == 0:
             return
-        if phase == 'P':
+        if self.phase[-1] == 'P':
             tr = self.st_pick.select(channel='*Z')[0]
         else:
             tr = self.st_pick.select(channel='*T')[0]
@@ -245,20 +242,19 @@ class EQ(object):
         self.t_trigger = t1 + n_trigger/df
         self.trigger_shift = n_trigger/df - time_before
 
-    def trim(self, time_before, time_after, phase='P', isreturn=False):
+    def trim(self, time_before, time_after, isreturn=False):
         """
         offset = sac.b - real o
         """
-        t1, t2 = self._get_time(time_before, time_after, phase)
+        t1, t2 = self._get_time(time_before, time_after)
         if isreturn:
             return self.st.copy().trim(t1, t2)
         else:
             self.st.trim(t1, t2)
 
-    def deconvolute(self, shift, time_after, f0=2, phase='P', method='iter', only_r=False, itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
+    def deconvolute(self, shift, time_after, f0=2, method='iter', only_r=False,
+                    itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
         self.method = method
-        if phase not in ['P', 'S']:
-            raise ValueError('Phase must in \'P\' or \'S\'')
         if method == 'iter':
             kwargs = {'method': method,
                       'f0': f0,
@@ -273,7 +269,7 @@ class EQ(object):
         else:
             raise ValueError('method must be in \'iter\' or \'water\'')
 
-        if phase == 'P':
+        if self.phase[-1] == 'P':
             self.decon_p(**kwargs)
             if not only_r:
                 self.decon_p(tcomp=True, **kwargs)
@@ -319,9 +315,9 @@ class EQ(object):
         uout.data = np.flip(uout.data)
         self.rf.append(uout)
 
-    def saverf(self, path, evtstr=None, phase='P', shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
+    def saverf(self, path, evtstr=None, shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
-        if phase == 'P':
+        if self.phase[-1] == 'P':
             if self.comp == 'lqt':
                 svcomp = 'Q'
             else:
@@ -330,16 +326,15 @@ class EQ(object):
                 loop_lst = [svcomp]
             else:
                 loop_lst = [svcomp, 'T']
-            rayp = srad2skm(self.PArrival.ray_param)
-        elif phase == 'S':
+            rayp = srad2skm(self.rayp)
+        elif self.phase[-1] == 'S':
             if self.comp == 'lqt':
                 loop_lst = ['L']
             else:
                 loop_lst = ['Z']
-            rayp = srad2skm(self.SArrival.ray_param)
+            rayp = srad2skm(self.rayp)
         else:
-            raise ValueError('Phase must be in \'P\' or \'S\'')
-
+            pass
         if evtstr is None:
             filename = join(path, self.datestr)
         else:
@@ -354,8 +349,9 @@ class EQ(object):
                 trrf.stats['sac'][key] = value
             tr = SACTrace.from_obspy_trace(trrf)
             tr.b = -shift
-            tr.o = 0
-            tr.write(filename + '_{0}_{1}.sac'.format(phase, tr.kcmpnm[-1]))
+            tr.a = 0
+            tr.ka = self.phase
+            tr.write(filename + '_{0}_{1}.sac'.format(self.phase, tr.kcmpnm[-1]))
 
     def s_condition(self, trrf, shift):
         nt0 = int(np.floor((shift)/trrf.stats.delta))
@@ -365,14 +361,14 @@ class EQ(object):
         else:
             return False
 
-    def judge_rf(self, shift, npts, phase='P', criterion='crust', rmsgate=None):
-        if phase == 'P' and self.comp == 'rtz':
+    def judge_rf(self, shift, npts, criterion='crust', rmsgate=None):
+        if self.phase[-1] == 'P' and self.comp == 'rtz':
             trrf = self.rf.select(channel='*R')[0]
-        elif phase == 'P' and self.comp == 'lqt':
+        elif self.phase[-1] == 'P' and self.comp == 'lqt':
             trrf = self.rf.select(channel='*Q')[0]
-        elif phase == 'S' and self.comp == 'lqt':
+        elif self.phase[-1] == 'S' and self.comp == 'lqt':
             trrf = self.rf.select(channel='*L')[0]
-        elif phase == 'S' and self.comp == 'rtz':
+        elif self.phase[-1] == 'S' and self.comp == 'rtz':
             trrf = self.rf.select(channel='*Z')[0]        
         if trrf.stats.npts != npts:
             return False
