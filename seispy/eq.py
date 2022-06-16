@@ -129,7 +129,7 @@ class EQ(object):
         self.inc = real_inc
 
     def search_baz(self, bazi, time_b=10, time_e=20, offset=90):
-        p_arr, _ = self.arr_correct(write_to_sac=False)
+        p_arr = self.arr_correct(write_to_sac=False)
         this_st = self.st.copy()
         this_st.filter('bandpass', freqmin=0.03, freqmax=0.5)
         this_st.trim(this_st[0].stats.starttime+p_arr-time_b, this_st[0].stats.starttime+p_arr+time_e)
@@ -164,7 +164,8 @@ class EQ(object):
         else:
             pass
 
-    def rotate(self, bazi, inc=None, method='NE->RT', search_inc=False):
+    def rotate(self, baz, inc=None, method='NE->RT', search_inc=False, baz_shift=0):
+        bazi = np.mod(baz + baz_shift, 360)
         if inc is None:
             if self.phase[-1] == 'S' and search_inc:
                 inc = self.search_inc(bazi)

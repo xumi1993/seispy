@@ -30,6 +30,7 @@ def init_RF():
     rf.filter()
     rf.cal_phase()
     rf.drop_eq_snr()
+    rf.baz_correct()
     return rf
 
 def gen_list(para):
