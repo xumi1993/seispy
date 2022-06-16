@@ -129,7 +129,7 @@ class EQ(object):
         self.inc = real_inc
 
     def search_baz(self, bazi, time_b=10, time_e=20, offset=90):
-        p_arr, _ = self.arr_correct(write_to_sac=False)
+        p_arr = self.arr_correct(write_to_sac=False)
         this_st = self.st.copy()
         this_st.filter('bandpass', freqmin=0.03, freqmax=0.5)
         this_st.trim(this_st[0].stats.starttime+p_arr-time_b, this_st[0].stats.starttime+p_arr+time_e)
