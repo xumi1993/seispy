@@ -222,6 +222,7 @@ class RF(object):
         self.eqs = pd.DataFrame()
         self.model = TauPyModel('iasp91')
         self.stainfo = stainfo()
+        self.baz_shift = 0
 
     @property
     def date_begin(self):
@@ -369,12 +370,11 @@ class RF(object):
             if None in shift_all:
                 self.logger.RFlog.error('Range of searching bazi is too small.')
                 sys.exit(1)
-            baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
+            self.baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
             # fig = _plotampt(x, y, ampt_all, shift_all)
             # fig.savefig('{}_rotation.png'.format(self.stainfo.station))
             # self._baz_confirm(offset, ampt_all)
-            self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(baz_shift))
-            self.eqs['bazi'] = np.mod(self.eqs['bazi'] + baz_shift, 360)
+            self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(self.baz_shift))
 
     def rotate(self, search_inc=False):
         targ_comp = ''.join(sorted(self.para.comp.upper()))
@@ -388,7 +388,7 @@ class RF(object):
         drop_idx = []
         for i, row in self.eqs.iterrows():
             try:
-                row['data'].rotate(row['bazi'], method=method, search_inc=search_inc)
+                row['data'].rotate(row['bazi'], method=method, search_inc=search_inc, baz_shift=self.baz_shift)
             except Exception as e:
                 self.logger.RFlog.error('{}: {}'.format(row['data'].datestr, e))
                 drop_idx.append(i)
@@ -468,7 +468,8 @@ class RF(object):
             if row['data'].judge_rf(shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
-                                   mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r)
+                                   mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r,
+                                   user9=self.baz_shift, kuser9='baz corr')
                 good_lst.append(i)
         self.logger.RFlog.info('{} PRFs are saved.'.format(len(good_lst)))
         self.eqs = self.eqs.loc[good_lst]

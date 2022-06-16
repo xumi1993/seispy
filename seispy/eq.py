@@ -164,7 +164,8 @@ class EQ(object):
         else:
             pass
 
-    def rotate(self, bazi, inc=None, method='NE->RT', search_inc=False):
+    def rotate(self, baz, inc=None, method='NE->RT', search_inc=False, baz_shift=0):
+        bazi = np.mod(baz + baz_shift, 360)
         if inc is None:
             if self.phase[-1] == 'S' and search_inc:
                 inc = self.search_inc(bazi)
