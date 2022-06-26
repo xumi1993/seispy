@@ -3,6 +3,7 @@ from obspy import UTCDateTime, Catalog
 import numpy as np
 import argparse
 from obspy.clients.fdsn import Client
+from http.client import IncompleteRead
 # from netCDF4 import Dataset
 import sys
 
@@ -27,24 +28,24 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
     locs = locals()
     locs.pop('server')
     client = Client(server)
-    # try:
-    #     cat = client.get_events(**locs)
-    # except:
-    chunk_length = 365 * 86400  # Query length in seconds
-    cat = Catalog()
-    locs.pop('starttime')
-    locs.pop('endtime')
-    while starttime <= endtime:
-        cat += client.get_events(starttime=starttime,
-                                    endtime=starttime + chunk_length,
-                                    **locs)
-        if starttime + chunk_length > endtime:
-            chunk = endtime - starttime
-            if chunk <= 1:
-                break
-        starttime += chunk_length
-    cat_df = _cat2df(cat)
-    return cat_df
+    try:
+        cat = client.get_events(**locs)
+    except IncompleteRead:
+        chunk_length = 365 * 86400  # Query length in seconds
+        cat = Catalog()
+        locs.pop('starttime')
+        locs.pop('endtime')
+        while starttime <= endtime:
+            cat += client.get_events(starttime=starttime,
+                                        endtime=starttime + chunk_length,
+                                        **locs)
+            if starttime + chunk_length > endtime:
+                chunk = endtime - starttime
+                if chunk <= 1:
+                    break
+            starttime += chunk_length
+        cat_df = _cat2df(cat)
+        return cat_df
 
 
 def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, maxdep=6371, key='dvs'):
