@@ -20,7 +20,7 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
             maxradius=None, mindepth=None, maxdepth=None,
             minmagnitude=None, maxmagnitude=None, magnitudetype=None,
             includeallorigins=None, includeallmagnitudes=None,
-            includearrivals=None, eventid=None, limit=None, offset=None,
+            includearrivals=None, eventid=None, limit=20000, offset=None,
             orderby='time-asc', catalog=None, contributor=None):
     if not isinstance(server, str):
         raise TypeError('server name should be \'str\' type')
@@ -28,7 +28,7 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
     locs.pop('server')
     client = Client(server)
     try:
-        cat = client.get_events(**locs, limit=20000)
+        cat = client.get_events(**locs)
     except:
         chunk_length = 365 * 86400  # Query length in seconds
         cat = Catalog()
