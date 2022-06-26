@@ -1,5 +1,5 @@
 import pandas as pd
-from obspy import UTCDateTime
+from obspy import UTCDateTime, Catalog
 import numpy as np
 import argparse
 from obspy.clients.fdsn import Client
@@ -27,7 +27,22 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
     locs = locals()
     locs.pop('server')
     client = Client(server)
-    cat = client.get_events(**locs)
+    try:
+        cat = client.get_events(**locs, limit=20000)
+    except:
+        chunk_length = 365 * 86400  # Query length in seconds
+        cat = Catalog()
+        locs.pop('starttime')
+        locs.pop('endtime')
+        while starttime <= endtime:
+            cat += client.get_events(starttime=starttime,
+                                        endtime=starttime + chunk_length,
+                                        **locs)
+            if starttime + chunk_length > endtime:
+                chunk = endtime - starttime
+                if chunk <= 1:
+                    break
+            starttime += chunk_length
     cat_df = _cat2df(cat)
     return cat_df
 

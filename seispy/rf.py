@@ -469,7 +469,7 @@ class RF(object):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r,
-                                   user9=self.baz_shift, kuser9='baz corr')
+                                   user9=self.baz_shift)
                 good_lst.append(i)
         self.logger.RFlog.info('{} PRFs are saved.'.format(len(good_lst)))
         self.eqs = self.eqs.loc[good_lst]
