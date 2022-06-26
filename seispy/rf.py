@@ -254,6 +254,8 @@ class RF(object):
                 if server is None:
                     server = self.para.catalog_server
                 self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
+                if self.para.date_end > UTCDateTime():
+                    self.para.date_end = UTCDateTime()
                 self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
                                       latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
                                       minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
