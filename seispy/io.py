@@ -44,8 +44,8 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
                 if chunk <= 1:
                     break
             starttime += chunk_length
-        cat_df = _cat2df(cat)
-        return cat_df
+    cat_df = _cat2df(cat)
+    return cat_df
 
 
 def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, maxdep=6371, key='dvs'):
