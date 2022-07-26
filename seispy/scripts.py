@@ -16,6 +16,7 @@ def rfharmo():
                         metavar='tb/te', default='-2/10')
     parser.add_argument('-s', help="Resample RFs with sampling interval of dt", metavar='dt', default=None, type=float)
     parser.add_argument('-o', help="Specify output path for saving constant component.", metavar='outpath', default=None, type=str)
+    parser.add_argument('-e', help='Enlarge factor, defaults to 2', metavar='enf', default=2., type=float)
     parser.add_argument('-p', help='Figure output path, defaults to ./', metavar='figure_path', default='./', type=str)
     args = parser.parse_args()
     rfsta = RFStation(args.rfpath)
@@ -25,7 +26,7 @@ def rfharmo():
     rfsta.harmonic(twin[0], twin[1])
     if args.o is not None:
         rfsta.harmo.write_constant(args.o)
-    rfsta.harmo.plot(outpath=args.p)
+    rfsta.harmo.plot(outpath=args.p, enf=args.e)
 
 
 def rfani():
@@ -52,6 +53,9 @@ def rfani():
     timewin = np.array(arg.t.split('/')).astype(float)
     rfsta = RFStation(arg.rfpath)
     bf, bt = rfsta.jointani(timewin[0], timewin[1], tlen=arg.l, weight=weights)
+    if bf.size == 1:
+        bf = np.append(bf, np.nan)
+        bt = np.append(bt, np.nan)
     with open(arg.c, 'a+') as fid:
         fid.write('{}\t{:.3f}\t{:.3f}\t{:.2f}\t{:.2f}\t{:.2f}\t{:.2f}\n'.format(
                   rfsta.staname, rfsta.stla, rfsta.stlo, bf[0], bt[0], bf[1], bt[1]))
