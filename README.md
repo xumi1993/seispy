@@ -1,24 +1,26 @@
 # <img src="https://user-images.githubusercontent.com/7437523/128596331-dc5c5e40-93e1-4d9e-b92d-9c53fe51145a.png" width="500"/> 
 
+
+[![License](https://img.shields.io/github/license/xumi1993/seispy)]()
+[![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
+[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
+[![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)]()
+[![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
+
 [![CRV test](https://github.com/xumi1993/seispy/actions/workflows/test.yml/badge.svg?branch=dev)](https://github.com/xumi1993/seispy/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/xumi1993/seispy/branch/dev/graph/badge.svg?token=XN3E3N6S3V)](https://codecov.io/gh/xumi1993/seispy)
-
 [![Upload Python Package](https://github.com/xumi1993/seispy/actions/workflows/python-publish.yml/badge.svg)](https://github.com/xumi1993/seispy/actions/workflows/python-publish.yml)
 [![Deploy Seispy Docs](https://github.com/xumi1993/seispy-doc.post/actions/workflows/deploy.yml/badge.svg)](https://github.com/xumi1993/seispy-doc.post/actions/workflows/deploy.yml)
 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=13623&branchName=master">
   <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/seispy-feedstock?branchName=master">
 </a> 
 
-[![Conda Version](https://img.shields.io/conda/vn/conda-forge/seispy.svg)](https://anaconda.org/conda-forge/seispy)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/version.svg)](https://anaconda.org/conda-forge/seispy)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/installer/conda.svg)](https://conda.anaconda.org/conda-forge)
+[![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/downloads.svg)](https://anaconda.org/conda-forge/seispy)
+
 [![PyPI](https://img.shields.io/pypi/v/python-seispy)](https://pypi.org/project/python-seispy/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/python-seispy)](https://pypi.org/project/python-seispy/)
-[![GitHub](https://img.shields.io/github/license/xumi1993/seispy)]()
-[![GitHub tag (latest by date)](https://img.shields.io/github/v/tag/xumi1993/seispy)]()
-[![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
-[![](https://img.shields.io/github/commit-activity/m/xumi1993/seispy)]()
-[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
-[![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)]()
-[![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
 
 [![GitHub stars](https://img.shields.io/github/stars/xumi1993/seispy?style=social)]()
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
