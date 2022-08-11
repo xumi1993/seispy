@@ -83,6 +83,8 @@ Access [here](https://www.koushare.com/video/videodetail/14734) for video tutori
 - [RF calculation & H-k stacking](examples/ex-prf)
 - [CCP staking along profile](examples/ex-ccp)
 - [3D CCP stacking](examples/ex-ccp3d)
+- [Crustal anisotropy](examples/ex-rfani.md)
+- [Harmonic decomposition](examples/ex-harmo.md)
 ---
 :header: bg-myst-three
 **Configuration**
