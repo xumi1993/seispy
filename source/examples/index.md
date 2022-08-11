@@ -30,10 +30,21 @@
 </div>
 :::
 
+:::{card} Crustal anisotropic estimation with a single station
+:link: ex-rfani
+:link-type: doc
+
+<div class="center">
+<img src="../_static/SC.LTA_joint_ani.png" width="280px">
+<img src="../_static/SC.LTA_baz_stack.png" width="350px">
+</div>
+:::
+
 ```{toctree}
 :maxdepth: 2
 
 ex-prf
 ex-ccp
 ex-ccp3d
+ex-rfani
 ```
