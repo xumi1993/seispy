@@ -29,7 +29,6 @@
 Seispy is a Python module for processing seismological data and calculating Receiver Functions. The advanced functions are available to improve the Obspy.
 
 
-# Installation
 ## Dependencies
   * [Python]() >= 3.6
   * [ObsPy](http://docs.obspy.org) >= 1.1.0
@@ -43,30 +42,20 @@ Seispy is a Python module for processing seismological data and calculating Rece
 
 See [Seispy documentation](https://seispy.xumijian.me/installation.html) in detail.
  
-# Inclusion
 ## Libraries
-
--   `seispy.distaz`: Calculate distance and azimuth (by the
-    [lithospheric seismology program at USC][]).
--   `seispy.geo`: Tiny codes of geophysics.
--   `seispy.decon`: Functions of deconvolution transferred from
-    [iwbailey/processRFmatlab][] including
-    -   Iterative time domain deconvolution method (Ligorría and Ammon
-        1999 BSSA).
-    -   Water level frequency domain deconvolution method (CJ. Ammon
-        1991 BSSA)
--   `seispy.rf`: Procedure for RF calculation. The functions of
-    `match_eq`, `search_eq` invoked `obspy.core.UTCDateTime` and
-    `obspy.clients` from the [Obspy][].
--   `seispy.eq`: RF processing for each event, which invoked
-    `obspy.io.sac`, `obspy.signal`, `obspy.taup` and `obspy.core.Stream`
-    from the [Obspy][].
--   `seispy.rfcorrect`: Subsequent process of RFs including moveout
-    correction and time to depth conversion (1D and 3D) (see [Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
--   `seispy.ccpprofile`: CCP stacking along a profile.
--   `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and
-    D660.
--   `seispy.get_cpt`: Convert color map from the `cpt` format to the `matplotlib.cmap` modified from [bouziot/get-cpt](https://github.com/bouziot/get-cpt) based on the GPLv3 license.
+- `seispy.distaz`: Calculate distance and azimuth credited by the [lithospheric seismology program at USC](http://www.seis.sc.edu/software/distaz/), but `numpy.ndarray` operations are supported.
+- `seispy.geo`: Tiny codes of geophysics.
+- `seispy.decon`: Functions of deconvolution transferred from [iwbailey/processRFmatlab](https://github.com/iwbailey/processRFmatlab) including
+  - Iterative time domain deconvolution method (Ligorría and Ammon 1999 BSSA). 
+  - Water level frequency domain deconvolution method (CJ. Ammon 1991 BSSA)
+- `seispy.rf`: Procedure for RF calculation. The functions of `match_eq`, `search_eq` invoked `obspy.core.UTCDateTime` and `obspy.clients` from the [Obspy](https://docs.obspy.org/).
+- `seispy.eq`: RF processing for each event, which invoked `obspy.io.sac`, `obspy.signal`, `obspy.taup` and `obspy.core.Stream` from the [Obspy](https://docs.obspy.org/).
+- `seispy.hk`: H-k stacking for single station (Zhu and Kanamori 2000 JGR).
+- `seispy.rfani`: A joint method for crustal anisotropic calculation (Liu and Niu 2011 GJI).
+- `seispy.slantstack`: Slant stacking for single station (Tauzin et al., 2008)
+- `seispy.rfcorrect`: Subsequent process of RFs including moveout correction and time to depth conversion (1D and 3D) (see [Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
+- `seispy.ccpprofile`: CCP stacking along a profile.
+- `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and D660.
 
   [lithospheric seismology program at USC]: http://www.seis.sc.edu/software/distaz/
   [scikits-bootstrap]: https://github.com/cgevans/scikits-bootstrap
