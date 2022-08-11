@@ -40,6 +40,16 @@
 </div>
 :::
 
+:::{card} Harmonic decomposition
+:link: ex-harmo
+:link-type: doc
+```{image} ../_static/SC.LTA_harmonic_trans.png
+:width: 500px
+:align: center
+```
+:::
+
+
 ```{toctree}
 :maxdepth: 2
 
@@ -47,4 +57,5 @@ ex-prf
 ex-ccp
 ex-ccp3d
 ex-rfani
+ex-harmo
 ```

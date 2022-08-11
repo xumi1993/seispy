@@ -1,7 +1,7 @@
 # Crustal anisotropic estimation with a single station
 
 ## Background
-[Liu and Niu (2011)](https://doi.org/10.1111/j.1365-246X.2011.05249.x) has provided a method to joint estimating crustal seismic anisotropy with radial energy maximization, radial correlation coefficient (cc) maximization and transverse energy minimization. Users can run `rfani` after PRFs of single station calculated for estimating crustal anisotropy. 
+[Liu and Niu (2011)](https://doi.org/10.1111/j.1365-246X.2011.05249.x) has provided a method for joint estimating crustal seismic anisotropy with radial energy maximization, radial correlation coefficient (cc) maximization and transverse energy minimization. Users can run `rfani` after PRFs of single station calculated for estimating crustal anisotropy. 
 
 ```
 usage: rfani [-h] -t tb/te [-c list_file_name] [-l half_time_length] [-r rayp] [-m velocity_model] [-o OUTPATH] [-p] [-w w1/w2/w3] rfpath
