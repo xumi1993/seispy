@@ -53,14 +53,17 @@ class RPickFigure(RFFigure):
             tmp_files = glob.glob(join(self.rfpath, '*S_L.sac'))
             self.comp = 'L'
             self.enf = 4
-        else:
+        elif len(glob.glob(join(self.rfpath, '*S_Z.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*S_Z.sac'))
             self.comp = 'Z'
             self.enf = 4
+        else:
+            self.log.RFlog.info('No such file in the format of evt_phase_component.sac')
+            exit()
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
         self.phases = [basename(sac_file).split('_')[1] for sac_file in sorted(tmp_files)]
-        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
+        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt, window=None)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
         if self.xlim[1] > self.time_axis[-1]:
             self.xlim[1] = self.time_axis[-1]
