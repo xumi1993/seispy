@@ -45,4 +45,5 @@ rfharmo -o./
 
 <img src="../_static/SC.LTA_harmonic_trans.png" width="500px">
 
+Result of harmonic decomposition in SC.LTA
 :::
