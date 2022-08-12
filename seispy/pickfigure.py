@@ -51,6 +51,7 @@ class RFFigure(Figure):
         self.ipage = 0
         self.maxidx = 20
         self.xlim = xlim
+        self.plotfig = None
 
     def init_canvas(self, order='baz'):
         self.init_figure(width=self.width, height=self.height, dpi=self.dpi)
