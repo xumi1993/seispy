@@ -20,7 +20,7 @@ class SlantStack():
         self.dis = dis
         self.ref_dis = 65
         self.rayp_range = np.arange(-0.35, 0.35, 0.01)
-        self.tau_range = np.arange(0, 100)
+        self.tau_range = np.arange(0, 100, 0.1)
         self.syn_tau = np.array([])
         self.syn_drayp = np.array([])
 
@@ -60,12 +60,29 @@ class SlantStack():
         self.syn_tau = [arr.time - p_arr for arr in arrs[1:]]
         self.syn_drayp = [p_rayp - skm2sdeg(srad2skm(arr.ray_param))for arr in arrs[1:]]
 
-    def plot(self, cmap='jet', xlim=None, vmin=None, vmax=None, figpath=None):
+    def plot(self, cmap='jet', xlim=None, vmin=None, vmax=None, figpath=None, colorbar=True):
+        """ Imaging for slant stacking
+
+        Parameters
+        ----------
+        cmap : str, optional
+            The colormap to use, by default 'jet'
+        xlim : _type_, optional
+             Set the x limits of the current axes., by default None
+        vmin : _type_, optional
+            Normalize the minium value data to the ``vmin``, by default None
+        vmax : _type_, optional
+            Normalize the maximum value data to the ``vmax``, by default None
+        figpath : _type_, optional
+            Output path to the image, by default None
+        colorbar : bool, optional
+            Wether plot the colorbar, by default True
+        """
         plt.style.use("bmh")
         self.fig = plt.figure(figsize=(8,5))
         self.ax = self.fig.add_subplot()
         if vmin is None and vmax is None:
-            vmax = np.max(np.abs(self.stack_amp))
+            vmax = np.max(np.abs(self.stack_amp))*0.1
             vmin = -vmax
         elif vmin is None and isinstance(vmax, (int, float)):
             vmin = np.min(self.stack_amp)
@@ -77,7 +94,9 @@ class SlantStack():
             raise TypeError('vmin and vmax must be in int or in float type')
         im = self.ax.pcolor(self.tau_range, self.rayp_range, self.stack_amp,
                             vmax=vmax, vmin=vmin, cmap=cmap)
-        # self.fig.colorbar(im, ax=self.ax)
+        if colorbar:
+            cax = self.fig.colorbar(im, ax=self.ax)
+            cax.set_label('Stack Amplitude')
         self.ax.grid()
         self.ax.scatter(self.syn_tau, self.syn_drayp, color='k', marker='x')
         if xlim is not None and isinstance(xlim, (list, np.ndarray)):
