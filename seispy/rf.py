@@ -65,7 +65,8 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
             # bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
             if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
                 this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw]], columns=col)
-                eq_lst = eq_lst.append(this_data, ignore_index=True)
+                # eq_lst = eq_lst.append(this_data, ignore_index=True)
+                eq_lst = pd.concat([eq_lst, this_data], ignore_index=True)
     return eq_lst
 
 
