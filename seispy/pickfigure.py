@@ -1,3 +1,4 @@
+from curses import window
 import glob
 import os
 import sys
@@ -50,6 +51,7 @@ class RFFigure(Figure):
         self.ipage = 0
         self.maxidx = 20
         self.xlim = xlim
+        self.plotfig = None
 
     def init_canvas(self, order='baz'):
         self.init_figure(width=self.width, height=self.height, dpi=self.dpi)
@@ -142,8 +144,8 @@ class RFFigure(Figure):
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
         self.phases = [basename(sac_file).split('_')[1] for sac_file in sorted(tmp_files)]
-        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
-        self.trf = obspy.read(join(self.rfpath, '*_T.sac')).sort(['starttime']).resample(1/dt)
+        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt, window=None)
+        self.trf = obspy.read(join(self.rfpath, '*_T.sac')).sort(['starttime']).resample(1/dt, window=None)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
         self.evt_num = len(self.rrf)
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))

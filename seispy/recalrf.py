@@ -48,7 +48,7 @@ def match_eq(eq_lst, pathname, logger, ref_comp='Z', suffix='SAC', offset=0,
             continue
         this_eq.get_time_offset(results.iloc[0]['date'])
         this_df = pd.DataFrame([[this_eq, datestr]], columns=new_col, index=results.index.values)
-        eq_match = eq_match.append(this_df)
+        eq_match = pd.concat([eq_match, this_df])
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')

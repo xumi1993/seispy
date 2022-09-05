@@ -2,7 +2,7 @@ import re
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
-from seispy.rfcorrect import RFStation
+from seispy.rfcorrect import RFStation, moveoutcorrect_ref
 import argparse
 import numpy as np
 from os.path import join
@@ -10,16 +10,18 @@ from os.path import join
 
 def init_figure():
     h = plt.figure(figsize=(8, 10))
-    gs = GridSpec(1, 3)
+    gs = GridSpec(15, 3)
     gs.update(wspace=0.25)
-    axr = plt.subplot(gs[0, 0:-1])
+    axr = plt.subplot(gs[1:, 0:-1])
     axr.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
-    axb = plt.subplot(gs[0, -1])
+    axb = plt.subplot(gs[1:, -1])
     axb.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
-    return h, axr, axb
+    axs = plt.subplot(gs[0, 0:-1])
+    axs.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
+    return h, axr, axb, axs
 
 
-def plot_waves(axr, axb, stadata, enf=12):
+def plot_waves(axr, axb, axs, stadata, enf=12):
     bound = np.zeros(stadata.rflength)
     for i in range(stadata.ev_num):
         datar = stadata.datar[i] * enf + (i + 1)
@@ -28,10 +30,17 @@ def plot_waves(axr, axb, stadata, enf=12):
                          alpha=0.7)
         axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
                          alpha=0.7)
+    # rfsum, _ = moveoutcorrect_ref(stadata, 0.06, np.arange(300), sphere=False)
+    rfsum = np.mean(stadata.datar, axis=0)
+    axs.fill_between(stadata.time_axis, rfsum, 0, where=rfsum > 0, facecolor='red', alpha=0.7)
+    axs.fill_between(stadata.time_axis, rfsum, 0, where=rfsum < 0, facecolor='blue', alpha=0.7)
+    axs.plot(stadata.time_axis, rfsum, color='gray', lw=0.5)
     axb.scatter(stadata.bazi, np.arange(stadata.ev_num) + 1, s=7)
+    # axp = axb.twiny()
+    # axp.scatter(stadata.rayp, np.arange(stadata.ev_num) + 1, s=7)
+    # return axp
 
-
-def set_fig(axr,  axb, stadata, xmin=-2, xmax=80):
+def set_fig(axr, axb, axs, stadata, xmin=-2, xmax=80):
     y_range = np.arange(stadata.ev_num) + 1
     x_range = np.arange(0, xmax+2, 5)
     space = 2
@@ -56,13 +65,18 @@ def set_fig(axr,  axb, stadata, xmin=-2, xmax=80):
     axb.set_yticks(y_range)
     axb.set_yticklabels(y_range, fontsize=5)
     axb.set_xlabel(r'Back-azimuth ($^\circ$)', fontsize=13)
+    # axp.set_xlabel('Ray-parameter (s/km)', fontsize=13)
+
+    axs.set_xlim(xmin, xmax)
+    axs.set_xticks(x_range)
+    axs.set_xticklabels([])
 
 
 def plotr(rfsta, outpath='./', xlim=[-2, 80], key='bazi', enf=6, format='pdf'):
-    h, axr, axb = init_figure()
+    h, axr, axb, axs = init_figure()
     rfsta.sort(key)
-    plot_waves(axr, axb, rfsta, enf=enf)
-    set_fig(axr, axb, rfsta, xlim[0], xlim[1])
+    plot_waves(axr, axb, axs, rfsta, enf=enf)
+    set_fig(axr, axb, axs, rfsta, xlim[0], xlim[1])
     h.savefig(join(outpath, rfsta.staname + '_R_bazorder_{:.1f}.{}'.format(
               rfsta.f0[0], format)), format=format, dpi=500)
 

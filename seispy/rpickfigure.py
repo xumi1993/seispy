@@ -53,13 +53,17 @@ class RPickFigure(RFFigure):
             tmp_files = glob.glob(join(self.rfpath, '*S_L.sac'))
             self.comp = 'L'
             self.enf = 4
-        else:
+        elif len(glob.glob(join(self.rfpath, '*S_Z.sac'))) != 0:
             tmp_files = glob.glob(join(self.rfpath, '*S_Z.sac'))
             self.comp = 'Z'
             self.enf = 4
+        else:
+            self.log.RFlog.info('No such file in the format of evt_phase_component.sac')
+            exit()
         self.log.RFlog.info('Reading PRFs from {}'.format(self.rfpath))
         self.filenames = [basename(sac_file).split('_')[0] for sac_file in sorted(tmp_files)]
-        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt)
+        self.phases = [basename(sac_file).split('_')[1] for sac_file in sorted(tmp_files)]
+        self.rrf = obspy.read(join(self.rfpath, '*_{}.sac'.format(self.comp))).sort(['starttime']).resample(1/dt, window=None)
         self.time_axis = self.rrf[0].times() + self.rrf[0].stats.sac.b
         if self.xlim[1] > self.time_axis[-1]:
             self.xlim[1] = self.time_axis[-1]
@@ -67,7 +71,6 @@ class RPickFigure(RFFigure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
-        self.phases = [tr.stats.sac.ka for tr in self.rrf]
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
@@ -185,6 +188,6 @@ class RPickFigure(RFFigure):
         stadata = StaData(self.filenames, self.rrf, self.baz, self.goodrf)
         stadata.time_axis = self.time_axis
         stadata.staname = self.staname
-        self.plotfig, axr, axb = init_figure()
-        plot_waves(axr, axb, stadata, enf=self.enf)
-        set_fig(axr, axb, stadata, self.xlim[0], self.xlim[1])
+        self.plotfig, axr, axb, axs = init_figure()
+        plot_waves(axr, axb, axs, stadata, enf=self.enf)
+        set_fig(axr, axb, axs, stadata, self.xlim[0], self.xlim[1])

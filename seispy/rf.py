@@ -65,7 +65,8 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
             # bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
             if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
                 this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw]], columns=col)
-                eq_lst = eq_lst.append(this_data, ignore_index=True)
+                # eq_lst = eq_lst.append(this_data, ignore_index=True)
+                eq_lst = pd.concat([eq_lst, this_data], ignore_index=True)
     return eq_lst
 
 
@@ -254,6 +255,8 @@ class RF(object):
                 if server is None:
                     server = self.para.catalog_server
                 self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
+                if self.para.date_end > UTCDateTime():
+                    self.para.date_end = UTCDateTime()
                 self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
                                       latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
                                       minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
@@ -469,7 +472,7 @@ class RF(object):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r,
-                                   user9=self.baz_shift, kuser9='baz corr')
+                                   user9=self.baz_shift)
                 good_lst.append(i)
         self.logger.RFlog.info('{} PRFs are saved.'.format(len(good_lst)))
         self.eqs = self.eqs.loc[good_lst]

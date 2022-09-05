@@ -1,8 +1,9 @@
 import pandas as pd
-from obspy import UTCDateTime
+from obspy import UTCDateTime, Catalog
 import numpy as np
 import argparse
 from obspy.clients.fdsn import Client
+from http.client import IncompleteRead
 # from netCDF4 import Dataset
 import sys
 
@@ -20,14 +21,29 @@ def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
             maxradius=None, mindepth=None, maxdepth=None,
             minmagnitude=None, maxmagnitude=None, magnitudetype=None,
             includeallorigins=None, includeallmagnitudes=None,
-            includearrivals=None, eventid=None, limit=None, offset=None,
+            includearrivals=None, eventid=None, limit=20000, offset=None,
             orderby='time-asc', catalog=None, contributor=None):
     if not isinstance(server, str):
         raise TypeError('server name should be \'str\' type')
     locs = locals()
     locs.pop('server')
     client = Client(server)
-    cat = client.get_events(**locs)
+    try:
+        cat = client.get_events(**locs)
+    except IncompleteRead:
+        chunk_length = 365 * 86400  # Query length in seconds
+        cat = Catalog()
+        locs.pop('starttime')
+        locs.pop('endtime')
+        while starttime <= endtime:
+            cat += client.get_events(starttime=starttime,
+                                        endtime=starttime + chunk_length,
+                                        **locs)
+            if starttime + chunk_length > endtime:
+                chunk = endtime - starttime
+                if chunk <= 1:
+                    break
+            starttime += chunk_length
     cat_df = _cat2df(cat)
     return cat_df
 

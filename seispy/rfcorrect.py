@@ -64,6 +64,7 @@ class RFStation(object):
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 self.__dict__['data{}'.format(self.comp.lower())][_i] = sac.data
+        self.data_prime = self.__dict__['data{}'.format(self.comp.lower())]
 
     def read_sample(self, data_path):
         fname = glob.glob(join(data_path, self.event[0] + '_' + self.phase[0] + '_{}.sac'.format(self.comp)))
@@ -154,7 +155,7 @@ class RFStation(object):
         if not self.only_r:
             self.datat = self.datat[idx]
 
-    def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91', replace=False):
+    def moveoutcorrect(self, ref_rayp=0.06, dep_range=np.arange(0, 150), velmod='iasp91', replace=False, **kwargs):
         """Moveout correction with specified reference ray-parameter and depth
 
         :param ref_rayp: reference ray-parameter in s/km, defaults to 0.06
@@ -178,7 +179,7 @@ class RFStation(object):
         
         """
         if not self.only_r:
-            t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod)
+            t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod, **kwargs)
         else:
             t_corr = None
         if 'datar' in self.__dict__:
@@ -189,7 +190,7 @@ class RFStation(object):
             chan = 'l'
         else:
             pass
-        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan=chan, velmod=velmod)
+        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan=chan, velmod=velmod, **kwargs)
         if replace:
             self.__dict__['data{}'.format(chan)] = rf_corr
             if not self.only_r:

@@ -95,6 +95,8 @@ class MatplotlibWidget(QMainWindow):
         QApplication.quit()
 
     def plot_ui(self):
+        if self.mpl.rffig.plotfig is not None:
+            plt.close(self.mpl.rffig.plotfig)
         self.mpl.rffig.plot()
 
     def plot_save(self):
