@@ -398,7 +398,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
 
     :param stadatar: Data class of RFStation
     :type stadatar: :meth:`RFStation`
-    :param YAxisRange: Depth range for converison
+    :param YAxisRange: Depth range for conversion
     :type YAxisRange: numpy.ndarray
     :param velmod: Velocity for conversion, whcih can be a path to velocity file, defaults to 'iasp91'
     :type velmod: str, optional

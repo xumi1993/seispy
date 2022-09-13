@@ -1,6 +1,7 @@
 from os.path import join, dirname, exists, abspath
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
 from seispy import geo
 from seispy.geo import geo2sph, km2deg, skm2srad, sph2geo, srad2skm
 from seispy import distaz
@@ -38,23 +39,96 @@ def read_rfdep(path):
             raise FileNotFoundError('Cannot open file of {}'.format(path))
 
 
+
+def _from_layer_model(h, vp, vs, dep_range):
+    dep = 0
+    vp_dep = np.zeros_like(dep_range).astype(float)
+    vs_dep = np.zeros_like(dep_range).astype(float)
+    for i, layer in enumerate(h):
+        if (layer == 0 and i == h.size-1) or \
+           (dep+layer < dep_range[-1] and i == h.size-1):
+           idx = np.where(dep_range>=dep)[0]
+        else:
+            idx = np.where((dep_range >= dep) & (dep_range < dep+layer))[0]
+        if idx.size == 0:
+            raise ValueError('The thickness of layer {} less than the depth interval'.format(i+1))
+        vp_dep[idx] = vp[i]
+        vs_dep[idx] = vs[i]
+        dep += layer
+        if dep > dep_range[-1]:
+            break
+    return vp_dep, vs_dep
+
+
 class DepModel(object):
-    def __init__(self, YAxisRange, velmod='iasp91', elevation=0):
+    def __init__(self, dep_range, velmod='iasp91', elevation=0., layer_mod=False):
+        """Class for computing back projection of Ps Ray paths.
+
+        Parameters
+        ----------
+        dep_range : numpy.ndarray
+            Depth range for conversion
+        velmod : str, optional
+            Text file of 1D velocity model with first 3 columns of depth/thickness, Vp and Vs,
+            by default 'iasp91'
+        elevation : float, optional
+            Elevation in km, by default 0.0
+        """
         self.elevation = elevation
-        VelocityModel = np.loadtxt(self.from_file(velmod))
-        self.depthsraw = VelocityModel[:, 0]
-        self.vpraw = VelocityModel[:, 1]
-        self.vsraw = VelocityModel[:, 2]
-        self.depths = YAxisRange.astype(float)
+        self.layer_mod = layer_mod
+        self.depths = dep_range.astype(float)
+        try:
+            self.model_array = np.loadtxt(self.from_file(velmod))
+        except (ValueError, TypeError):
+            return
+        else:
+            self.read_model_file()
+            self.discretize()
+
+    def read_model_file(self):
         self.dep_val = np.average(np.diff(self.depths))
-        if elevation == 0:
+        if self.layer_mod:
+            self.depthsraw = self.depths
+            self.vpraw, self.vsraw = _from_layer_model(self.model_array[:, 0],
+                                                       self.model_array[:, 1],
+                                                       self.model_array[:, 2],
+                                                       self.depths)
+        else:
+            self.depthsraw = self.model_array[:, 0]
+            self.vpraw = self.model_array[:, 1]
+            self.vsraw = self.model_array[:, 2]
+    
+    @classmethod
+    def read_layer_model(cls, dep_range, h, vp, vs, **kwargs):
+        mod = cls(dep_range, velmod=None, layer_mod=True, **kwargs)
+        mod.depthsraw = mod.depths
+        mod.vpraw, mod.vsraw = _from_layer_model(h, vp, vs, mod.depths)
+        mod.discretize()
+        return mod
+    
+    def plot_model(self, show=True):
+        plt.style.use('bmh')
+        self.model_fig = plt.figure(figsize=(4,6))
+        self.model_ax = self.model_fig.add_subplot()
+        self.model_ax.step(self.vp, self.depths, where='post', label='Vp')
+        self.model_ax.step(self.vs, self.depths, where='post', label='Vs')
+        self.model_ax.legend()
+        self.model_ax.set_xlabel('Velocity (km/s)')
+        self.model_ax.set_ylabel('Depth (km)')
+        self.model_ax.set_ylim([self.depths[0], self.depths[-1]])
+        self.model_ax.invert_yaxis()
+        if show:
+            plt.show()
+
+    def discretize(self):
+        if self.elevation == 0:
             self.depths_elev = self.depths
             self.depths_extend = self.depths
         else:
             dep_append = np.arange(self.depths[-1]+self.dep_val, 
-                               self.depths[-1]+self.dep_val+np.floor(elevation/self.dep_val+1), self.dep_val)
+                               self.depths[-1]+self.dep_val+np.floor(self.elevation/self.dep_val+1), self.dep_val)
             self.depths_extend = np.append(self.depths, dep_append)
-            self.depths_elev = np.append(self.depths, dep_append) - elevation
+            self.depths_elev = np.append(self.depths, dep_append) - self.elevation
         self.dz = np.append(0, np.diff(self.depths_extend))
         self.vp = interp1d(self.depthsraw, self.vpraw, bounds_error=False,
                            fill_value=self.vpraw[0])(self.depths_elev)
@@ -63,6 +137,8 @@ class DepModel(object):
         self.R = 6371.0 - self.depths_elev
 
     def from_file(self, mode_name):
+        if not isinstance(mode_name, str):
+            raise TypeError('velmod should be in str type')
         if exists(mode_name):
             filename = mode_name
         elif exists(join(dirname(__file__), 'data', mode_name.lower()+'.vel')):
