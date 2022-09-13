@@ -5,16 +5,16 @@ channels:
 dependencies:
   - python=3.9
   - pip
-  - sphinx=4.5.0
+  - sphinx
   - sphinx-copybutton
   - sphinx-design
   - myst-nb
+  - pydata-sphinx-theme=0.8.1
   - obspy=1.3.0
   - seispy
   - numpydoc
   - pip:
     - sphinx-gallery
     - sphinx-cjkspace
-    - pydata-sphinx-theme
     - sphinx-panels
     - sphinx-icon
