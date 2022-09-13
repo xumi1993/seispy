@@ -5,7 +5,7 @@ Module Index
    :maxdepth: 4
 
    rf
-   hk
+   post
    ccp
    gui
-   seispy
+   .. seispy
