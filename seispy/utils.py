@@ -10,6 +10,13 @@ from scipy.interpolate import interp1d, interpn
 import seispy
 
 
+def vs2vprho(vs):
+    vp = 0.9409 + 2.0947*vs - 0.8206*vs**2 + 0.2683*vs**3 - 0.0251*vs**4
+    rho = 1.6612*vp - 0.4721*vp**2 + 0.0671*vp**3 - 0.0043*vp**4 + 0.000106*vp**5
+    # vs = 0.7858 - 1.2344*vp + 0.7949*vp**2 - 0.1238*vp**3 + 0.0064*vp**4
+    return vp, rho
+
+
 def load_cyan_map():
     path = join(dirname(__file__), 'data', 'cyan.mat')
     carray = loadmat(path)['cyan']
@@ -97,7 +104,7 @@ class DepModel(object):
             self.depthsraw = self.model_array[:, 0]
             self.vpraw = self.model_array[:, 1]
             self.vsraw = self.model_array[:, 2]
-    
+
     @classmethod
     def read_layer_model(cls, dep_range, h, vp, vs, **kwargs):
         mod = cls(dep_range, velmod=None, layer_mod=True, **kwargs)
@@ -105,7 +112,7 @@ class DepModel(object):
         mod.vpraw, mod.vsraw = _from_layer_model(h, vp, vs, mod.depths)
         mod.discretize()
         return mod
-    
+
     def plot_model(self, show=True):
         plt.style.use('bmh')
         self.model_fig = plt.figure(figsize=(4,6))
@@ -130,10 +137,12 @@ class DepModel(object):
             self.depths_extend = np.append(self.depths, dep_append)
             self.depths_elev = np.append(self.depths, dep_append) - self.elevation
         self.dz = np.append(0, np.diff(self.depths_extend))
+        self.thickness = np.append(np.diff(self.depths_extend), 0.)
         self.vp = interp1d(self.depthsraw, self.vpraw, bounds_error=False,
                            fill_value=self.vpraw[0])(self.depths_elev)
         self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False,
                            fill_value=self.vsraw[0])(self.depths_elev)
+        _, self.rho = vs2vprho(self.vs)
         self.R = 6371.0 - self.depths_elev
 
     def from_file(self, mode_name):
