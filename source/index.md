@@ -31,9 +31,7 @@
 [![GitHub stars](https://img.shields.io/github/stars/xumi1993/seispy?style=social)]()
 [![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
 
-Seispy is a Python module for processing seismological data and calculating Receiver Functions. The advanced functions are available to improve the Obspy.
-
-I have been writing Seispy when I was a master student. At first, I wanted to calculate Receiver Functions in Python, but there is no suitable toolkit. Fortunately, The Obspy provided mounts of APIs for processing seismic data, so I ported codes for calculating Receiver Functions from Matlab to Python. Today increased functions have been added to Seispy to further process seismic data over than Obspy.
+Seispy is a graphical interface Python module for receiver function (RF) calculation and post-processing in seismological research. Automated workflows of RF calculations facilitate processing large volumes of different types of seismic data. The graphic user interface enables an intuitive and straightforward evaluation of RF quality control. Seispy contains the basic RF-based methods. Five main modules for the post-processing of RF are H-k stacking, crustal anisotropic estimation, harmonic decomposition, 2D and 3D common conversion point (CCP) stacking. The CCP staking in the different application scenarios can be handled by rich modules, such as time-to-depth conversion, 2D or 3D CCP stacking, and adaptive station or bin selection for CCP stacking profiles in a dense seismic array or a linear seismic array. As a Python module, functions in the Seispy can be called easily in python scripts for other purposes. The modular design allows new functionality to be added in a collaborative development environment. Seispy licensed under GPLv3 can be open accessed at https://github.com/xumi1993/seispy.
 
 <img src="_static/seispy_shortcut.png"/> 
 
