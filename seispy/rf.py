@@ -258,10 +258,11 @@ class RF(object):
                 if self.para.date_end > UTCDateTime():
                     self.para.date_end = UTCDateTime()
                 query = Query(server)
-                self.eq_lst = query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
+                query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
                                  latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
                                  minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
                                  minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
+                self.eq_lst = query.events
             except Exception as e:
                 raise ConnectionError(e)
         else:
