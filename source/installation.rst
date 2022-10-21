@@ -91,11 +91,11 @@ Clone the source code from `Github <https://github.com/xumi1993/seispy.git>`_ to
     git clone --depth=1 https://github.com/xumi1993/seispy.git
 
 
-For **Chinese users**, try to clone the source code from `Git service of Nanjing University <https://git.nju.edu.cn/geophy/seispy>`_
+For **Chinese users**, try to clone the source code from `Gitlab repository <https://gitlab.com/xumi1993/seispy.git>`_
 
 .. code-block:: shell
 
-    git clone https://git.nju.edu.cn/geophy/seispy.git
+    git clone https://gitlab.com/xumi1993/seispy.git
 
 
 Install Seispy to the Python environment
@@ -105,7 +105,7 @@ Change path to where the source code was cloned into, and install the module via
 
 .. code-block:: shell
 
-    cd seispy
+    cd path/to/seispy
     pip install .
 
 Update Seispy
@@ -115,6 +115,6 @@ To update the Seispy, please change to directory of the source code, and execute
 
 .. code-block:: shell
 
-    cd seispy
+    cd path/to/seispy
     git pull
     pip install .
