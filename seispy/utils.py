@@ -81,6 +81,7 @@ class DepModel(object):
         elevation : float, optional
             Elevation in km, by default 0.0
         """
+        self.isrho = False
         self.elevation = elevation
         self.layer_mod = layer_mod
         self.depths = dep_range.astype(float)
@@ -104,6 +105,9 @@ class DepModel(object):
             self.depthsraw = self.model_array[:, 0]
             self.vpraw = self.model_array[:, 1]
             self.vsraw = self.model_array[:, 2]
+            if self.model_array.shape[1] == 4:
+                self.isrho = True
+                self.rhoraw = self.model_array[:, 3]
 
     @classmethod
     def read_layer_model(cls, dep_range, h, vp, vs, **kwargs):
@@ -142,7 +146,11 @@ class DepModel(object):
                            fill_value=self.vpraw[0])(self.depths_elev)
         self.vs = interp1d(self.depthsraw, self.vsraw, bounds_error=False,
                            fill_value=self.vsraw[0])(self.depths_elev)
-        _, self.rho = vs2vprho(self.vs)
+        if self.isrho:
+            self.rho = interp1d(self.depthsraw, self.rhoraw, bounds_error=False,
+                               fill_value=self.rhoraw[0])(self.depths_elev)
+        else:
+            _, self.rho = vs2vprho(self.vs)
         self.R = 6371.0 - self.depths_elev
 
     def from_file(self, mode_name):

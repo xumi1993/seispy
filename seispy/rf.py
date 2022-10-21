@@ -4,7 +4,7 @@ from obspy.io.sac import SACTrace
 from obspy.taup import TauPyModel
 import re
 from os.path import join, exists
-from seispy.io import wsfetch
+from seispy.io import Query
 from seispy.para import para
 from seispy import distaz
 from seispy.eq import EQ
@@ -249,7 +249,7 @@ class RF(object):
             self.logger.RFlog.error('{0}'.format(e))
             raise e
 
-    def search_eq(self, local=False, server=None, catalog='GCMT'):
+    def search_eq(self, local=False, server=None, catalog=None):
         if not local:
             try:
                 if server is None:
@@ -257,10 +257,11 @@ class RF(object):
                 self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
                 if self.para.date_end > UTCDateTime():
                     self.para.date_end = UTCDateTime()
-                self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
-                                      latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
-                                      minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
-                                      minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
+                query = Query(server)
+                query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
+                                 latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
+                                 minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
+                                 minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
             except Exception as e:
                 raise ConnectionError(e)
         else:

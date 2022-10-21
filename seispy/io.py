@@ -1,7 +1,7 @@
 import pandas as pd
 from obspy import UTCDateTime, Catalog
 import numpy as np
-import argparse
+from datetime import timedelta
 from obspy.clients.fdsn import Client
 from http.client import IncompleteRead
 # from netCDF4 import Dataset
@@ -15,37 +15,30 @@ def _cat2df(cat):
     return pd.DataFrame(data, columns=cols)
 
 
-def wsfetch(server, starttime=None, endtime=None, minlatitude=None,
-            maxlatitude=None, minlongitude=None, maxlongitude=None,
-            latitude=None, longitude=None, minradius=None,
-            maxradius=None, mindepth=None, maxdepth=None,
-            minmagnitude=None, maxmagnitude=None, magnitudetype=None,
-            includeallorigins=None, includeallmagnitudes=None,
-            includearrivals=None, eventid=None, limit=20000, offset=None,
-            orderby='time-asc', catalog=None, contributor=None):
-    if not isinstance(server, str):
-        raise TypeError('server name should be \'str\' type')
-    locs = locals()
-    locs.pop('server')
-    client = Client(server)
-    try:
-        cat = client.get_events(**locs)
-    except IncompleteRead:
-        chunk_length = 365 * 86400  # Query length in seconds
-        cat = Catalog()
-        locs.pop('starttime')
-        locs.pop('endtime')
+class Query():
+    def __init__(self, server='IRIS'):
+        self.client = Client(server)
+
+    def get_events(self, starttime=None,
+                   endtime=UTCDateTime.now(), **kwargs):
+        if endtime > UTCDateTime.now():
+            endtime = UTCDateTime.now()
+        chunk_length = 365 * 86400
+        events = Catalog()
         while starttime <= endtime:
-            cat += client.get_events(starttime=starttime,
-                                        endtime=starttime + chunk_length,
-                                        **locs)
+            print(starttime)
+            events += self.client.get_events(starttime=starttime,
+                                             endtime=starttime + chunk_length,
+                                             **kwargs)
             if starttime + chunk_length > endtime:
                 chunk = endtime - starttime
                 if chunk <= 1:
                     break
             starttime += chunk_length
-    cat_df = _cat2df(cat)
-    return cat_df
+        self.events = _cat2df(events)
+
+    def get_stations(self, includerestricted=False, **kwargs):
+        self.stations = self.client.get_stations(includerestricted=includerestricted, **kwargs)
 
 
 def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, maxdep=6371, key='dvs'):
@@ -63,20 +56,6 @@ def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, max
     # new_lat, new_dep, new_lon = np.meshgrid(cut_lat, cut_dep, cut_lon)
     return cut_data, cut_dep, cut_lat, cut_lon
 
-
-# def lsnc():
-#     parser = argparse.ArgumentParser(description="List all fields of netCDF file")
-#     parser.add_argument('-k', help='Key name of fields', type=str, dest='key', default=None)
-#     parser.add_argument('ncfile', type=str, help='Path to netCDF file')
-#     arg = parser.parse_args()
-#     if len(sys.argv) == 1:
-#         parser.print_help()
-#         sys.exit(1)
-#     ncdata = Dataset(arg.ncfile)
-#     if arg.key is None:
-#         print(ncdata.variables)
-#     else:
-#         print(ncdata.variables[arg.key])
 
 
 if __name__ == '__main__':

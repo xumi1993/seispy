@@ -19,7 +19,7 @@ setup(name='python-seispy',
       package_data={'': ['data/*']},
       install_requires=[
                 'numpy>=1.19.0',
-                'scipy==1.8.1',
+                'scipy>=1.9.1',
                 'matplotlib>=3.2.0',
                 'pandas>=1.0.0',
                 'obspy>=1.2.1',

@@ -245,20 +245,3 @@ class RFTrace(obspy.Trace):
             raise ValueError('method must be \'iter\' or \'water\'')
         return cls(rf, header)
         
-
-
-if __name__ == '__main__':
-    ldata = SACTrace.read('data/syn_S.L')
-    qdata = SACTrace.read('data/syn_S.Q')
-    l = ldata.data
-    q = qdata.data
-    # l = np.flip(ldata.data, axis=0)
-    # q = np.flip(qdata.data, axis=0)
-    time_axis = np.linspace(qdata.b, qdata.npts*qdata.delta+qdata.b, qdata.npts)
-
-    rf, rms, it = deconit(l, q, qdata.delta, tshift=-qdata.b, f0=2, itmax=20, phase='S')
-    fig, axes = plt.subplots(3, 1, sharex=True, figsize=(10,6))
-    axes[0].plot(time_axis, qdata.data)
-    axes[1].plot(time_axis, ldata.data)
-    axes[2].plot(time_axis, rf)
-    plt.show()
