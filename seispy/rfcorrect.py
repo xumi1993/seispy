@@ -10,6 +10,8 @@ from seispy.psrayp import get_psrayp
 from seispy.rfani import RFAni
 from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
+from seispy.plotRT import plotrt as _plotrt
+from seispy.plotR import plotr as _plotr
 from seispy.utils import DepModel, Mod3DPerturbation
 import warnings
 import glob
@@ -308,6 +310,14 @@ class RFStation(object):
         self.harmo = Harmonics(self, tb, te)
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
+
+    def plotrt(self, outformat=None, **kwargs):
+        if self.only_r:
+            raise ValueError('Transverse RFs are nessary or use RFStation.plotr instead.')
+        return _plotrt(self, outformat=outformat, **kwargs)
+
+    def plotr(self, outformat=None, **kwargs):
+        return _plotr(self, outformat=outformat, **kwargs)
 
 
 class SACStation(RFStation):
@@ -771,7 +781,7 @@ def time2depth(stadatar, dep_range, Tpds, normalize='single'):
 
 
 if __name__ == '__main__':
-    rfsta = SACStation('/Users/xumijian/Codes/seispy-example/ex-ccp/RFresult/ZX.212/ZX.212finallist.dat')
+    rfsta = SACStation('/Users/xumijian/Codes/seispy-example/ex-ccp/RFresult/ZX.212')
     rfsta.jointani(2, 7, weight=[0.9, 0.1, 0.0])
     rfsta.ani.plot_polar()
 

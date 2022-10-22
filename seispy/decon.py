@@ -5,8 +5,7 @@ from obspy.io.sac import SACTrace
 from obspy.signal.util import next_pow_2
 from math import pi
 from numpy.fft import fft, ifft, ifftshift
-from scipy.signal import fftconvolve, correlate
-from scipy.linalg import solve_toeplitz
+# from scipy.linalg import solve_toeplitz
 import matplotlib.pyplot as plt
 
 

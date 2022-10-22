@@ -104,10 +104,7 @@ class RPickFigure(RFFigure):
         self.axr.plot([0, 0], [0, self.axpages*self.maxidx+1], color="black")
         self.axr.set_xlim(self.xlim[0], self.xlim[1])
         self.axr.set_xticks(np.arange(self.xlim[0], self.xlim[1]+1, 2))
-        self.axb.set_xlim(0, 360)
-        self.axb.set_xticks(np.arange(0, 361, 60))
-        self.axg.set_xlim(30, 90)
-        self.axg.set_xticks(np.arange(30, 91, 10))
+        self.set_ax_baz_dis()
     
     def set_ylabels(self):
         self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1)
@@ -125,9 +122,9 @@ class RPickFigure(RFFigure):
     
     def init_variables(self):
         self.goodrf = np.ones(self.evt_num)
-        self.rlines = [[] for i in range(self.evt_num)]
-        self.rwvfillpos = [[] for i in range(self.evt_num)]
-        self.rwvfillnag = [[] for i in range(self.evt_num)]
+        self.rlines = [[]]*self.evt_num
+        self.rwvfillpos = [[]]*self.evt_num
+        self.rwvfillnag = [[]]*self.evt_num
     
     def plotwave(self):
         bound = np.zeros(self.time_axis.shape[0])
@@ -136,10 +133,6 @@ class RPickFigure(RFFigure):
             self.rlines[i], = self.axr.plot(self.time_axis, r_amp_axis, color="black", linewidth=0.2)            
             self.rwvfillpos[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis >i+1, facecolor='red', alpha=0.3)
             self.rwvfillnag[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis <i+1, facecolor='blue', alpha=0.3)
-
-    def plotbaz(self):
-        self.axb.scatter(self.baz, np.arange(self.evt_num)+1)
-        self.axg.scatter(self.gcarc, np.arange(self.evt_num)+1, color='orange', alpha=0.6)
 
     def onclick(self, event):
         if event.inaxes != self.axr:

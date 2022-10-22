@@ -1,9 +1,6 @@
-import re
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
-from seispy.rfcorrect import RFStation, moveoutcorrect_ref
-import argparse
 import numpy as np
 from os.path import join
 
@@ -72,34 +69,20 @@ def set_fig(axr, axb, axs, stadata, xmin=-2, xmax=80):
     axs.set_xticklabels([])
 
 
-def plotr(rfsta, outpath='./', xlim=[-2, 80], key='bazi', enf=6, format='pdf'):
+def plotr(rfsta, out_path='./', xlim=[-2, 80], key='bazi', enf=6, outformat='g', show=False):
     h, axr, axb, axs = init_figure()
     rfsta.sort(key)
     plot_waves(axr, axb, axs, rfsta, enf=enf)
     set_fig(axr, axb, axs, rfsta, xlim[0], xlim[1])
-    h.savefig(join(outpath, rfsta.staname + '_R_bazorder_{:.1f}.{}'.format(
-              rfsta.f0[0], format)), format=format, dpi=500)
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
-    parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
-    parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
-    parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
-    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
-                    dest='format', default='g', type=str, metavar='f|g')
-    parser.add_argument('-x', help='The max time scale in sec, defaults to 85s', default=85, type=float, metavar='max_time')
-
-    arg = parser.parse_args()
-    if arg.format not in ('f', 'g'):
-        parser.error('Error: The format must be in \'f\' and \'g\'')
-    elif arg.format == 'g':
-        fmt = 'png'
-    elif arg.format == 'f':
-        fmt = 'pdf'
-    rfsta = RFStation(arg.rfpath)
-    plotr(rfsta, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
-
+    if outformat is None and not show:
+        return h
+    elif outformat == 'g':
+        h.savefig(join(out_path, rfsta.staname+'_R_bazorder_{:.1f}.png'.format(rfsta.f0[0])), dpi=400, bbox_inches='tight')
+    elif outformat == 'f':
+        h.savefig(join(out_path, rfsta.staname+'_R_bazorder_{:.1f}.pdf'.format(rfsta.f0[0])), format='pdf', bbox_inches='tight')
+    if show:
+        plt.show()
+        return h
 
 
 if __name__ == '__main__':

@@ -120,6 +120,7 @@ def haskell(omega, p, nl, ipha, alpha, beta, rho, h):
         uz = sl[2,0] / denom
     return ur, uz
 
+
 def fwd_seis(rayp, dt, npts, ipha, alpha, beta, rho, h):
     nlay = h.size
     npts_max = next_pow_2(npts)
@@ -135,8 +136,9 @@ def fwd_seis(rayp, dt, npts, ipha, alpha, beta, rho, h):
 
     return ur[0:npts], uz[0:npts]
 
+
 class SynSeis():
-    def __init__(self, depmod, rayp, dt, npts=2500, ipha=1) -> None:
+    def __init__(self, depmod, rayp, dt, npts=2500, ipha=1, filter=None) -> None:
         """_summary_
 
         Parameters
@@ -195,12 +197,12 @@ class SynSeis():
             st.filter('bandpass', freqmin=freqmin, freqmax=freqmax,
                       corners=order, zerophase=zerophase)
 
-    def run_decon(self, pre_filt=[0.05, 2], shift=10, f0=2.0, **kwargs):
+    def run_deconvolution(self, pre_filt=[0.05, 2], shift=10, f0=2.0, **kwargs):
         if pre_filt is not None:
             self.filter(*pre_filt)
-        self.rfstream = Stream()
+        rfstream = Stream()
         for i, _ in enumerate(self.rayp):
             rftr = RFTrace.deconvolute(self.rstream[i], self.zstream[i], tshift=shift,
                                        f0=f0, **kwargs)
-            self.rfstream.append(rftr)
+        return rfstream.append(rftr)
 

@@ -78,6 +78,16 @@ class RFFigure(Figure):
         ticklabels[1: len(self.azi_label)+1] = self.azi_label
         self.axb.set_yticklabels(ticklabels)
 
+    def set_ax_baz_dis(self):
+        self.axb.set_xlim(0, 360)
+        self.axb.set_xticks(np.arange(0, 361, 60))
+        self.axb.xaxis.label.set_color('#1f77b4')
+        self.axb.tick_params(axis='x', labelcolor='#1f77b4')
+        self.axg.set_xlim(30, 90)
+        self.axg.set_xticks(np.arange(30, 91, 10))
+        self.axg.xaxis.label.set_color('#ff7f0e')
+        self.axg.tick_params(axis='x', labelcolor='#ff7f0e')
+
     def set_page(self):
         self.set_ylabels()
         self.axr.plot([0, 0], [0, self.axpages*self.maxidx+1], color="black")
@@ -86,10 +96,7 @@ class RFFigure(Figure):
         self.axr.set_xticks(np.arange(self.xlim[0], self.xlim[1]+1, 2))
         self.axt.set_xlim(self.xlim[0], self.xlim[1])
         self.axt.set_xticks(np.arange(self.xlim[0], self.xlim[1]+1, 2))
-        self.axb.set_xlim(0, 360)
-        self.axb.set_xticks(np.arange(0, 361, 60))
-        self.axg.set_xlim(30, 90)
-        self.axg.set_xticks(np.arange(30, 91, 10))
+        self.set_ax_baz_dis()
 
     def init_variables(self):
         self.goodrf = np.ones(self.evt_num)
@@ -185,8 +192,8 @@ class RFFigure(Figure):
             self.twvfillnag[i] = self.axt.fill_between(self.time_axis, t_amp_axis, bound+i+1, where=t_amp_axis <i+1, facecolor='blue', alpha=0.3)
 
     def plotbaz(self):
-        self.axb.scatter(self.baz, np.arange(self.evt_num)+1)
-        self.axg.scatter(self.gcarc, np.arange(self.evt_num)+1, color='orange', alpha=0.6)
+        self.axb.scatter(self.baz, np.arange(self.evt_num)+1, color='#1f77b4')
+        self.axg.scatter(self.gcarc, np.arange(self.evt_num)+1, color='#ff7f0e', alpha=0.6)
 
     def onclick(self, event):
         if event.inaxes != self.axr and event.inaxes != self.axt:
