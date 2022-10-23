@@ -204,5 +204,6 @@ class SynSeis():
         for i, _ in enumerate(self.rayp):
             rftr = RFTrace.deconvolute(self.rstream[i], self.zstream[i], tshift=shift,
                                        f0=f0, **kwargs)
-        return rfstream.append(rftr)
+            rfstream.append(rftr)
+        return rfstream
 

@@ -46,7 +46,6 @@ def read_rfdep(path):
             raise FileNotFoundError('Cannot open file of {}'.format(path))
 
 
-
 def _from_layer_model(h, vp, vs, dep_range):
     dep = 0
     vp_dep = np.zeros_like(dep_range).astype(float)
@@ -121,8 +120,8 @@ class DepModel(object):
         plt.style.use('bmh')
         self.model_fig = plt.figure(figsize=(4,6))
         self.model_ax = self.model_fig.add_subplot()
-        self.model_ax.step(self.vp, self.depths, where='post', label='Vp')
-        self.model_ax.step(self.vs, self.depths, where='post', label='Vs')
+        self.model_ax.step(self.vp, self.depths, where='pre', label='Vp')
+        self.model_ax.step(self.vs, self.depths, where='pre', label='Vs')
         self.model_ax.legend()
         self.model_ax.set_xlabel('Velocity (km/s)')
         self.model_ax.set_ylabel('Depth (km)')
