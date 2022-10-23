@@ -60,6 +60,18 @@ class ReRF(RF):
         self.eq_lst = self.read_finallist(finallist)
     
     def read_finallist(self, finallist):
+        """Read final list from RF path.
+
+        Parameters
+        ----------
+        finallist : str
+            Path to final list.
+
+        Returns
+        -------
+        pandas.DataFrame
+            Data frame of earthquake information.
+        """
         self.logger.RFlog.info('Read event info from {}'.format(finallist))
         dtype = {'names': ('evt', 'phase', 'evlat', 'evlon', 'evdep', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}

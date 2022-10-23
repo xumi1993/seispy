@@ -77,9 +77,11 @@ def plotr(rfsta, out_path='./', xlim=[-2, 80], key='bazi', enf=6, outformat='g',
     if outformat is None and not show:
         return h
     elif outformat == 'g':
-        h.savefig(join(out_path, rfsta.staname+'_R_bazorder_{:.1f}.png'.format(rfsta.f0[0])), dpi=400, bbox_inches='tight')
+        h.savefig(join(out_path, rfsta.staname+'_R_{}order_{:.1f}.png'.format(key, rfsta.f0[0])),
+                       dpi=400, bbox_inches='tight')
     elif outformat == 'f':
-        h.savefig(join(out_path, rfsta.staname+'_R_bazorder_{:.1f}.pdf'.format(rfsta.f0[0])), format='pdf', bbox_inches='tight')
+        h.savefig(join(out_path, rfsta.staname+'_R_{}order_{:.1f}.pdf'.format(key, rfsta.f0[0])),
+                       format='pdf', bbox_inches='tight')
     if show:
         plt.show()
         return h

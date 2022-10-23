@@ -127,9 +127,11 @@ def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xlim=[-2, 30]
     if outformat is None and not show:
         return h
     elif outformat == 'g':
-        h.savefig(join(out_path, rfsta.staname+'_RT_bazorder_{:.1f}.png'.format(rfsta.f0[0])), dpi=400, bbox_inches='tight')
+        h.savefig(join(out_path, rfsta.staname+'_RT_{}order_{:.1f}.png'.format(key, rfsta.f0[0])),
+                       dpi=400, bbox_inches='tight')
     elif outformat == 'f':
-        h.savefig(join(out_path, rfsta.staname+'_RT_bazorder_{:.1f}.pdf'.format(rfsta.f0[0])), format='pdf', bbox_inches='tight')
+        h.savefig(join(out_path, rfsta.staname+'_RT_{}order_{:.1f}.pdf'.format(key, rfsta.f0[0])),
+                       format='pdf', bbox_inches='tight')
     if show:
         plt.show()
         return h
