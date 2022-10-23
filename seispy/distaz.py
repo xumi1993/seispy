@@ -1,6 +1,48 @@
 import math
 import numpy as np
-from seispy.geo import *
+
+
+def sind(deg):
+    rad = math.radians(deg)
+    return math.sin(rad)
+
+
+def cosd(deg):
+    rad = math.radians(deg)
+    return math.cos(rad)
+
+
+def tand(deg):
+    rad = math.radians(deg)
+    return math.tan(rad)
+
+
+def cotd(deg):
+    rad = math.radians(deg)
+    return math.cos(rad) / math.sin(rad)
+
+
+def asind(x):
+    rad = math.asin(x)
+    return math.degrees(rad)
+
+
+def acosd(x):
+    rad = math.acos(x)
+    return math.degrees(rad)
+
+
+def atand(x):
+    rad = math.atan(x)
+    return math.degrees(rad)
+
+
+def km2deg(kilometers):
+    return kilometers / 111.19
+
+
+def deg2km(degree):
+    return degree * 111.19
 
 
 class distaz:
