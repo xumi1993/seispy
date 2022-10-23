@@ -108,7 +108,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30,
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xmax=30, show=False):
+def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xlim=[-2, 30], show=False):
     """Plot PRFs with R and T components
 
     :param rfpath: Path to PRFs
@@ -123,7 +123,7 @@ def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xmax=30, show
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
     rfsta.sort(key)
     plot_waves(axr, axt, axb, axr_sum, axt_sum, rfsta, enf=enf)
-    set_fig(axr, axt, axb, axr_sum, axt_sum, rfsta, rfsta.staname, xmax=xmax, comp=rfsta.comp)
+    set_fig(axr, axt, axb, axr_sum, axt_sum, rfsta, rfsta.staname, xmin=xlim[0], xmax=xlim[1], comp=rfsta.comp)
     if outformat is None and not show:
         return h
     elif outformat == 'g':

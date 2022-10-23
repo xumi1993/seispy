@@ -56,9 +56,3 @@ def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, max
     # new_lat, new_dep, new_lon = np.meshgrid(cut_lat, cut_dep, cut_lon)
     return cut_data, cut_dep, cut_lat, cut_lon
 
-
-
-if __name__ == '__main__':
-    ncfile = '/Users/xumj/Researches/Tibet_MTZ/models/3D2017-09Sv-depth.nc'
-    ncdata = Dataset(ncfile)
-    nc2npz(ncdata, minlat=22, maxlat=40, minlon=80, maxlon=105, maxdep=900)

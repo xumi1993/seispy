@@ -235,7 +235,7 @@ def plot_rt():
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
     rfsta = RFStation(arg.rfpath)
-    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xmax=arg.x)
+    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xlim=[-2, arg.x])
 
 
 def plot_r():

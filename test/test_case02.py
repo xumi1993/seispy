@@ -39,5 +39,5 @@ def test_sub03():
 def test_sub04():
     rfs = RFStation('ex-rfani/SC.LTA')
     rfs.resample(0.1)
-    plotr(rfs, outpath='./', xlim=[-2, 80], key='bazi', enf=6, format='pdf')
-    plotrt(rfs, enf=3, out_path='./', key='bazi', outformat='g', xmax=30)
+    plotr(rfs, out_path='./', xlim=[-2, 80], key='bazi', enf=6, outformat='f')
+    plotrt(rfs, out_path='./', key='bazi', outformat='g', enf=3,  xmax=30)
