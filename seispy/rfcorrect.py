@@ -70,7 +70,7 @@ class RFStation(object):
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 self.data_prime[_i] = sac.data
-        exec('self.data{} = self.data_prime'.format(rfsta.comp.lower()))
+        exec('self.data{} = self.data_prime'.format(self.comp.lower()))
 
     def read_sample(self, data_path):
         fname = glob.glob(join(data_path, self.event[0] + '_' + self.phase[0] + '_{}.sac'.format(self.comp)))
