@@ -83,6 +83,3 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
  * `updatecatalog`: Automatically update the GCMT catalog.
  * `setpar`: Set up the values in configure files.
 
-### TODO
-
-- Download seismic data from web service for RF calculation.

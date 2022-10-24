@@ -3,7 +3,6 @@ from obspy import UTCDateTime, Catalog
 import numpy as np
 from datetime import timedelta
 from obspy.clients.fdsn import Client
-from http.client import IncompleteRead
 # from netCDF4 import Dataset
 import sys
 
@@ -26,7 +25,6 @@ class Query():
         chunk_length = 365 * 86400
         events = Catalog()
         while starttime <= endtime:
-            print(starttime)
             events += self.client.get_events(starttime=starttime,
                                              endtime=starttime + chunk_length,
                                              **kwargs)

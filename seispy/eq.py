@@ -8,7 +8,20 @@ from seispy.decon import RFTrace
 from seispy.geo import snr, srad2skm, rotateSeisENtoTR, \
                        rssq, extrema
 from obspy.signal.trigger import recursive_sta_lta
+import glob
 
+
+class NotEnoughComponent(Exception):
+    def __init__(self, matchkey):
+        self.matchkey = matchkey
+    def __str__(self):
+        print('{}'.format(self.matchkey))
+
+class TooMoreComponents(Exception):
+    def __init__(self, matchkey):
+        self.matchkey = matchkey
+    def __str__(self):
+        print('{}'.format(self.matchkey))
 
 def rotateZNE(st):
     try:
@@ -36,30 +49,49 @@ class EQ(object):
         """
         self.datestr = datestr
         self.filestr = join(pathname, '*' + datestr + '*' + suffix)
-        self.st = obspy.read(self.filestr)
-        if len(self.st) < 3:
-            channel = ' '.join([tr.stats.channel for tr in self.st])
-            raise ValueError('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, datestr))
-        elif len(self.st) > 3:
-            raise ValueError('{} has more than 3 components, please select to delete redundant seismic components'.format(datestr))
+        if glob.glob(self.filestr):  
+            self.st = obspy.read(self.filestr)
+            self._check_comp()
+            self.st.sort()
+            self.set_comp()
         else:
-            pass
-        self.st.sort()
+            self.st = obspy.Stream()
         self.rf = obspy.Stream()
         self.timeoffset = 0
         self.rms = np.array([0])
         self.it = 0
         self.trigger_shift = 0
         self.inc_correction = 0
-        self.set_comp()
     
+    def _check_comp(self):
+        if len(self.st) < 3:
+            channel = ' '.join([tr.stats.channel for tr in self.st])
+            raise NotEnoughComponent('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, self.datestr))
+        elif len(self.st) > 3:
+            raise TooMoreComponents('{} has more than 3 components, please select to delete redundant seismic components'.format(self.datestr))
+        else:
+            pass
+
     def readstream(self):
-        self.st = obspy.read(self.filestr)
         self.rf = obspy.Stream()
-    
+        self.st = obspy.read(self.filestr)
+        self._check_comp()
+        self.st.sort()
+        self.set_comp()
+
     def cleanstream(self):
         self.st = None
         self.rf = None
+
+    @classmethod
+    def from_stream(cls, stream):
+        eq = cls('', '')
+        eq.st = stream
+        eq.datestr = eq.st[0].stats.starttime.strftime('%Y.%j.%H.%M.%S')
+        eq._check_comp()
+        eq.st.sort()
+        eq.set_comp()
+        return eq
 
     def set_comp(self):
         if self.st.select(channel='*[E2]'):
