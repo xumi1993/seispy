@@ -177,6 +177,7 @@ class RFPara(object):
             cf.read(cfg_file)
         except Exception:
             raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
+        sections = cf.sections()
         for key, value in cf.items('path'):
             if value == '':
                 continue
@@ -188,10 +189,11 @@ class RFPara(object):
                 pa.catalogpath = value
             else:
                 pa.__dict__[key] = value
-        for key, value in cf.items('fetch'):
-            pa.stainfo.__dict__[key] = value
-        sections = cf.sections()
         sections.remove('path')
+        if 'fetch' in sections:
+            for key, value in cf.items('fetch'):
+                pa.stainfo.__dict__[key] = value
+            sections.remove('fetch')
         for sec in sections:
             for key, value in cf.items(sec):
                 if key == 'date_begin':
