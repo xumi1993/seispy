@@ -121,12 +121,12 @@ class RFStation(object):
         ----------
         stream : ``obspy.Stream``
             _description_
-        rayp : _type_
-            _description_
-        baz : _type_
-            _description_
+        rayp : ``numpy.ndarray`` or ``float``
+            Ray-parameters in s/km.
+        baz : ``numpy.ndarray`` or ``float``
+            Back-azimuth
         prime_comp : str, optional
-            _description_, by default 'R'
+             Prime component of RF, by default 'R'
         """
         if len(stream) == 0:
             raise ValueError('No such RFTrace read')
