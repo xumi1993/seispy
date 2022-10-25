@@ -36,6 +36,8 @@ class RFStation(object):
         
         self.only_r = only_r
         self.comp = prime_comp
+        self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
+                 'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         if not exists(data_path):
             return
         self._chech_comp()
@@ -49,8 +51,6 @@ class RFStation(object):
             raise ValueError("More than one finallist.dat in the {}".format(data_path))
         else:
             evt_lst = evt_lsts[0]
-        self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
-                 'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
             np.loadtxt(evt_lst, dtype=self.dtype, unpack=True, ndmin=1)
         self.rayp = skm2srad(self.rayp)
@@ -91,8 +91,8 @@ class RFStation(object):
 
     def init_property(self, ev_num):
         self.ev_num = ev_num
-        self.event = ['']*ev_num
-        self.phase = ['']*ev_num
+        self.event = np.array(['']*ev_num)
+        self.phase = np.array(['']*ev_num)
         self.evla = np.zeros(ev_num)
         self.evlo = np.zeros(ev_num)
         self.evdp = np.zeros(ev_num)
@@ -139,15 +139,29 @@ class RFStation(object):
         if ev_num != rayp.size or ev_num != baz.size:
             raise ValueError('Array length of rayp and baz must be the same as stream')
         rfsta.init_property(ev_num)
+        try:
+            rfsta.staname = '{}.{}'.format(stream[0].stats.sac.knetwk, stream[0].stats.sac.kstnm)
+            rfsta.stla = stream[0].stats.sac.stla
+            rfsta.stlo = stream[0].stats.sac.stlo
+            rfsta.stel = stream[0].stats.sac.stel
+        except:
+            pass
+        try:
+            rfsta.shift = stream[0].stats.tshift
+        except:
+            rfsta.shift = -stream[0].stats.sac.b
         rfsta.sampling = stream[0].stats.delta
         rfsta.rflength = stream[0].stats.npts
-        rfsta.shift = stream[0].stats.tshift
         rfsta.data_prime = np.zeros([rfsta.ev_num, rfsta.rflength])
         rfsta.bazi = baz
         rfsta.rayp = skm2srad(rayp)
+        rfsta.time_axis = np.arange(rfsta.rflength) * rfsta.sampling - rfsta.shift
         for i, tr in enumerate(stream):
             rfsta.event[i] = '{}'.format(i)
-            rfsta.f0 = tr.stats.f0
+            try:
+                rfsta.f0[i] = tr.stats.f0
+            except:
+                rfsta.f0[i] = tr.stats.sac.user1
             rfsta.data_prime[i] = tr.data
         exec('rfsta.data{} = rfsta.data_prime'.format(rfsta.comp.lower()))
         return rfsta

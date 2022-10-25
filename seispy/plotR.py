@@ -22,14 +22,14 @@ def init_figure():
 def plot_waves(axr, axb, axs, stadata, enf=12):
     bound = np.zeros(stadata.rflength)
     for i in range(stadata.ev_num):
-        datar = stadata.datar[i] * enf + (i + 1)
-        # axr.plot(time_axis, stadata.datar[i], linewidth=0.2, color='black')
+        datar = stadata.data_prime[i] * enf + (i + 1)
         axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar > i+1, facecolor='red',
                          alpha=0.7)
         axr.fill_between(stadata.time_axis, datar, bound + i+1, where=datar < i+1, facecolor='blue',
                          alpha=0.7)
-    # rfsum, _ = moveoutcorrect_ref(stadata, 0.06, np.arange(300), sphere=False)
-    rfsum = np.mean(stadata.datar, axis=0)
+    # rfcorr, _ = stadata.moveoutcorrect( 0.1, np.arange(300), sphere=False)
+    # rfsum = np.mean(rfcorr, axis=0)
+    rfsum = np.mean(stadata.data_prime, axis=0)
     axs.fill_between(stadata.time_axis, rfsum, 0, where=rfsum > 0, facecolor='red', alpha=0.7)
     axs.fill_between(stadata.time_axis, rfsum, 0, where=rfsum < 0, facecolor='blue', alpha=0.7)
     # axs.plot(stadata.time_axis, rfsum, color='gray', lw=0.5)
@@ -53,7 +53,7 @@ def set_fig(axr, axb, axs, stadata, xmin=-2, xmax=80):
     axr.set_xlabel('Time after P (s)', fontsize=13)
     axr.set_ylabel('Event', fontsize=13)
     axr.add_line(Line2D([0, 0], axr.get_ylim(), color='black'))
-    axr.set_title('R components ({})'.format(stadata.staname), fontsize=16)
+    # axr.set_title('R components ({})'.format(stadata.staname), fontsize=16)
 
     # set axb
     axb.set_xlim(0, 360)
@@ -65,6 +65,7 @@ def set_fig(axr, axb, axs, stadata, xmin=-2, xmax=80):
     axb.set_xlabel(r'Back-azimuth ($^\circ$)', fontsize=13)
     # axp.set_xlabel('Ray-parameter (s/km)', fontsize=13)
 
+    axs.set_title('{} components ({})'.format(stadata.comp.upper(), stadata.staname), fontsize=16)
     axs.set_xlim(xmin, xmax)
     axs.set_xticks(x_range)
     axs.set_xticklabels([])
