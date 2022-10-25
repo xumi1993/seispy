@@ -7,6 +7,7 @@ from os.path import join
 
 def init_figure():
     h = plt.figure(figsize=(8, 10))
+    h.tight_layout()
     gs = GridSpec(15, 3)
     gs.update(wspace=0.25)
     axr = plt.subplot(gs[1:, 0:-1])
@@ -31,7 +32,7 @@ def plot_waves(axr, axb, axs, stadata, enf=12):
     rfsum = np.mean(stadata.datar, axis=0)
     axs.fill_between(stadata.time_axis, rfsum, 0, where=rfsum > 0, facecolor='red', alpha=0.7)
     axs.fill_between(stadata.time_axis, rfsum, 0, where=rfsum < 0, facecolor='blue', alpha=0.7)
-    axs.plot(stadata.time_axis, rfsum, color='gray', lw=0.5)
+    # axs.plot(stadata.time_axis, rfsum, color='gray', lw=0.5)
     axb.scatter(stadata.bazi, np.arange(stadata.ev_num) + 1, s=7)
     # axp = axb.twiny()
     # axp.scatter(stadata.rayp, np.arange(stadata.ev_num) + 1, s=7)
@@ -67,6 +68,10 @@ def set_fig(axr, axb, axs, stadata, xmin=-2, xmax=80):
     axs.set_xlim(xmin, xmax)
     axs.set_xticks(x_range)
     axs.set_xticklabels([])
+    axs.set_yticks([np.sum(axs.get_ylim())/3])
+    axs.tick_params(axis='y', left=False)
+    axs.set_yticklabels(['Sum'], fontsize=8)
+    axs.add_line(Line2D([0, 0], axs.get_ylim(), color='black'))
 
 
 def plotr(rfsta, out_path='./', xlim=[-2, 80], key='bazi', enf=6, outformat='g', show=False):

@@ -16,6 +16,7 @@ dist/
 *.egg-info
 
 .empty/
+.pytest_cache/
 
 test/ex-ccp.tar.gz
 test/ex-ccp/
