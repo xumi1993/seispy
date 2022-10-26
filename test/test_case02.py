@@ -2,8 +2,6 @@ from seispy.rfcorrect import RFStation
 import pytest
 from os.path import exists
 from subprocess import Popen
-from seispy.plotR import plotr
-from seispy.plotRT import plotrt
 
 
 def test_download():
@@ -38,6 +36,11 @@ def test_sub03():
 
 def test_sub04():
     rfs = RFStation('ex-rfani/SC.LTA')
+    # rfs = RFStation('/Users/xumijian/Codes/seispy-example/ex-rfani/SC.LTA')
     rfs.resample(0.1)
-    rfs.plotr(out_path='./', xlim=[-2, 80], key='bazi', enf=6, outformat='f')
+    rfs.plotr(out_path='./', xlim=[-2, 40], key='rayp', enf=6, outformat='f')
     rfs.plotrt(out_path='./', xlim=[-2, 25], key='bazi', enf=3, outformat='g')
+
+
+if __name__ == '__main__':
+    test_sub04()

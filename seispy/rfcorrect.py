@@ -202,7 +202,8 @@ class RFStation(object):
         else:
             raise ValueError('\'method\' must be in \'single\' and \'average\'')
         for i in range(self.ev_num):
-            self.__dict__['data{}'.format(self.comp.lower())][i] /= maxamp[i]
+            self.data_prime /= maxamp[i]
+            exec('self.data{} = self.data_prime'.format(self.comp.lower()))
             if not self.only_r:
                 self.datat[i] /= maxamp[i]
 
@@ -216,8 +217,8 @@ class RFStation(object):
             Target sampling interval in sec
         """
         npts = int(self.rflength * (self.sampling / dt)) + 1
-        self.__dict__['data{}'.format(self.comp.lower())] = resample(
-            self.__dict__['data{}'.format(self.comp.lower())], npts, axis=1)
+        self.data_prime = resample(self.data_prime, npts, axis=1)
+        exec('self.data{} = self.data_prime'.format(self.comp.lower()))
         if not self.only_r:
             self.datat = resample(self.datat, npts, axis=1)
         self.sampling = dt
@@ -234,7 +235,8 @@ class RFStation(object):
         idx = np.argsort(self.__dict__[key])
         for keyarg in self.dtype['names']:
             self.__dict__[keyarg] = self.__dict__[keyarg][idx]
-        self.__dict__['data{}'.format(self.comp.lower())] = self.__dict__['data{}'.format(self.comp.lower())][idx]
+        self.data_prime = self.data_prime[idx]
+        exec('self.data{} = self.data_prime'.format(self.comp.lower()))
         if not self.only_r:
             self.datat = self.datat[idx]
 
@@ -366,7 +368,7 @@ class RFStation(object):
         return best_f, best_t
 
     def slantstack(self, ref_dis=None, rayp_range=None, tau_range=None):
-        self.slant = SlantStack(self.__dict__['data{}'.format(self.comp.lower())], self.time_axis, self.dis)
+        self.slant = SlantStack(self.data_prime, self.time_axis, self.dis)
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
