@@ -4,6 +4,7 @@ from obspy.taup import TauPyModel
 from obspy.io.sac import SACTrace
 import re
 from os.path import join, exists
+from os import makedirs
 from seispy.io import Query
 from seispy.para import RFPara
 from seispy import distaz
@@ -287,6 +288,12 @@ class RF(object):
         else:
             self.logger.RFlog.info('{0} earthquakes are associated'.format(self.eqs.shape[0]))
 
+    def save_raw_data(self):
+        if not exists(self.para.datapath):
+            makedirs(self.para.datapath)
+        for i, row in self.eqs.iterrows():
+            row['data'].write(self.para.datapath, row['date'])
+
     def savepjt(self):
         eqs = self.eqs.copy()
         for _, row in eqs.iterrows():
@@ -444,7 +451,7 @@ class RF(object):
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
 
-    def saverf(self):
+    def saverf(self, gauss=None):
         npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
         if self.para.phase[-1] == 'P':
             shift = self.para.time_before
@@ -453,6 +460,15 @@ class RF(object):
         else:
             pass
         good_lst = []
+        if isinstance(self.para.gauss, (int, float)):
+            gauss = self.para.gauss
+        elif gauss is None:
+            gauss = self.para.gauss[0]
+        else:
+            if gauss in self.para.gauss:
+                pass
+            else:
+                raise ValueError('gauss should be a element in the seispy.para.RFPara.gauss')
 
         if self.para.rmsgate is not None:
             self.logger.RFlog.info('Save RFs with final RMS less than {:.2f} and criterion of {}'.format(self.para.rmsgate, self.para.criterion))
@@ -462,7 +478,7 @@ class RF(object):
             if row['data'].judge_rf(shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
-                                   mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r,
+                                   mag=row['mag'], gcarc=row['dis'], gauss=gauss, only_r=self.para.only_r,
                                    user9=self.baz_shift)
                 good_lst.append(i)
         self.logger.RFlog.info('{} PRFs are saved.'.format(len(good_lst)))

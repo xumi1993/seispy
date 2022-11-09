@@ -3,7 +3,7 @@ from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
 from scipy.signal import resample
-from os.path import dirname, join, exists, basename, isfile, abspath
+from os.path import dirname, join, exists, isfile, abspath
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
@@ -43,7 +43,6 @@ class RFStation(object):
         self._chech_comp()
         if isfile(data_path):
             data_path = dirname(abspath(data_path))
-        self.staname = basename(abspath(data_path))
         evt_lsts = glob.glob(join(data_path, '*finallist.dat'))
         if len(evt_lsts) == 0:
             raise FileNotFoundError("No such *finallist.dat in the {}".format(data_path))
@@ -78,6 +77,7 @@ class RFStation(object):
             raise FileNotFoundError('No such files with comp of {} in {}'.format(self.comp, data_path))
         else:
             sample_sac = SACTrace.read(fname[0])
+        self.staname = '{}.{}'.format(sample_sac.knetwk, sample_sac.kstnm)
         self.stla = sample_sac.stla
         self.stlo = sample_sac.stlo
         if sample_sac.stel is None:
