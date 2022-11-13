@@ -40,10 +40,11 @@ jobs:
         with:
           miniconda-version: "latest"
           channels: bioconda, conda-forge, defaults
-          use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
           auto-update-conda: true
+          activate-environment: test
           python-version: '3.10'
       - name: Install dependencies
+        shell: bash -el {0}
         run: |
           conda activate test
           python -m pip install --upgrade pip

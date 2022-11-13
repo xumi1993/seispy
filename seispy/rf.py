@@ -10,7 +10,6 @@ from seispy.para import RFPara
 from seispy import distaz
 from seispy.eq import EQ
 from seispy.setuplog import setuplog
-from seispy.sviewerui import MatplotlibWidget
 import glob
 import numpy as np
 from datetime import timedelta
@@ -18,11 +17,12 @@ import pandas as pd
 import configparser
 import argparse
 import sys
-from PyQt6.QtWidgets import QApplication
 import pickle
 
 
 def pickphase(eqs, para, logger):
+    from PyQt6.QtWidgets import QApplication
+    from seispy.sviewerui import MatplotlibWidget
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(eqs, para, logger)
     ui.show()
