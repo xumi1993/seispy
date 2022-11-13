@@ -101,6 +101,16 @@ class RFPara(object):
     def __str__(self):
         return self.__dict__
 
+    def _check_date_range(self):
+        if self.date_begin > self.stainfo.query.stations[0][0].end_date or \
+            self.date_end < self.stainfo.query.stations[0][0].start_date:
+            raise ValueError('The date range set does not overlap with'
+                             'the date range of the fetched data')
+        if self.date_begin < self.stainfo.query.stations[0][0].start_date:
+            self.date_begin = self.stainfo.query.stations[0][0].start_date
+        if self.date_end > self.stainfo.query.stations[0][0].end_date:
+            self.date_end = self.stainfo.query.stations[0][0].end_date
+
     @property
     def datapath(self):
         return self._datapath

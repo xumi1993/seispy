@@ -226,6 +226,7 @@ class RF(object):
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Load station info from {0} web-service'.format(self.para.data_server))
                 self.para.stainfo.get_station_from_ws(self.para.data_server)
+                self.para._check_date_range()
                 if self.para.stainfo.query.stations[0][0].start_date > self.para.date_end or \
                    self.para.stainfo.query.stations[0][0].end_date < self.para.date_begin:
                    self.logger.RFlog.error('No such overlap between recording range and date range')

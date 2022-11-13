@@ -166,6 +166,11 @@ class SynSeis():
         self.ipha = ipha
 
     def run_fwd(self):
+        """Forward modelling synthetic seismograms.
+
+        ``SynSeis.rstream`` and ``SynSeis.zstream`` are generated as 
+        radial and vertical Seismograms in ``Obspy.Stream`` type.
+        """
         self.rstream = Stream()
         self.zstream = Stream()
         for _, rayp in enumerate(self.rayp):
