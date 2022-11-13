@@ -23,7 +23,7 @@ setup(name='python-seispy',
                 'matplotlib>=3.2.0',
                 'pandas>=1.0.0',
                 'obspy>=1.2.1',
-                'pyqt5>=5.12.0',
+                'pyqt6>=6.3.0',
                 'scikits.bootstrap>=1.0.0'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.scripts:prf',
@@ -44,7 +44,7 @@ setup(name='python-seispy',
                                         'veltxt2mod=seispy.modcreator:veltxt2mod']},
       zip_safe=False,
       classifiers=['Programming Language :: Python',
-                   'Programming Language :: Python :: 3.8',
                    'Programming Language :: Python :: 3.9',
-                   'Programming Language :: Python :: 3.10']
+                   'Programming Language :: Python :: 3.10',
+                   'Programming Language :: Python :: 3.11']
       )
