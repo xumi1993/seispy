@@ -18,7 +18,7 @@ import pandas as pd
 import configparser
 import argparse
 import sys
-from PyQt5.QtWidgets import QApplication
+from PyQt6.QtWidgets import QApplication
 import pickle
 
 
@@ -26,7 +26,7 @@ def pickphase(eqs, para, logger):
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(eqs, para, logger)
     ui.show()
-    if app.exec_() == 0:
+    if app.exec() == 0:
         ui.exit_app()
         return
 
