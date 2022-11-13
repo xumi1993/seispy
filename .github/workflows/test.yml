@@ -36,13 +36,17 @@ jobs:
         with:
           fetch-depth: 1
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: conda-incubator/setup-miniconda@v2
         with:
+          miniconda-version: "latest"
+          channels: bioconda, conda-forge, defaults
+          use-only-tar-bz2: true  # IMPORTANT: This needs to be set for caching to work properly!
+          auto-update-conda: true
+          auto-activate-base: true
           python-version: '3.11'
       - name: Install dependencies
         run: |
-          apt-get update
-          apt-get install ffmpeg libsm6 libxext6  -y
+          conda install mesa-libegl-devel-cos6-x86_64  -y
           python -m pip install --upgrade pip
           pip install .
           pip install pytest pytest-cov
