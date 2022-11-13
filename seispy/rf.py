@@ -91,7 +91,7 @@ def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dis
 def fetch_waveform(eq_lst, para, model, logger):
     tb = np.max([2*para.noiselen, 2*para.time_before])
     te = np.max([2*para.noiselen, 2*para.time_after])
-    query = Query(para.server)
+    query = Query(para.data_server)
     new_col = ['dis', 'bazi', 'data', 'datestr']
     eq_match = pd.DataFrame(columns=new_col)
     for i, row in eq_lst.iterrows():
@@ -111,7 +111,7 @@ def fetch_waveform(eq_lst, para, model, logger):
         t2 = row['date']+arr_time+te
         try:
             logger.RFlog.info('Fetch waveforms of ({}/{}) event {} from {}'.format(
-                              i+1, eq_lst.shape[0], datestr, para.server))
+                              i+1, eq_lst.shape[0], datestr, para.data_server))
             st = query.client.get_waveforms(para.stainfo.network, para.stainfo.station,
                                             para.stainfo.location, para.stainfo.channel, t1, t2)
             _add_header(st, row['date'], para.stainfo)
@@ -223,8 +223,8 @@ class RF(object):
     def load_stainfo(self):
         try:
             if self.para.use_remote_data:
-                self.logger.RFlog.info('Load station info from {0} web-service'.format(self.para.server))
-                self.para.stainfo.get_station_from_ws(self.para.server)
+                self.logger.RFlog.info('Load station info from {0} web-service'.format(self.para.data_server))
+                self.para.stainfo.get_station_from_ws(self.para.data_server)
                 if self.para.stainfo.query.stations[0][0].start_date > self.para.date_end or \
                    self.para.stainfo.query.stations[0][0].end_date < self.para.date_begin:
                    self.logger.RFlog.error('No such overlap between recording range and date range')
@@ -236,15 +236,13 @@ class RF(object):
             self.logger.RFlog.error('Error in loading station info: {0}'.format(e))
             sys.exit(1)
 
-    def search_eq(self, local=False, server=None, catalog=None):
+    def search_eq(self, local=False, catalog=None):
         if not local:
             try:
-                if server is None:
-                    server = self.para.server
-                self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
+                self.logger.RFlog.info('Searching earthquakes from {}'.format(self.para.cata_server))
                 if self.para.date_end > UTCDateTime():
                     self.para.date_end = UTCDateTime()
-                query = Query(server)
+                query = Query(self.para.cata_server)
                 query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
                                  latitude=self.para.stainfo.stla, longitude=self.para.stainfo.stlo,
                                  minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
@@ -269,7 +267,7 @@ class RF(object):
     def match_eq(self):
         try:
             if self.para.use_remote_data:
-                self.logger.RFlog.info('Fetch seismic records from {}'.format(self.para.server))
+                self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
                 self.eqs = fetch_waveform(self.eq_lst, self.para, self.model, self.logger)
             else:
                 self.logger.RFlog.info('Associating SAC files with earthquakes')

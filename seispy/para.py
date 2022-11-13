@@ -57,7 +57,8 @@ class RFPara(object):
         self.rfpath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
         self.pjtpath = 'rfpjt.pkl'
-        self.server = 'IRIS'
+        self.cata_server = 'IRIS'
+        self.data_server = 'IRIS'
         self.velmod = 'iasp91'
         self.offset = None
         self.tolerance = 210
@@ -106,6 +107,15 @@ class RFPara(object):
             raise TypeError('datapath should be \'str\' type not \'{0}\''.format(type(value)))
         else:
             self._datapath = value
+
+    # Temporary function. It will be removed after 2~3 versions
+    @property
+    def server(self):
+        return self.cata_server
+    
+    @server.setter
+    def server(self, value):
+        self.cata_server = value
 
     @property
     def rfpath(self):
@@ -220,7 +230,9 @@ class RFPara(object):
                         pa.rmsgate = None
                 else:
                     try:
-                        pa.__dict__[key] = float(value)
+                        exec('pa.{} = {}'.format(key, float(value)))
+                        # pa.__dict__[key] = float(value)
                     except ValueError:
-                        pa.__dict__[key] = value
+                        exec('pa.{} = value'.format(key))
+                        # pa.__dict__[key] = value
         return pa
