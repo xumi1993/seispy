@@ -16,7 +16,7 @@
 </a> 
 
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/version.svg)](https://anaconda.org/conda-forge/seispy)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/installer/conda.svg)](https://conda.anaconda.org/conda-forge)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/seispy.svg)](https://anaconda.org/conda-forge/seispy)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/downloads.svg)](https://anaconda.org/conda-forge/seispy)
 
 [![PyPI](https://img.shields.io/pypi/v/python-seispy)](https://pypi.org/project/python-seispy/)

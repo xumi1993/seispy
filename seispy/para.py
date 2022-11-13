@@ -5,6 +5,7 @@ from obspy.io.sac import SACTrace
 import glob
 import configparser
 from seispy.io import Query
+import re
 
 
 def _load_station_info(pathname, ref_comp, suffix):
@@ -74,7 +75,7 @@ class RFPara(object):
         self.noisegate = 5
         self.noiselen = 50
         self.phase = 'P'
-        self.gauss = 2
+        self.gauss = 2.0
         self.target_dt = 0.01
         self.time_before = 10
         self.time_after = 120
@@ -95,6 +96,9 @@ class RFPara(object):
         self.stainfo = StaInfo()
 
     def get_para(self):
+        return self.__dict__
+
+    def __str__(self):
         return self.__dict__
 
     @property
@@ -223,6 +227,11 @@ class RFPara(object):
                     pa.criterion = value
                 elif key == 'decon_method':
                     pa.decon_method = value
+                elif key == 'gauss':
+                    try:
+                        pa.gauss = cf.getfloat(sec, 'gauss')
+                    except:
+                        pa.gauss = [float(v) for v in re.split(' |,', value)]
                 elif key == 'rmsgate':
                     try:
                         pa.rmsgate = cf.getfloat(sec, 'rmsgate')

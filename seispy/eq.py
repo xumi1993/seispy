@@ -126,6 +126,18 @@ class EQ(object):
     def __str__(self):
         return('Event data class {0}'.format(self.datestr))
 
+    def write(self, path, evt_datetime):
+        for tr in self.st:
+            sac = SACTrace.from_obspy_trace(tr)
+            sac.b = 0
+            sac.o = evt_datetime - tr.stats.starttime
+            fname = join(path, '{}.{}.{}.{}.SAC'.format(
+                tr.stats.network, tr.stats.station,
+                tr.stats.starttime.strftime('%Y.%j.%H%M%S'),
+                tr.stats.channel
+            ))
+            sac.write(fname)
+
     def detrend(self):
         self.st.detrend(type='linear')
         self.st.detrend(type='constant')
@@ -285,38 +297,63 @@ class EQ(object):
         else:
             self.st.trim(t1, t2)
 
-    def deconvolute(self, shift, time_after, f0=2, method='iter', only_r=False,
+    def deconvolute(self, shift, time_after, f0=2.0, method='iter', only_r=False,
                     itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
-        self.method = method
-        if method == 'iter':
-            kwargs = {'method': method,
-                      'f0': f0,
-                      'tshift': shift,
-                      'itmax': itmax,
-                      'minderr': minderr}
-        elif method == 'water':
-            kwargs = {'method': method,
-                      'f0': f0,
-                      'tshift': shift,
-                      'wlevel': wlevel}
-        else:
-            raise ValueError('method must be in \'iter\' or \'water\'')
+        """Deconvolution
 
-        if self.phase[-1] == 'P':
-            self.decon_p(**kwargs)
-            if not only_r:
-                self.decon_p(tcomp=True, **kwargs)
-        else:
-            # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
-            #     raise ValueError('Please rotate component to \'LQT\'')
-            self.decon_s(**kwargs)
-        if target_dt is not None:
-            if self.rf[0].stats.delta != target_dt:
-                # self.rf.resample(1 / target_dt)
-                for tr in self.rf:
-                    # tr.data = tr.data[0:-1]
-                    tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
-                    tr.stats.delta = target_dt
+        Parameters
+        ----------
+        shift : float
+            Time shift before P arrival
+        time_after : float
+            Time length after P arrival
+        f0 : float or list, optional
+            Gaussian factors, by default 2.0
+        method : str, optional
+            method for deconvolution in ``iter`` or ``water``, by default ``iter``
+        only_r : bool, optional
+            Whether only calculate RF in prime component, by default False
+        itmax : int, optional
+            Maximum iterative number, valid for method of ``iter``, by default 400
+        minderr : float, optional
+            Minium residual error, valid for method of ``iter``, by default 0.001
+        wlevel : float, optional
+            Water level, valid for method of ``water``, by default 0.05
+        target_dt : None or float, optional
+            Time delta for resampling, by default None
+        """
+        self.method = method
+        if isinstance(f0, (int, float)):
+            f0 = [f0]
+        for ff in f0:
+            if method == 'iter':
+                kwargs = {'method': method,
+                        'f0': ff,
+                        'tshift': shift,
+                        'itmax': itmax,
+                        'minderr': minderr}
+            elif method == 'water':
+                kwargs = {'method': method,
+                        'f0': ff,
+                        'tshift': shift,
+                        'wlevel': wlevel}
+            else:
+                raise ValueError('method must be in \'iter\' or \'water\'')
+
+            if self.phase[-1] == 'P':
+                self.decon_p(**kwargs)
+                if not only_r:
+                    self.decon_p(tcomp=True, **kwargs)
+            else:
+                # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
+                #     raise ValueError('Please rotate component to \'LQT\'')
+                self.decon_s(**kwargs)
+            if target_dt is not None:
+                if self.rf[0].stats.delta != target_dt:
+                    for tr in self.rf:
+                        # tr.data = tr.data[0:-1]
+                        tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
+                        tr.stats.delta = target_dt
     
     def decon_p(self, tshift, tcomp=False, **kwargs):
         if self.comp == 'lqt':
@@ -373,7 +410,11 @@ class EQ(object):
         else:
             filename = join(path, evtstr)
         for comp in loop_lst:
-            trrf = self.rf.select(channel='*'+comp)[0]
+            trrfs = self.rf.select(channel='*'+comp)
+            try:
+                trrf = [tr for tr in trrfs if tr.stats.f0 == gauss][0]
+            except:
+                ValueError('No such gauss factor of {} in calculated RFs'.format(gauss))
             header = {'evla': evla, 'evlo': evlo, 'evdp': evdp, 'mag': mag, 'baz': baz,
                       'gcarc': gcarc, 'user0': rayp, 'kuser0': 'Ray Para', 'user1': gauss, 'kuser1': 'G factor'}
             for key in kwargs:
