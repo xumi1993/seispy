@@ -1,7 +1,7 @@
 # matplotlib.use("Qt5Agg")
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QIcon, QKeySequence, QGuiApplication, QShortcut, QAction
-from PyQt6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QKeySequence, QGuiApplication, QShortcut, QAction
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
                             QSizePolicy, QWidget, \
                             QPushButton, QHBoxLayout, QFileDialog
 from os.path import exists, dirname, join

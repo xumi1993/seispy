@@ -15,13 +15,13 @@ class NotEnoughComponent(Exception):
     def __init__(self, matchkey):
         self.matchkey = matchkey
     def __str__(self):
-        print('{}'.format(self.matchkey))
+        return '{}'.format(self.matchkey)
 
 class TooMoreComponents(Exception):
     def __init__(self, matchkey):
         self.matchkey = matchkey
     def __str__(self):
-        print('{}'.format(self.matchkey))
+        return '{}'.format(self.matchkey)
 
 def rotateZNE(st):
     try:
@@ -435,24 +435,29 @@ class EQ(object):
         else:
             return False
 
-    def judge_rf(self, shift, npts, criterion='crust', rmsgate=None):
+    def judge_rf(self, gauss, shift, npts, criterion='crust', rmsgate=None):
         if self.phase[-1] == 'P' and self.comp == 'rtz':
-            trrf = self.rf.select(channel='*R')[0]
+            trrfs = self.rf.select(channel='*R')
         elif self.phase[-1] == 'P' and self.comp == 'lqt':
-            trrf = self.rf.select(channel='*Q')[0]
+            trrfs = self.rf.select(channel='*Q')
         elif self.phase[-1] == 'S' and self.comp == 'lqt':
-            trrf = self.rf.select(channel='*L')[0]
+            trrfs = self.rf.select(channel='*L')
         elif self.phase[-1] == 'S' and self.comp == 'rtz':
-            trrf = self.rf.select(channel='*Z')[0]        
-        if trrf.stats.npts != npts:
-            return False
-        
+            trrfs = self.rf.select(channel='*Z')
+        for tr in trrfs:      
+            if tr.stats.npts != npts:
+                return False
+        try:
+            trrf = [tr for tr in trrfs if tr.stats.f0 == gauss][0]
+        except:
+            ValueError('No such gauss factor of {} in calculated RFs'.format(gauss))
+
         # Final RMS
         if rmsgate is not None:
             if self.method == 'iter':
-                rms = self.rf[0].stats.rms[-1]
+                rms = trrf.stats.rms[-1]
             else:
-                rms = self.rf[0].stats.rms
+                rms = trrf.stats.rms
             rmspass = rms < rmsgate
         else:
             rmspass = True

@@ -86,7 +86,7 @@ class RFPara(object):
         self.wlevel = 0.05
         self.itmax = 400
         self.minderr = 0.001
-        self.criterion = 'crust'
+        self.criterion = None
         self.only_r = False
         self.rmsgate = None
         self.switchEN=False

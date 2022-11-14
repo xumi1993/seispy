@@ -21,7 +21,7 @@ import pickle
 
 
 def pickphase(eqs, para, logger):
-    from PyQt6.QtWidgets import QApplication
+    from PySide6.QtWidgets import QApplication
     from seispy.sviewerui import MatplotlibWidget
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(eqs, para, logger)
@@ -119,7 +119,11 @@ def fetch_waveform(eq_lst, para, model, logger):
         except Exception as e:
             logger.RFlog.error('Error in Fetch waveforms of event {}: {}'.format(datestr, str(e).strip()))
             continue
-        this_eq = EQ.from_stream(st)
+        try:
+            this_eq = EQ.from_stream(st)
+        except Exception as e:
+            logger.RFlog.error('{}'.format(e))
+            continue
         this_eq.get_time_offset(row['date'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
         eq_match = pd.concat([eq_match, this_df])
@@ -224,13 +228,14 @@ class RF(object):
     def load_stainfo(self):
         try:
             if self.para.use_remote_data:
-                self.logger.RFlog.info('Load station info from {0} web-service'.format(self.para.data_server))
+                self.logger.RFlog.info('Load station info of {}.{} from {} web-service'.format(
+                    self.para.stainfo.network, self.para.stainfo.station, self.para.data_server))
                 self.para.stainfo.get_station_from_ws(self.para.data_server)
-                self.para._check_date_range()
-                if self.para.stainfo.query.stations[0][0].start_date > self.para.date_end or \
-                   self.para.stainfo.query.stations[0][0].end_date < self.para.date_begin:
-                   self.logger.RFlog.error('No such overlap between recording range and date range')
-                   sys.exit(1)
+                try:
+                    self.para._check_date_range()
+                except Exception as e:
+                    self.logger.RFlog.error('{}'.format(e))
+                    sys.exit(1)
             else:
                 self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
                 self.para.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
@@ -474,7 +479,7 @@ class RF(object):
         else:
             self.logger.RFlog.info('Save RFs with and criterion of {}'.format(self.para.criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
+            if row['data'].judge_rf(gauss, shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
                                    mag=row['mag'], gcarc=row['dis'], gauss=gauss, only_r=self.para.only_r,
