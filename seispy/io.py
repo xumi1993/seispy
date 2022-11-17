@@ -26,13 +26,13 @@ class Query():
         if endtime-starttime < 365 * 86400:
             events += self.client.get_events(starttime=starttime,
                                             endtime=endtime,
-                                            **kwargs)
+                                            orderby='time-asc', **kwargs)
         else:
             chunk_length = 365 * 86400
             while starttime <= endtime:
                 events += self.client.get_events(starttime=starttime,
                                                 endtime=starttime + chunk_length,
-                                                **kwargs)
+                                                orderby='time-asc', **kwargs)
                 if starttime + chunk_length > endtime:
                     chunk = endtime - starttime
                     if chunk <= 1:
