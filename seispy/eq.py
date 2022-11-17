@@ -349,9 +349,8 @@ class EQ(object):
                 #     raise ValueError('Please rotate component to \'LQT\'')
                 self.decon_s(**kwargs)
             if target_dt is not None:
-                if self.rf[0].stats.delta != target_dt:
-                    for tr in self.rf:
-                        # tr.data = tr.data[0:-1]
+                for tr in self.rf:
+                    if tr.stats.delta != target_dt:
                         tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
                         tr.stats.delta = target_dt
     

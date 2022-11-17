@@ -28,7 +28,11 @@ class CCPPara(object):
         self.stack_val = 1
         self.boot_samples = None
         self.phase = 1
-        
+    
+    def __str__(self):
+        head = ['{}: {}'.format(k, v) for k, v in self.__dict__.items()]
+        return '\n'.join(head)
+
     @property
     def bin_radius(self):
         return self._bin_radius

@@ -101,7 +101,8 @@ class RFPara(object):
         return self.__dict__
 
     def __str__(self):
-        return self.__dict__
+        head = ['{}: {}'.format(k, v) for k, v in self.__dict__.items()]
+        return '\n'.join(head)
 
     def _check_date_range(self):
         if self.date_begin > self.stainfo.query.stations[0][0].end_date or \
