@@ -44,18 +44,3 @@ class Query():
         self.stations = self.client.get_stations(includerestricted=includerestricted, **kwargs)
 
 
-def nc2npz(ncdata, minlat=-90, maxlat=90, minlon=-180, maxlon=180, mindep=0, maxdep=6371, key='dvs'):
-    lat = ncdata.variables['latitude'][:].data
-    lon = ncdata.variables['longitude'][:].data
-    dep = ncdata.variables['depth'][:].data
-    data = ncdata.variables[key][:].data
-    idx_lat = np.where((lat >= minlat) & (lat <= maxlat))[0]
-    idx_lon = np.where((lon >= minlon) & (lon <= maxlon))[0]
-    idx_dep = np.where((dep >= mindep) & (dep <= maxdep))[0]
-    cut_data = data[idx_dep[0]:idx_dep[-1]+1, idx_lat[0]:idx_lat[-1]+1, idx_lon[0]:idx_lon[-1]+1]
-    cut_lat = lat[idx_lat]
-    cut_lon = lon[idx_lon]
-    cut_dep = dep[idx_dep]
-    # new_lat, new_dep, new_lon = np.meshgrid(cut_lat, cut_dep, cut_lon)
-    return cut_data, cut_dep, cut_lat, cut_lon
-
