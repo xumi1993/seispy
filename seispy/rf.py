@@ -117,7 +117,7 @@ def fetch_waveform(eq_lst, para, model, logger):
                                             para.stainfo.location, para.stainfo.channel, t1, t2)
             _add_header(st, row['date'], para.stainfo)
         except Exception as e:
-            logger.RFlog.error('Error in Fetch waveforms of event {}: {}'.format(datestr, str(e).strip()))
+            logger.RFlog.error('Error in fetching waveforms of event {}: {}'.format(datestr, str(e).strip()))
             continue
         try:
             this_eq = EQ.from_stream(st)
