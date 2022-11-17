@@ -22,7 +22,10 @@ class Query():
                    endtime=UTCDateTime.now(), **kwargs):
         if endtime > UTCDateTime.now():
             endtime = UTCDateTime.now()
-        chunk_length = 365 * 86400
+        if endtime-starttime > 365 * 86400: 
+            chunk_length = 365 * 86400
+        else:
+            chunk_length = endtime-starttime
         events = Catalog()
         while starttime <= endtime:
             events += self.client.get_events(starttime=starttime,
