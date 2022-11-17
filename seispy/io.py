@@ -22,20 +22,22 @@ class Query():
                    endtime=UTCDateTime.now(), **kwargs):
         if endtime > UTCDateTime.now():
             endtime = UTCDateTime.now()
-        if endtime-starttime > 365 * 86400: 
-            chunk_length = 365 * 86400
-        else:
-            chunk_length = endtime-starttime
         events = Catalog()
-        while starttime <= endtime:
+        if endtime-starttime < 365 * 86400:
             events += self.client.get_events(starttime=starttime,
-                                             endtime=starttime + chunk_length,
-                                             **kwargs)
-            if starttime + chunk_length > endtime:
-                chunk = endtime - starttime
-                if chunk <= 1:
-                    break
-            starttime += chunk_length
+                                            endtime=endtime,
+                                            **kwargs)
+        else:
+            chunk_length = 365 * 86400
+            while starttime <= endtime:
+                events += self.client.get_events(starttime=starttime,
+                                                endtime=starttime + chunk_length,
+                                                **kwargs)
+                if starttime + chunk_length > endtime:
+                    chunk = endtime - starttime
+                    if chunk <= 1:
+                        break
+                starttime += chunk_length
         self.events = _cat2df(events)
 
     def get_stations(self, includerestricted=False, **kwargs):
