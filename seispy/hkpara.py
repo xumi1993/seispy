@@ -13,6 +13,10 @@ class HKPara(object):
         self.krange = np.arange(1.6, 1.9, 0.01)
         self.vp = 6.3
         self.weight = (0.7, 0.2, 0.1)
+    
+    def __str__(self):
+        head = ['{}: {}'.format(k, v) for k, v in self.__dict__.items()]
+        return '\n'.join(head)
 
     @property
     def hrange(self):

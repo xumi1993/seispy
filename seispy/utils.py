@@ -46,13 +46,14 @@ def read_rfdep(path):
             raise FileNotFoundError('Cannot open file of {}'.format(path))
 
 
-def _from_layer_model(h, vp, vs, dep_range):
+def _from_layer_model(dep_range, h, vp, vs, rho=None):
     dep = 0
     vp_dep = np.zeros_like(dep_range).astype(float)
     vs_dep = np.zeros_like(dep_range).astype(float)
+    rho_dep = np.zeros_like(dep_range).astype(float)
     for i, layer in enumerate(h):
-        if (layer == 0 and i == h.size-1) or \
-           (dep+layer < dep_range[-1] and i == h.size-1):
+        if (layer == 0 and i == len(h)-1) or \
+           (dep+layer < dep_range[-1] and i == len(h)-1):
            idx = np.where(dep_range>=dep)[0]
         else:
             idx = np.where((dep_range >= dep) & (dep_range < dep+layer))[0]
@@ -60,10 +61,12 @@ def _from_layer_model(h, vp, vs, dep_range):
             raise ValueError('The thickness of layer {} less than the depth interval'.format(i+1))
         vp_dep[idx] = vp[i]
         vs_dep[idx] = vs[i]
+        if rho is not None:
+            rho_dep[idx] = rho[i]
         dep += layer
         if dep > dep_range[-1]:
             break
-    return vp_dep, vs_dep
+    return vp_dep, vs_dep, rho_dep
 
 
 class DepModel(object):
@@ -96,10 +99,17 @@ class DepModel(object):
         self.dep_val = np.average(np.diff(self.depths))
         if self.layer_mod:
             self.depthsraw = self.depths
-            self.vpraw, self.vsraw = _from_layer_model(self.model_array[:, 0],
+            if self.model_array.shape[1] == 4:
+                self.isrho = True
+                rho_array = self.model_array[:, 3]
+            else:
+                rho_array = None
+            self.vpraw, self.vsraw, self.rhoraw = _from_layer_model(self.depths,
+                                                       self.model_array[:, 0],
                                                        self.model_array[:, 1],
                                                        self.model_array[:, 2],
-                                                       self.depths)
+                                                       rho=rho_array
+                                                       )
         else:
             self.depthsraw = self.model_array[:, 0]
             self.vpraw = self.model_array[:, 1]
@@ -109,17 +119,24 @@ class DepModel(object):
                 self.rhoraw = self.model_array[:, 3]
 
     @classmethod
-    def read_layer_model(cls, dep_range, h, vp, vs, **kwargs):
-        mod = cls(dep_range, velmod=None, layer_mod=True, **kwargs)
+    def read_layer_model(cls, dep_range, h, vp, vs, rho=None, elevation=0):
+        mod = cls(dep_range, velmod=None, layer_mod=True, elevation=elevation)
+        if rho is not None:
+            mod.isrho = True
         mod.depthsraw = mod.depths
-        mod.vpraw, mod.vsraw = _from_layer_model(h, vp, vs, mod.depths)
+        mod.vpraw, mod.vsraw, mod.rhoraw = _from_layer_model(mod.depths, h, vp, vs, rho=rho)
         mod.discretize()
         return mod
 
     def plot_model(self, show=True):
         plt.style.use('bmh')
-        self.model_fig = plt.figure(figsize=(4,6))
-        self.model_ax = self.model_fig.add_subplot()
+        if self.isrho:
+            self.model_fig = plt.figure(figsize=(6,6))
+            fignum = 2
+        else:
+            self.model_fig = plt.figure(figsize=(4,6))
+            fignum = 1
+        self.model_ax = self.model_fig.add_subplot(1,fignum,1)
         self.model_ax.step(self.vp, self.depths, where='pre', label='Vp')
         self.model_ax.step(self.vs, self.depths, where='pre', label='Vs')
         self.model_ax.legend()
@@ -127,6 +144,13 @@ class DepModel(object):
         self.model_ax.set_ylabel('Depth (km)')
         self.model_ax.set_ylim([self.depths[0], self.depths[-1]])
         self.model_ax.invert_yaxis()
+        if self.isrho:
+            self.rho_ax = self.model_fig.add_subplot(1,fignum,2)
+            self.rho_ax.step(self.rho, self.depths, where='pre', color='C2', label='Density')
+            self.rho_ax.legend()
+            self.rho_ax.set_xlabel('Density (km/s)')
+            self.rho_ax.set_ylim([self.depths[0], self.depths[-1]])
+            self.rho_ax.invert_yaxis()
         if show:
             plt.show()
 

@@ -26,7 +26,7 @@ class StaInfo():
         self.stla = 0.
         self.stlo = 0.
         self.stel = 0.
-        self.channel = ''
+        self.channel = '*'
         self.location = '*'
 
     def get_stainfo(self):
@@ -44,7 +44,9 @@ class StaInfo():
             Sever name of FDSN web-service, by default 'IRIS'
         """
         self.query = Query(server)
-        self.query.get_stations(network=self.network, station=self.station, level='channel', **kwargs)
+        self.query.get_stations(network=self.network, station=self.station,
+                                channel=self.channel, location=self.location, 
+                                level='channel', **kwargs)
         if len(self.query.stations) != 1 or len(self.query.stations[0]) != 1:
             raise ValueError('More than one station are fetched. Please set up stricter condition in query')
         self.stla = self.query.stations[0][0].latitude
@@ -99,7 +101,8 @@ class RFPara(object):
         return self.__dict__
 
     def __str__(self):
-        return self.__dict__
+        head = ['{}: {}'.format(k, v) for k, v in self.__dict__.items()]
+        return '\n'.join(head)
 
     def _check_date_range(self):
         if self.date_begin > self.stainfo.query.stations[0][0].end_date or \
