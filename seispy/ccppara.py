@@ -118,15 +118,16 @@ def ccppara(cfg_file):
         lon2 = cf.getfloat('line', 'profile_lon2')
         cpara.line = np.array([lat1, lon1, lat2, lon2])
     except:
-        try:
-            # para for center bins
-            cla = cf.getfloat('spacedbins', 'center_lat')
-            clo = cf.getfloat('spacedbins', 'center_lon')
-            hlla = cf.getfloat('spacedbins', 'half_len_lat')
-            hllo = cf.getfloat('spacedbins', 'half_len_lon')
-            cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slide_val)]
-        except:
-            warnings.warn('No such section of spacedbins and line. Setup them for CCP stacking')
+        pass
+    try:
+        # para for center bins
+        cla = cf.getfloat('spacedbins', 'center_lat')
+        clo = cf.getfloat('spacedbins', 'center_lon')
+        hlla = cf.getfloat('spacedbins', 'half_len_lat')
+        hllo = cf.getfloat('spacedbins', 'half_len_lon')
+        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slide_val)]
+    except:
+        warnings.warn('No such section of spacedbins and line. Setup them for CCP stacking')
     # para for depth section
     dep_end = cf.getfloat('depth', 'dep_end')
     cpara.dep_val = cf.getfloat('depth', 'dep_val')

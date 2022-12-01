@@ -23,12 +23,14 @@ def search_peak(tr, cpara, depmin, depmax):
     return dep_moho
 
 class GoodDepth():
-    def __init__(self, stack_data_path, logger, width=7.2, height=11, dpi=100) -> None:
+    def __init__(self, stack_data_path, logger, width=7.2, height=11, dpi=100, smooth=10) -> None:
         self.stack_data_path = stack_data_path
         self.logger = logger
         self.ccp_data = CCP3D.read_stack_data(stack_data_path)
         self.good_depth = pd.DataFrame(columns=['depth', 'amp', 'count', 'ci_low', 'ci_high'])
         self.bin_idx = 0
+        self.smooth = 10
+        self.smooth_val = int(self.smooth/self.ccp_data.cpara.stack_val)
         self.create_fig(width=width, height=height, dpi=dpi)
         
     def create_fig(self, width=7.2, height=11, dpi=100):
@@ -47,7 +49,7 @@ class GoodDepth():
            depmax < depmin:
            raise ValueError('Depth range is out of stacking range.')
         for i, bin_stack in enumerate(self.ccp_data.stack_data):
-            tr = bin_stack['mu']
+            tr = smooth(bin_stack['mu'], self.smooth_val, 'hanning')
             dep_moho = search_peak(tr, self.ccp_data.cpara, depmin, depmax)
             if np.isnan(dep_moho):
                 stackamp = np.nan
@@ -105,10 +107,10 @@ class GoodDepth():
             self.good_depth.iloc[self.bin_idx]['depth']
         ))
 
-    def init_fig(self, issmooth=False):
+    def init_fig(self):
         self.plot_ew(self.ax_ew)
         self.plot_ns(self.ax_ns)
-        self.get_prot_moho(issmooth=issmooth)
+        self.get_prot_moho()
         self.plot_stack(self.ax_stack, self.ax_count)
     
     def plot_ew(self, ax):
@@ -116,7 +118,7 @@ class GoodDepth():
         ax.grid(color='gray', linestyle='--', linewidth=0.4, axis='y')
         for i, pos_lon in enumerate(self.ew_lon):
             # pos_lon = self.bin_mat[self.bin_loc_idx[0], idx_lon, 1]
-            amp = self.stack_ew[i] * 0.2 + pos_lon
+            amp = self.stack_ew[i] * self.ccp_data.cpara.slide_val/50 + pos_lon
             ax.plot(amp, self.ccp_data.cpara.stack_range, linewidth=0.2, color='black')
             if not np.isnan(amp).all():
                 if i == self.val:
@@ -138,7 +140,7 @@ class GoodDepth():
         ax.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
         for i, pos_lat in enumerate(self.ns_lat):
             # pos_lat = self.bin_mat[idx_lat, self.bin_loc_idx[1], 0]
-            amp = self.stack_ns[i] * 0.2 + pos_lat
+            amp = self.stack_ns[i] * self.ccp_data.cpara.slide_val/50 + pos_lat
             ax.plot(self.ccp_data.cpara.stack_range, amp, linewidth=0.2, color='black')
             if not np.isnan(amp).all():
                 if i == self.val:
@@ -153,14 +155,14 @@ class GoodDepth():
         # ax.set_ylim(self.ns_lat[0]-0.1, self.ns_lat[-1]+0.1)
         ax.set_ylabel('Latitude ($^\circ$)')
 
-    def get_prot_moho(self, issmooth=True):
+    def get_prot_moho(self):
         # bin_stack = self.ccp.stack_data[i]
         self.mu = self.ccp_data.stack_data[self.bin_idx]['mu']
         self.ci = self.ccp_data.stack_data[self.bin_idx]['ci']
-        if issmooth:
-            self.mu = smooth(self.mu)
-            self.ci[:, 0] = smooth(self.ci[:, 0])
-            self.ci[:, 1] = smooth(self.ci[:, 1])
+        if self.smooth is not None:
+            self.mu = smooth(self.mu, self.smooth_val, 'hanning')
+            self.ci[:, 0] = smooth(self.ci[:, 0], self.smooth_val, 'hanning')
+            self.ci[:, 1] = smooth(self.ci[:, 1], self.smooth_val, 'hanning')
         if np.isnan(self.mu).all():
             self.prot_moho = [np.nan]
             self.maxpeak = [np.nan]
@@ -174,13 +176,14 @@ class GoodDepth():
     def plot_stack(self, ax, ax_c):
         ax.cla()
         ax_c.cla()
+        maxamp = np.max(np.abs(self.mu))*1.5
         ax.plot([0, 0], [0, 100], color='k', linewidth=0.5)
-        for extr in self.prot_moho:
-            ax.plot([-1, 1], [extr, extr], linewidth=2, color='tomato')
         ax.plot(self.mu, self.ccp_data.cpara.stack_range)
         ax.plot(self.ci[:, 0], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
         ax.plot(self.ci[:, 1], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
-        self.pltdepth, = ax.plot([-1, 1], [self.good_depth.iloc[self.bin_idx]['depth']]*2, linewidth=2, color='g')
+        for extr in self.prot_moho:
+            ax.plot([-maxamp, maxamp], [extr, extr], linewidth=2, color='tomato')
+        self.pltdepth, = ax.plot([-maxamp, maxamp], [self.good_depth.iloc[self.bin_idx]['depth']]*2, linewidth=2, color='g')
         # ax.set_xlim([-self.maxpeak, self.maxpeak])
         ax.set_xlabel('Amplitude')
         ax.set_ylim([self.plot_min, self.plot_max])

@@ -453,7 +453,10 @@ class EQ(object):
         
         # All points are NaN
         if np.isnan(trrf.data).all():
-            return True
+            return False
+        
+        if np.isinf(trrf.data).any():
+            return False
         
         # Final RMS
         if rmsgate is not None:

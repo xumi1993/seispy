@@ -41,9 +41,11 @@ def get_color(depth, cmap='jet_r'):
 
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, stack_data_path='', idx=0,
-                depmin=30, depmax=60, logger=None, width=7.2, height=11, dpi=100):
+                depmin=30, depmax=60, logger=None, width=7.2,
+                height=11, dpi=100, smooth=10):
         plt.rcParams['axes.unicode_minus'] = False 
-        self.gooddepth = GoodDepth(stack_data_path, logger, width=width, height=height, dpi=dpi)
+        self.gooddepth = GoodDepth(stack_data_path, logger, width=width,
+                                   height=height, dpi=dpi, smooth=smooth)
         self.gooddepth.get_dep(depmin, depmax)
         self.gooddepth.bin_idx = idx
         self.gooddepth._get_next_bin()
@@ -59,7 +61,7 @@ class MyMplCanvas(FigureCanvas):
 
 class MapUI(QWidget):
     def __init__(self, stack_data_path, depmin=30, depmax=65,
-                 width=6, height=11, dpi=100, idx=0):
+                 width=6, height=11, dpi=100, idx=0, smooth=10):
         super(MapUI, self).__init__()
         self.log = setuplog()
         # self._set_geom_center()
@@ -67,7 +69,7 @@ class MapUI(QWidget):
         self.map_para = {'width': width, 'height':height, 'dpi':dpi}
         self.mpl = MyMplCanvas(self, stack_data_path=stack_data_path,
                                depmin=depmin, depmax=depmax, idx=idx,
-                               logger=self.log, **self.map_para)
+                               logger=self.log, smooth=smooth, **self.map_para)
         self.mpl.mpl_connect('button_press_event', self.on_click)
         self.layout = QHBoxLayout()
         self.layout.addWidget(self.mpl, 7)
@@ -271,6 +273,7 @@ def main():
     parser.add_argument('stack_data_path', type=str, help='Path to CCP stacked data')
     parser.add_argument('-d', help='Depth range contain target interface', metavar='dep_min/dep_max')
     parser.add_argument('-i', help='Specify starting index of bins', type=int, default=1, metavar='index')
+    parser.add_argument('-s', help='Smoothing scale in km', type=float, default=2, metavar='smooth')
     args = parser.parse_args()
     try:
         dep_range = [float(v) for v in args.d.split('/')]
