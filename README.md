@@ -30,12 +30,12 @@ Seispy is a Python module for processing seismological data and calculating Rece
 
 
 ## Dependencies
-  * [Python]() >= 3.6
-  * [ObsPy](http://docs.obspy.org) >= 1.1.0
+  * [Python]() >= 3.8
+  * [ObsPy](http://docs.obspy.org) >= 1.2.0
   * [NumPy](http://www.numpy.org/) >= 1.16
   * [SciPy](http://www.scipy.org/) >= 1.2.0
-  * [matplotlib](https://matplotlib.org/) >= 3.0.0
-  * [pyqt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
+  * [matplotlib](https://matplotlib.org/) >= 3.6.0
+  * [PySide6](https://www.riverbankcomputing.com/software/pyqt/) >= 6.3.0
   * [scikits.bootstrap](https://github.com/cgevans/scikits-bootstrap) >= 1.0.0
   
 ## Installation

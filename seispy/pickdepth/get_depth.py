@@ -5,7 +5,8 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
-from matplotlib.ticker import AutoMinorLocator
+from matplotlib.ticker import AutoMinorLocator, AutoLocator
+from matplotlib.backend_bases import MouseButton
 
 
 def search_peak(tr, cpara, depmin, depmax):
@@ -22,8 +23,9 @@ def search_peak(tr, cpara, depmin, depmax):
     return dep_moho
 
 class GoodDepth():
-    def __init__(self, stack_data_path, width=7.2, height=11, dpi=100) -> None:
+    def __init__(self, stack_data_path, logger, width=7.2, height=11, dpi=100) -> None:
         self.stack_data_path = stack_data_path
+        self.logger = logger
         self.ccp_data = CCP3D.read_stack_data(stack_data_path)
         self.good_depth = pd.DataFrame(columns=['depth', 'amp', 'count', 'ci_low', 'ci_high'])
         self.bin_idx = 0
@@ -37,8 +39,13 @@ class GoodDepth():
         self.ax_stack = self.fig.add_subplot(self.gs[2:, 3:6])
         self.ax_count = self.fig.add_subplot(self.gs[2:, 6:8])
 
-
     def get_dep(self, depmin, depmax):
+        self.depmin = depmin
+        self.depmax = depmax
+        if depmin > self.ccp_data.cpara.stack_range[-1] or \
+           depmax < self.ccp_data.cpara.stack_range[0] or \
+           depmax < depmin:
+           raise ValueError('Depth range is out of stacking range.')
         for i, bin_stack in enumerate(self.ccp_data.stack_data):
             tr = bin_stack['mu']
             dep_moho = search_peak(tr, self.ccp_data.cpara, depmin, depmax)
@@ -85,9 +92,18 @@ class GoodDepth():
     def plot_bin(self, **kwargs):
         idx = np.where(self.ccp_data.bin_map==self.bin_idx)
         idx = [idx[0][0], idx[1][0]]
-        self.this_depth = self.good_depth.iloc[self.bin_idx]['depth']
+        if self.depmin < 100:
+            self.plot_min = 0
+        else:
+            self.plot_min = self.depmin*0.85
+        self.plot_max = self.depmax*1.15
+        # self.this_depth = self.good_depth.iloc[self.bin_idx]['depth']
         self.get_adjcent(idx)
         self.init_fig(**kwargs)
+        self.logger.PickDepthlog.info('{}/{}: Depth = {} km'.format(
+            self.bin_idx+1, self.ccp_data.bin_loca.shape[0],
+            self.good_depth.iloc[self.bin_idx]['depth']
+        ))
 
     def init_fig(self, issmooth=False):
         self.plot_ew(self.ax_ew)
@@ -107,13 +123,13 @@ class GoodDepth():
                     ax.fill_betweenx(self.ccp_data.cpara.stack_range, amp, pos_lon, where=amp > pos_lon, facecolor='k', alpha=0.7)
                 else:
                     ax.fill_betweenx(self.ccp_data.cpara.stack_range, amp, pos_lon, where=amp > pos_lon, facecolor='r', alpha=0.7)
-        ax.set_ylim(0, 90)
-        ax.set_yticks(np.arange(0, 100, 20))
+        ax.set_ylim(self.plot_min, self.plot_max)
+        # ax.set_yticks(np.arange(0, 100, 20))
         ax.set_ylabel('Depth (km)')
         ax.set_xlim(self.ccp_data.bin_loca[self.bin_idx, 1]-self.ccp_data.cpara.center_bin[-1]*self.val-0.1,
                     self.ccp_data.bin_loca[self.bin_idx, 1]+self.ccp_data.cpara.center_bin[-1]*self.val+0.1)
         ax.set_xlabel('Longitude ($^\circ$)')
-        ax.set_title('Index: {}, Lat: {:.2f} ($^\circ$), Lon: {:.2f} ($^\circ$)'.format(
+        ax.set_title('Index: {}, Lat: {:.2f}$^\circ$, Lon: {:.2f}$^\circ$'.format(
             self.bin_idx+1, self.ccp_data.bin_loca[self.bin_idx][0], self.ccp_data.bin_loca[self.bin_idx][1]))
         ax.invert_yaxis()
 
@@ -129,8 +145,8 @@ class GoodDepth():
                     ax.fill_between(self.ccp_data.cpara.stack_range, amp, pos_lat, where=amp > pos_lat, facecolor='k', alpha=0.7)
                 else:
                     ax.fill_between(self.ccp_data.cpara.stack_range, amp, pos_lat, where=amp > pos_lat, facecolor='red', alpha=0.7)
-        ax.set_xlim(0, 90)
-        ax.set_xticks(np.arange(0, 100, 20))
+        ax.set_xlim(self.plot_min, self.plot_max)
+        # ax.set_xticks(np.arange(0, 100, 20))
         ax.set_xlabel('Depth (km)')
         ax.set_ylim(self.ccp_data.bin_loca[self.bin_idx, 0]-self.ccp_data.cpara.center_bin[-1]*self.val-0.1,
                     self.ccp_data.bin_loca[self.bin_idx, 0]+self.ccp_data.cpara.center_bin[-1]*self.val+0.1)
@@ -164,21 +180,23 @@ class GoodDepth():
         ax.plot(self.mu, self.ccp_data.cpara.stack_range)
         ax.plot(self.ci[:, 0], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
         ax.plot(self.ci[:, 1], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
-        self.pltdepth, = ax.plot([-1, 1], [self.this_depth]*2, linewidth=2, color='g')
+        self.pltdepth, = ax.plot([-1, 1], [self.good_depth.iloc[self.bin_idx]['depth']]*2, linewidth=2, color='g')
         # ax.set_xlim([-self.maxpeak, self.maxpeak])
         ax.set_xlabel('Amplitude')
-        ax.set_ylim([self.ccp_data.cpara.stack_range[0], self.ccp_data.cpara.stack_range[-1]])
-        ax.set_yticks(np.arange(self.ccp_data.cpara.stack_range[0], self.ccp_data.cpara.stack_range[-1], 10))
+        ax.set_ylim([self.plot_min, self.plot_max])
+        # ax.set_yticks(np.arange(self.ccp_data.cpara.stack_range[0], self.ccp_data.cpara.stack_range[-1], 10))
         ax.set_ylabel('Depth (km)')
+        ax.yaxis.set_major_locator(AutoLocator())
         ax.yaxis.set_minor_locator(AutoMinorLocator())
         ax.invert_yaxis()
 
         ax_c.barh(self.ccp_data.cpara.stack_range, self.ccp_data.stack_data[self.bin_idx]['count'], height=0.8, facecolor='tan')
-        ax_c.set_ylim(ax.get_ylim())
-        ax_c.set_yticks(ax.get_yticks())
+        ax_c.set_ylim([self.plot_min, self.plot_max])
+        # ax_c.set_yticks(ax.get_yticks())
+        ax.yaxis.set_minor_locator(AutoMinorLocator())
         ax_c.yaxis.set_minor_locator(AutoMinorLocator())
         ax_c.set_xlabel('Count')
-        # ax_c.invert_yaxis()
+        ax_c.invert_yaxis()
 
     def _get_next_bin(self):
         self.bin_idx += 1
@@ -212,10 +230,26 @@ class GoodDepth():
         self._get_next_bin()
         self.plot_bin(**kwargs)
 
-    def on_move(self, event):
+    def on_click(self, event):
         if event.inaxes == self.ax_stack:
             idx = np.argmin(np.abs(self.prot_moho - event.ydata))
             sub_value = np.min(np.abs(self.prot_moho - event.ydata))
-            if sub_value < 10:
-                self.pltdepth.set_ydata([self.prot_moho[idx]]*2)
-                self.this_depth = self.prot_moho[idx]
+            if event.button is MouseButton.LEFT:
+                if sub_value < 10:
+                    self.pltdepth.set_ydata([self.prot_moho[idx]]*2)
+                    self.pltdepth.set_visible(True)
+                    self.logger.PickDepthlog.info('Set the depth to {} km'.format(self.prot_moho[idx]))
+                    self.good_depth.iloc[self.bin_idx]['depth'] = self.prot_moho[idx]
+            elif event.button is MouseButton.RIGHT:
+                self.pltdepth.set_visible(False)
+                self.logger.PickDepthlog.info('Set the depth to NaN')
+                self.good_depth.iloc[self.bin_idx]['depth'] = np.nan
+
+    def write(self, fname):
+        bin_df = pd.DataFrame(self.ccp_data.bin_loca, columns=['lat', 'lon'])
+        full_pd = pd.concat([bin_df, self.good_depth['depth'],
+                  self.good_depth['ci_low'], self.good_depth['ci_high'],
+                  self.good_depth['count']], axis=1)
+        full_pd.to_csv(fname, sep=' ', header=False,
+                       index=False, na_rep='nan',
+                       float_format='%.4f')
