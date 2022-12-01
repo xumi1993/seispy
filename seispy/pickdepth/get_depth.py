@@ -35,8 +35,8 @@ class GoodDepth():
         self.fig = plt.figure(figsize=(width, height), dpi=dpi, constrained_layout=True)
         self.gs = gridspec.GridSpec(10, 8, figure=self.fig)
         self.ax_ew = self.fig.add_subplot(self.gs[0:2, 0:8])
-        self.ax_ns = self.fig.add_subplot(self.gs[2:, 0:3])
-        self.ax_stack = self.fig.add_subplot(self.gs[2:, 3:6])
+        self.ax_ns = self.fig.add_subplot(self.gs[2:, 0:2])
+        self.ax_stack = self.fig.add_subplot(self.gs[2:, 2:6])
         self.ax_count = self.fig.add_subplot(self.gs[2:, 6:8])
 
     def get_dep(self, depmin, depmax):

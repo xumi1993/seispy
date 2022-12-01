@@ -1,13 +1,13 @@
 # import folium
 from .get_depth import GoodDepth
 from seispy.setuplog import setuplog
-from PySide6.QtCore import Qt, QModelIndex
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout,\
                               QVBoxLayout, QSizePolicy, QGroupBox,\
                               QPushButton, QTableWidget, QLineEdit,\
                               QLabel, QAbstractItemView, QTableWidgetItem,\
                               QToolButton, QMessageBox, QFileDialog,\
-                              QPlainTextEdit
+                              QPlainTextEdit, QHeaderView
 from PySide6.QtGui import QIcon, QShortcut, QKeySequence, QGuiApplication
 # from PySide6.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
@@ -46,6 +46,7 @@ class MyMplCanvas(FigureCanvas):
         self.gooddepth = GoodDepth(stack_data_path, logger, width=width, height=height, dpi=dpi)
         self.gooddepth.get_dep(depmin, depmax)
         self.gooddepth.bin_idx = idx
+        self.gooddepth._get_next_bin()
         self.gooddepth.plot_bin()
         FigureCanvas.__init__(self, self.gooddepth.fig)
         self.setParent(parent)
@@ -53,19 +54,19 @@ class MyMplCanvas(FigureCanvas):
                                    QSizePolicy.Expanding,
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
-        FigureCanvas.setCursor(self, Qt.CrossCursor)
+        # FigureCanvas.setCursor(self, Qt.CrossCursor)
 
 
 class MapUI(QWidget):
     def __init__(self, stack_data_path, depmin=30, depmax=65,
-                 width=6, height=11, dpi=100):
+                 width=6, height=11, dpi=100, idx=0):
         super(MapUI, self).__init__()
         self.log = setuplog()
         # self._set_geom_center()
         self.add_log_layout()
         self.map_para = {'width': width, 'height':height, 'dpi':dpi}
         self.mpl = MyMplCanvas(self, stack_data_path=stack_data_path,
-                               depmin=depmin, depmax=depmax, idx=1000,
+                               depmin=depmin, depmax=depmax, idx=idx,
                                logger=self.log, **self.map_para)
         self.mpl.mpl_connect('button_press_event', self.on_click)
         self.layout = QHBoxLayout()
@@ -163,19 +164,23 @@ class MapUI(QWidget):
 
     def set_table(self):
         bin_num = self.mpl.gooddepth.ccp_data.bin_loca.shape[0]
-        # self.model=QStandardItemModel(bin_num, 2)
-        # self.model.setHorizontalHeaderLabels(['Latitude', 'Longitude'])
-        self.tableWidget = QTableWidget(bin_num, 2)
-        self.tableWidget.setHorizontalHeaderLabels(['Latitude', 'Longitude'])
-        # self.tableWidget.setModel(self.model)
+        self.tableWidget = QTableWidget(bin_num, 3)
+        self.tableWidget.setHorizontalHeaderLabels(['Latitude', 'Longitude', 'Depth'])
+        header = self.tableWidget.horizontalHeader()  
+        header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.tableWidget.selectRow(self.mpl.gooddepth.bin_idx)
         self.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         for i in range(bin_num):
-            itemlat = QTableWidgetItem('{:.4f}'.format(self.mpl.gooddepth.ccp_data.bin_loca[i, 0]))
-            itemlon = QTableWidgetItem('{:.4f}'.format(self.mpl.gooddepth.ccp_data.bin_loca[i, 1]))
+            itemlat = QTableWidgetItem('{:.3f}'.format(self.mpl.gooddepth.ccp_data.bin_loca[i, 0]))
+            itemlon = QTableWidgetItem('{:.3f}'.format(self.mpl.gooddepth.ccp_data.bin_loca[i, 1]))
+            itemdep = QTableWidgetItem('{:.2f}'.format(self.mpl.gooddepth.good_depth.iloc[i]['depth']))
             self.tableWidget.setItem(i, 0, itemlat)
             self.tableWidget.setItem(i, 1, itemlon)
+            self.tableWidget.setItem(i, 2, itemdep)
         self.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.tableWidget.cellPressed.connect(self.on_select_row)
 
     def page_up(self):
@@ -244,7 +249,10 @@ class MapUI(QWidget):
             self.idx_edit.setText('')
     
     def on_click(self, event):
+        bin_idx = self.mpl.gooddepth.bin_idx
         self.mpl.gooddepth.on_click(event)
+        itemdep = QTableWidgetItem('{:.2f}'.format(self.mpl.gooddepth.good_depth.iloc[bin_idx]['depth']))
+        self.tableWidget.setItem(bin_idx, 2, itemdep)
         self.mpl.draw()
     
     def _define_global_shortcuts(self):
@@ -262,14 +270,16 @@ def main():
     parser = argparse.ArgumentParser(description="User interface for picking PRFs")
     parser.add_argument('stack_data_path', type=str, help='Path to CCP stacked data')
     parser.add_argument('-d', help='Depth range contain target interface', metavar='dep_min/dep_max')
+    parser.add_argument('-i', help='Specify starting index of bins', type=int, default=1, metavar='index')
     args = parser.parse_args()
     try:
         dep_range = [float(v) for v in args.d.split('/')]
     except:
         raise ValueError('Error format of depth range')
-    app = QApplication(sys.argv)
-    # stack_data_path = '/Users/xumijian/Researches/NETibetHu/stack_data_3D_noele.npz'
-    mapui = MapUI(args.stack_data_path, depmin=dep_range[0], depmax=dep_range[1])
+    if args.i < 1:
+        raise ValueError('The index should be greater than 0')
+    app = QApplication(sys.argv)    
+    mapui = MapUI(args.stack_data_path, depmin=dep_range[0], depmax=dep_range[1], idx=args.i-1)
     mapui.show()
     sys.exit(app.exec())
 
