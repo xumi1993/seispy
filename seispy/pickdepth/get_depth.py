@@ -201,11 +201,11 @@ class GoodDepth():
     def _get_next_bin(self):
         self.bin_idx += 1
         while True:
-            mu = self.ccp_data.stack_data[self.bin_idx]['mu']
+            # mu = self.ccp_data.stack_data[self.bin_idx]['mu']
             if self.bin_idx >= self.ccp_data.bin_loca.shape[0]:
                 self.bin_idx = self.ccp_data.bin_loca.shape[0]-1
                 break
-            if np.isnan(mu).all():
+            if np.isnan(self.good_depth.iloc[self.bin_idx]['depth']):
                 self.bin_idx += 1
             else:
                 break
@@ -213,11 +213,11 @@ class GoodDepth():
     def _get_previous_bin(self):
         self.bin_idx -= 1
         while True:
-            mu = self.ccp_data.stack_data[self.bin_idx]['mu']
+            # mu = self.ccp_data.stack_data[self.bin_idx]['mu']
             if self.bin_idx < 0:
                 self.bin_idx = 0
                 break
-            if np.isnan(mu).all():
+            if np.isnan(self.good_depth.iloc[self.bin_idx]['depth']):
                 self.bin_idx -= 1
             else:
                 break
