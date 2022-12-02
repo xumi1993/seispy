@@ -118,7 +118,7 @@ def ccppara(cfg_file):
         lon2 = cf.getfloat('line', 'profile_lon2')
         cpara.line = np.array([lat1, lon1, lat2, lon2])
     except:
-        pass
+        warnings.warn('line section not found. Setup it for ccp_profile')
     try:
         # para for center bins
         cla = cf.getfloat('spacedbins', 'center_lat')

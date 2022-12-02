@@ -1,10 +1,6 @@
 import pandas as pd
 from obspy import UTCDateTime, Catalog
-import numpy as np
-from datetime import timedelta
 from obspy.clients.fdsn import Client
-# from netCDF4 import Dataset
-import sys
 
 
 def _cat2df(cat):
@@ -19,7 +15,8 @@ class Query():
         self.client = Client(server)
 
     def get_events(self, starttime=None,
-                   endtime=UTCDateTime.now(), **kwargs):
+                   endtime=UTCDateTime.now(), 
+                   **kwargs):
         if endtime > UTCDateTime.now():
             endtime = UTCDateTime.now()
         events = Catalog()
@@ -38,7 +35,9 @@ class Query():
                     if chunk <= 1:
                         break
                 starttime += chunk_length
+
         self.events = _cat2df(events)
+        self.events_raw = events
 
     def get_stations(self, includerestricted=False, **kwargs):
         self.stations = self.client.get_stations(includerestricted=includerestricted, **kwargs)

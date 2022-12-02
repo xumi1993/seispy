@@ -2,14 +2,16 @@ import obspy
 from obspy import UTCDateTime
 from obspy.taup import TauPyModel
 from obspy.io.sac import SACTrace
+from obspy.core.event.catalog import read_events
 import re
 from os.path import join, exists
 from os import makedirs
-from seispy.io import Query
+from seispy.io import Query, _cat2df
 from seispy.para import RFPara
 from seispy import distaz
 from seispy.eq import EQ
 from seispy.setuplog import setuplog
+from seispy.catalog import read_catalog_file
 import glob
 import numpy as np
 from datetime import timedelta
@@ -67,25 +69,40 @@ def datestr2regex(datestr):
     return pattern
 
 
-def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
-    col = ['date', 'evla', 'evlo', 'evdp', 'mag']
-    eq_lst = pd.DataFrame(columns=col)
-    with open(logpath) as f:
-        lines = f.readlines()
-        for line in lines:
-            line_sp = line.strip().split()
-            date_now = UTCDateTime.strptime('.'.join(line_sp[0:3]) + 'T' + '.'.join(line_sp[4:7]),
-                                                  '%Y.%m.%dT%H.%M.%S')
-            evla = float(line_sp[7])
-            evlo = float(line_sp[8])
-            evdp = float(line_sp[9])
-            mw = float(line_sp[10])
-            dis = distaz(stla, stlo, evla, evlo).delta
-            # bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
-            if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
-                this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw]], columns=col)
-                # eq_lst = eq_lst.append(this_data, ignore_index=True)
-                eq_lst = pd.concat([eq_lst, this_data], ignore_index=True)
+def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
+                 magmin=5.5, magmax=10., dismin=30., dismax=90.):
+    """Read local catalog with seispy or QUAKEML format
+
+    :param logpath: Path to catalogs
+    :type logpath: str
+    :param b_time: Start time 
+    :type b_time: obspy.UTCDateTime
+    :param e_time: End time
+    :type e_time: obspy.UTCDateTime
+    :param stla: Station latitude
+    :type stla: float
+    :param stlo: Station longitude
+    :type stlo: float
+    :param magmin: Minimum magnitude, defaults to 5.5
+    :type magmin: float, optional
+    :param magmax: Maximum magnitude, defaults to 10
+    :type magmax: float, optional
+    :param dismin: Minimum distance, defaults to 30
+    :type dismin: float, optional
+    :param dismax: Maximum distance, defaults to 90
+    :type dismax: float, optional
+    :return: list of earthquakes
+    :rtype: pandas.DataFrame
+    """
+    try:
+        eq_lst = read_catalog_file(logpath)
+    except:
+        events = read_events(logpath, 'QUAKEML')
+        eq_lst = _cat2df(events)
+    dis = distaz(stla, stlo, eq_lst['evla'], eq_lst['evlo']).delta
+    eq_lst = eq_lst[(eq_lst['date']>=b_time) & (eq_lst['date']<=e_time) & \
+                    (eq_lst['mag']>=magmin) & (eq_lst['mag']<=magmax) & \
+                    (dis>=dismin) & (dis<=dismax)]
     return eq_lst
 
 
