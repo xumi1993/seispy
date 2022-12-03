@@ -3,13 +3,15 @@ from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
 from scipy.signal import resample
-from os.path import dirname, join, exists, basename, isfile, abspath
+from os.path import dirname, join, exists, isfile, abspath
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
 from seispy.rfani import RFAni
 from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
+from seispy.plotRT import plotrt as _plotrt
+from seispy.plotR import plotr as _plotr
 from seispy.utils import DepModel, Mod3DPerturbation
 import warnings
 import glob
@@ -34,10 +36,13 @@ class RFStation(object):
         
         self.only_r = only_r
         self.comp = prime_comp
+        self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
+                 'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
+        if not exists(data_path):
+            return
         self._chech_comp()
         if isfile(data_path):
             data_path = dirname(abspath(data_path))
-        self.staname = basename(abspath(data_path))
         evt_lsts = glob.glob(join(data_path, '*finallist.dat'))
         if len(evt_lsts) == 0:
             raise FileNotFoundError("No such *finallist.dat in the {}".format(data_path))
@@ -45,26 +50,26 @@ class RFStation(object):
             raise ValueError("More than one finallist.dat in the {}".format(data_path))
         else:
             evt_lst = evt_lsts[0]
-        self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
-                 'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         self.event, self.phase, self.evla, self.evlo, self.evdp, self.dis, self.bazi, self.rayp, self.mag, self.f0 = \
             np.loadtxt(evt_lst, dtype=self.dtype, unpack=True, ndmin=1)
         self.rayp = skm2srad(self.rayp)
         self.ev_num = self.evla.shape[0]
         self.read_sample(data_path)
-        self.__dict__['data{}'.format(self.comp.lower())] = np.empty([self.ev_num, self.rflength])
+        self.data_prime = np.empty([self.ev_num, self.rflength])
+        # self.__dict__['data{}'.format(self.comp.lower())] = np.empty([self.ev_num, self.rflength])
+        # eval('self.data_prime = self.data{}'.format(self.comp.lower()))
         if not only_r:
             self.datat = np.empty([self.ev_num, self.rflength])
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
                 sact = SACTrace.read(join(data_path, evt + '_' + ph + '_T.sac'))
-                self.__dict__['data{}'.format(self.comp.lower())][_i] = sac.data
+                self.data_prime[_i] = sac.data
                 self.datat[_i] = sact.data
         else:
             for _i, evt, ph in zip(range(self.ev_num), self.event, self.phase):
                 sac = SACTrace.read(join(data_path, evt + '_' + ph + '_{}.sac'.format(self.comp)))
-                self.__dict__['data{}'.format(self.comp.lower())][_i] = sac.data
-        self.data_prime = self.__dict__['data{}'.format(self.comp.lower())]
+                self.data_prime[_i] = sac.data
+        exec('self.data{} = self.data_prime'.format(self.comp.lower()))
 
     def read_sample(self, data_path):
         fname = glob.glob(join(data_path, self.event[0] + '_' + self.phase[0] + '_{}.sac'.format(self.comp)))
@@ -72,6 +77,7 @@ class RFStation(object):
             raise FileNotFoundError('No such files with comp of {} in {}'.format(self.comp, data_path))
         else:
             sample_sac = SACTrace.read(fname[0])
+        self.staname = '{}.{}'.format(sample_sac.knetwk, sample_sac.kstnm)
         self.stla = sample_sac.stla
         self.stlo = sample_sac.stlo
         if sample_sac.stel is None:
@@ -82,6 +88,83 @@ class RFStation(object):
         self.shift = -sample_sac.b
         self.sampling = sample_sac.delta
         self.time_axis = np.arange(self.rflength) * self.sampling - self.shift
+
+    def init_property(self, ev_num):
+        self.ev_num = ev_num
+        self.event = np.array(['']*ev_num)
+        self.phase = np.array(['']*ev_num)
+        self.evla = np.zeros(ev_num)
+        self.evlo = np.zeros(ev_num)
+        self.evdp = np.zeros(ev_num)
+        self.mag = np.zeros(ev_num)
+        self.dis = np.zeros(ev_num)
+        self.bazi = np.zeros(ev_num)
+        self.rayp = np.zeros(ev_num)
+        self.f0 = np.zeros(ev_num)
+        self.stla = 0
+        self.stlo = 0
+        self.stel = 0
+        self.staname = ''
+        self.sampling = 0
+        self.rflength = 0
+        # self.data_prime = np.array([])
+        # exec('self.data_prime = self.data{} = np.array([])'.format(self.comp.lower()))
+        # self.__dict__['data{}'.format(self.comp.lower())] = np.array([])
+        self.datat = np.array([])
+        # self.data_prime = eval('self.data{}'.format(self.comp.lower()))
+
+    @classmethod
+    def read_stream(cls, stream, rayp, baz, prime_comp='R'):
+        """Create RFStation instance from ``obspy.Stream``
+
+        Parameters
+        ----------
+        stream : ``obspy.Stream``
+            _description_
+        rayp : ``numpy.ndarray`` or ``float``
+            Ray-parameters in s/km.
+        baz : ``numpy.ndarray`` or ``float``
+            Back-azimuth
+        prime_comp : str, optional
+             Prime component of RF, by default 'R'
+        """
+        if len(stream) == 0:
+            raise ValueError('No such RFTrace read')
+        rfsta = cls('', only_r=True, prime_comp=prime_comp)
+        ev_num = len(stream)
+        if isinstance(rayp, float):
+            rayp = np.ones(ev_num)*rayp
+        if isinstance(baz, (float, int)):
+            baz = np.ones(ev_num)*baz
+        if ev_num != rayp.size or ev_num != baz.size:
+            raise ValueError('Array length of rayp and baz must be the same as stream')
+        rfsta.init_property(ev_num)
+        try:
+            rfsta.staname = '{}.{}'.format(stream[0].stats.sac.knetwk, stream[0].stats.sac.kstnm)
+            rfsta.stla = stream[0].stats.sac.stla
+            rfsta.stlo = stream[0].stats.sac.stlo
+            rfsta.stel = stream[0].stats.sac.stel
+        except:
+            pass
+        try:
+            rfsta.shift = stream[0].stats.tshift
+        except:
+            rfsta.shift = -stream[0].stats.sac.b
+        rfsta.sampling = stream[0].stats.delta
+        rfsta.rflength = stream[0].stats.npts
+        rfsta.data_prime = np.zeros([rfsta.ev_num, rfsta.rflength])
+        rfsta.bazi = baz
+        rfsta.rayp = skm2srad(rayp)
+        rfsta.time_axis = np.arange(rfsta.rflength) * rfsta.sampling - rfsta.shift
+        for i, tr in enumerate(stream):
+            rfsta.event[i] = '{}'.format(i)
+            try:
+                rfsta.f0[i] = tr.stats.f0
+            except:
+                rfsta.f0[i] = tr.stats.sac.user1
+            rfsta.data_prime[i] = tr.data
+        exec('rfsta.data{} = rfsta.data_prime'.format(rfsta.comp.lower()))
+        return rfsta
 
     @property
     def stel(self):
@@ -119,7 +202,8 @@ class RFStation(object):
         else:
             raise ValueError('\'method\' must be in \'single\' and \'average\'')
         for i in range(self.ev_num):
-            self.__dict__['data{}'.format(self.comp.lower())][i] /= maxamp[i]
+            self.data_prime /= maxamp[i]
+            exec('self.data{} = self.data_prime'.format(self.comp.lower()))
             if not self.only_r:
                 self.datat[i] /= maxamp[i]
 
@@ -129,12 +213,12 @@ class RFStation(object):
 
         Parameters
         ----------
-        dt : float
+        dt : ``float``
             Target sampling interval in sec
         """
         npts = int(self.rflength * (self.sampling / dt)) + 1
-        self.__dict__['data{}'.format(self.comp.lower())] = resample(
-            self.__dict__['data{}'.format(self.comp.lower())], npts, axis=1)
+        self.data_prime = resample(self.data_prime, npts, axis=1)
+        exec('self.data{} = self.data_prime'.format(self.comp.lower()))
         if not self.only_r:
             self.datat = resample(self.datat, npts, axis=1)
         self.sampling = dt
@@ -151,7 +235,8 @@ class RFStation(object):
         idx = np.argsort(self.__dict__[key])
         for keyarg in self.dtype['names']:
             self.__dict__[keyarg] = self.__dict__[keyarg][idx]
-        self.__dict__['data{}'.format(self.comp.lower())] = self.__dict__['data{}'.format(self.comp.lower())][idx]
+        self.data_prime = self.data_prime[idx]
+        exec('self.data{} = self.data_prime'.format(self.comp.lower()))
         if not self.only_r:
             self.datat = self.datat[idx]
 
@@ -161,7 +246,7 @@ class RFStation(object):
         :param ref_rayp: reference ray-parameter in s/km, defaults to 0.06
         :type ref_rayp: float, optional
         :param dep_range: Depth range used for extracting velocity in velocity model, defaults to np.arange(0, 150)
-        :type dep_range: :meth:`np.ndarray`, optional
+        :type dep_range: ``np.ndarray``, optional
         :param velmod: Velocity model for moveout correction. 'iasp91', 'prem' 
                       and 'ak135' is valid for internal model. Specify path to velocity model for the customized model. 
                       The format is the same as in Taup, but the depth should be monotonically increasing, defaults to 'iasp91'
@@ -171,10 +256,10 @@ class RFStation(object):
 
         Returns
         -------
-        rf_corr: :meth:`np.ndarray` 
-            Corrected RFs with component of :meth:`RFStation.comp`
+        rf_corr: ``np.ndarray``
+            Corrected RFs with component of ``RFStation.comp``
 
-        t_corr: :meth:`np.ndarray` or ``None``
+        t_corr: ``np.ndarray`` or ``None``
             Corrected RFs in transverse component. If ``only_r`` is ``True``, this variable is ``None``
         
         """
@@ -275,7 +360,7 @@ class RFStation(object):
         :param weight: Weight for three different method, defaults to [0.4, 0.4, 0.2]
         :type weight: list, optional
         :return: Dominant fast velocity direction and time delay
-        :rtype: list, list
+        :rtype: ``List``, ``List``
         """
         self.ani = RFAni(self, tb, te, tlen=tlen, rayp=rayp, model=velmodel)
         self.ani.baz_stack(val=stack_baz_val)
@@ -283,7 +368,7 @@ class RFStation(object):
         return best_f, best_t
 
     def slantstack(self, ref_dis=None, rayp_range=None, tau_range=None):
-        self.slant = SlantStack(self.__dict__['data{}'.format(self.comp.lower())], self.time_axis, self.dis)
+        self.slant = SlantStack(self.data_prime, self.time_axis, self.dis)
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
@@ -291,9 +376,9 @@ class RFStation(object):
         """Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
 
         :param tb: Start time relative to P, defaults to -5
-        :type tb: float, optional
+        :type tb: ``float``, optional
         :param te: End time relative to P, defaults to 10
-        :type te: float, optional
+        :type te: ``float``, optional
 
         Returns
         -------
@@ -308,6 +393,14 @@ class RFStation(object):
         self.harmo = Harmonics(self, tb, te)
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
+
+    def plotrt(self, outformat=None, **kwargs):
+        if self.only_r:
+            raise ValueError('Transverse RFs are nessary or use RFStation.plotr instead.')
+        return _plotrt(self, outformat=outformat, **kwargs)
+
+    def plotr(self, outformat=None, **kwargs):
+        return _plotr(self, outformat=outformat, **kwargs)
 
 
 class SACStation(RFStation):
@@ -398,8 +491,8 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
 
     :param stadatar: Data class of RFStation
     :type stadatar: :meth:`RFStation`
-    :param YAxisRange: Depth range for converison
-    :type YAxisRange: numpy.ndarray
+    :param YAxisRange: Depth range for conversion
+    :type YAxisRange: ``numpy.ndarray``
     :param velmod: Velocity for conversion, whcih can be a path to velocity file, defaults to 'iasp91'
     :type velmod: str, optional
     :param srayp: ray-parameter library of conversion phases. See :meth:`seispy.psrayp` in detail, defaults to None
@@ -771,7 +864,7 @@ def time2depth(stadatar, dep_range, Tpds, normalize='single'):
 
 
 if __name__ == '__main__':
-    rfsta = SACStation('/Users/xumijian/Codes/seispy-example/ex-ccp/RFresult/ZX.212/ZX.212finallist.dat')
+    rfsta = SACStation('/Users/xumijian/Codes/seispy-example/ex-ccp/RFresult/ZX.212')
     rfsta.jointani(2, 7, weight=[0.9, 0.1, 0.0])
     rfsta.ani.plot_polar()
 

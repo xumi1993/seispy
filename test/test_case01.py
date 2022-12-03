@@ -1,13 +1,15 @@
 import os
-from seispy.rf import RF
+from seispy.rf import RF, read_catalog
 from seispy.recalrf import ReRF
 from seispy.hk import hksta
 from seispy.hkpara import HKPara
+from seispy.catalog import download_catalog
 from subprocess import Popen
 import pytest
 from os.path import exists, join, basename
 import glob
 from obspy.io.sac import SACTrace
+from obspy import UTCDateTime
 
 
 def test_download():
@@ -108,6 +110,15 @@ def test_sub05():
     hksta(hkpara, isplot=True, isdisplay=True)
 
 
+def test_sub06():
+    fname = 'evts.lst'
+    b_time = UTCDateTime('20200101')
+    e_time = UTCDateTime('20200201')
+    download_catalog(fname, format='QUAKEML', starttime=b_time,
+                     endtime=e_time, minmagnitude=5.5)
+    eq_lst = read_catalog(fname, b_time, e_time, 0.,0.,)
+    print(eq_lst)
+
 
 if __name__ == '__main__':
-    test_sub01()
+    test_sub06()

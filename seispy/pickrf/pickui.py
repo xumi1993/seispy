@@ -2,16 +2,15 @@ import sys
 import os
 import argparse
 # matplotlib.use("Qt5Agg")
-from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
-                            QSizePolicy, QWidget, QDesktopWidget, \
-                            QPushButton, QHBoxLayout, QFileDialog, \
-                            QAction, QShortcut
+from PySide6.QtGui import QIcon, QKeySequence, QAction, QGuiApplication, QShortcut
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
+                            QSizePolicy, QWidget, \
+                            QPushButton, QHBoxLayout, QFileDialog            
 from os.path import exists, dirname, join
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from seispy.pickfigure import RFFigure
-from seispy.rpickfigure import RPickFigure
+from seispy.pickrf.pickfigure import RFFigure
+from seispy.pickrf.rpickfigure import RPickFigure
 import glob
 
 
@@ -32,8 +31,8 @@ class MyMplCanvas(FigureCanvas):
         self.setParent(parent)
 
         FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
+                                   QSizePolicy.Policy.Expanding,
+                                   QSizePolicy.Policy.Expanding)
         FigureCanvas.updateGeometry(self)
 
 
@@ -120,7 +119,7 @@ class MatplotlibWidget(QMainWindow):
             self.mpl.rffig.log.RFlog.error('{}'.format(e))
 
     def _set_geom_center(self, height=1, width=1):
-        screen_resolution = QDesktopWidget().screenGeometry()
+        screen_resolution = QGuiApplication.primaryScreen().geometry()
         screen_height = screen_resolution.height()
         screen_width = screen_resolution.width()
         frame_height = int(screen_height * height)
@@ -191,7 +190,7 @@ def main():
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(rfpath, only_r=only_r, xlim=[-2, xlim], order=arg.order)
     ui.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
 
 
 if __name__ == '__main__':

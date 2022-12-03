@@ -28,6 +28,26 @@ def average_delay(fd, td):
 
 class RFAni():
     def __init__(self, sacdatar, tb, te, tlen=3, val=10, rayp=0.06, model='iasp91'):
+        """ Estimate crustal anisotropy with a joint method. 
+            See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
+
+        Parameters
+        ----------
+        sacdatar : seispy.rfcorrect.RFStation
+            RFStation include RF data
+        tb : float
+            Starting time for searching Ps peak.
+        te : float
+            end time for searching Ps peak.
+        tlen : int, optional
+            Half-length of time window for trimming waveform around Ps, by default 3
+        val : int, optional
+            Interval of Back-azimuth, by default 10
+        rayp : float, optional
+            Reference ray-parameter for moveout correction, by default 0.06
+        model : str, optional
+            1D velocity for moveout correction, by default 'iasp91'
+        """
         self.tb = tb
         self.te = te
         self.tlen = tlen
@@ -38,8 +58,6 @@ class RFAni():
         self.sacdatar.moveoutcorrect(ref_rayp=rayp, velmod=model, replace=True)
         self.baz_stack(val=val)
         self.search_peak_amp()
-        # self.para = readpara(para=join(path, 'raysum-params'))
-        # self.baz, self.datar, self.datat = readrf(path, self.para, join(path, 'sample.geom'))
         self.init_ani_para()
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
 
@@ -250,7 +268,7 @@ class RFAni():
         return self.bf, self.bt
 
     def plot_polar(self, cmap=load_cyan_map(), show=False, outpath='./'):
-        """Polar map of crustal anisotropy inverted by a joint method. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
+        """Polar map of crustal anisotropy. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
 
         :param cmap: Colormap of matplotlib, defaults to 'rainbow'
         :type cmap: optional

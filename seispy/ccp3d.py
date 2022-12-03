@@ -68,13 +68,14 @@ def bin_shape(cpara):
 
 def boot_bin_stack(data_bin, n_samples=3000):
     warnings.filterwarnings("ignore")
+    data_bin = data_bin[~np.isnan(data_bin)]
     count = data_bin.shape[0]
     if count > 1:
         if n_samples is not None:
             cci = ci(data_bin, n_samples=n_samples)
         else:
             cci = np.array([np.nan, np.nan])
-        mu = np.average(data_bin)
+        mu = np.nanmean(data_bin)
     else:
         cci = np.array([np.nan, np.nan])
         mu = np.nan

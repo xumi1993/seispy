@@ -8,7 +8,20 @@ from seispy.decon import RFTrace
 from seispy.geo import snr, srad2skm, rotateSeisENtoTR, \
                        rssq, extrema
 from obspy.signal.trigger import recursive_sta_lta
+import glob
 
+
+class NotEnoughComponent(Exception):
+    def __init__(self, matchkey):
+        self.matchkey = matchkey
+    def __str__(self):
+        return '{}'.format(self.matchkey)
+
+class TooMoreComponents(Exception):
+    def __init__(self, matchkey):
+        self.matchkey = matchkey
+    def __str__(self):
+        return '{}'.format(self.matchkey)
 
 def rotateZNE(st):
     try:
@@ -36,30 +49,49 @@ class EQ(object):
         """
         self.datestr = datestr
         self.filestr = join(pathname, '*' + datestr + '*' + suffix)
-        self.st = obspy.read(self.filestr)
-        if len(self.st) < 3:
-            channel = ' '.join([tr.stats.channel for tr in self.st])
-            raise ValueError('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, datestr))
-        elif len(self.st) > 3:
-            raise ValueError('{} has more than 3 components, please select to delete redundant seismic components'.format(datestr))
+        if glob.glob(self.filestr):  
+            self.st = obspy.read(self.filestr)
+            self._check_comp()
+            self.st.sort()
+            self.set_comp()
         else:
-            pass
-        self.st.sort()
+            self.st = obspy.Stream()
         self.rf = obspy.Stream()
         self.timeoffset = 0
         self.rms = np.array([0])
         self.it = 0
         self.trigger_shift = 0
         self.inc_correction = 0
-        self.set_comp()
     
+    def _check_comp(self):
+        if len(self.st) < 3:
+            channel = ' '.join([tr.stats.channel for tr in self.st])
+            raise NotEnoughComponent('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, self.datestr))
+        elif len(self.st) > 3:
+            raise TooMoreComponents('{} has more than 3 components, please select to delete redundant seismic components'.format(self.datestr))
+        else:
+            pass
+
     def readstream(self):
-        self.st = obspy.read(self.filestr)
         self.rf = obspy.Stream()
-    
+        self.st = obspy.read(self.filestr)
+        self._check_comp()
+        self.st.sort()
+        self.set_comp()
+
     def cleanstream(self):
         self.st = None
         self.rf = None
+
+    @classmethod
+    def from_stream(cls, stream):
+        eq = cls('', '')
+        eq.st = stream
+        eq.datestr = eq.st[0].stats.starttime.strftime('%Y.%j.%H.%M.%S')
+        eq._check_comp()
+        eq.st.sort()
+        eq.set_comp()
+        return eq
 
     def set_comp(self):
         if self.st.select(channel='*[E2]'):
@@ -93,6 +125,18 @@ class EQ(object):
 
     def __str__(self):
         return('Event data class {0}'.format(self.datestr))
+
+    def write(self, path, evt_datetime):
+        for tr in self.st:
+            sac = SACTrace.from_obspy_trace(tr)
+            sac.b = 0
+            sac.o = evt_datetime - tr.stats.starttime
+            fname = join(path, '{}.{}.{}.{}.SAC'.format(
+                tr.stats.network, tr.stats.station,
+                tr.stats.starttime.strftime('%Y.%j.%H%M%S'),
+                tr.stats.channel
+            ))
+            sac.write(fname)
 
     def detrend(self):
         self.st.detrend(type='linear')
@@ -253,38 +297,62 @@ class EQ(object):
         else:
             self.st.trim(t1, t2)
 
-    def deconvolute(self, shift, time_after, f0=2, method='iter', only_r=False,
+    def deconvolute(self, shift, time_after, f0=2.0, method='iter', only_r=False,
                     itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
-        self.method = method
-        if method == 'iter':
-            kwargs = {'method': method,
-                      'f0': f0,
-                      'tshift': shift,
-                      'itmax': itmax,
-                      'minderr': minderr}
-        elif method == 'water':
-            kwargs = {'method': method,
-                      'f0': f0,
-                      'tshift': shift,
-                      'wlevel': wlevel}
-        else:
-            raise ValueError('method must be in \'iter\' or \'water\'')
+        """Deconvolution
 
-        if self.phase[-1] == 'P':
-            self.decon_p(**kwargs)
-            if not only_r:
-                self.decon_p(tcomp=True, **kwargs)
-        else:
-            # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
-            #     raise ValueError('Please rotate component to \'LQT\'')
-            self.decon_s(**kwargs)
-        if target_dt is not None:
-            if self.rf[0].stats.delta != target_dt:
-                # self.rf.resample(1 / target_dt)
+        Parameters
+        ----------
+        shift : float
+            Time shift before P arrival
+        time_after : float
+            Time length after P arrival
+        f0 : float or list, optional
+            Gaussian factors, by default 2.0
+        method : str, optional
+            method for deconvolution in ``iter`` or ``water``, by default ``iter``
+        only_r : bool, optional
+            Whether only calculate RF in prime component, by default False
+        itmax : int, optional
+            Maximum iterative number, valid for method of ``iter``, by default 400
+        minderr : float, optional
+            Minium residual error, valid for method of ``iter``, by default 0.001
+        wlevel : float, optional
+            Water level, valid for method of ``water``, by default 0.05
+        target_dt : None or float, optional
+            Time delta for resampling, by default None
+        """
+        self.method = method
+        if isinstance(f0, (int, float)):
+            f0 = [f0]
+        for ff in f0:
+            if method == 'iter':
+                kwargs = {'method': method,
+                        'f0': ff,
+                        'tshift': shift,
+                        'itmax': itmax,
+                        'minderr': minderr}
+            elif method == 'water':
+                kwargs = {'method': method,
+                        'f0': ff,
+                        'tshift': shift,
+                        'wlevel': wlevel}
+            else:
+                raise ValueError('method must be in \'iter\' or \'water\'')
+
+            if self.phase[-1] == 'P':
+                self.decon_p(**kwargs)
+                if not only_r:
+                    self.decon_p(tcomp=True, **kwargs)
+            else:
+                # TODO: if 'Q' not in self.rf[1].stats.channel or 'L' not in self.rf[2].stats.channel:
+                #     raise ValueError('Please rotate component to \'LQT\'')
+                self.decon_s(**kwargs)
+            if target_dt is not None:
                 for tr in self.rf:
-                    # tr.data = tr.data[0:-1]
-                    tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
-                    tr.stats.delta = target_dt
+                    if tr.stats.delta != target_dt:
+                        tr.data = resample(tr.data, int((shift + time_after)/target_dt+1))
+                        tr.stats.delta = target_dt
     
     def decon_p(self, tshift, tcomp=False, **kwargs):
         if self.comp == 'lqt':
@@ -341,7 +409,11 @@ class EQ(object):
         else:
             filename = join(path, evtstr)
         for comp in loop_lst:
-            trrf = self.rf.select(channel='*'+comp)[0]
+            trrfs = self.rf.select(channel='*'+comp)
+            try:
+                trrf = [tr for tr in trrfs if tr.stats.f0 == gauss][0]
+            except:
+                ValueError('No such gauss factor of {} in calculated RFs'.format(gauss))
             header = {'evla': evla, 'evlo': evlo, 'evdp': evdp, 'mag': mag, 'baz': baz,
                       'gcarc': gcarc, 'user0': rayp, 'kuser0': 'Ray Para', 'user1': gauss, 'kuser1': 'G factor'}
             for key in kwargs:
@@ -362,24 +434,36 @@ class EQ(object):
         else:
             return False
 
-    def judge_rf(self, shift, npts, criterion='crust', rmsgate=None):
+    def judge_rf(self, gauss, shift, npts, criterion='crust', rmsgate=None):
         if self.phase[-1] == 'P' and self.comp == 'rtz':
-            trrf = self.rf.select(channel='*R')[0]
+            trrfs = self.rf.select(channel='*R')
         elif self.phase[-1] == 'P' and self.comp == 'lqt':
-            trrf = self.rf.select(channel='*Q')[0]
+            trrfs = self.rf.select(channel='*Q')
         elif self.phase[-1] == 'S' and self.comp == 'lqt':
-            trrf = self.rf.select(channel='*L')[0]
+            trrfs = self.rf.select(channel='*L')
         elif self.phase[-1] == 'S' and self.comp == 'rtz':
-            trrf = self.rf.select(channel='*Z')[0]        
-        if trrf.stats.npts != npts:
+            trrfs = self.rf.select(channel='*Z')
+        for tr in trrfs:      
+            if tr.stats.npts != npts:
+                return False
+        try:
+            trrf = [tr for tr in trrfs if tr.stats.f0 == gauss][0]
+        except:
+            ValueError('No such gauss factor of {} in calculated RFs'.format(gauss))
+        
+        # All points are NaN
+        if np.isnan(trrf.data).all():
+            return False
+        
+        if np.isinf(trrf.data).any():
             return False
         
         # Final RMS
         if rmsgate is not None:
             if self.method == 'iter':
-                rms = self.rf[0].stats.rms[-1]
+                rms = trrf.stats.rms[-1]
             else:
-                rms = self.rf[0].stats.rms
+                rms = trrf.stats.rms
             rmspass = rms < rmsgate
         else:
             rmspass = True

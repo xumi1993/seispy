@@ -10,13 +10,13 @@
 [![CRV test](https://github.com/xumi1993/seispy/actions/workflows/test.yml/badge.svg?branch=dev)](https://github.com/xumi1993/seispy/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/xumi1993/seispy/branch/dev/graph/badge.svg?token=XN3E3N6S3V)](https://codecov.io/gh/xumi1993/seispy)
 [![Upload Python Package](https://github.com/xumi1993/seispy/actions/workflows/python-publish.yml/badge.svg)](https://github.com/xumi1993/seispy/actions/workflows/python-publish.yml)
-[![Deploy Seispy Docs](https://github.com/xumi1993/seispy-doc.post/actions/workflows/deploy.yml/badge.svg)](https://github.com/xumi1993/seispy-doc.post/actions/workflows/deploy.yml)
+[![Seispy docs](https://github.com/xumi1993/seispy/actions/workflows/doc_build.yml/badge.svg)](https://github.com/xumi1993/seispy/actions/workflows/doc_build.yml)
 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=13623&branchName=master">
   <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/seispy-feedstock?branchName=master">
 </a> 
 
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/version.svg)](https://anaconda.org/conda-forge/seispy)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/installer/conda.svg)](https://conda.anaconda.org/conda-forge)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/seispy.svg)](https://anaconda.org/conda-forge/seispy)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/downloads.svg)](https://anaconda.org/conda-forge/seispy)
 
 [![PyPI](https://img.shields.io/pypi/v/python-seispy)](https://pypi.org/project/python-seispy/)
@@ -30,12 +30,12 @@ Seispy is a Python module for processing seismological data and calculating Rece
 
 
 ## Dependencies
-  * [Python]() >= 3.6
-  * [ObsPy](http://docs.obspy.org) >= 1.1.0
+  * [Python]() >= 3.8
+  * [ObsPy](http://docs.obspy.org) >= 1.2.0
   * [NumPy](http://www.numpy.org/) >= 1.16
   * [SciPy](http://www.scipy.org/) >= 1.2.0
-  * [matplotlib](https://matplotlib.org/) >= 3.0.0
-  * [pyqt5](https://www.riverbankcomputing.com/software/pyqt/) >= 5.12.0
+  * [matplotlib](https://matplotlib.org/) >= 3.6.0
+  * [PySide6](https://www.riverbankcomputing.com/software/pyqt/) >= 6.3.0
   * [scikits.bootstrap](https://github.com/cgevans/scikits-bootstrap) >= 1.0.0
   
 ## Installation
@@ -83,6 +83,3 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
  * `updatecatalog`: Automatically update the GCMT catalog.
  * `setpar`: Set up the values in configure files.
 
-### TODO
-
-- Download seismic data from web service for RF calculation.

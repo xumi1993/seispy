@@ -1,12 +1,8 @@
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.lines import Line2D
-from seispy.rfcorrect import RFStation, SACStation
-from seispy.rf import CfgParser
-import argparse
 import numpy as np
-from os.path import join, realpath, basename, exists
-import sys
+from os.path import join
 
 
 def init_figure():
@@ -24,17 +20,6 @@ def init_figure():
     axb = plt.subplot(gs[1:, 2])
     axb.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
     return h, axr, axt, axb, axr_sum, axt_sum
-
-
-def read_process_data(path, resamp_dt=0.1):
-    stadata = SACStation(path)
-    stadata.resample(resamp_dt)
-    idx = np.argsort(stadata.bazi)
-    stadata.event = stadata.event[idx]
-    stadata.bazi = stadata.bazi[idx]
-    stadata.datar = stadata.datar[idx]
-    stadata.datat = stadata.datat[idx]
-    return stadata
 
 
 def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=3):
@@ -123,7 +108,7 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30,
     axb.set_xlabel(r'Back-azimuth ($\circ$)', fontsize=13)
 
 
-def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xmax=30):
+def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xlim=[-2, 30], show=False):
     """Plot PRFs with R and T components
 
     :param rfpath: Path to PRFs
@@ -138,26 +123,18 @@ def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xmax=30):
     h, axr, axt, axb, axr_sum, axt_sum = init_figure()
     rfsta.sort(key)
     plot_waves(axr, axt, axb, axr_sum, axt_sum, rfsta, enf=enf)
-    set_fig(axr, axt, axb, axr_sum, axt_sum, rfsta, rfsta.staname, xmax=xmax, comp=rfsta.comp)
-    if outformat == 'g':
-        h.savefig(join(out_path, rfsta.staname+'_RT_bazorder_{:.1f}.png'.format(rfsta.f0[0])), dpi=400, bbox_inches='tight')
+    set_fig(axr, axt, axb, axr_sum, axt_sum, rfsta, rfsta.staname, xmin=xlim[0], xmax=xlim[1], comp=rfsta.comp)
+    if outformat is None and not show:
+        return h
+    elif outformat == 'g':
+        h.savefig(join(out_path, rfsta.staname+'_RT_{}order_{:.1f}.png'.format(key, rfsta.f0[0])),
+                       dpi=400, bbox_inches='tight')
     elif outformat == 'f':
-        h.savefig(join(out_path, rfsta.staname+'_RT_bazorder_{:.1f}.pdf'.format(rfsta.f0[0])), format='pdf', bbox_inches='tight')
-
-
-def main():
-    parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
-    parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
-    parser.add_argument('-e', help='Enlargement factor, defaults to 3', dest='enf', type=float, default=3, metavar='enf')
-    parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
-    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
-                        dest='format', default='g', type=str, metavar='f|g')
-    parser.add_argument('-x', help='The max time scale in sec, defaults to 30s', default=30, type=float, metavar='max_time')
-    arg = parser.parse_args()
-    if arg.format not in ('f', 'g'):
-        raise ValueError('Error: The format must be in \'f\' and \'g\'')
-    rfsta = RFStation(arg.rfpath)
-    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xmax=arg.x)
+        h.savefig(join(out_path, rfsta.staname+'_RT_{}order_{:.1f}.pdf'.format(key, rfsta.f0[0])),
+                       format='pdf', bbox_inches='tight')
+    if show:
+        plt.show()
+        return h
 
 
 if __name__ == '__main__':

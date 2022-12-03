@@ -2,8 +2,8 @@ import numpy as np
 import re
 from obspy.io.sac.sactrace import SACTrace
 import matplotlib.pyplot as plt
-from os.path import dirname, join, basename
-from seispy.rfcorrect import SACStation
+from os.path import dirname, join
+from seispy.rfcorrect import RFStation
 from seispy.hkpara import hkpara
 from seispy.geo import srad2skm
 import argparse
@@ -165,20 +165,19 @@ def print_result(besth, bestk, maxhsig, maxksig, print_comment=True):
 
 
 def hksta(hpara, isplot=False, isdisplay=False):
-    station = basename(hpara.rfpath)
-    stadata = SACStation(hpara.rfpath, only_r=True)
+    stadata = RFStation(hpara.rfpath, only_r=True)
     stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, srad2skm(stadata.rayp),
                                     hpara.hrange, hpara.krange, vp=hpara.vp, weight=hpara.weight)
     besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, hpara.hrange, hpara.krange, stadata.ev_num)
     with open(hpara.hklist, 'a') as f:
-        f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(station, stadata.stla, stadata.stlo,
+        f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(stadata.staname, stadata.stla, stadata.stlo,
                                                                               besth, maxhsig, bestk, maxksig))
-    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$ km\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(station, besth,
+    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$ km\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(stadata.staname, besth,
                                                                                      maxhsig, bestk, maxksig)
     if isdisplay:
         print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
     if isplot:
-        img_path = join(hpara.hkpath, station+'_Hk.png')
+        img_path = join(hpara.hkpath, stadata.staname+'_Hk.png')
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title, path=img_path)
     else:
         plot(stack, allstack, hpara.hrange, hpara.krange, besth, bestk, cvalue, title=title)
@@ -187,22 +186,10 @@ def hksta(hpara, isplot=False, isdisplay=False):
 def hk():
     parser = argparse.ArgumentParser(description="HK stacking for single station")
     parser.add_argument('cfg_file', type=str, help='Path to HK configure file')
-    # parser.add_argument('-s', help='Path to PRFs with folder name of the station name',
-                        # dest='station', type=str, default='')
-    # parser.add_argument('-H', help='Range for searching best H: <hmin>/<hmax>', type=str, default='')
-    # parser.add_argument('-K', help='Range for searching best K: <kmin>/<kmax>', type=str, default='')
     parser.add_argument('-v', help='Display results to standard output',
                         dest='isdisplay', action='store_true')
     arg = parser.parse_args()
     hpara = hkpara(arg.cfg_file)
-    # if arg.station != '':
-    #     hpara.rfpath = arg.station
-    # if arg.H != '':
-    #     hmin, hmax = [float(val) for val in arg.H.split('/')]
-    #     hpara.hrange = np.arange(hmin, hmax, 0.1)
-    # if arg.K != '':
-    #     kmin, kmax = [float(val) for val in arg.K.split('/')]
-    #     hpara.krange = np.arange(kmin, kmax, 0.1)
     hksta(hpara, isplot=True, isdisplay=arg.isdisplay)
 
 

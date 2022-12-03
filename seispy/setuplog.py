@@ -34,6 +34,10 @@ class setuplog(object):
         if not self.ModCreatorlog.handlers:
             self.ModCreatorlog.setLevel(logging.INFO)
             self.ModCreatorlog.addHandler(ch)
+        self.PickDepthlog = logging.getLogger('PickDepth')
+        if not self.PickDepthlog.handlers:
+            self.PickDepthlog.setLevel(logging.INFO)
+            # self.PickDepthlog.addHandler(ch)
 
 
 if __name__ == '__main__':

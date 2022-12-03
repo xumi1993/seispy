@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.2.18"
+VERSION = "1.3.0"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -19,33 +19,32 @@ setup(name='python-seispy',
       package_data={'': ['data/*']},
       install_requires=[
                 'numpy>=1.19.0',
-                'scipy==1.8.1',
-                'matplotlib>=3.2.0',
+                'scipy>=1.9.1',
+                'matplotlib>=3.5.0',
                 'pandas>=1.0.0',
                 'obspy>=1.2.1',
-                'pyqt5>=5.12.0',
+                'pyside6>=6.3.0',
                 'scikits.bootstrap>=1.0.0'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.scripts:prf',
                                         'srf=seispy.scripts:srf',
                                         'setpar=seispy.rf:setpar',
                                         'rf2depth=seispy.rf2depth_makedata:rf2depth',
-                                        'plotrt=seispy.plotRT:main',
-                                        'plotr=seispy.plotR:main',
-                                        'updatecatalog=seispy.updatecatalog:main',
-                                        'ndk2dat=seispy.updatecatalog:ndk2dat',
+                                        'plotrt=seispy.scripts:plot_rt',
+                                        'plotr=seispy.scripts:plot_r',
+                                        'download_catalog=seispy.catalog:main',
                                         'ccp_profile=seispy.scripts:ccp_profile',
                                         'hk=seispy.hk:hk',
-                                        'pickrf=seispy.pickui:main',
+                                        'pickrf=seispy.pickrf.pickui:main',
+                                        'pickdepth=seispy.pickdepth.pickdepthui:main',
                                         'rfani=seispy.scripts:rfani',
                                         'ccp3d=seispy.scripts:ccp3d',
                                         'rfharmo=seispy.scripts:rfharmo',
                                         'get_pierce_points=seispy.scripts:get_pierce_points',
                                         'veltxt2mod=seispy.modcreator:veltxt2mod']},
-      #  include_package_data=True,
       zip_safe=False,
       classifiers=['Programming Language :: Python',
-                   'Programming Language :: Python :: 3.8',
                    'Programming Language :: Python :: 3.9',
-                   'Programming Language :: Python :: 3.10']
+                   'Programming Language :: Python :: 3.10',
+                   'Programming Language :: Python :: 3.11']
       )

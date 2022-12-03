@@ -2,6 +2,7 @@ import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
 from seispy.geo import km2deg
+import warnings
 
 
 class CCPPara(object):
@@ -28,7 +29,11 @@ class CCPPara(object):
         self.stack_val = 1
         self.boot_samples = None
         self.phase = 1
-        
+    
+    def __str__(self):
+        head = ['{}: {}'.format(k, v) for k, v in self.__dict__.items()]
+        return '\n'.join(head)
+
     @property
     def bin_radius(self):
         return self._bin_radius
@@ -101,13 +106,28 @@ def ccppara(cfg_file):
         cpara.bin_radius = cf.getfloat('bin', 'bin_radius')
     except:
         cpara.bin_radius = None
-    cpara.slide_val = cf.getfloat('bin', 'slide_val')
-    # para for line section
-    lat1 = cf.getfloat('line', 'profile_lat1')
-    lon1 = cf.getfloat('line', 'profile_lon1')
-    lat2 = cf.getfloat('line', 'profile_lat2')
-    lon2 = cf.getfloat('line', 'profile_lon2')
-    cpara.line = np.array([lat1, lon1, lat2, lon2])
+    try:
+        cpara.slide_val = cf.getfloat('bin', 'slide_val')
+    except:
+        warnings.warn('slide_val not found. Setup it for CCP stacking')
+    try:
+        # para for line section
+        lat1 = cf.getfloat('line', 'profile_lat1')
+        lon1 = cf.getfloat('line', 'profile_lon1')
+        lat2 = cf.getfloat('line', 'profile_lat2')
+        lon2 = cf.getfloat('line', 'profile_lon2')
+        cpara.line = np.array([lat1, lon1, lat2, lon2])
+    except:
+        warnings.warn('line section not found. Setup it for ccp_profile')
+    try:
+        # para for center bins
+        cla = cf.getfloat('spacedbins', 'center_lat')
+        clo = cf.getfloat('spacedbins', 'center_lon')
+        hlla = cf.getfloat('spacedbins', 'half_len_lat')
+        hllo = cf.getfloat('spacedbins', 'half_len_lon')
+        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slide_val)]
+    except:
+        warnings.warn('No such section of spacedbins and line. Setup them for CCP stacking')
     # para for depth section
     dep_end = cf.getfloat('depth', 'dep_end')
     cpara.dep_val = cf.getfloat('depth', 'dep_val')
@@ -125,12 +145,5 @@ def ccppara(cfg_file):
         cpara.boot_samples = cf.getint('stack', 'boot_samples')
     except:
         cpara.boot_samples = None
-    # para for center bins
-    if cf.has_section('spacedbins'):
-        cla = cf.getfloat('spacedbins', 'center_lat')
-        clo = cf.getfloat('spacedbins', 'center_lon')
-        hlla = cf.getfloat('spacedbins', 'half_len_lat')
-        hllo = cf.getfloat('spacedbins', 'half_len_lon')
-        cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slide_val)]
 
     return cpara

@@ -3,23 +3,9 @@ import obspy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from seispy.pickfigure import RFFigure, indexpags
+from seispy.pickrf.pickfigure import RFFigure, indexpags
+from seispy.rfcorrect import RFStation
 from os.path import join, basename
-from seispy.plotR import init_figure, set_fig, plot_waves
-
-
-class StaData():
-    def __init__(self, filenames, rrf, baz, goodrf):
-        goodidx = np.where(goodrf == 1)
-        self.event = [filenames[i] for i in goodidx[0]]
-        self.bazi = baz[goodidx]
-        self.rflength = len(rrf[0].data)
-        self.ev_num = len(self.bazi)
-        self.datar = np.empty([self.ev_num, self.rflength])
-        for i, idx in enumerate(goodidx[0]):
-            self.datar[i, :] = rrf[idx].data
-        self.time_axis = np.array([])
-        self.staname = ''
 
 
 class RPickFigure(RFFigure):
@@ -71,6 +57,7 @@ class RPickFigure(RFFigure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
+        self.rayp = np.array([tr.stats.sac.user0 for tr in self.rrf])
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
@@ -86,7 +73,7 @@ class RPickFigure(RFFigure):
         self.baz = self.baz[idx]
         self.gcarc = self.gcarc[idx]
         self.phases = [self.phases[i] for i in idx]
-        self.rrf = [self.rrf[i] for i in idx]
+        self.rrf = obspy.Stream([self.rrf[i] for i in idx])
         # self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
         self.filenames = [self.filenames[i] for i in idx]
 
@@ -104,10 +91,7 @@ class RPickFigure(RFFigure):
         self.axr.plot([0, 0], [0, self.axpages*self.maxidx+1], color="black")
         self.axr.set_xlim(self.xlim[0], self.xlim[1])
         self.axr.set_xticks(np.arange(self.xlim[0], self.xlim[1]+1, 2))
-        self.axb.set_xlim(0, 360)
-        self.axb.set_xticks(np.arange(0, 361, 60))
-        self.axg.set_xlim(30, 90)
-        self.axg.set_xticks(np.arange(30, 91, 10))
+        self.set_ax_baz_dis()
     
     def set_ylabels(self):
         self.axr.set_ylim(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1)
@@ -125,9 +109,9 @@ class RPickFigure(RFFigure):
     
     def init_variables(self):
         self.goodrf = np.ones(self.evt_num)
-        self.rlines = [[] for i in range(self.evt_num)]
-        self.rwvfillpos = [[] for i in range(self.evt_num)]
-        self.rwvfillnag = [[] for i in range(self.evt_num)]
+        self.rlines = [[]]*self.evt_num
+        self.rwvfillpos = [[]]*self.evt_num
+        self.rwvfillnag = [[]]*self.evt_num
     
     def plotwave(self):
         bound = np.zeros(self.time_axis.shape[0])
@@ -136,10 +120,6 @@ class RPickFigure(RFFigure):
             self.rlines[i], = self.axr.plot(self.time_axis, r_amp_axis, color="black", linewidth=0.2)            
             self.rwvfillpos[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis >i+1, facecolor='red', alpha=0.3)
             self.rwvfillnag[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis <i+1, facecolor='blue', alpha=0.3)
-
-    def plotbaz(self):
-        self.axb.scatter(self.baz, np.arange(self.evt_num)+1)
-        self.axg.scatter(self.gcarc, np.arange(self.evt_num)+1, color='orange', alpha=0.6)
 
     def onclick(self, event):
         if event.inaxes != self.axr:
@@ -185,9 +165,9 @@ class RPickFigure(RFFigure):
     def plot(self):
         plt.ion()
         plt.rcParams['toolbar'] = 'None'
-        stadata = StaData(self.filenames, self.rrf, self.baz, self.goodrf)
-        stadata.time_axis = self.time_axis
-        stadata.staname = self.staname
-        self.plotfig, axr, axb, axs = init_figure()
-        plot_waves(axr, axb, axs, stadata, enf=self.enf)
-        set_fig(axr, axb, axs, stadata, self.xlim[0], self.xlim[1])
+        goodidx = np.where(self.goodrf == 1)[0]
+        newrfs = obspy.Stream([self.rrf[idx] for idx in goodidx])
+        stadata = RFStation.read_stream(newrfs, self.rayp[goodidx],
+                                        self.baz[goodidx], prime_comp=self.comp)
+        stadata.event = np.array([self.filenames[i] for i in goodidx])
+        self.plotfig = stadata.plotr(enf=self.enf, xlim=self.xlim)

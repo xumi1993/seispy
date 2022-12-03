@@ -1,8 +1,6 @@
 import numpy as np
 import argparse
 from seispy.rfcorrect import RFStation
-from seispy.ccp3d import CCP3D
-from seispy.ccpprofile import CCPProfile
 from scipy.interpolate import interp1d
 from seispy.utils import read_rfdep
 from seispy.rf import RF
@@ -65,6 +63,7 @@ def rfani():
 
 
 def ccp3d():
+    from seispy.ccp3d import CCP3D
     parser = argparse.ArgumentParser(description="3-D CCP stacking with spaced grid bins.")
     parser.add_argument('cfg_file', type=str, help='Path to CCP configure file')
     parser.add_argument('-s', help='Range for searching depth of D410 and D660, The results would be saved to \'peakfile\' in cfg_file',
@@ -81,6 +80,7 @@ def ccp3d():
 
 
 def ccp_profile():
+    from seispy.ccpprofile import CCPProfile
     parser = argparse.ArgumentParser(description="Stack PRFS along a profile")
     parser.add_argument('cfg_file', type=str, help='Path to CCP configure file')
     parser.add_argument('-t', help='Output as a text file', dest='isdat', action='store_true')
@@ -219,3 +219,41 @@ def srf():
     pjt.trim()
     pjt.deconv()
     pjt.saverf()
+
+
+def plot_rt():
+    from seispy.plotRT import plotrt
+    parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
+    parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
+    parser.add_argument('-e', help='Enlargement factor, defaults to 3', dest='enf', type=float, default=3, metavar='enf')
+    parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
+    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
+                        dest='format', default='g', type=str, metavar='f|g')
+    parser.add_argument('-x', help='The max time scale in sec, defaults to 30s', default=30, type=float, metavar='max_time')
+    arg = parser.parse_args()
+    if arg.format not in ('f', 'g'):
+        raise ValueError('Error: The format must be in \'f\' and \'g\'')
+    rfsta = RFStation(arg.rfpath)
+    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xlim=[-2, arg.x])
+
+
+def plot_r():
+    from seispy.plotR import plotr
+    parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
+    parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
+    parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
+    parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
+    parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
+                    dest='format', default='g', type=str, metavar='f|g')
+    parser.add_argument('-x', help='The max time scale in sec, defaults to 85s', default=85, type=float, metavar='max_time')
+
+    arg = parser.parse_args()
+    if arg.format not in ('f', 'g'):
+        parser.error('Error: The format must be in \'f\' and \'g\'')
+    elif arg.format == 'g':
+        fmt = 'png'
+    elif arg.format == 'f':
+        fmt = 'pdf'
+    rfsta = RFStation(arg.rfpath)
+    plotr(rfsta, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
+

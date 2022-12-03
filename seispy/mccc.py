@@ -1,10 +1,7 @@
 import numpy as np
 
 
-def mccc(seis, dt, twin=0):
-    data = np.zeros([len(seis), seis[0].data.shape[0]])
-    for i in range(len(seis)):
-        data[i, :] = seis[i].data
+def mccc(data, dt, twin=0):
     nt = data.shape[1] * 2
     ns = data.shape[0]
     mask = np.ones(nt)
@@ -19,7 +16,7 @@ def mccc(seis, dt, twin=0):
         mask[0:itw] = 1.0
         mask[nt-itw-1:nt] = 1.0
     for i in range(ns-1):
-        ffis = np.conj(fft_conj[i])
+        ffis = fft_conj[i]
 #        ffis = np.conj(np.fft.fft(seis[i].data, nt))
         for j in np.arange(i+1, ns):
             ffjs = fft_all[j]
@@ -34,6 +31,6 @@ def mccc(seis, dt, twin=0):
     tcc *= dt
 
     for i in np.arange(0, ns):
-        tdel[i] = (-np.sum(tcc[0:i+1, i]) + np.sum(tcc[i, i+1:ns]))/ns
+        tdel[i] = (-np.sum(tcc[0:i, i]) + np.sum(tcc[i, i+1:ns]))/ns
 
     return tdel

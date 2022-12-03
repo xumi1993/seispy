@@ -1,13 +1,12 @@
 # matplotlib.use("Qt5Agg")
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QKeySequence
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
-                            QSizePolicy, QWidget, QDesktopWidget, \
-                            QPushButton, QHBoxLayout, QFileDialog, \
-                            QAction, QShortcut
+from PySide6.QtCore import Qt
+from PySide6.QtGui import QIcon, QKeySequence, QGuiApplication, QShortcut, QAction
+from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
+                            QSizePolicy, QWidget, \
+                            QPushButton, QHBoxLayout, QFileDialog
 from os.path import exists, dirname, join
 from seispy.setuplog import setuplog
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
@@ -161,10 +160,10 @@ class MyMplCanvas(FigureCanvas):
         FigureCanvas.__init__(self, self.sfig.fig)
         self.setParent(parent)
         FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
+                                   QSizePolicy.Policy.Expanding,
+                                   QSizePolicy.Policy.Expanding)
         FigureCanvas.updateGeometry(self)
-        FigureCanvas.setCursor(self, Qt.CrossCursor)
+        FigureCanvas.setCursor(self, Qt.CursorShape.CrossCursor)
 
 class MatplotlibWidget(QMainWindow):
     def __init__(self, eqs, para, logger, parent=None):
@@ -175,7 +174,6 @@ class MatplotlibWidget(QMainWindow):
         self.mpl = MyMplCanvas(self, eqs=eqs, para=para, logger=logger, width=8, height=4, dpi=50)
         # self.mpl.mpl_connect('motion_notify_event', self.on_mouse_move)
         self.mpl.mpl_connect('button_press_event', self.on_click)
-        # self.setCursor(Qt.CrossCursor)
         self.layout = QVBoxLayout()
         self.add_btn()
         self.layout.addWidget(self.mpl, 2)
@@ -290,7 +288,7 @@ class MatplotlibWidget(QMainWindow):
         self.key_enter.activated.connect(self.finish_connect)
 
     def _set_geom_center(self, height=0.7, width=1):
-        screen_resolution = QDesktopWidget().screenGeometry()
+        screen_resolution = QGuiApplication.primaryScreen().geometry()
         screen_height = screen_resolution.height()
         screen_width = screen_resolution.width()
         frame_height = int(screen_height * height)

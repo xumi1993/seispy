@@ -1,15 +1,17 @@
 import obspy
 from obspy import UTCDateTime
-from obspy.io.sac import SACTrace
 from obspy.taup import TauPyModel
+from obspy.io.sac import SACTrace
+from obspy.core.event.catalog import read_events
 import re
 from os.path import join, exists
-from seispy.io import wsfetch
-from seispy.para import para
+from os import makedirs
+from seispy.io import Query, _cat2df
+from seispy.para import RFPara
 from seispy import distaz
 from seispy.eq import EQ
 from seispy.setuplog import setuplog
-from seispy.sviewerui import MatplotlibWidget
+from seispy.catalog import read_catalog_file
 import glob
 import numpy as np
 from datetime import timedelta
@@ -17,17 +19,35 @@ import pandas as pd
 import configparser
 import argparse
 import sys
-from PyQt5.QtWidgets import QApplication
 import pickle
 
 
 def pickphase(eqs, para, logger):
+    from PySide6.QtWidgets import QApplication
+    from seispy.pickseis.sviewerui import MatplotlibWidget
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(eqs, para, logger)
     ui.show()
-    if app.exec_() == 0:
+    if app.exec() == 0:
         ui.exit_app()
         return
+
+
+def _add_header(st, evt_time, stainfo):
+    sta = stainfo.query.stations[0][0]
+    for tr in st:
+        header = SACTrace.from_obspy_trace(tr).to_obspy_trace().stats.sac
+        channel = tr.stats.channel
+        for ch in sta.channels:
+            if ch.code == channel:
+                header.cmpaz = ch.azimuth
+                header.cmpinc = -ch.dip
+        header.stla = stainfo.stla
+        header.stlo = stainfo.stlo
+        header.stel = stainfo.stel
+        header.b = 0
+        header.o = evt_time - tr.stats.starttime
+        tr.stats.__dict__['sac'] = header
 
 
 class SACFileNotFoundError(Exception):
@@ -35,6 +55,7 @@ class SACFileNotFoundError(Exception):
         self.matchkey = matchkey
     def __str__(self):
         print('No sac files found with {}'.format(self.matchkey))
+
 
 def datestr2regex(datestr):
     pattern = datestr.replace('%y', r'\d{2}')
@@ -48,37 +69,84 @@ def datestr2regex(datestr):
     return pattern
 
 
-def read_catalog(logpath, b_time, e_time, stla, stlo, magmin=5.5, magmax=10, dismin=30, dismax=90):
-    col = ['date', 'evla', 'evlo', 'evdp', 'mag']
-    eq_lst = pd.DataFrame(columns=col)
-    with open(logpath) as f:
-        lines = f.readlines()
-        for line in lines:
-            line_sp = line.strip().split()
-            date_now = UTCDateTime.strptime('.'.join(line_sp[0:3]) + 'T' + '.'.join(line_sp[4:7]),
-                                                  '%Y.%m.%dT%H.%M.%S')
-            evla = float(line_sp[7])
-            evlo = float(line_sp[8])
-            evdp = float(line_sp[9])
-            mw = float(line_sp[10])
-            dis = distaz(stla, stlo, evla, evlo).delta
-            # bazi = seispy.distaz(stla, stlo, evla, evlo).getBaz()
-            if b_time <= date_now <= e_time and magmin <= mw <= magmax and dismin <= dis <= dismax:
-                this_data = pd.DataFrame([[date_now, evla, evlo, evdp, mw]], columns=col)
-                # eq_lst = eq_lst.append(this_data, ignore_index=True)
-                eq_lst = pd.concat([eq_lst, this_data], ignore_index=True)
+def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
+                 magmin=5.5, magmax=10., dismin=30., dismax=90.):
+    """Read local catalog with seispy or QUAKEML format
+
+    :param logpath: Path to catalogs
+    :type logpath: str
+    :param b_time: Start time 
+    :type b_time: obspy.UTCDateTime
+    :param e_time: End time
+    :type e_time: obspy.UTCDateTime
+    :param stla: Station latitude
+    :type stla: float
+    :param stlo: Station longitude
+    :type stlo: float
+    :param magmin: Minimum magnitude, defaults to 5.5
+    :type magmin: float, optional
+    :param magmax: Maximum magnitude, defaults to 10
+    :type magmax: float, optional
+    :param dismin: Minimum distance, defaults to 30
+    :type dismin: float, optional
+    :param dismax: Maximum distance, defaults to 90
+    :type dismax: float, optional
+    :return: list of earthquakes
+    :rtype: pandas.DataFrame
+    """
+    try:
+        eq_lst = read_catalog_file(logpath)
+    except:
+        events = read_events(logpath, 'QUAKEML')
+        eq_lst = _cat2df(events)
+    dis = distaz(stla, stlo, eq_lst['evla'], eq_lst['evlo']).delta
+    eq_lst = eq_lst[(eq_lst['date']>=b_time) & (eq_lst['date']<=e_time) & \
+                    (eq_lst['mag']>=magmin) & (eq_lst['mag']<=magmax) & \
+                    (dis>=dismin) & (dis<=dismax)]
     return eq_lst
 
 
-def load_station_info(pathname, ref_comp, suffix):
-    try:
-        ex_sac = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))[0]
-    except Exception:
-        raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
-    ex_tr = SACTrace.read(ex_sac, headonly=True)
-    if (ex_tr.stla is None or ex_tr.stlo is None):
-        raise ValueError('The stlo and stla are not in the SACHeader')
-    return ex_tr.knetwk, ex_tr.kstnm, ex_tr.stla, ex_tr.stlo, ex_tr.stel
+def fetch_waveform(eq_lst, para, model, logger):
+    tb = np.max([2*para.noiselen, 2*para.time_before])
+    te = np.max([2*para.noiselen, 2*para.time_after])
+    query = Query(para.data_server)
+    new_col = ['dis', 'bazi', 'data', 'datestr']
+    eq_match = pd.DataFrame(columns=new_col)
+    for i, row in eq_lst.iterrows():
+        datestr = row['date'].strftime('%Y.%j.%H.%M.%S')
+        daz = distaz(para.stainfo.stla, para.stainfo.stlo, row['evla'], row['evlo'])
+        arrivals = model.get_travel_times(row['evdp'], daz.delta, phase_list=[para.phase])
+        if not arrivals:
+            logger.RFlog.error('The phase of {} with source depth {} and distance {} is not exists'.format(
+                                     para.phase, row['evdp'], daz.delta))
+            continue
+        if len(arrivals) > 1:
+            logger.RFlog.error('More than one phase were calculated with source depth of {} and distance of {}'.format(
+                               row['evdp'], daz.delta))
+        else:
+            arr_time = arrivals[0].time
+        t1 = row['date']+arr_time-tb
+        t2 = row['date']+arr_time+te
+        try:
+            logger.RFlog.info('Fetch waveforms of ({}/{}) event {} from {}'.format(
+                              i+1, eq_lst.shape[0], datestr, para.data_server))
+            st = query.client.get_waveforms(para.stainfo.network, para.stainfo.station,
+                                            para.stainfo.location, para.stainfo.channel, t1, t2)
+            _add_header(st, row['date'], para.stainfo)
+        except Exception as e:
+            logger.RFlog.error('Error in fetching waveforms of event {}: {}'.format(datestr, str(e).strip()))
+            continue
+        try:
+            this_eq = EQ.from_stream(st)
+        except Exception as e:
+            logger.RFlog.error('{}'.format(e))
+            continue
+        this_eq.get_time_offset(row['date'])
+        this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
+        eq_match = pd.concat([eq_match, this_df])
+    ind = eq_match.index.drop_duplicates(keep=False)
+    eq_match = eq_match.loc[ind]
+    return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
 
 def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', offset=None,
@@ -125,73 +193,6 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
 
 
-class stainfo():
-    def __init__(self):
-        self.network = ''
-        self.station = ''
-        self.stla = 0.
-        self.stlo = 0.
-        self.stel = 0.
-
-    def get_stainfo(self):
-        return self.__dict__
-
-    def load_stainfo(self, pathname, ref_comp, suffix):
-        (self.network, self.station, self.stla, self.stlo, self.stel) = load_station_info(pathname, ref_comp, suffix)
-
-
-def CfgParser(cfg_file):
-    cf = configparser.RawConfigParser(allow_no_value=True)
-    pa = para()
-    try:
-        cf.read(cfg_file)
-    except Exception:
-        raise FileNotFoundError('Cannot open configure file %s' % cfg_file)
-    for key, value in cf.items('path'):
-        if value == '':
-            continue
-        elif key == 'datapath':
-            pa.datapath = value
-        elif key == 'rfpath':
-            pa.rfpath = value
-        elif key == 'catalogpath':
-            pa.catalogpath = value
-        else:
-            pa.__dict__[key] = value
-    sections = cf.sections()
-    sections.remove('path')
-    for sec in sections:
-        for key, value in cf.items(sec):
-            if key == 'date_begin':
-                pa.__dict__[key] = UTCDateTime(value)
-            elif key == 'date_end':
-                pa.__dict__[key] = UTCDateTime(value)
-            elif key == 'offset':
-                try:
-                    pa.__dict__[key] = float(value)
-                except:
-                    pa.__dict__[key] = None
-            elif key == 'itmax':
-                pa.__dict__[key] = int(value)
-            elif key == 'only_r':
-                pa.__dict__[key] = cf.getboolean(sec, 'only_r')
-            elif key == 'criterion':
-                pa.criterion = value
-            elif key == 'decon_method':
-                pa.decon_method = value
-            elif key == 'rmsgate':
-                try:
-                    pa.rmsgate = cf.getfloat(sec, 'rmsgate')
-                except:
-                    pa.rmsgate = None
-            else:
-                try:
-                    pa.__dict__[key] = float(value)
-                except ValueError:
-                    pa.__dict__[key] = value
-    return pa
-
-
 def CfgModify(cfg_file, session, key, value):
     cf = configparser.RawConfigParser()
     try:
@@ -209,20 +210,20 @@ class RF(object):
         else:
             self.logger = log
         if cfg_file is None:
-            self.para = para()
+            self.para = RFPara()
         elif isinstance(cfg_file, str):
             if not exists(cfg_file):
                 self.logger.RFlog.error('No such file of {}.'.format(cfg_file))
                 sys.exit(1)
-            self.para = CfgParser(cfg_file)
+            self.para = RFPara.read_para(cfg_file)
         else:
             raise TypeError('cfg should be in \'str\' format rather than \'{0}\''.format(type(cfg_file)))
-        if not isinstance(self.para, para):
+        if not isinstance(self.para, RFPara):
             raise TypeError('Input value should be class seispy.rf.para')
         self.eq_lst = pd.DataFrame()
         self.eqs = pd.DataFrame()
-        self.model = TauPyModel('iasp91')
-        self.stainfo = stainfo()
+        self.model = TauPyModel(self.para.velmod)
+        self.stainfo = self.para.stainfo
         self.baz_shift = 0
 
     @property
@@ -243,24 +244,34 @@ class RF(object):
 
     def load_stainfo(self):
         try:
-            self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
-            self.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
+            if self.para.use_remote_data:
+                self.logger.RFlog.info('Load station info of {}.{} from {} web-service'.format(
+                    self.para.stainfo.network, self.para.stainfo.station, self.para.data_server))
+                self.para.stainfo.get_station_from_ws(self.para.data_server)
+                try:
+                    self.para._check_date_range()
+                except Exception as e:
+                    self.logger.RFlog.error('{}'.format(e))
+                    sys.exit(1)
+            else:
+                self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
+                self.para.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
         except Exception as e:
-            self.logger.RFlog.error('{0}'.format(e))
-            raise e
+            self.logger.RFlog.error('Error in loading station info: {0}'.format(e))
+            sys.exit(1)
 
-    def search_eq(self, local=False, server=None, catalog='GCMT'):
+    def search_eq(self, local=False, catalog=None):
         if not local:
             try:
-                if server is None:
-                    server = self.para.catalog_server
-                self.logger.RFlog.info('Searching earthquakes from {}'.format(server))
+                self.logger.RFlog.info('Searching earthquakes from {}'.format(self.para.cata_server))
                 if self.para.date_end > UTCDateTime():
                     self.para.date_end = UTCDateTime()
-                self.eq_lst = wsfetch(server, starttime=self.para.date_begin, endtime=self.para.date_end,
-                                      latitude=self.stainfo.stla, longitude=self.stainfo.stlo,
-                                      minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
-                                      minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
+                query = Query(self.para.cata_server)
+                query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
+                                 latitude=self.para.stainfo.stla, longitude=self.para.stainfo.stlo,
+                                 minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
+                                 minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
+                self.eq_lst = query.events
             except Exception as e:
                 raise ConnectionError(e)
         else:
@@ -269,7 +280,7 @@ class RF(object):
                     'Searching earthquakes from {0} to {1}'.format(self.date_begin.strftime('%Y.%m.%dT%H:%M:%S'),
                                                                    self.date_end.strftime('%Y.%m.%dT%H:%M:%S')))
                 self.eq_lst = read_catalog(self.para.catalogpath, self.para.date_begin, self.para.date_end,
-                                           self.stainfo.stla, self.stainfo.stlo,
+                                           self.para.stainfo.stla, self.para.stainfo.stlo,
                                            magmin=self.para.magmin, magmax=self.para.magmax,
                                            dismin=self.para.dismin, dismax=self.para.dismax)
             except Exception as e:
@@ -279,19 +290,30 @@ class RF(object):
 
     def match_eq(self):
         try:
-            self.logger.RFlog.info('Match SAC files')
-            self.eqs = match_eq(self.eq_lst, self.para.datapath, self.stainfo.stla, self.stainfo.stlo, self.logger,
-                                ref_comp=self.para.ref_comp, suffix=self.para.suffix,
-                                offset=self.para.offset, tolerance=self.para.tolerance,
-                                dateformat=self.para.dateformat)
+            if self.para.use_remote_data:
+                self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
+                self.eqs = fetch_waveform(self.eq_lst, self.para, self.model, self.logger)
+            else:
+                self.logger.RFlog.info('Associating SAC files with earthquakes')
+                self.eqs = match_eq(self.eq_lst, self.para.datapath, self.para.stainfo.stla, 
+                                    self.para.stainfo.stlo, self.logger,
+                                    ref_comp=self.para.ref_comp, suffix=self.para.suffix,
+                                    offset=self.para.offset, tolerance=self.para.tolerance,
+                                    dateformat=self.para.dateformat)
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise e
         if self.eqs.shape[0] == 0:
-            self.logger.RFlog.warning('No earthquakes matched, please check configurations.'.format(self.eqs.shape[0]))
+            self.logger.RFlog.warning('No earthquakes associated, please check configurations.'.format(self.eqs.shape[0]))
             sys.exit(1)
         else:
-            self.logger.RFlog.info('{0} earthquakes are matched'.format(self.eqs.shape[0]))
+            self.logger.RFlog.info('{0} earthquakes are associated'.format(self.eqs.shape[0]))
+
+    def save_raw_data(self):
+        if not exists(self.para.datapath):
+            makedirs(self.para.datapath)
+        for i, row in self.eqs.iterrows():
+            row['data'].write(self.para.datapath, row['date'])
 
     def savepjt(self):
         eqs = self.eqs.copy()
@@ -374,9 +396,6 @@ class RF(object):
                 self.logger.RFlog.error('Range of searching bazi is too small.')
                 sys.exit(1)
             self.baz_shift = np.mean(shift_all[np.where(np.logical_not(np.isnan(shift_all)))])
-            # fig = _plotampt(x, y, ampt_all, shift_all)
-            # fig.savefig('{}_rotation.png'.format(self.stainfo.station))
-            # self._baz_confirm(offset, ampt_all)
             self.logger.RFlog.info('Average {:.1f} deg offset in back-azimuth'.format(self.baz_shift))
 
     def rotate(self, search_inc=False):
@@ -453,7 +472,7 @@ class RF(object):
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
 
-    def saverf(self):
+    def saverf(self, gauss=None):
         npts = int((self.para.time_before + self.para.time_after)/self.para.target_dt+1)
         if self.para.phase[-1] == 'P':
             shift = self.para.time_before
@@ -462,16 +481,25 @@ class RF(object):
         else:
             pass
         good_lst = []
+        if isinstance(self.para.gauss, (int, float)):
+            gauss = self.para.gauss
+        elif gauss is None:
+            gauss = self.para.gauss[0]
+        else:
+            if gauss in self.para.gauss:
+                pass
+            else:
+                raise ValueError('gauss should be a element in the seispy.para.RFPara.gauss')
 
         if self.para.rmsgate is not None:
             self.logger.RFlog.info('Save RFs with final RMS less than {:.2f} and criterion of {}'.format(self.para.rmsgate, self.para.criterion))
         else:
             self.logger.RFlog.info('Save RFs with and criterion of {}'.format(self.para.criterion))
         for i, row in self.eqs.iterrows():
-            if row['data'].judge_rf(shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
+            if row['data'].judge_rf(gauss, shift, npts, criterion=self.para.criterion, rmsgate=self.para.rmsgate):
                 row['data'].saverf(self.para.rfpath, evtstr=row['date'].strftime('%Y.%j.%H.%M.%S'), shift=shift,
                                    evla=row['evla'], evlo=row['evlo'], evdp=row['evdp'], baz=row['bazi'],
-                                   mag=row['mag'], gcarc=row['dis'], gauss=self.para.gauss, only_r=self.para.only_r,
+                                   mag=row['mag'], gcarc=row['dis'], gauss=gauss, only_r=self.para.only_r,
                                    user9=self.baz_shift)
                 good_lst.append(i)
         self.logger.RFlog.info('{} PRFs are saved.'.format(len(good_lst)))
