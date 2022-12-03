@@ -24,7 +24,7 @@ import pickle
 
 def pickphase(eqs, para, logger):
     from PySide6.QtWidgets import QApplication
-    from seispy.sviewerui import MatplotlibWidget
+    from seispy.pickseis.sviewerui import MatplotlibWidget
     app = QApplication(sys.argv)
     ui = MatplotlibWidget(eqs, para, logger)
     ui.show()

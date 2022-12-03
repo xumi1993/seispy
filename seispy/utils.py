@@ -1,9 +1,9 @@
-from os.path import join, dirname, exists, abspath
+from os.path import join, dirname, exists
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
 from seispy import geo
-from seispy.geo import geo2sph, km2deg, skm2srad, sph2geo, srad2skm
+from seispy.geo import geo2sph, sph2geo
 from seispy import distaz
 import numpy as np
 from scipy.interpolate import interp1d, interpn

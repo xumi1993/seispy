@@ -9,8 +9,8 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
 from os.path import exists, dirname, join
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 import matplotlib.pyplot as plt
-from seispy.pickfigure import RFFigure
-from seispy.rpickfigure import RPickFigure
+from seispy.pickrf.pickfigure import RFFigure
+from seispy.pickrf.rpickfigure import RPickFigure
 import glob
 
 

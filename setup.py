@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.2.19"
+VERSION = "1.3.0"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -35,7 +35,7 @@ setup(name='python-seispy',
                                         'download_catalog=seispy.catalog:main',
                                         'ccp_profile=seispy.scripts:ccp_profile',
                                         'hk=seispy.hk:hk',
-                                        'pickrf=seispy.pickui:main',
+                                        'pickrf=seispy.pickrf.pickui:main',
                                         'pickdepth=seispy.pickdepth.pickdepthui:main',
                                         'rfani=seispy.scripts:rfani',
                                         'ccp3d=seispy.scripts:ccp3d',

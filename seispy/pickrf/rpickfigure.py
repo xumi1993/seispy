@@ -3,7 +3,7 @@ import obspy
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
-from seispy.pickfigure import RFFigure, indexpags
+from seispy.pickrf.pickfigure import RFFigure, indexpags
 from seispy.rfcorrect import RFStation
 from os.path import join, basename
 
