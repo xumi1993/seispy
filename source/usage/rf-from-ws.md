@@ -83,7 +83,7 @@ rf.search_eq(catalog='NEIC PDE')
 rf.match_eq() 
 ```
 
-### Calculate RF 
+## Calculate PRFs 
   - Remove the linear trend (`rf.detrend`) and apply a bandpass filter (`rf.filter`) to the data. The frequencies for the bandpass filter are set in the [`RF.para`](#set-the-parameters) ([`'para.freqmin'`](#set-the-parameters) and [`'para.freqmin'`](#set-the-parameters));   
   - Mark phase arrivals with the server of Taup and the velocity mode ([`'para.velmod'`](#set-the-parameters)) can be set in the [`RF.para`](#set-the-parameters);   
   - Rotate the seismic data to `'RTZ'` or`'LQT'` and delete the events with the SNR lower than the [`'para.noisegate'`](#set-the-parameters);   
@@ -103,7 +103,7 @@ rf.trim()
 rf.deconv()
 ```
 
-### Save the RFs
+### Save the PRFs
   Save the RFs calculating with different Gauss factors.
 
 
