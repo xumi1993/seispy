@@ -5,8 +5,6 @@
 
 # Seispy Documentation
 
------------------------
-
 [![License](https://img.shields.io/github/license/xumi1993/seispy)]()
 [![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
@@ -22,7 +20,7 @@
 </a> 
 
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/version.svg)](https://anaconda.org/conda-forge/seispy)
-[![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/installer/conda.svg)](https://conda.anaconda.org/conda-forge)
+[![Conda Version](https://img.shields.io/conda/vn/conda-forge/seispy.svg)](https://anaconda.org/conda-forge/seispy)
 [![Anaconda-Server Badge](https://anaconda.org/conda-forge/seispy/badges/downloads.svg)](https://anaconda.org/conda-forge/seispy)
 
 [![PyPI](https://img.shields.io/pypi/v/python-seispy)](https://pypi.org/project/python-seispy/)
@@ -38,22 +36,18 @@ Seispy is a graphical interface Python module for receiver function (RF) calcula
 
 ## Installation
 
-::::{panels}
-:container: full-width
-----
-:header: bg-myst-one
-**Install via PyPI**
-^^^^
+::::{grid} 2
+
+:::{grid-item-card} **Install via PyPI**
 ```
 pip install python-seispy
 ```
----
-:header: bg-myst-two
-**Install via conda**
-^^^^
+:::
+:::{grid-item-card} **Install via conda**
 ```
 conda install seispy -c conda-forge
 ```
+:::
 ::::
 Further details are available in the [Installation Guide](installation).
 
@@ -64,34 +58,25 @@ Further details are available in the [Installation Guide](installation).
 Access [here](https://www.koushare.com/video/videodetail/14734) for video tutorial in Chinese
 :::
 
-::::{panels} 
-:container: full-width
-:column: col-lg-4 p-2
----
-:header: bg-myst-two
-**Getting Started**
-^^^
+::::{grid} 3
+:::{grid-item-card} **Getting Started**
 - [Introduction to receiver function](usage/PRF_Process)
 - [Procedure of RF calculation](usage/rf-sta)
 - [Visual check RFs](usage/pickrf)
 - [Time-to-depth & CCP stacking](usage/ccp)
----
-:header: bg-myst-three
-**Examples**
-^^^
+:::
+:::{grid-item-card} **Examples**
 - [RF calculation & H-k stacking](examples/ex-prf)
 - [CCP staking along profile](examples/ex-ccp)
 - [3D CCP stacking](examples/ex-ccp3d)
 - [Crustal anisotropy](examples/ex-rfani.md)
 - [Harmonic decomposition](examples/ex-harmo.md)
----
-:header: bg-myst-three
-**Configuration**
-^^^
+:::
+:::{grid-item-card} **Configuration**
 - [RF Configure](notes/rf_cfg)
 - [Hk Configure](notes/hk_cfg)
 - [CCP Configure](notes/ccp_cfg)
-
+:::
 ::::
 
 ## Libraries

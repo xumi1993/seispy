@@ -16,5 +16,5 @@ dependencies:
   - pip:
     - sphinx-gallery
     - sphinx-cjkspace
-    - sphinx-panels
+    # - sphinx-panels
     - sphinx-icon

@@ -6,13 +6,13 @@ Dependencies
 
 The current version has been integration tested using **Python 3**. 
 
-Following Python modules are required for the Seispy, **but do not have to be installed manually.**
+Following Python modules are required for the Seispy, **but do not have to be installed manually.** Once the Seispy has been installed, dependencies are automatically installed to your environment.
 
 - `Numpy <https://numpy.org/>`_
 - `Scipy <https://www.scipy.org/scipylib/index.html>`_
 - `Obspy <https://docs.obspy.org/>`_
 - `Matplotlib <https://matplotlib.org/>`_
-- `Pyqt5 <https://pypi.org/project/PyQt5/>`_
+- `PySide6 <https://doc.qt.io/qtforpython/index.html>`_
 
 
 Install and update via `Anaconda <https://www.anaconda.com/>`_ 
@@ -35,7 +35,8 @@ Once the ``conda-forge`` channel has been enabled, ``seispy`` can be installed w
 
 .. code-block:: shell
 
-    conda install seispy -c conda-forge
+    conda create -n seispy seispy
+    conda activate seispy
 
 
 ``Seispy`` can be updated with:
@@ -78,18 +79,23 @@ Upgrading Seispy to the next stable version.
     pip install python-seispy -U
 
 
-Install and update from source code
+Install and update from source codes
 --------------------------------------
 
-Download
-^^^^^^^^^^
+Download source codes
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Clone the source code from `Github <https://github.com/xumi1993/seispy.git>`_ to any directory.
 
 .. code-block:: shell
 
-    git clone --depth=1 https://github.com/xumi1993/seispy.git
+    git clone https://github.com/xumi1993/seispy.git
 
+To access developing version, users can clone the source codes with 
+
+.. code-block:: shell
+
+    git clone --branch=dev https://github.com/xumi1993/seispy.git
 
 For **Chinese users**, try to clone the source code from `Gitlab repository <https://gitlab.com/xumi1993/seispy.git>`_
 
@@ -97,6 +103,11 @@ For **Chinese users**, try to clone the source code from `Gitlab repository <htt
 
     git clone https://gitlab.com/xumi1993/seispy.git
 
+or
+
+.. code-block:: shell
+
+    git clone --branch=dev https://gitlab.com/xumi1993/seispy.git
 
 Install Seispy to the Python environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
