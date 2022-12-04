@@ -48,7 +48,7 @@ class MyMplCanvas(FigureCanvas):
                                    height=height, dpi=dpi, smooth=smooth)
         self.gooddepth.get_dep(depmin, depmax)
         self.gooddepth.bin_idx = idx
-        self.gooddepth._get_next_bin()
+        self.gooddepth._check_nan_bin()
         self.gooddepth.plot_bin()
         FigureCanvas.__init__(self, self.gooddepth.fig)
         self.setParent(parent)
