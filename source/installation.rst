@@ -129,3 +129,32 @@ To update the Seispy, please change to directory of the source code, and execute
     cd path/to/seispy
     git pull
     pip install .
+
+
+FAQ
+-------
+- When old users update seispy to v1.3.0, An error probably raised because of incompatible Qt library
+    .. code-block:: shell
+
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqwebgl.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqoffscreen.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqminimal.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqcocoa.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.qpa.plugin: Could not find the Qt platform plugin "cocoa" in ""
+        This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+    Please uninstall PyQt5 with ``pip`` or ``conda``
+
+    .. code-block:: shell
+
+        pip uninstall pyqt5
+
+    or 
+
+    .. code-block:: shell
+
+        conda remove pyqt
