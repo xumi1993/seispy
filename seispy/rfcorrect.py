@@ -195,9 +195,9 @@ class RFStation(object):
         if not isinstance(method, str):
             raise TypeError('\'type\' must be string, but {} type got'.format(type(method)))
         if method == 'single':
-            maxamp = np.nanmax(np.abs(self.__dict__['data{}'.format(self.comp.lower())]), axis=1)
+            maxamp = np.nanmax(np.abs(self.data_prime), axis=1)
         elif method == 'average':
-            amp = np.nanmax(np.abs(np.mean(self.__dict__['data{}'.format(self.comp.lower())], axis=0)))
+            amp = np.nanmax(np.abs(np.mean(self.data_prime, axis=0)))
             maxamp = np.ones(self.ev_num) * amp
         else:
             raise ValueError('\'method\' must be in \'single\' and \'average\'')
