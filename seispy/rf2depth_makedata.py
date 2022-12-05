@@ -73,8 +73,8 @@ def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
     RFdepth = []
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
-        evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
-        stadatar = RFStation(evt_lst, only_r=True)
+        rfpath = join(cpara.rfpath, sta_info.station[i])
+        stadatar = RFStation(rfpath, only_r=True)
         stadatar.stel = sta_info.stel[i]
         stadatar.stla = sta_info.stla[i]
         stadatar.stlo = sta_info.stlo[i]
@@ -122,8 +122,8 @@ def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
     RFdepth = []
     for i in range(sta_info.stla.shape[0]):
         rfdep = {}
-        evt_lst = join(cpara.rfpath, sta_info.station[i], sta_info.station[i] + 'finallist.dat')
-        stadatar = RFStation(evt_lst, only_r=True)
+        rfpath = join(cpara.rfpath, sta_info.station[i])
+        stadatar = RFStation(rfpath, only_r=True)
         stadatar.stel = sta_info.stel[i]
         stadatar.stla = sta_info.stla[i]
         stadatar.stlo = sta_info.stlo[i]
