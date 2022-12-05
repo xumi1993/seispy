@@ -160,7 +160,8 @@ class RFFigure(Figure):
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
-        self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
+        # self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
+        self.staname = basename(self.rfpath)
         self.fig.suptitle("{} (Latitude: {:.2f}\N{DEGREE SIGN}, Longitude: {:.2f}\N{DEGREE SIGN})".format(
                           self.staname, self.rrf[0].stats.sac.stla, self.rrf[0].stats.sac.stlo), fontsize=20)
 
