@@ -202,7 +202,7 @@ class RFStation(object):
         else:
             raise ValueError('\'method\' must be in \'single\' and \'average\'')
         for i in range(self.ev_num):
-            self.data_prime /= maxamp[i]
+            self.data_prime[i] /= maxamp[i]
             exec('self.data{} = self.data_prime'.format(self.comp.lower()))
             if not self.only_r:
                 self.datat[i] /= maxamp[i]
