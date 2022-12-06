@@ -33,12 +33,6 @@ class LoggerText(logging.Handler):
         self.widget.appendPlainText(msg)
 
 
-def get_color(depth, cmap='jet_r'):
-    colors = cm.get_cmap(cmap, 20)
-    # print([v*255 for v in colors(depth)[0:3]])
-    return '#{:02x}{:02x}{:02x}'.format(*[int(v*255) for v in colors(depth)[0:3]])
-
-
 class MyMplCanvas(FigureCanvas):
     def __init__(self, parent=None, stack_data_path='', idx=0,
                 depmin=30, depmax=60, logger=None, width=7.2,
@@ -48,7 +42,7 @@ class MyMplCanvas(FigureCanvas):
                                    height=height, dpi=dpi, smooth=smooth)
         self.gooddepth.get_dep(depmin, depmax)
         self.gooddepth.bin_idx = idx
-        self.gooddepth._get_next_bin()
+        self.gooddepth._check_nan_bin()
         self.gooddepth.plot_bin()
         FigureCanvas.__init__(self, self.gooddepth.fig)
         self.setParent(parent)

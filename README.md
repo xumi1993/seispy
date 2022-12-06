@@ -76,10 +76,11 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
  * `ccp3d`: Stack PRFs with spaced bins.
  * `rfani`: Estimating crustal anisotropy with a joint method.
  * `rfharmo`: Harmonic decomposition to extract constant component of RF and plot dip/anisotropic components.
+ * `pickdepth`: Pick depth of stacked PRFs following `ccp3d`
 
 ### Others
  * `veltxt2mod`: Create 3D velocity model with `numpy.lib.npyio.NpzFile` format from a ASCII table file.
- * `ndk2dat`: Convert the GCMT catalog file ("ndk" format) to the list file for the `prf` command.
- * `updatecatalog`: Automatically update the GCMT catalog.
+ * `downlod_catalog`: Download catalogs from FDSN web-service.
+ * `gen_rayp_lib`: Generate a rap-parameter library with depth of source and epicentral distance.
  * `setpar`: Set up the values in configure files.
 

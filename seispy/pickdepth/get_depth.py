@@ -201,6 +201,13 @@ class GoodDepth():
         ax_c.set_xlabel('Count')
         ax_c.invert_yaxis()
 
+    def _check_nan_bin(self):
+        while True:
+            if np.isnan(self.good_depth.iloc[self.bin_idx]['depth']):
+                self.bin_idx += 1
+            else:
+                break
+
     def _get_next_bin(self):
         self.bin_idx += 1
         while True:
