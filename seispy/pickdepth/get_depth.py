@@ -109,8 +109,8 @@ class GoodDepth():
         if self.depmin < 100:
             self.plot_min = 0
         else:
-            self.plot_min = self.depmin*0.85
-        self.plot_max = self.depmax*1.15
+            self.plot_min = self.depmin-(self.depmax-self.depmin)*0.15
+        self.plot_max = self.depmax+(self.depmax-self.depmin)*0.15
         # self.this_depth = self.good_depth.iloc[self.bin_idx]['depth']
         self.get_adjacent(idx)
         self.init_fig(**kwargs)
