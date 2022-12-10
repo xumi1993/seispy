@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 from matplotlib.ticker import AutoMinorLocator, AutoLocator
 from matplotlib.backend_bases import MouseButton
+import warnings
 
 
 def search_peak(tr, cpara, depmin, depmax):
@@ -29,7 +30,7 @@ class GoodDepth():
         self.ccp_data = CCP3D.read_stack_data(stack_data_path)
         self.good_depth = pd.DataFrame(columns=['depth', 'amp', 'count', 'ci_low', 'ci_high'])
         self.bin_idx = 0
-        self.smooth = 10
+        self.smooth = smooth
         self.smooth_val = int(self.smooth/self.ccp_data.cpara.stack_val)
         self.create_fig(width=width, height=height, dpi=dpi)
         
@@ -129,7 +130,7 @@ class GoodDepth():
         ax.grid(color='gray', linestyle='--', linewidth=0.4, axis='y')
         for i, pos_lon in enumerate(self.ew_lon):
             # pos_lon = self.bin_mat[self.bin_loc_idx[0], idx_lon, 1]
-            amp = self.stack_ew[i] * self.ccp_data.cpara.slide_val/50 + pos_lon
+            amp = self.stack_ew[i]*self.ccp_data.cpara.center_bin[-1]*self.val*0.5 + pos_lon
             ax.plot(amp, self.ccp_data.cpara.stack_range, linewidth=0.2, color='black')
             if not np.isnan(amp).all():
                 if i == self.val:
@@ -149,7 +150,7 @@ class GoodDepth():
         ax.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
         for i, pos_lat in enumerate(self.ns_lat):
             # pos_lat = self.bin_mat[idx_lat, self.bin_loc_idx[1], 0]
-            amp = self.stack_ns[i] * self.ccp_data.cpara.slide_val/50 + pos_lat
+            amp = self.stack_ns[i] * self.ccp_data.cpara.center_bin[-1]*self.val*0.5 + pos_lat
             ax.plot(self.ccp_data.cpara.stack_range, amp, linewidth=0.2, color='black')
             if not np.isnan(amp).all():
                 if i == self.val:
@@ -183,9 +184,10 @@ class GoodDepth():
             self.maxpeak = np.nanmax(self.mu) + 0.1
 
     def plot_stack(self, ax, ax_c):
+        warnings.simplefilter('ignore')
         ax.cla()
         ax_c.cla()
-        maxamp = np.max(np.abs(self.mu))*1.5
+        maxamp = np.nanmax(np.abs(self.mu))*1.5
         ax.plot([0, 0], [0, 1000], color='k', linewidth=0.5)
         ax.plot(self.mu, self.ccp_data.cpara.stack_range)
         ax.plot(self.ci[:, 0], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
