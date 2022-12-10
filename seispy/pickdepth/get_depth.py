@@ -1,5 +1,5 @@
 from seispy.ccp3d import CCP3D
-from seispy.geo import extrema
+from seispy.geo import extrema, latlon_from
 from seispy.signal import smooth
 import numpy as np
 import pandas as pd
@@ -66,15 +66,25 @@ class GoodDepth():
                                    columns=['depth', 'amp', 'count', 'ci_low', 'ci_high'])
             self.good_depth = pd.concat([self.good_depth, this_df], ignore_index=True)
     
-    def get_adjcent(self, idx, val=5):
+    def _get_adjacent_lim(self):
+        offset = self.ccp_data.cpara.center_bin[-1]*self.val+0.1
+        lat, lon = self.ccp_data.bin_loca[self.bin_idx]
+        _, lon_max = latlon_from(lat, lon, 90, offset)
+        _, lon_min= latlon_from(lat, lon, 270, offset)
+        lat_max, _ = latlon_from(lat, lon, 0, offset)
+        lat_min, _ = latlon_from(lat, lon, 180, offset)
+        self.ew_lon_lim = [lon_min, lon_max]
+        self.ns_lat_lim = [lat_min, lat_max]
+
+    def get_adjacent(self, idx, val=5):
         self.val = val
-        self.adjcent_ns = np.linspace(idx[0]-val, idx[0]+val, 2*val+1, dtype=np.uint8)
-        self.adjcent_ew = np.linspace(idx[1]-val, idx[1]+val, 2*val+1, dtype=np.uint8)
-        self.ns_lat = np.zeros(self.adjcent_ns.size)
-        self.ew_lon = np.zeros(self.adjcent_ew.size)
+        self.adjacent_ns = np.linspace(idx[0]-val, idx[0]+val, 2*val+1, dtype=np.uint8)
+        self.adjacent_ew = np.linspace(idx[1]-val, idx[1]+val, 2*val+1, dtype=np.uint8)
+        self.ns_lat = np.zeros(self.adjacent_ns.size)
+        self.ew_lon = np.zeros(self.adjacent_ew.size)
         self.stack_ew = np.zeros([2*val+1, self.ccp_data.cpara.stack_range.size])
         self.stack_ns = np.zeros([2*val+1, self.ccp_data.cpara.stack_range.size])
-        for i, idx_lat in enumerate(self.adjcent_ns):
+        for i, idx_lat in enumerate(self.adjacent_ns):
             try:
                 bin_idx = self.ccp_data.bin_map[idx_lat, idx[1]]
                 self.stack_ns[i] = self.ccp_data.stack_data[bin_idx]['mu']
@@ -82,7 +92,7 @@ class GoodDepth():
             except:
                 self.stack_ns[i] = np.nan
                 self.ns_lat[i] = np.nan
-        for i, idx_lon in enumerate(self.adjcent_ew):
+        for i, idx_lon in enumerate(self.adjacent_ew):
             try:
                 bin_idx = self.ccp_data.bin_map[idx[0], idx_lon]
                 self.stack_ew[i] = self.ccp_data.stack_data[bin_idx]['mu']
@@ -90,6 +100,7 @@ class GoodDepth():
             except:
                 self.stack_ew[i] = np.nan
                 self.ew_lon[i] = np.nan
+        self._get_adjacent_lim()
 
     def plot_bin(self, **kwargs):
         idx = np.where(self.ccp_data.bin_map==self.bin_idx)
@@ -100,7 +111,7 @@ class GoodDepth():
             self.plot_min = self.depmin*0.85
         self.plot_max = self.depmax*1.15
         # self.this_depth = self.good_depth.iloc[self.bin_idx]['depth']
-        self.get_adjcent(idx)
+        self.get_adjacent(idx)
         self.init_fig(**kwargs)
         self.logger.PickDepthlog.info('{}/{}: Depth = {} km'.format(
             self.bin_idx+1, self.ccp_data.bin_loca.shape[0],
@@ -126,10 +137,8 @@ class GoodDepth():
                 else:
                     ax.fill_betweenx(self.ccp_data.cpara.stack_range, amp, pos_lon, where=amp > pos_lon, facecolor='r', alpha=0.7)
         ax.set_ylim(self.plot_min, self.plot_max)
-        # ax.set_yticks(np.arange(0, 100, 20))
         ax.set_ylabel('Depth (km)')
-        ax.set_xlim(self.ccp_data.bin_loca[self.bin_idx, 1]-self.ccp_data.cpara.center_bin[-1]*self.val-0.1,
-                    self.ccp_data.bin_loca[self.bin_idx, 1]+self.ccp_data.cpara.center_bin[-1]*self.val+0.1)
+        ax.set_xlim(self.ew_lon_lim)
         ax.set_xlabel('Longitude ($^\circ$)')
         ax.set_title('Index: {}, Lat: {:.2f}$^\circ$, Lon: {:.2f}$^\circ$'.format(
             self.bin_idx+1, self.ccp_data.bin_loca[self.bin_idx][0], self.ccp_data.bin_loca[self.bin_idx][1]))
@@ -150,8 +159,7 @@ class GoodDepth():
         ax.set_xlim(self.plot_min, self.plot_max)
         # ax.set_xticks(np.arange(0, 100, 20))
         ax.set_xlabel('Depth (km)')
-        ax.set_ylim(self.ccp_data.bin_loca[self.bin_idx, 0]-self.ccp_data.cpara.center_bin[-1]*self.val-0.1,
-                    self.ccp_data.bin_loca[self.bin_idx, 0]+self.ccp_data.cpara.center_bin[-1]*self.val+0.1)
+        ax.set_ylim(self.ns_lat_lim)
         # ax.set_ylim(self.ns_lat[0]-0.1, self.ns_lat[-1]+0.1)
         ax.set_ylabel('Latitude ($^\circ$)')
 
@@ -167,7 +175,8 @@ class GoodDepth():
             self.prot_moho = [np.nan]
             self.maxpeak = [np.nan]
         else:
-            self.ex_idx = extrema(self.mu)
+            idx_all = extrema(self.mu)
+            self.ex_idx = idx_all[np.where(self.mu[idx_all] > 0)[0]]
             self.prot_moho = self.ccp_data.cpara.stack_range[self.ex_idx]
             #  self.prot_moho = self.prot_moho[np.where(self.mu[self.prot_moho] > 0)]
             # self.prot_moho.sort()
@@ -177,7 +186,7 @@ class GoodDepth():
         ax.cla()
         ax_c.cla()
         maxamp = np.max(np.abs(self.mu))*1.5
-        ax.plot([0, 0], [0, 100], color='k', linewidth=0.5)
+        ax.plot([0, 0], [0, 1000], color='k', linewidth=0.5)
         ax.plot(self.mu, self.ccp_data.cpara.stack_range)
         ax.plot(self.ci[:, 0], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
         ax.plot(self.ci[:, 1], self.ccp_data.cpara.stack_range, lw=0.5, ls='--', color='black')
