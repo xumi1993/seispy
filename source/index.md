@@ -52,6 +52,14 @@ conda install seispy -c conda-forge
 Further details are available in the [Installation Guide](installation).
 
 
+## Citation
+Users using Seispy in their research please cite our peer-reviewed journal article in manuscripts
+
+```{admonition} Reference
+Mijian Xu, Jing He; Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. *Seismological Research Letters* 2022; doi: [https://doi.org/10.1785/0220220288](https://doi.org/10.1785/0220220288)
+```
+
+
 ## Learning resources
 
 :::{seealso}
