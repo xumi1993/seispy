@@ -182,7 +182,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         try:
             this_eq = EQ(pathname, datestr, suffix)
         except Exception as e:
-            logger.RFlog.error(''.format(e))
+            logger.RFlog.error('{}'.format(e))
             continue
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
@@ -256,6 +256,8 @@ class RF(object):
             else:
                 self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
                 self.para.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
+            self.logger.RFlog.info('{}/{}, latitude: {:.3f}, longiture: {:.3f}'.format(
+                self.para.stainfo.network, self.para.stainfo.station, self.stainfo.stla, self.stainfo.stlo))
         except Exception as e:
             self.logger.RFlog.error('Error in loading station info: {0}'.format(e))
             sys.exit(1)
