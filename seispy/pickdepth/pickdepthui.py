@@ -267,7 +267,7 @@ def main():
     parser.add_argument('stack_data_path', type=str, help='Path to CCP stacked data')
     parser.add_argument('-d', help='Depth range contain target interface', metavar='dep_min/dep_max')
     parser.add_argument('-i', help='Specify starting index of bins', type=int, default=1, metavar='index')
-    parser.add_argument('-s', help='Smoothing scale in km', type=float, default=2, metavar='smooth')
+    parser.add_argument('-s', help='Smoothing scale in km', type=float, default=5, metavar='smooth')
     args = parser.parse_args()
     try:
         dep_range = [float(v) for v in args.d.split('/')]
@@ -276,7 +276,7 @@ def main():
     if args.i < 1:
         raise ValueError('The index should be greater than 0')
     app = QApplication(sys.argv)    
-    mapui = MapUI(args.stack_data_path, depmin=dep_range[0], depmax=dep_range[1], idx=args.i-1)
+    mapui = MapUI(args.stack_data_path, depmin=dep_range[0], depmax=dep_range[1], idx=args.i-1, smooth=args.s)
     mapui.show()
     sys.exit(app.exec())
 

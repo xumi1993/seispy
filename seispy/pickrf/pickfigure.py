@@ -115,9 +115,9 @@ class RFFigure(Figure):
         self.axg = self.axb.twiny()
 
     def set_figure(self):
-        self.axr.grid(b=True, which='major', axis='x')
-        self.axt.grid(b=True, which='major', axis='x')
-        self.axb.grid(b=True, which='major')
+        self.axr.grid(visible=True, which='major', axis='x')
+        self.axt.grid(visible=True, which='major', axis='x')
+        self.axb.grid(visible=True, which='major')
         self.axr.set_ylabel("Event")
         self.axr.set_xlabel("Time after P (s)")
         self.axr.set_title("{} component".format(self.comp))

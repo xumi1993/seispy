@@ -97,7 +97,7 @@ class SlantStack():
         if colorbar:
             cax = self.fig.colorbar(im, ax=self.ax)
             cax.set_label('Stack Amplitude')
-        self.ax.grid()
+        self.ax.grid(visible=True)
         self.ax.scatter(self.syn_tau, self.syn_drayp, color='k', marker='x')
         if xlim is not None and isinstance(xlim, (list, np.ndarray)):
             self.ax.set_xlim(xlim)
