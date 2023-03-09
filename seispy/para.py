@@ -9,11 +9,15 @@ import re
 
 
 def _load_station_info(pathname, ref_comp, suffix):
-    try:
-        ex_sac = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))[0]
-    except Exception:
+    ex_sac = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
+    if len(ex_sac) == 0:
         raise FileNotFoundError('no such SAC file in {0}'.format(pathname))
-    ex_tr = SACTrace.read(ex_sac, headonly=True)
+    for sac in ex_sac:
+        try:
+            ex_tr = SACTrace.read(sac, headonly=True)
+            break
+        except Exception:
+            continue
     if (ex_tr.stla is None or ex_tr.stlo is None):
         raise ValueError('The stlo and stla are not in the SACHeader')
     return ex_tr.knetwk, ex_tr.kstnm, ex_tr.stla, ex_tr.stlo, ex_tr.stel

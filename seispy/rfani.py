@@ -285,9 +285,9 @@ class RFAni():
             ax.set_theta_direction(-1)
             ax.set_theta_zero_location("N")
             if title == 'T energy':
-                eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap.reversed(), shading='auto')
+                eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap.reversed())
             else:
-                eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap, shading='auto')
+                eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap)
             ax.grid(True, color='lightgray', linewidth=0.5)
             ax.scatter(np.radians(self.bf), self.bt, color='white', marker='X', s=48)
             ax.set_xticks(np.radians(np.arange(0, 360, 30)))
