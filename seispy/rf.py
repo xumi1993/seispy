@@ -420,14 +420,17 @@ class RF(object):
                                        row['data'].datestr, row['data'].inc_correction))
         self.eqs.drop(drop_idx, inplace=True)
 
-    def drop_eq_snr(self, length=None):
+    def drop_eq_snr(self, length=None, z_only=False):
         if length is None:
             length = self.para.noiselen
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
             snr_E, snr_N, snr_Z = row['data'].snr(length=length)
-            mean_snr = np.mean([snr_E, snr_N, snr_Z])
+            if z_only:
+                mean_snr = snr_Z
+            else:
+                mean_snr = np.mean([snr_E, snr_N, snr_Z])
             if mean_snr < self.para.noisegate:
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
@@ -445,8 +448,9 @@ class RF(object):
             for _, row in self.eqs.iterrows():
                 row['data'].phase_trigger(self.para.time_before, self.para.time_after,
                                           stl=stl, ltl=ltl)
-        self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
         pickphase(self.eqs, self.para, self.logger)
+        self.logger.RFlog.info('{0} events left after visual checking'.format(self.eqs.shape[0]))
+
 
     def deconv(self):
         shift = self.para.time_before
