@@ -256,7 +256,7 @@ class RF(object):
             else:
                 self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
                 self.para.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
-            self.logger.RFlog.info('{}/{}, latitude: {:.3f}, longiture: {:.3f}'.format(
+            self.logger.RFlog.info('{}.{}, latitude: {:.3f}, longitude: {:.3f}'.format(
                 self.para.stainfo.network, self.para.stainfo.station, self.stainfo.stla, self.stainfo.stlo))
         except Exception as e:
             self.logger.RFlog.error('Error in loading station info: {0}'.format(e))
