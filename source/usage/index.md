@@ -9,4 +9,5 @@ srf
 pickrf
 ccp
 ps-depth
+pickdepths
 ```

@@ -27,3 +27,4 @@ test/ex-prf/
 test/._*
 test/RFresult/
 test/RFdepth.npy
+synrf.*
