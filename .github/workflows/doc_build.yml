@@ -33,8 +33,8 @@ jobs:
         with:
           activate-environment: docs
           environment-file: environment.yml
-          miniforge-variant: Mambaforge
-          use-mamba: true
+          # miniforge-variant: Mambaforge
+          # use-mamba: true
       
       - name: Build documentation
         run: |

@@ -6,13 +6,13 @@ Dependencies
 
 The current version has been integration tested using **Python 3**. 
 
-Following Python modules are required for the Seispy, **but do not have to be installed manually.**
+Following Python modules are required for the Seispy, **but do not have to be installed manually.** Once the Seispy has been installed, dependencies are automatically installed to your environment.
 
 - `Numpy <https://numpy.org/>`_
 - `Scipy <https://www.scipy.org/scipylib/index.html>`_
 - `Obspy <https://docs.obspy.org/>`_
 - `Matplotlib <https://matplotlib.org/>`_
-- `Pyqt5 <https://pypi.org/project/PyQt5/>`_
+- `PySide6 <https://doc.qt.io/qtforpython/index.html>`_
 
 
 Install and update via `Anaconda <https://www.anaconda.com/>`_ 
@@ -35,7 +35,8 @@ Once the ``conda-forge`` channel has been enabled, ``seispy`` can be installed w
 
 .. code-block:: shell
 
-    conda install seispy -c conda-forge
+    conda create -n seispy seispy
+    conda activate seispy
 
 
 ``Seispy`` can be updated with:
@@ -78,25 +79,35 @@ Upgrading Seispy to the next stable version.
     pip install python-seispy -U
 
 
-Install and update from source code
+Install and update from source codes
 --------------------------------------
 
-Download
-^^^^^^^^^^
+Download source codes
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 Clone the source code from `Github <https://github.com/xumi1993/seispy.git>`_ to any directory.
 
 .. code-block:: shell
 
-    git clone --depth=1 https://github.com/xumi1993/seispy.git
+    git clone https://github.com/xumi1993/seispy.git
 
-
-For **Chinese users**, try to clone the source code from `Git service of Nanjing University <https://git.nju.edu.cn/geophy/seispy>`_
+To access developing version, users can clone the source codes with 
 
 .. code-block:: shell
 
-    git clone https://git.nju.edu.cn/geophy/seispy.git
+    git clone --branch=dev https://github.com/xumi1993/seispy.git
 
+For **Chinese users**, try to clone the source code from `Gitlab repository <https://gitlab.com/xumi1993/seispy.git>`_
+
+.. code-block:: shell
+
+    git clone https://gitlab.com/xumi1993/seispy.git
+
+or
+
+.. code-block:: shell
+
+    git clone --branch=dev https://gitlab.com/xumi1993/seispy.git
 
 Install Seispy to the Python environment
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -105,7 +116,7 @@ Change path to where the source code was cloned into, and install the module via
 
 .. code-block:: shell
 
-    cd seispy
+    cd path/to/seispy
     pip install .
 
 Update Seispy
@@ -115,6 +126,35 @@ To update the Seispy, please change to directory of the source code, and execute
 
 .. code-block:: shell
 
-    cd seispy
+    cd path/to/seispy
     git pull
     pip install .
+
+
+FAQ
+-------
+- When old users update seispy to v1.3.0, An error probably raised because of incompatible Qt library
+    .. code-block:: shell
+
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqwebgl.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqoffscreen.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqminimal.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.core.plugin.loader: In /Users/zhangxiaoqing/miniconda3/plugins/platforms/libqcocoa.dylib:
+        Plugin uses incompatible Qt library (5.15.0) [release]
+        qt.qpa.plugin: Could not find the Qt platform plugin "cocoa" in ""
+        This application failed to start because no Qt platform plugin could be initialized. Reinstalling the application may fix this problem.
+
+    Please uninstall PyQt5 with ``pip`` or ``conda``
+
+    .. code-block:: shell
+
+        pip uninstall pyqt5
+
+    or 
+
+    .. code-block:: shell
+
+        conda remove pyqt

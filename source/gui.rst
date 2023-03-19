@@ -1,18 +1,18 @@
 GUI package
 ============
 
-seispy.pickfigure module
+seispy.pickrf.pickfigure module
 ------------------------
 
-.. automodule:: seispy.pickfigure
+.. automodule:: seispy.pickrf.pickfigure
     :members:
     :undoc-members:
     :show-inheritance:
 
-seispy.pickui module
+seispy.pickrf.pickui module
 --------------------
 
-.. automodule:: seispy.pickui
+.. automodule:: seispy.pickrf.pickui
     :members:
     :undoc-members:
     :show-inheritance:

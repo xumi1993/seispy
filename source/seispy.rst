@@ -105,22 +105,6 @@ seispy.para module
     :undoc-members:
     :show-inheritance:
 
-seispy.pickfigure module
-------------------------
-
-.. automodule:: seispy.pickfigure
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-seispy.pickui module
---------------------
-
-.. automodule:: seispy.pickui
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 seispy.plotR module
 -------------------
 
@@ -189,14 +173,6 @@ seispy.signal module
 --------------------
 
 .. automodule:: seispy.signal
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-seispy.updatecatalog module
----------------------------
-
-.. automodule:: seispy.updatecatalog
     :members:
     :undoc-members:
     :show-inheritance:

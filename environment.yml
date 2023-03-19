@@ -3,18 +3,17 @@ channels:
   - conda-forge
   - nodefaults
 dependencies:
-  - python=3.9
+  - python=3.10
+  - seispy
   - pip
   - sphinx
   - sphinx-copybutton
   - sphinx-design
   - myst-nb
   - pydata-sphinx-theme=0.8.1
-  - obspy=1.3.0
-  - seispy
+  - obspy
   - numpydoc
   - pip:
     - sphinx-gallery
     - sphinx-cjkspace
-    - sphinx-panels
     - sphinx-icon
