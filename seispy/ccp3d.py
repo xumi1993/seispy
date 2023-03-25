@@ -1,5 +1,5 @@
 import numpy as np
-from seispy.geo import km2deg, latlon_from, cosd, extrema, skm2srad, rad2deg
+from seispy.geo import km2deg, extrema, skm2srad, rad2deg
 from seispy import distaz
 from seispy.rfcorrect import DepModel
 from seispy.setuplog import setuplog

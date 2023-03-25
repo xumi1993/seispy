@@ -178,19 +178,23 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
         Longitude(s) of terminus point(s)
     """
 
+    def init_lalo(lat0, lon0, npts):
+        if hasattr(lat0, "__iter__") and hasattr(lon0, "__iter__"):
+            if len(lat0) != len(lon0):
+                raise ValueError('lat0 and lon0 must be in the same length')
+            elif len(lat0) != npts:
+                raise ValueError('initial points must be in the same length as azimuths')
+        elif isinstance(lat0, (int, float)) and isinstance(lon0, (int, float)):
+            lat = np.ones(npts) * lat0
+            lon = np.ones(npts) * lon0
+        else:
+            raise ValueError('lat0 and lon0 must be in the same length')
+        return lat, lon
+
     if hasattr(azimuth, "__iter__") and hasattr(gcarc_dist, "__iter__"):
         if len(azimuth) == len(gcarc_dist):
-            npnt = len(azimuth)
-            if hasattr(lat0, "__iter__") and hasattr(lon0, "__iter__"):
-                if len(lat0) != len(lon0):
-                    raise ValueError('lat0 and lon0 must be in the same length')
-                elif len(lat0) != len(azimuth):
-                    raise ValueError('initial points must be in the same length as azimuths')
-            elif isinstance(lat0, (int, float)) and isinstance(lon0, (int, float)):
-                lat0 = np.ones(npnt) * lat0
-                lon0 = np.ones(npnt) * lon0
-            else:
-                raise ValueError('lat0 and lon0 must be in the same length')
+            npts = len(azimuth)
+            init_lalo(lat0, lon0, npts)
         else:
             raise ValueError('azimuth and gcarc_dist must be in the same length')
     elif isinstance(azimuth, (int, float)) and isinstance(gcarc_dist, (int, float)):
@@ -204,6 +208,14 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
             pass
         else:
             raise ValueError('lat0 and lon0 must be in the same length')            
+    elif isinstance(azimuth, (int, float)) and hasattr(gcarc_dist, "__iter__"):
+        npts = len(gcarc_dist)
+        azimuth = np.ones(npts)*azimuth
+        lat0, lon0 = init_lalo(lat0, lon0, npts)
+    elif isinstance(gcarc_dist, (int, float)) and hasattr(azimuth, "__iter__"):
+        npts = len(azimuth)
+        gcarc_dist = np.ones(lat0, lon0, npts)*gcarc_dist
+        lat0, lon0 = init_lalo(lat0, lon0, npts)
 
     g = Geod(ellps=ellps)
     lon, lat, _ = g.fwd(lon0, lat0, azimuth, deg2km(gcarc_dist)*1000)
