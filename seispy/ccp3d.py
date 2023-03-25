@@ -13,49 +13,6 @@ import warnings
 import sys
 
 
-# def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
-#     """
-# Create spaced grid point with coordinates of the center point in the area in spherical coordinates.
-
-# :param center_lat: Latitude of the center point.
-# :type center_lat: float
-# :param center_lon: Longitude of the center point.
-# :type center_lon: float
-# :param len_lat: Half length in degree along latitude axis.
-# :type len_lat: float
-# :param len_lon: Half length in degree along longitude axis.
-# :type len_lon: float
-# :param val: Interval in degree between adjacent grid point.
-# :type val: float
-# :return: Coordinates of Grid points.
-# :rtype: 2-D ndarray of floats with shape (n, 2), where n is the number of grid points.
-#     """
-#     lats = np.arange(0, 2*len_lat, val)
-#     lons = np.arange(0, 2*len_lon, val)
-#     plat, plon = latlon_from(center_lat, center_lon, 0, 90)
-#     da = distaz(plat, plon, center_lat, center_lon)
-#     begx = -len_lon 
-#     begy = -len_lat
-#     bin_loca = []
-#     bin_mat = np.zeros([lats.size, lons.size, 2])
-#     bin_map = np.zeros([lats.size, lons.size]).astype(int)
-#     n = 0
-#     for j in range(lats.size):
-#         delyinc = j * val + begy
-#         delt = da.delta + delyinc
-#         for i in range(lons.size):
-#             azim = da.az + (begx + i * val) / cosd(delyinc)
-#             glat, glon = latlon_from(plat, plon, azim, delt)
-#             if glon > 180:
-#                 glon -= 360
-#             bin_loca.append([glat, glon])
-#             bin_mat[j, i, 0] = glat
-#             bin_mat[j, i, 1] = glon
-#             bin_map[j, i] = n
-#             n += 1
-#     return np.array(bin_loca), bin_mat, bin_map
-
-
 def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
     """
     Create spaced grid point with coordinates of the center point in the area in spherical coordinates.

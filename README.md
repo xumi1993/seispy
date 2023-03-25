@@ -28,16 +28,20 @@
 
 Seispy is a Python module for processing seismological data and calculating Receiver Functions. The advanced functions are available to improve the Obspy.
 
+## Acknowledgements
 
-## Dependencies
-  * [Python]() >= 3.8
-  * [ObsPy](http://docs.obspy.org) >= 1.2.0
-  * [NumPy](http://www.numpy.org/) >= 1.16
-  * [SciPy](http://www.scipy.org/) >= 1.2.0
-  * [matplotlib](https://matplotlib.org/) >= 3.6.0
-  * [PySide6](https://www.riverbankcomputing.com/software/pyqt/) >= 6.3.0
-  * [scikits.bootstrap](https://github.com/cgevans/scikits-bootstrap) >= 1.0.0
-  
+For the use of the Seispy package, please cite as:
+
+- Xu, M. and He, J.; Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. Seismological Research Letters 2022;; 94 (2A): 935–943. doi: https://doi.org/10.1785/0220220288
+
+For 3D time-difference correction, please also consider citing:
+
+- Xu, M., Huang, H., Huang, Z., Wang, P., Wang, L., Xu, M., ... & Yuan, X. (2018). Insight into the subducted Indian slab and origin of the Tengchong volcano in SE Tibet from receiver function analysis. Earth and Planetary Science Letters, 482, 567-579. doi: https://doi.org/10.1016/j.epsl.2017.11.048
+
+For 2D and 3D CCP stacking, please also consider citing:
+
+- Xu, M., Huang, Z., Wang, L., Xu, M., Zhang, Y., Mi, N., ... & Yuan, X. (2020). Sharp lateral Moho variations across the SE Tibetan margin and their implications for plateau growth. Journal of Geophysical Research: Solid Earth, 125(5), e2019JB018117. doi: https://doi.org/10.1029/2019JB018117
+
 ## Installation
 
 See [Seispy documentation](https://seispy.xumijian.me/installation.html) in detail.

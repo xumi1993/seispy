@@ -215,7 +215,7 @@ def geoproject(lat_p, lon_p, lat1, lon1, lat2, lon2):
     dis_center = distaz(lat1, lon1, lat_p, lon_p).delta
     azi_center = distaz(lat1, lon1, lat_p, lon_p).baz
     dis_along = atand(tand(dis_center))*cosd(azi-azi_center)
-    (lat, lon) = latlon_from(lat1, lon1, azi, dis_along)
+    lat, lon = latlon_from(lat1, lon1, azi, dis_along)
     return lat, lon
 
 
