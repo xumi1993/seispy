@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi, mod
 from seispy import distaz
+from pyproj import Geod
 
 def sind(deg):
     rad = np.radians(deg)
@@ -142,28 +143,71 @@ def snr(x, y):
     return 10 * np.log10(spow / npow)
 
 
-def latlon_from(lat1, lon1, azimuth, gcarc_dist):
-    lat2 = asind((sind(lat1) * cosd(gcarc_dist)) + (cosd(lat1) * sind(gcarc_dist) * cosd(azimuth)))
-    if isinstance(gcarc_dist, np.ndarray):
-        lon2 = np.zeros_like(lat2)
-        for n in range(len(gcarc_dist)):
-            if cosd(gcarc_dist[n]) >= (cosd(90 - lat1) * cosd(90 - lat2[n])):
-                lon2[n] = lon1 + asind(sind(gcarc_dist[n]) * sind(azimuth) / cosd(lat2[n]))
+def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
+    """
+    Determine position with given position of initial point, azimuth and distance
+
+    Accepted numeric scalar or array:
+    - :class:`int`
+    - :class:`float`
+    - :class:`numpy.floating`
+    - :class:`numpy.integer`
+    - :class:`list`
+    - :class:`tuple`
+    - :class:`array.array`
+    - :class:`numpy.ndarray`
+    - :class:`xarray.DataArray`
+    - :class:`pandas.Series`
+
+    :param lat0: Latitude of original point
+    :type lat0: float or array
+    :param lon0: Longitude of original point
+    :type lon0: float or array
+    :param azimuth: Azimuth(s) in degree
+    :type azimuth: float or array
+    :param gcarc_dist: Distance(s) between initial and terminus point(s) in degree
+    :type gcarc_dist: float or array
+    :param ellps: Ellipsoids supported by ``pyproj``, defaults to "WGS84"
+    :type ellps: :class:`str`, optional
+
+    Returns
+    -------
+    scalar or array:
+        Latitude(s) of terminus point(s)  
+    scalar or array:
+        Longitude(s) of terminus point(s)
+    """
+
+    if hasattr(azimuth, "__iter__") and hasattr(gcarc_dist, "__iter__"):
+        if len(azimuth) == len(gcarc_dist):
+            npnt = len(azimuth)
+            if hasattr(lat0, "__iter__") and hasattr(lon0, "__iter__"):
+                if len(lat0) != len(lon0):
+                    raise ValueError('lat0 and lon0 must be in the same length')
+                elif len(lat0) != len(azimuth):
+                    raise ValueError('initial points must be in the same length as azimuths')
+            elif isinstance(lat0, (int, float)) and isinstance(lon0, (int, float)):
+                lat0 = np.ones(npnt) * lat0
+                lon0 = np.ones(npnt) * lon0
             else:
-                lon2[n] = lon1 + asind(sind(gcarc_dist[n]) * sind(azimuth) / cosd(lat2[n])) + 180
-    elif isinstance(azimuth, np.ndarray):
-        lon2 = np.zeros_like(lat2)
-        for n in range(len(azimuth)):
-            if cosd(gcarc_dist) >= (cosd(90 - lat1) * cosd(90 - lat2[n])):
-                lon2[n] = lon1 + asind(sind(gcarc_dist) * sind(azimuth[n]) / cosd(lat2[n]))
-            else:
-                lon2[n] = lon1 + asind(sind(gcarc_dist) * sind(azimuth[n]) / cosd(lat2[n])) + 180
-    else:
-        if (cosd(gcarc_dist) >= (cosd(90 - lat1) * cosd(90 - lat2))):
-            lon2 = lon1 + asind(sind(gcarc_dist) * sind(azimuth) / cosd(lat2))
+                raise ValueError('lat0 and lon0 must be in the same length')
         else:
-            lon2 = lon1 + asind(sind(gcarc_dist) * sind(azimuth) / cosd(lat2)) + 180
-    return lat2, lon2
+            raise ValueError('azimuth and gcarc_dist must be in the same length')
+    elif isinstance(azimuth, (int, float)) and isinstance(gcarc_dist, (int, float)):
+        if hasattr(lat0, "__iter__") and hasattr(lon0, "__iter__"):
+            if len(lat0) != len(lon0):
+                raise ValueError('lat0 and lon0 must be in the same length')
+            else:
+                azimuth = np.ones(lat0)*azimuth
+                gcarc_dist = np.ones(lat0)*gcarc_dist
+        elif isinstance(lat0, (int, float)) and isinstance(lon0, (int, float)):
+            pass
+        else:
+            raise ValueError('lat0 and lon0 must be in the same length')            
+
+    g = Geod(ellps=ellps)
+    lon, lat, _ = g.fwd(lon0, lat0, azimuth, deg2km(gcarc_dist)*1000)
+    return lat, lon
 
 
 def geoproject(lat_p, lon_p, lat1, lon1, lat2, lon2):
