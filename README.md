@@ -32,7 +32,7 @@ Seispy is a Python module for processing seismological data and calculating Rece
 
 For the use of the Seispy package, please cite as:
 
-- Xu, M. and He, J.; Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. Seismological Research Letters 2022;; 94 (2A): 935–943. doi: https://doi.org/10.1785/0220220288
+- Xu, M. & He, J. (2023). Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. Seismological Research Letters, 94 (2A): 935–943. doi: https://doi.org/10.1785/0220220288
 
 For 3D time-difference correction, please also consider citing:
 
