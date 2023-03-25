@@ -1,6 +1,8 @@
 import numpy as np
 import seispy
-from seispy.geo import km2deg, deg2km, latlon_from, geoproject, sind, rad2deg, skm2srad
+from seispy.geo import km2deg, deg2km, latlon_from, \
+                       geoproject, sind, rad2deg, skm2srad, \
+                       geo2sph, sph2geo
 from seispy.setuplog import setuplog
 from seispy.distaz import distaz
 from seispy.rfcorrect import DepModel
@@ -8,8 +10,31 @@ from seispy.rf2depth_makedata import Station
 from seispy.ccppara import ccppara, CCPPara
 from scikits.bootstrap import ci
 from seispy.ccp3d import boot_bin_stack
-from seispy.utils import check_stack_val, read_rfdep, create_center_bin_profile
+from seispy.utils import check_stack_val, read_rfdep
+from scipy.interpolate import interp1d
 from os.path import exists, dirname, basename, join
+
+
+def prof_range(lat, lon):
+    dis = [0]
+    for i in range(lat.size-1):
+        dis.append(distaz(lat[i], lon[i], lat[i+1], lon[i+1]).degreesToKilometers())
+    return np.cumsum(dis)
+
+
+def create_center_bin_profile(stations, val=5, method='linear'):
+    if not isinstance(stations, Station):
+        raise TypeError('Stations should be seispy.rf2depth_makedata.Station')
+    dis_sta = prof_range(stations.stla, stations.stlo)
+    dis_inter = np.append(np.arange(0, dis_sta[-1], val), dis_sta[-1])
+    r, theta, phi = geo2sph(np.zeros(stations.stla.size), stations.stla, stations.stlo)
+    # t_po = np.arange(stations.stla.size)
+    # ip_t_po = np.linspace(0, stations.stla.size, bin_num)
+    theta_i = interp1d(dis_sta, theta, kind=method, bounds_error=False, fill_value='extrapolate')(dis_inter)
+    phi_i = interp1d(dis_sta, phi, kind=method, bounds_error=False, fill_value='extrapolate')(dis_inter)
+    _, lat, lon = sph2geo(r, theta_i, phi_i)
+    # dis = prof_range(lat, lon)
+    return lat, lon, dis_inter
 
 
 def line_proj(lat1, lon1, lat2, lon2):

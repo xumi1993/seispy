@@ -2,6 +2,7 @@ import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
 from seispy.geo import km2deg
+from seispy.utils import scalar_instance
 import warnings
 
 
@@ -40,7 +41,7 @@ class CCPPara(object):
 
     @bin_radius.setter
     def bin_radius(self, value):
-        if not (isinstance(value, (int, float)) or value is None):
+        if not (scalar_instance(value) or value is None):
             raise TypeError('Error type of bin_radius')
         else:
             self._bin_radius = value

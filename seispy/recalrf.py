@@ -1,5 +1,6 @@
 from seispy.rf import RF, datestr2regex, SACFileNotFoundError
 from seispy.eq import EQ
+from seispy.utils import scalar_instance
 import numpy as np
 from obspy import UTCDateTime
 from datetime import timedelta
@@ -23,7 +24,7 @@ def match_eq(eq_lst, pathname, logger, ref_comp='Z', suffix='SAC', offset=0,
             datestr = re.findall(pattern, ref_sac)[0]
         except IndexError:
             raise IndexError('Error data format of {} in {}'.format(dateformat, ref_sac))
-        if isinstance(offset, (int, float)):
+        if scalar_instance(offset):
             sac_files.append([datestr, UTCDateTime.strptime(datestr, dateformat), -offset])
         elif offset is None:
             try:

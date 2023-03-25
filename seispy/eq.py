@@ -7,6 +7,7 @@ from os.path import join
 from seispy.decon import RFTrace
 from seispy.geo import snr, srad2skm, rotateSeisENtoTR, \
                        rssq, extrema
+from seispy.utils import scalar_instance
 from obspy.signal.trigger import recursive_sta_lta
 import glob
 
@@ -323,7 +324,7 @@ class EQ(object):
             Time delta for resampling, by default None
         """
         self.method = method
-        if isinstance(f0, (int, float)):
+        if scalar_instance(f0):
             f0 = [f0]
         for ff in f0:
             if method == 'iter':

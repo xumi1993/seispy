@@ -2,16 +2,16 @@ import numpy as np
 import re
 from obspy.io.sac.sactrace import SACTrace
 import matplotlib.pyplot as plt
-from os.path import dirname, join
+from os.path import join
 from seispy.rfcorrect import RFStation
 from seispy.hkpara import hkpara
 from seispy.geo import srad2skm
 import argparse
-from seispy.utils import load_cyan_map
+from seispy.utils import load_cyan_map, array_instance
 
 
 def transarray(array, axis=0):
-    if not isinstance(array, np.ndarray):
+    if not array_instance(array):
         raise ValueError('array should be `numpy.ndarray`')
     if len(array.shape) != 1:
         raise ValueError('array should be 1-d array')

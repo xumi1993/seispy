@@ -2,12 +2,10 @@ from os.path import join, dirname, exists
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
 import matplotlib.pyplot as plt
-from seispy import geo
-from seispy.geo import geo2sph, sph2geo
-from seispy import distaz
 import numpy as np
 from scipy.interpolate import interp1d, interpn
-import seispy
+import pandas as pd
+import array
 
 
 def vs2vprho(vs):
@@ -265,23 +263,30 @@ class Mod3DPerturbation:
         return dvs
 
 
-def create_center_bin_profile(stations, val=5, method='linear'):
-    if not isinstance(stations, seispy.rf2depth_makedata.Station):
-        raise TypeError('Stations should be seispy.rf2depth_makedata.Station')
-    dis_sta = prof_range(stations.stla, stations.stlo)
-    dis_inter = np.append(np.arange(0, dis_sta[-1], val), dis_sta[-1])
-    r, theta, phi = geo2sph(np.zeros(stations.stla.size), stations.stla, stations.stlo)
-    # t_po = np.arange(stations.stla.size)
-    # ip_t_po = np.linspace(0, stations.stla.size, bin_num)
-    theta_i = interp1d(dis_sta, theta, kind=method, bounds_error=False, fill_value='extrapolate')(dis_inter)
-    phi_i = interp1d(dis_sta, phi, kind=method, bounds_error=False, fill_value='extrapolate')(dis_inter)
-    _, lat, lon = sph2geo(r, theta_i, phi_i)
-    # dis = prof_range(lat, lon)
-    return lat, lon, dis_inter
+def scalar_instance(v):
+    if isinstance(
+        v,
+        (int,
+         float,
+         np.floating,
+         np.integer
+        )
+    ):
+        return True
+    else:
+        return False
 
 
-def prof_range(lat, lon):
-    dis = [0]
-    for i in range(lat.size-1):
-        dis.append(distaz(lat[i], lon[i], lat[i+1], lon[i+1]).degreesToKilometers())
-    return np.cumsum(dis)
+def array_instance(v):
+    if isinstance(
+        v,
+        (list,
+         tuple,
+         np.ndarray,
+         pd.Series,
+         array.array,
+        )
+    ):
+        return True
+    else:
+        return False

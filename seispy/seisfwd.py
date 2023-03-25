@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.fftpack import ifft
 from obspy.signal.util import next_pow_2
+from seispy.utils import scalar_instance, array_instance
 from obspy import Trace, Stream
 from seispy.decon import RFTrace
 
@@ -157,9 +158,9 @@ class SynSeis():
         self.depmod = depmod
         self.dt = dt
         self.npts = npts
-        if not isinstance(rayp, (float, list, np.ndarray)):
+        if not (array_instance(rayp) or scalar_instance(rayp)):
             raise TypeError('The rayp should be in float, list and np.ndarray')
-        if isinstance(rayp, float):
+        if scalar_instance(rayp):
             self.rayp = [rayp]
         else:
             self.rayp = rayp

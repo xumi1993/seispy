@@ -6,7 +6,6 @@ from obspy.io.sac import SACTrace
 from os.path import join
 
 
-
 class Harmonics():
     def __init__(self, rfsta, tmin=-5, tmax=10) -> None:
         """ Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs

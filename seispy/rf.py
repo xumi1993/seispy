@@ -12,6 +12,7 @@ from seispy import distaz
 from seispy.eq import EQ
 from seispy.setuplog import setuplog
 from seispy.catalog import read_catalog_file
+from seispy.utils import scalar_instance
 import glob
 import numpy as np
 from datetime import timedelta
@@ -487,7 +488,7 @@ class RF(object):
         else:
             pass
         good_lst = []
-        if isinstance(self.para.gauss, (int, float)):
+        if scalar_instance(self.para.gauss):
             gauss = self.para.gauss
         elif gauss is None:
             gauss = self.para.gauss[0]

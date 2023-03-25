@@ -1,7 +1,7 @@
 import numpy as np
-from numpy import pi, mod
 from seispy import distaz
 from pyproj import Geod
+from seispy.utils import scalar_instance, array_instance
 
 def sind(deg):
     rad = np.radians(deg)
@@ -40,7 +40,7 @@ def atand(x):
 
 def km2deg(km):
     radius = 6371
-    circum = 2*pi*radius
+    circum = 2*np.pi*radius
     conv = circum / 360
     deg = km / conv
     return deg
@@ -48,14 +48,14 @@ def km2deg(km):
 
 def deg2km(deg):
     radius = 6371
-    circum = 2*pi*radius
+    circum = 2*np.pi*radius
     conv = circum / 360
     km = deg * conv
     return km
 
 
 def rad2deg(rad):
-    deg = rad*(360/(2*pi))
+    deg = rad*(360/(2*np.pi))
     return deg
 
 
@@ -70,7 +70,7 @@ def sdeg2skm(sdeg):
 
 
 def srad2skm(srad):
-    sdeg = srad * ((2*pi)/360)
+    sdeg = srad * ((2*np.pi)/360)
     return sdeg / deg2km(1)
 
 
@@ -92,15 +92,15 @@ def rot3D(bazi, inc):
     
     """
 
-    if isinstance(inc, float) or isinstance(inc, int):
+    if scalar_instance(inc):
         value31 = 0
-    elif isinstance(inc, np.ndarray):
+    elif array_instance(inc):
         value31 = np.repeat(0, len(inc))
     else:
         raise TypeError('Input args sould be in \'float\', \'int\', or \'numpy.ndarray\'')
 
-    inc = inc / 180 * pi
-    bazi = bazi / 180 * pi
+    inc = inc / 180 * np.pi
+    bazi = bazi / 180 * np.pi
 
     M = np.array([[np.cos(inc), -np.sin(inc)*np.sin(bazi), -np.sin(inc)*np.cos(bazi)],
                   [np.sin(inc), np.cos(inc)*np.sin(bazi), np.cos(inc)*np.cos(bazi)],
@@ -125,7 +125,7 @@ def spherical2cartesian(lon, lat, dep):
 
 
 def rotateSeisENtoTR(E, N, BAZ):
-    angle = mod(BAZ+180, 360)
+    angle = np.mod(BAZ+180, 360)
     R = N*cosd(angle) + E*sind(angle)
     T = E*cosd(angle) - N*sind(angle)
     return T, R
@@ -184,12 +184,12 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
                 raise ValueError('lat0 and lon0 must be in the same length')
             elif len(lat0) != npts:
                 raise ValueError('initial points must be in the same length as azimuths')
-        elif isinstance(lat0, (int, float)) and isinstance(lon0, (int, float)):
-            lat = np.ones(npts) * lat0
-            lon = np.ones(npts) * lon0
+        elif scalar_instance(lat0) and scalar_instance(lon0):
+            lat1 = np.ones(npts) * lat0
+            lon1 = np.ones(npts) * lon0
         else:
             raise ValueError('lat0 and lon0 must be in the same length')
-        return lat, lon
+        return lat1, lon1
 
     if hasattr(azimuth, "__iter__") and hasattr(gcarc_dist, "__iter__"):
         if len(azimuth) == len(gcarc_dist):
@@ -197,22 +197,22 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
             init_lalo(lat0, lon0, npts)
         else:
             raise ValueError('azimuth and gcarc_dist must be in the same length')
-    elif isinstance(azimuth, (int, float)) and isinstance(gcarc_dist, (int, float)):
+    elif scalar_instance(azimuth) and scalar_instance(gcarc_dist):
         if hasattr(lat0, "__iter__") and hasattr(lon0, "__iter__"):
             if len(lat0) != len(lon0):
                 raise ValueError('lat0 and lon0 must be in the same length')
             else:
                 azimuth = np.ones(lat0)*azimuth
                 gcarc_dist = np.ones(lat0)*gcarc_dist
-        elif isinstance(lat0, (int, float)) and isinstance(lon0, (int, float)):
+        elif scalar_instance(lat0) and scalar_instance(lon0):
             pass
         else:
             raise ValueError('lat0 and lon0 must be in the same length')            
-    elif isinstance(azimuth, (int, float)) and hasattr(gcarc_dist, "__iter__"):
+    elif scalar_instance(azimuth) and hasattr(gcarc_dist, "__iter__"):
         npts = len(gcarc_dist)
         azimuth = np.ones(npts)*azimuth
         lat0, lon0 = init_lalo(lat0, lon0, npts)
-    elif isinstance(gcarc_dist, (int, float)) and hasattr(azimuth, "__iter__"):
+    elif scalar_instance(gcarc_dist) and hasattr(azimuth, "__iter__"):
         npts = len(azimuth)
         gcarc_dist = np.ones(lat0, lon0, npts)*gcarc_dist
         lat0, lon0 = init_lalo(lat0, lon0, npts)
