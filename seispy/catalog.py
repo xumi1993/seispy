@@ -28,7 +28,7 @@ def read_catalog_file(fname):
     data_cata = pd.read_table(fname, header=None, sep=' |\t', engine='python')
     date_cols = data_cata.loc[:, [0,1,2,4,5,6]]
     date_cols.columns = colcata
-    dates = pd.to_datetime(date_cols)
+    dates = pd.to_datetime(date_cols)[0].apply(UTCDateTime)
     eq_lst = pd.concat([dates, data_cata.loc[:, 7:]], axis=1)
     eq_lst.columns = col
     return eq_lst
