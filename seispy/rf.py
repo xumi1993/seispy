@@ -71,7 +71,8 @@ def datestr2regex(datestr):
 
 
 def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
-                 magmin=5.5, magmax=10., dismin=30., dismax=90.):
+                 magmin=5.5, magmax=10., dismin=30., dismax=90.,
+                 depthmin=0, depthmax=800):
     """Read local catalog with seispy or QUAKEML format
 
     :param logpath: Path to catalogs
@@ -103,6 +104,7 @@ def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
     dis = distaz(stla, stlo, eq_lst['evla'], eq_lst['evlo']).delta
     eq_lst = eq_lst[(eq_lst['date']>=b_time) & (eq_lst['date']<=e_time) & \
                     (eq_lst['mag']>=magmin) & (eq_lst['mag']<=magmax) & \
+                    (eq_lst['evdp']>=depthmin) & (eq_lst['evdp']<=depthmax) & \
                     (dis>=dismin) & (dis<=dismax)]
     return eq_lst
 
@@ -243,12 +245,19 @@ class RF(object):
     def date_end(self, value):
         self.para.date_end = value
 
-    def load_stainfo(self):
+    def load_stainfo(self, use_date_range=True):
         try:
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Load station info of {}.{} from {} web-service'.format(
                     self.para.stainfo.network, self.para.stainfo.station, self.para.data_server))
-                self.para.stainfo.get_station_from_ws(self.para.data_server)
+                if use_date_range:
+                    self.para.stainfo.get_station_from_ws(
+                        self.para.data_server,
+                        starttime=self.para.date_begin,
+                        endtime=self.para.date_end
+                    )
+                else:
+                    self.para.stainfo.get_station_from_ws(self.para.data_server)
                 try:
                     self.para._check_date_range()
                 except Exception as e:
@@ -273,7 +282,9 @@ class RF(object):
                 query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
                                  latitude=self.para.stainfo.stla, longitude=self.para.stainfo.stlo,
                                  minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
-                                 minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
+                                 minradius=self.para.dismin, maxradius=self.para.dismax, 
+                                 mindepth=self.para.depthmin, maxdepth=self.para.depthmax,
+                                 catalog=catalog)
                 self.eq_lst = query.events
             except Exception as e:
                 raise ConnectionError(e)
@@ -285,7 +296,8 @@ class RF(object):
                 self.eq_lst = read_catalog(self.para.catalogpath, self.para.date_begin, self.para.date_end,
                                            self.para.stainfo.stla, self.para.stainfo.stlo,
                                            magmin=self.para.magmin, magmax=self.para.magmax,
-                                           dismin=self.para.dismin, dismax=self.para.dismax)
+                                           dismin=self.para.dismin, dismax=self.para.dismax,
+                                           depthmin=self.para.depthmin, depthmax=self.para.depthmax)
             except Exception as e:
                 self.logger.RFlog.error('{0}'.format(e))
                 raise e
