@@ -116,8 +116,8 @@ pjt.para.datapath = 'Data/Path/to/station_name'
 pjt.para.rfpath = 'Result/Path/to/station_name'
 pjt.para.suffix = 'sac'
 pjt.para.ref_comp = ".1."
-pjt.date_begin = UTCDataTime('20180701')
-pjt.date_end = UTCDataTime('20190701')
+pjt.date_begin = UTCDateTime('20180701')
+pjt.date_end = UTCDateTime('20190701')
 pjt.para.offset = 0
 pjt.para.tolerance = 60
 ```

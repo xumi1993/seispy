@@ -1,4 +1,4 @@
-name: docs-post
+name: seispy-docs
 channels:
   - conda-forge
   - nodefaults
