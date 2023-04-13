@@ -1,4 +1,4 @@
-# Visual pick depth of the discontinuities after CCP stacking
+# Visually pick depth of the discontinuities after CCP stacking
 
 Before open an user interface, the file (`*.npz`) after CCP Stacking must be calculated, such as `stack_data_3D.npz`  
 
@@ -64,7 +64,7 @@ Main UI with picked depth (green line)
 Main UI without any picks
 ```
 
-- `Save` or <kbd>ctrl</kbd>+<kbd>s</kbd> to save the picked depths in a file, which include following columns:
+- `Save` or <kbd>ctrl</kbd>+<kbd>s</kbd> to save the picked depths in a text file, which include following columns:
 
   :::{table} Content of picked depths in the text file
   :widths: auto
