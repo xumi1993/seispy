@@ -1,5 +1,4 @@
 import numpy as np
-import seispy
 from seispy.geo import km2deg, deg2km, latlon_from, \
                        geoproject, sind, rad2deg, skm2srad, \
                        geo2sph, sph2geo
@@ -13,6 +12,7 @@ from seispy.ccp3d import boot_bin_stack
 from seispy.utils import check_stack_val, read_rfdep
 from scipy.interpolate import interp1d
 from os.path import exists, dirname, basename, join
+import sys
 
 
 def prof_range(lat, lon):
@@ -171,7 +171,9 @@ class CCPProfile():
                     self.logger.CCPlog.warning('{} does not in RFdepth structure'.format(sta))
                 if self.cpara.shape == 'rect' and self.cpara.adaptive == False:
                     self._pierce_project(self.rfdep[idx])
-        elif self.cpara.width is None and self.cpara.shape == 'circle':
+        elif self.cpara.shape == 'circle':
+            if self.cpara.width is not None:
+                self.logger.CCPlog.warning('The \'width\' will be ignored, when circle bin was set')
             dep_mod = DepModel(self.cpara.stack_range)
             x_s = np.cumsum((dep_mod.dz / dep_mod.R) / np.sqrt((1. / (skm2srad(0.085) ** 2. * (dep_mod.R / dep_mod.vs) ** -2)) - 1))
             dis = self.fzone[-1] + rad2deg(x_s[-1]) + 0.3
@@ -184,12 +186,8 @@ class CCPProfile():
             self.idxs = self._proj_sta(self.cpara.width)
             self._write_sta()  
         else:
-            if self.cpara.width is not None:
-                self.logger.CCPlog.error('Width of profile was set, the bin shape of {} is invalid'.format(self.cpara.shape))
-                raise ValueError('Width of profile was set, the bin shape of {} is invalid'.format(self.cpara.shape))
-            else:
-                self.logger.CCPlog.error('Width of profile was not set, the bin shape of {} is invalid'.format(self.cpara.shape))
-                raise ValueError('Width of profile was not set, the bin shape of {} is invalid'.format(self.cpara.shape))
+            self.logger.CCPlog.error('Width of profile was not set, the bin shape of {} is invalid'.format(self.cpara.shape))
+            sys.exit(1)
 
     def _write_sta(self):
         with open(self.cpara.stack_sta_list, 'w') as f:
@@ -217,7 +215,7 @@ class CCPProfile():
         final_idx = np.intersect1d(tmp_idx, proj_idx).astype(int)
         if not final_idx.any():
             self.logger.CCPlog.error('No stations within the profile belt with width of {}'.format(width))
-            raise ValueError('Satisfied stations not found')
+            sys.exit(1)
         return final_idx
 
     def _pierce_project(self, rfsta):
@@ -243,7 +241,7 @@ class CCPProfile():
             bin_ci = np.zeros([self.cpara.stack_range.size, 2])
             bin_count = np.zeros(self.cpara.stack_range.size)
             self.logger.CCPlog.info('{}/{} bin from {:.2f} km at lat: {:.3f} lon: {:.3f}'.format(i + 1, self.bin_loca.shape[0], self.profile_range[i], bin_info[0], bin_info[1]))
-            if self.cpara.width is None and self.cpara.shape == 'circle':
+            if self.cpara.shape == 'circle':
                 idxs = self.idxs[i]
             else:
                 idxs = self.idxs

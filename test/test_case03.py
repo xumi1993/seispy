@@ -42,6 +42,15 @@ def test_sub03():
     ccp.save_stack_data(format='dat')
     os.remove(ccp.cpara.stackfile)
 
+def test_sub04():
+    ccp = CCPProfile('ex-ccp/ccp.cfg')
+    ccp.cpara.width = None
+    ccp.cpara.shape = 'circle'
+    ccp.initial_profile()
+    ccp.stack()
+    ccp.save_stack_data(format='dat')
+    os.remove(ccp.cpara.stackfile)
+
 if __name__ == '__main__':
     # test_download()
     test_sub01()
