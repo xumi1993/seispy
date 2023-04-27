@@ -74,6 +74,8 @@ class RFPara(object):
         self.date_end = obspy.UTCDateTime.now()
         self.magmin = 5.5
         self.magmax = 10
+        self.depthmin = 0.
+        self.depthmax = 800.
         self.dismin = 30
         self.dismax = 90
         self.ref_comp = 'BHZ'
