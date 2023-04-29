@@ -184,7 +184,10 @@ class CCPProfile():
         elif self.cpara.width is not None and self.cpara.shape == 'rect':
             self.logger.CCPlog.info('Select stations within {} km perpendicular to the profile'.format(self.cpara.width))
             self.idxs = self._proj_sta(self.cpara.width)
-            self._write_sta()  
+            for idx in self.idxs:
+                self._pierce_project(self.rfdep[idx])      
+            if self.cpara.stack_sta_list != '':
+                self._write_sta()  
         else:
             self.logger.CCPlog.error('Width of profile was not set, the bin shape of {} is invalid'.format(self.cpara.shape))
             sys.exit(1)
@@ -194,7 +197,6 @@ class CCPProfile():
             for idx in self.idxs:
                 f.write('{}\t{:.3f}\t{:.3f}\n'.format(self.staname[idx],
                 self.stalst[idx,0], self.stalst[idx, 1]))
-                self._pierce_project(self.rfdep[idx])      
 
     def _proj_sta(self, width):
         az1_begin, az2_begin, az1_end, az2_end, daz = line_proj(*self.cpara.line)
@@ -241,7 +243,7 @@ class CCPProfile():
             bin_ci = np.zeros([self.cpara.stack_range.size, 2])
             bin_count = np.zeros(self.cpara.stack_range.size)
             self.logger.CCPlog.info('{}/{} bin from {:.2f} km at lat: {:.3f} lon: {:.3f}'.format(i + 1, self.bin_loca.shape[0], self.profile_range[i], bin_info[0], bin_info[1]))
-            if self.cpara.shape == 'circle':
+            if self.cpara.shape == 'circle' and not exists(self.cpara.stack_sta_list):
                 idxs = self.idxs[i]
             else:
                 idxs = self.idxs
@@ -285,13 +287,21 @@ class CCPProfile():
                 for i, bin in enumerate(self.stack_data):
                     for j, dep in enumerate(self.cpara.stack_range):
                         if dep == self.cpara.stack_range[-1]:
-                            f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f} nan nan nan nan\n'.format(bin['bin_lat'], bin['bin_lon'],
-                                                                                              self.profile_range[i], dep))
+                            f.write(
+                                '{:.4f}\t{:.4f}\t{:.4f}\t{:.2f} nan nan nan nan\n'.format(
+                                    bin['bin_lat'], bin['bin_lon'],
+                                    self.profile_range[i], dep
+                                )
+                            )
                         else:
-                            f.write('{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:d}\n'.format(bin['bin_lat'], bin['bin_lon'],
-                                                                                    self.profile_range[i],
-                                                                                    dep, bin['mu'][j], bin['ci'][j, 0],
-                                                                                    bin['ci'][j, 1], int(bin['count'][j])))
+                            f.write(
+                                '{:.4f}\t{:.4f}\t{:.4f}\t{:.2f}\t{:.4f}\t{:.4f}\t{:.4f}\t{:d}\n'.format(
+                                    bin['bin_lat'], bin['bin_lon'],
+                                    self.profile_range[i],
+                                    dep, bin['mu'][j], bin['ci'][j, 0],
+                                    bin['ci'][j, 1], int(bin['count'][j])
+                                )
+                            )
 
 
 if __name__ == '__main__':
