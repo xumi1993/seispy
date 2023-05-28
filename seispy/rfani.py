@@ -1,8 +1,7 @@
 import numpy as np
-from obspy.io.sac import SACTrace
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
-from os.path import join, abspath, dirname
+from os.path import join
 from seispy.geo import cosd, sind, extrema
 from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map

@@ -153,7 +153,7 @@ class distaz:
 
         dbaz_idx = np.where(dbaz < 0.0)[0]
         if len(dbaz_idx) != 0:
-            if isinstance(dbaz, (int, float)):
+            if isinstance(dbaz, (int, float, np.integer, np.floating)):
                 dbaz += 2 * math.pi
             else:
                 dbaz[dbaz_idx] += 2 * math.pi

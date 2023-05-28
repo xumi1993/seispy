@@ -172,7 +172,7 @@ def main():
     parser = argparse.ArgumentParser(description="User interface for picking PRFs")
     parser.add_argument('rf_path', type=str, help='Path to PRFs')
     parser.add_argument('-a', help='Arrangement of RFs, defaults to \'baz\'', dest='order',
-                        default='baz', type=str, metavar='baz|dis')
+                        default='baz', type=str, metavar='baz|dis|date')
     parser.add_argument('-x', help="Set x limits of the current axes, defaults to 30s for RT, 85s for R.",
                         dest='xlim', default=None, type=float, metavar='xmax')
     arg = parser.parse_args()

@@ -3,6 +3,7 @@ from scipy.interpolate import interp1d
 import matplotlib.pyplot as plt
 from obspy.taup import TauPyModel
 from seispy.geo import srad2skm, skm2sdeg
+from seispy.utils import scalar_instance, array_instance
 
 class SlantStack():
     def __init__(self, seis, timeaxis, dis) -> None:
@@ -12,7 +13,7 @@ class SlantStack():
         :type seis: numpy.ndarray
         :param timeaxis: 1D array for time axis
         :type timeaxis: numpy.ndarray
-        :param dis: 1D array for all event distance in km
+        :param dis: 1D array for all event distance in deg
         :type dis: numpy.ndarray
         """
         self.datar = seis
@@ -25,19 +26,19 @@ class SlantStack():
         self.syn_drayp = np.array([])
 
     def stack(self, ref_dis=None, rayp_range=None, tau_range=None):
-        if ref_dis is not None and isinstance(ref_dis, (int, float)):
+        if ref_dis is not None and scalar_instance(ref_dis):
             self.ref_dis = ref_dis
         elif ref_dis is None:
             pass
         else:
             raise TypeError('{} should be in int or float type.'.format(ref_dis))
-        if rayp_range is not None and isinstance(rayp_range, np.ndarray):
+        if rayp_range is not None and array_instance(rayp_range):
             self.rayp_range = rayp_range
         elif rayp_range is None:
             pass
         else:
             raise TypeError('{} should be in numpy.ndarray type.'.format(rayp_range))
-        if tau_range is not None and isinstance(tau_range, np.ndarray):
+        if tau_range is not None and array_instance(tau_range):
             self.tau_range = tau_range
         elif tau_range is None:
             pass
@@ -84,11 +85,11 @@ class SlantStack():
         if vmin is None and vmax is None:
             vmax = np.max(np.abs(self.stack_amp))*0.1
             vmin = -vmax
-        elif vmin is None and isinstance(vmax, (int, float)):
+        elif vmin is None and scalar_instance(vmax):
             vmin = np.min(self.stack_amp)
-        elif vmax is None and isinstance(vmin, (int, float)):
+        elif vmax is None and scalar_instance(vmin):
             vmax = np.max(self.stack_amp)
-        elif isinstance(vmax, (int, float)) and isinstance(vmin, (int, float)):
+        elif scalar_instance(vmax) and scalar_instance(vmin):
             pass
         else:
             raise TypeError('vmin and vmax must be in int or in float type')
@@ -99,7 +100,7 @@ class SlantStack():
             cax.set_label('Stack Amplitude')
         self.ax.grid(visible=True)
         self.ax.scatter(self.syn_tau, self.syn_drayp, color='k', marker='x')
-        if xlim is not None and isinstance(xlim, (list, np.ndarray)):
+        if xlim is not None and array_instance(xlim):
             self.ax.set_xlim(xlim)
         self.ax.set_xlabel('Time (s)')
         self.ax.set_ylabel('Slowness (s/$^\circ$)')

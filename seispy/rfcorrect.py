@@ -1,4 +1,3 @@
-from multiprocessing.sharedctypes import Value
 from obspy.io.sac.sactrace import SACTrace
 import numpy as np
 from scipy.interpolate import interp1d, interpn
@@ -12,7 +11,7 @@ from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
 from seispy.plotRT import plotrt as _plotrt
 from seispy.plotR import plotr as _plotr
-from seispy.utils import DepModel, Mod3DPerturbation
+from seispy.utils import DepModel, Mod3DPerturbation, scalar_instance
 import warnings
 import glob
 
@@ -132,9 +131,9 @@ class RFStation(object):
             raise ValueError('No such RFTrace read')
         rfsta = cls('', only_r=True, prime_comp=prime_comp)
         ev_num = len(stream)
-        if isinstance(rayp, float):
+        if scalar_instance(rayp):
             rayp = np.ones(ev_num)*rayp
-        if isinstance(baz, (float, int)):
+        if scalar_instance(baz):
             baz = np.ones(ev_num)*baz
         if ev_num != rayp.size or ev_num != baz.size:
             raise ValueError('Array length of rayp and baz must be the same as stream')
@@ -635,6 +634,7 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere
         for i in range(stadatar.ev_num):
             tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(
                 dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True, sphere=sphere, phase=phase)
+            print(type(stadatar.bazi[i]), type(rad2deg(x_s)))
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))
             pplat_p[i], pplon_p[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_p))
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):

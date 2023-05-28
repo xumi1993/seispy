@@ -2,6 +2,7 @@ import numpy as np
 from os.path import expanduser, join, dirname, exists
 import configparser
 from seispy.geo import km2deg
+from seispy.utils import scalar_instance
 import warnings
 
 
@@ -40,7 +41,7 @@ class CCPPara(object):
 
     @bin_radius.setter
     def bin_radius(self, value):
-        if not (isinstance(value, (int, float)) or value is None):
+        if not (scalar_instance(value) or value is None):
             raise TypeError('Error type of bin_radius')
         else:
             self._bin_radius = value
@@ -118,7 +119,8 @@ def ccppara(cfg_file):
         lon2 = cf.getfloat('line', 'profile_lon2')
         cpara.line = np.array([lat1, lon1, lat2, lon2])
     except:
-        warnings.warn('line section not found. Setup it for ccp_profile')
+        # warnings.warn('line section not found. Setup it for ccp_profile')
+        pass
     try:
         # para for center bins
         cla = cf.getfloat('spacedbins', 'center_lat')
@@ -127,7 +129,10 @@ def ccppara(cfg_file):
         hllo = cf.getfloat('spacedbins', 'half_len_lon')
         cpara.center_bin = [cla, clo, hlla, hllo, km2deg(cpara.slide_val)]
     except:
-        warnings.warn('No such section of spacedbins and line. Setup them for CCP stacking')
+        # warnings.warn('No such section of spaced bins. Setup them for ccp3d')
+        pass
+    if cpara.line.size == 0 and len(cpara.center_bin) == 0:
+        raise ValueError('Please setup line or spacedbins section')
     # para for depth section
     dep_end = cf.getfloat('depth', 'dep_end')
     cpara.dep_val = cf.getfloat('depth', 'dep_val')

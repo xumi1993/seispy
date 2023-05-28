@@ -1,7 +1,7 @@
 from os.path import expanduser
 import configparser
 import numpy as np
-from seispy.utils import check_path
+from seispy.utils import check_path, array_instance
 
 
 class HKPara(object):
@@ -24,7 +24,7 @@ class HKPara(object):
 
     @hrange.setter
     def hrange(self, value):
-        if not (isinstance(value, np.ndarray) or value is None):
+        if not (array_instance(value) or value is None):
             raise TypeError('Error type of hrange')
         else:
             self._hrange = value
@@ -35,7 +35,7 @@ class HKPara(object):
 
     @krange.setter
     def krange(self, value):
-        if not (isinstance(value, np.ndarray) or value is None):
+        if not (array_instance(value) or value is None):
             raise TypeError('Error type of krange')
         else:
             self._krange = value

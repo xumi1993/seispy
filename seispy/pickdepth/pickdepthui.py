@@ -1,4 +1,3 @@
-# import folium
 from .get_depth import GoodDepth
 from seispy.setuplog import setuplog
 from PySide6.QtCore import Qt

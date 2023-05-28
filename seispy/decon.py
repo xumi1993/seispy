@@ -1,19 +1,16 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import obspy
-from obspy.io.sac import SACTrace
 from obspy.signal.util import next_pow_2
-from math import pi
-from numpy.fft import fft, ifft, ifftshift
+from numpy.fft import fft, ifft
 # from scipy.linalg import solve_toeplitz
-import matplotlib.pyplot as plt
 
 
 def gaussFilter(dt, nft, f0):
     df = 1.0 / (nft * dt)
     nft21 = 0.5 * nft + 1
     f = df * np.arange(0, nft21)
-    w = 2 * pi * f
+    w = 2 * np.pi * f
 
     gauss = np.zeros([nft, 1])
     gauss1 = np.exp(-0.25 * (w / f0) ** 2) / dt
@@ -41,9 +38,9 @@ def correl(R, W, nfft):
 def phaseshift(x, nfft, dt, tshift):
     Xf = fft(x, nfft)
     shift_i = int(tshift / dt)
-    p = 2 * pi * np.arange(1, nfft + 1) * shift_i / nfft
+    p = 2 * np.pi * np.arange(1, nfft + 1) * shift_i / nfft
     Xf = Xf * np.vectorize(complex)(np.cos(p), -np.sin(p))
-    x = ifft(Xf, nfft) / np.cos(2 * pi * shift_i / nfft)
+    x = ifft(Xf, nfft) / np.cos(2 * np.pi * shift_i / nfft)
     x = x.real
     return x
 
@@ -164,7 +161,7 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, p
     fny = 1. / (2.* dt);     # nyquist
     delf = fny / (0.5 * nft)
     freq = delf * np.arange(nfpts)
-    w = 2 * pi * freq
+    w = 2 * np.pi * freq
 
     # containers
     # rff = np.zeros(nft); # Rfn in freq domain

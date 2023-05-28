@@ -1,10 +1,10 @@
-from curses import window
 import glob
 import os
 import sys
 import obspy
 import numpy as np
 import matplotlib.pyplot as plt
+import pandas as pd
 from matplotlib.figure import Figure
 from os.path import join, basename
 from seispy.setuplog import setuplog
@@ -129,8 +129,8 @@ class RFFigure(Figure):
     def read_sac(self, dt=0.1, order='baz'):
         if not isinstance(order, str):
             raise TypeError('The order must be str type')
-        elif not order in ['baz', 'dis']:
-            raise ValueError('The order must be \'baz\' or \'dis\'')
+        elif not order in ['baz', 'dis', 'date']:
+            raise ValueError('The order must be \'baz\', \'dis\' or \'date\'')
         else:
             pass
         if len(glob.glob(join(self.rfpath, '*P_R.sac'))) != 0:
@@ -170,14 +170,16 @@ class RFFigure(Figure):
             idx = np.argsort(self.baz)
         elif order == 'dis':
             idx = np.argsort(self.gcarc)
+        elif order == 'date':
+            idx = pd.to_datetime(self.filenames, format='%Y.%j.%H.%M.%S').argsort()
         else:
             pass
         self.baz = self.baz[idx]
         self.gcarc = self.gcarc[idx]
         self.phases = [self.phases[i] for i in idx]
         self.rrf = obspy.Stream([self.rrf[i] for i in idx])
-        self.trf = obspy.Stream([self.trf[i] for i in idx])
-        # self.gcarc = [self.rrf[i].stats.sac.gcarc for i in range(self.evt_num)]
+        if hasattr(self, 'trf'):
+            self.trf = obspy.Stream([self.trf[i] for i in idx])
         self.filenames = [self.filenames[i] for i in idx]
 
     def plotwave(self):

@@ -12,6 +12,7 @@ from seispy import distaz
 from seispy.eq import EQ
 from seispy.setuplog import setuplog
 from seispy.catalog import read_catalog_file
+from seispy.utils import scalar_instance
 import glob
 import numpy as np
 from datetime import timedelta
@@ -70,7 +71,8 @@ def datestr2regex(datestr):
 
 
 def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
-                 magmin=5.5, magmax=10., dismin=30., dismax=90.):
+                 magmin=5.5, magmax=10., dismin=30., dismax=90.,
+                 depthmin=0, depthmax=800):
     """Read local catalog with seispy or QUAKEML format
 
     :param logpath: Path to catalogs
@@ -102,6 +104,7 @@ def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
     dis = distaz(stla, stlo, eq_lst['evla'], eq_lst['evlo']).delta
     eq_lst = eq_lst[(eq_lst['date']>=b_time) & (eq_lst['date']<=e_time) & \
                     (eq_lst['mag']>=magmin) & (eq_lst['mag']<=magmax) & \
+                    (eq_lst['evdp']>=depthmin) & (eq_lst['evdp']<=depthmax) & \
                     (dis>=dismin) & (dis<=dismax)]
     return eq_lst
 
@@ -242,12 +245,19 @@ class RF(object):
     def date_end(self, value):
         self.para.date_end = value
 
-    def load_stainfo(self):
+    def load_stainfo(self, use_date_range=True):
         try:
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Load station info of {}.{} from {} web-service'.format(
                     self.para.stainfo.network, self.para.stainfo.station, self.para.data_server))
-                self.para.stainfo.get_station_from_ws(self.para.data_server)
+                if use_date_range:
+                    self.para.stainfo.get_station_from_ws(
+                        self.para.data_server,
+                        starttime=self.para.date_begin,
+                        endtime=self.para.date_end
+                    )
+                else:
+                    self.para.stainfo.get_station_from_ws(self.para.data_server)
                 try:
                     self.para._check_date_range()
                 except Exception as e:
@@ -256,7 +266,7 @@ class RF(object):
             else:
                 self.logger.RFlog.info('Load station info from {0}'.format(self.para.datapath))
                 self.para.stainfo.load_stainfo(self.para.datapath, self.para.ref_comp, self.para.suffix)
-            self.logger.RFlog.info('{}/{}, latitude: {:.3f}, longiture: {:.3f}'.format(
+            self.logger.RFlog.info('{}.{}, latitude: {:.3f}, longitude: {:.3f}'.format(
                 self.para.stainfo.network, self.para.stainfo.station, self.stainfo.stla, self.stainfo.stlo))
         except Exception as e:
             self.logger.RFlog.error('Error in loading station info: {0}'.format(e))
@@ -272,7 +282,9 @@ class RF(object):
                 query.get_events(starttime=self.para.date_begin, endtime=self.para.date_end,
                                  latitude=self.para.stainfo.stla, longitude=self.para.stainfo.stlo,
                                  minmagnitude=self.para.magmin, maxmagnitude=self.para.magmax,
-                                 minradius=self.para.dismin, maxradius=self.para.dismax, catalog=catalog)
+                                 minradius=self.para.dismin, maxradius=self.para.dismax, 
+                                 mindepth=self.para.depthmin, maxdepth=self.para.depthmax,
+                                 catalog=catalog)
                 self.eq_lst = query.events
             except Exception as e:
                 raise ConnectionError(e)
@@ -284,7 +296,8 @@ class RF(object):
                 self.eq_lst = read_catalog(self.para.catalogpath, self.para.date_begin, self.para.date_end,
                                            self.para.stainfo.stla, self.para.stainfo.stlo,
                                            magmin=self.para.magmin, magmax=self.para.magmax,
-                                           dismin=self.para.dismin, dismax=self.para.dismax)
+                                           dismin=self.para.dismin, dismax=self.para.dismax,
+                                           depthmin=self.para.depthmin, depthmax=self.para.depthmax)
             except Exception as e:
                 self.logger.RFlog.error('{0}'.format(e))
                 raise e
@@ -422,14 +435,17 @@ class RF(object):
                                        row['data'].datestr, row['data'].inc_correction))
         self.eqs.drop(drop_idx, inplace=True)
 
-    def drop_eq_snr(self, length=None):
+    def drop_eq_snr(self, length=None, z_only=False):
         if length is None:
             length = self.para.noiselen
         self.logger.RFlog.info('Reject data record with SNR less than {0}'.format(self.para.noisegate))
         drop_lst = []
         for i, row in self.eqs.iterrows():
             snr_E, snr_N, snr_Z = row['data'].snr(length=length)
-            mean_snr = np.mean([snr_E, snr_N, snr_Z])
+            if z_only:
+                mean_snr = snr_Z
+            else:
+                mean_snr = np.mean([snr_E, snr_N, snr_Z])
             if mean_snr < self.para.noisegate:
                 drop_lst.append(i)
         self.eqs.drop(drop_lst, inplace=True)
@@ -447,8 +463,9 @@ class RF(object):
             for _, row in self.eqs.iterrows():
                 row['data'].phase_trigger(self.para.time_before, self.para.time_after,
                                           stl=stl, ltl=ltl)
-        self.logger.RFlog.info('{0} events left after virtual checking'.format(self.eqs.shape[0]))
         pickphase(self.eqs, self.para, self.logger)
+        self.logger.RFlog.info('{0} events left after visual checking'.format(self.eqs.shape[0]))
+
 
     def deconv(self):
         shift = self.para.time_before
@@ -483,7 +500,7 @@ class RF(object):
         else:
             pass
         good_lst = []
-        if isinstance(self.para.gauss, (int, float)):
+        if scalar_instance(self.para.gauss):
             gauss = self.para.gauss
         elif gauss is None:
             gauss = self.para.gauss[0]

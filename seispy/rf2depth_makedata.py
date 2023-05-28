@@ -3,8 +3,8 @@ from seispy.rfcorrect import RFStation, psrf2depth, Mod3DPerturbation, psrf_1D_r
 import numpy as np
 from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog
-from seispy.geo import latlon_from, deg2km, rad2deg
-from os.path import join, dirname, exists
+from seispy.geo import latlon_from, rad2deg
+from os.path import join, exists
 import argparse
 import sys
 import glob
