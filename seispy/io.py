@@ -11,8 +11,8 @@ def _cat2df(cat):
 
 
 class Query():
-    def __init__(self, server='IRIS'):
-        self.client = Client(server)
+    def __init__(self, server='IRIS', **kwargs):
+        self.client = Client(server, **kwargs)
 
     def get_events(self, starttime=None,
                    endtime=UTCDateTime.now(), 

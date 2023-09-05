@@ -33,21 +33,32 @@ class StaInfo():
         self.channel = '*'
         self.location = '*'
 
+    def link_server(self, server, user=None, password=None):
+        """_summary_
+
+        :param server:  Sever name of FDSN web-service, by default 'IRIS'
+        :type server: str
+        :param user: username, defaults to None
+        :type user: str, optional
+        :param password: password, defaults to None
+        :type password: str, optional
+        """
+        try:
+            self.query = Query(server, user=user, password=password)
+        except Exception as e:
+            raise ConnectionError('Cannot connect with {} server'.format(server))
+
     def get_stainfo(self):
         return self.__dict__
 
     def load_stainfo(self, pathname, ref_comp, suffix):
         (self.network, self.station, self.stla, self.stlo, self.stel) = _load_station_info(pathname, ref_comp, suffix)
 
-    def get_station_from_ws(self, server='IRIS', **kwargs):
+    def get_station_from_ws(self, **kwargs):
         """Get station information from web-service with given network and station or other optional condition.
 
-        Parameters
-        ----------
-        server : str, optional
-            Sever name of FDSN web-service, by default 'IRIS'
+        
         """
-        self.query = Query(server)
         self.query.get_stations(network=self.network, station=self.station,
                                 channel=self.channel, location=self.location, 
                                 level='channel', **kwargs)
@@ -101,6 +112,8 @@ class RFPara(object):
         self.reverseE=False
         self.reverseN=False
         self.use_remote_data=False
+        self.data_server_user = None
+        self.data_server_password = None
         self.stainfo = StaInfo()
 
     def get_para(self):

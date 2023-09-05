@@ -112,7 +112,10 @@ def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
 def fetch_waveform(eq_lst, para, model, logger):
     tb = np.max([2*para.noiselen, 2*para.time_before])
     te = np.max([2*para.noiselen, 2*para.time_after])
-    query = Query(para.data_server)
+    try:
+        query = para.stainfo.query
+    except:
+        logger.RFlog.error('Please load station information and search earthquake before fetch waveform')
     new_col = ['dis', 'bazi', 'data', 'datestr']
     eq_match = pd.DataFrame(columns=new_col)
     for i, row in eq_lst.iterrows():
@@ -250,14 +253,18 @@ class RF(object):
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Load station info of {}.{} from {} web-service'.format(
                     self.para.stainfo.network, self.para.stainfo.station, self.para.data_server))
+                self.para.stainfo.link_server(
+                    self.para.data_server,
+                    self.para.data_server_user,
+                    self.para.data_server_password
+                )
                 if use_date_range:
                     self.para.stainfo.get_station_from_ws(
-                        self.para.data_server,
                         starttime=self.para.date_begin,
                         endtime=self.para.date_end
                     )
                 else:
-                    self.para.stainfo.get_station_from_ws(self.para.data_server)
+                    self.para.stainfo.get_station_from_ws()
                 try:
                     self.para._check_date_range()
                 except Exception as e:
@@ -304,6 +311,8 @@ class RF(object):
         self.logger.RFlog.info('{} earthquakes are found'.format(self.eq_lst.shape[0]))
 
     def match_eq(self):
+        """Assosiate earthquakes with local data file or online data.
+        """
         try:
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
