@@ -13,7 +13,7 @@ class SlantStack():
         :type seis: numpy.ndarray
         :param timeaxis: 1D array for time axis
         :type timeaxis: numpy.ndarray
-        :param dis: 1D array for all event distance in km
+        :param dis: 1D array for all event distance in deg
         :type dis: numpy.ndarray
         """
         self.datar = seis
