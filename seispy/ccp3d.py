@@ -1,7 +1,7 @@
 import numpy as np
 from seispy.geo import km2deg, extrema, skm2srad, rad2deg
 from seispy import distaz
-from seispy.rfcorrect import DepModel
+from seispy.core.depmodel import DepModel
 from seispy.setuplog import setuplog
 from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara

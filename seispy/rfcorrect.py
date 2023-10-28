@@ -3,6 +3,8 @@ import numpy as np
 from scipy.interpolate import interp1d, interpn
 from scipy.signal import resample
 from os.path import dirname, join, exists, isfile, abspath
+
+import seispy.core.depmodel
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
@@ -11,7 +13,8 @@ from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
 from seispy.plotRT import plotrt as _plotrt
 from seispy.plotR import plotr as _plotr
-from seispy.utils import DepModel, Mod3DPerturbation, scalar_instance
+from seispy.utils import Mod3DPerturbation, scalar_instance
+from seispy.core.depmodel import DepModel
 import warnings
 import glob
 
@@ -557,7 +560,9 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
     return ps_rfdepth, endindex, x_s, x_p
 
 
-def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
+def xps_tps_map(dep_mod: seispy.core.depmodel.DepModel
+                , srayp, prayp,
+                is_raylen=False, sphere=True, phase=1):
     """Calculate horizontal distance and time difference at depths
 
     :param dep_mod: 1D velocity model class 
@@ -611,7 +616,7 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
         tps = interp1d(dep_mod.depths_elev, tps, bounds_error=False, fill_value=(np.nan, tps[-1]))(dep_mod.depths)
         if is_raylen:
             raylength_s = interp1d(dep_mod.depths_elev, raylength_s, bounds_error=False, fill_value=(np.nan, raylength_s[-1]))(dep_mod.depths)
-            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=(np.nan, raylength_p[-1]))(dep_mod.depths)         
+            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=(np.nan, raylength_p[-1]))(dep_mod.depths)
     if is_raylen:
         return tps, x_s, x_p, raylength_s, raylength_p
     else:
