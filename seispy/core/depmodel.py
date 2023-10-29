@@ -73,14 +73,9 @@ def _layer2grid(dep_range, model):
     """
 
     neo_model = np.zeros((len(dep_range), 4)).astype(float)
-    # vp_dep = np.zeros_like(dep_range).astype(float)
-    # vs_dep = np.zeros_like(dep_range).astype(float)
-    # rho_dep = np.zeros_like(dep_range).astype(float)
-
     picks = np.searchsorted(model[:, 0], dep_range, side="left")
     for _i, _j in enumerate(picks):
         neo_model[_i, :] = model[_j, :]
-    # return vp_dep, vs_dep, rho_dep
     return neo_model[:, 1], neo_model[:, 2], neo_model[:, 3]
 
 def _intep_mod(model, depths_elev):
@@ -180,23 +175,14 @@ class DepModel(object):
             self.depths_elev = self.depths
             self.depths_extend = self.depths
         else:
-
-
             depths_append = np.arange(self.depths[-1]+self.dep_val,
                                self.depths[-1]+self.dep_val+np.floor(self.elevation/self.dep_val+1), self.dep_val)
 
             self.depths_extend = np.append(self.depths, depths_append)
             self.depths_elev = np.append(self.depths, depths_append) - self.elevation
-
-
         self.dz = np.append(0, np.diff(self.depths_extend))
         self.thickness = np.append(np.diff(self.depths_extend), 0.)
-
         self.R = 6371.0 - self.depths_elev
-
-
-
-
 
     def plot_model(self, show=True):
         plt.style.use('bmh')
@@ -271,8 +257,6 @@ class DepModel(object):
         array([6371. , 6350.9, 6335.9, 6271. ])
         >>> model.radius_s(1.2,phase="S", sphere=False)*111.2
         array([0.        , 0.0002478 , 0.00046823, 0.00142685])
-
-
         """
         if phase == 'P':
             vel = self.vp

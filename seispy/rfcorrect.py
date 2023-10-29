@@ -3,8 +3,6 @@ import numpy as np
 from scipy.interpolate import interp1d, interpn
 from scipy.signal import resample
 from os.path import dirname, join, exists, isfile, abspath
-
-import seispy.core.depmodel
 from seispy.geo import skm2srad, sdeg2skm, rad2deg, latlon_from, \
                        asind, tand, srad2skm, km2deg
 from seispy.psrayp import get_psrayp
@@ -560,8 +558,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
     return ps_rfdepth, endindex, x_s, x_p
 
 
-def xps_tps_map(dep_mod: seispy.core.depmodel.DepModel
-                , srayp, prayp,
+def xps_tps_map(dep_mod: DepModel, srayp, prayp,
                 is_raylen=False, sphere=True, phase=1):
     """Calculate horizontal distance and time difference at depths
 
