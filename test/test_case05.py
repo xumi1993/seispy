@@ -1,4 +1,4 @@
-from seispy.utils import DepModel
+from seispy.core.depmodel import DepModel
 from seispy.seisfwd import SynSeis
 from seispy.rfcorrect import RFStation
 import pytest

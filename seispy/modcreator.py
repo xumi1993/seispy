@@ -1,6 +1,6 @@
 import numpy as np
 from scipy.interpolate import griddata, interp1d
-from seispy.rfcorrect import DepModel
+from seispy.core.depmodel import DepModel
 from seispy.setuplog import setuplog
 import argparse
 

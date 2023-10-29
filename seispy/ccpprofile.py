@@ -4,7 +4,7 @@ from seispy.geo import km2deg, deg2km, latlon_from, \
                        geo2sph, sph2geo
 from seispy.setuplog import setuplog
 from seispy.distaz import distaz
-from seispy.rfcorrect import DepModel
+from seispy.core.depmodel import DepModel
 from seispy.rf2depth_makedata import Station
 from seispy.ccppara import ccppara, CCPPara
 from scikits.bootstrap import ci
