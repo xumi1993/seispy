@@ -8,8 +8,6 @@ import numpy as np
 def test_sub01():
     depth = np.array([0, 20.1, 35.1, 100])
     model = DepModel(depth)
-    print(model.vp)
-    print(model.dz)
     rayp = np.arange(0.04, 0.09, 0.01)
     ss = SynSeis(model, rayp, 0.1, 2400)
     ss.run_fwd()
