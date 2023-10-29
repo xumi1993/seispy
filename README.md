@@ -40,7 +40,7 @@ For 3D time-difference correction, please also consider citing:
 - Xu, M., Huang, H., Huang, Z., Wang, P., Wang, L., Xu, M., ... & Yuan, X. (2018). Insight into the subducted Indian slab and origin of the Tengchong volcano in SE Tibet from receiver function analysis. Earth and Planetary Science Letters, 482, 567-579.  [![Static Badge](https://img.shields.io/badge/DOI-10.1016%2Fj.epsl.2017.11.048-pink)
 ](https://doi.org/10.1785/0220220288)
 
-- Xu, M., Huang, Z., Wang, L., Xu, M., Mi, N., & Yu, D. (2020). Lateral variation of the mantle transition zone beneath the Tibetan plateau: Insight into thermal processes during Indian–Asian collision. Physics of the Earth and Planetary Interiors, 301, 106452. [![Static Badge](https://img.shields.io/badge/DOI-doi.org%2F10.1016%2Fj.pepi.2020.106452-pink)](https://doi.org/10.1016/j.pepi.2020.106452)
+- Xu, M., Huang, Z., Wang, L., Xu, M., Mi, N., & Yu, D. (2020). Lateral variation of the mantle transition zone beneath the Tibetan plateau: Insight into thermal processes during Indian–Asian collision. Physics of the Earth and Planetary Interiors, 301, 106452. [![Static Badge](https://img.shields.io/badge/DOI-10.1016%2Fj.pepi.2020.106452-pink)](https://doi.org/10.1016/j.pepi.2020.106452)
 
 For 2D and 3D CCP stacking, please also consider citing:
 
