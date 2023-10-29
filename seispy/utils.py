@@ -1,13 +1,10 @@
 from os.path import join, dirname, exists
 import array
-
 from scipy.io import loadmat
 from matplotlib.colors import ListedColormap
 import numpy as np
 from scipy.interpolate import interp1d, interpn
 import pandas as pd
-
-#from seispy.core.depmodel import DepModel
 
 
 def vs2vprho(vs):

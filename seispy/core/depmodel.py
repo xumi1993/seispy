@@ -1,9 +1,7 @@
 from os.path import exists, join, dirname
-
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
-
 from seispy.utils import vs2vprho
 
 
@@ -51,7 +49,6 @@ def _search_vel_file(mode_name):
         model[:3, :] = raw_model[:, :]
         _p, rho = vs2vprho(raw_model[:, 2])
         model[3, :] = rho
-
         return model
     else:
         return raw_model
@@ -85,7 +82,6 @@ def _intep_mod(model, depths_elev):
                        fill_value=model[0,2])(depths_elev)
     rho = interp1d(model[:,0], model[:,3], bounds_error=False,
                         fill_value=model[0,3])(depths_elev)
-
     return vp, vs, rho
 
 
