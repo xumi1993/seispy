@@ -181,6 +181,14 @@ class DepModel(object):
         self.R = 6371.0 - self.depths_elev
 
     def plot_model(self, show=True):
+        """
+        plot model with matplotlib
+        
+        Parameters
+        ----------
+        show : bool, optional
+        whether to show the plot, by default True
+        """        
         plt.style.use('bmh')
         if self.isrho:
             self.model_fig = plt.figure(figsize=(6, 6))
@@ -207,6 +215,23 @@ class DepModel(object):
             plt.show()
 
     def tpds(self, rayps, raypp, sphere=True):
+        # generate docstring
+        """
+        calculate travel time of Pds
+        Parameters
+        ----------
+        rayps : float or numpy.ndarray
+            ray parameter of Ps wave
+        raypp : float or numpy.ndarray
+            ray parameter of P wave
+        sphere : bool, optional
+            whether to use sphere earth, by default True
+        
+        Returns
+        -------
+        travel time of Pds
+        """
+
         if sphere:
             radius = self.R
         else:
@@ -217,6 +242,22 @@ class DepModel(object):
         return tps
 
     def tpppds(self, rayps, raypp, sphere=True):
+        """
+        calculate travel time of Ppds
+
+        Parameters
+        ----------
+        rayps : float or numpy.ndarray
+            ray parameter of Ps wave
+        raypp : float or numpy.ndarray
+            ray parameter of P wave
+        sphere : bool, optional
+            whether to use sphere earth, by default True
+        
+        Returns
+        -------
+        travel time of Ppds
+        """
         if sphere:
             radius = self.R
         else:
@@ -227,6 +268,20 @@ class DepModel(object):
         return tps
 
     def tpspds(self, rayps, sphere=True):
+        """
+        calculate travel time of Ppsds
+        
+        Parameters
+        ----------
+        rayps : float or numpy.ndarray
+            ray parameter of Ps wave
+        sphere : bool, optional
+            whether to use sphere earth, by default True
+        
+        Returns
+        -------
+        travel time of Ppsds
+        """
         if sphere:
             radius = self.R
         else:
@@ -267,6 +322,23 @@ class DepModel(object):
         return hor_dis
 
     def raylength(self, rayp, phase='P', sphere=True):
+        """
+        calculate ray length, P for Sp and S for Ps
+        
+        Parameters
+        ----------
+        rayp: float or numpy.ndarray
+            ray parameter
+        phase: str, optional
+            phase name, by default 'P'
+        sphere: bool, optional
+            whether to use sphere earth, by default True
+        
+        Returns
+        -------
+        ray length
+        """
+
         if phase == 'P':
             vel = self.vp
         else:

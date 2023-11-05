@@ -11,8 +11,9 @@ from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
 from seispy.plotRT import plotrt as _plotrt
 from seispy.plotR import plotr as _plotr
-from seispy.utils import Mod3DPerturbation, scalar_instance
+from seispy.utils import scalar_instance
 from seispy.core.depmodel import DepModel
+from seispy.core.pertmod import Mod3DPerturbation
 import warnings
 import glob
 

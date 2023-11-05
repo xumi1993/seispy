@@ -1,5 +1,6 @@
-from seispy.rfcorrect import RFStation, psrf2depth, Mod3DPerturbation, psrf_1D_raytracing,\
+from seispy.rfcorrect import RFStation, psrf2depth, psrf_1D_raytracing,\
     psrf_3D_migration, time2depth, psrf_3D_raytracing
+from seispy.core.pertmod import Mod3DPerturbation
 import numpy as np
 from seispy.ccppara import ccppara
 from seispy.setuplog import setuplog

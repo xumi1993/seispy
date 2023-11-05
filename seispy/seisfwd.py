@@ -48,7 +48,8 @@ def e_inverse(omega, rho, alpha, beta, p):
 
 
 def propagator_sol(omega, rho, alpha, beta, p, z):
-    """ propagator (Aki & Richards, pp. 398, Eq. (3) in Box 9.1)
+    """ 
+    propagator (Aki & Richards, pp. 398, Eq. (3) in Box 9.1)
 
     Parameters
     ----------

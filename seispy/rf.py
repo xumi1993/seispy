@@ -157,6 +157,31 @@ def fetch_waveform(eq_lst, para, model, logger):
 
 def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', offset=None,
              tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
+    """Match earthquakes with local SAC files
+
+    :param eq_lst: Earthquake list
+    :type eq_lst: pandas.DataFrame
+    :param pathname: Path to SAC files
+    :type pathname: str
+    :param stla: Station latitude
+    :type stla: float
+    :param stlo: Station longitude
+    :type stlo: float
+    :param logger: Logger
+    :type logger: seispy.setuplog.Logger
+    :param ref_comp: Reference component, defaults to 'Z'
+    :type ref_comp: str, optional
+    :param suffix: Suffix of SAC files, defaults to 'SAC'
+    :type suffix: str, optional
+    :param offset: Time offset between SAC files and earthquakes, defaults to None
+    :type offset: float, optional
+    :param tolerance: Tolerance of time offset, defaults to 210
+    :type tolerance: int, optional
+    :param dateformat: Date format of SAC files, defaults to '%Y.%j.%H.%M.%S'
+    :type dateformat: str, optional
+    :return: Earthquake list with matched SAC files
+    :rtype: pandas.DataFrame
+    """
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
     if len(ref_eqs) == 0:

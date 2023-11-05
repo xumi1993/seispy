@@ -54,6 +54,13 @@ def gen_center_bin(center_lat, center_lon, len_lat, len_lon, val):
 
 
 def bin_shape(cpara):
+    """Compute the radius of bins in degree.
+
+    :param cpara: Parameters of CCP stacking.
+    :type cpara: CCPPara
+    :return: Radius of bins in degree.
+    :rtype: 1-D ndarray of floats with shape (n, ), where n is the number of bins.
+    """
     if cpara.shape == 'rect':
         raise ValueError('The shape of bins must be set to \'circle\' in ccp3d mode.')
     if cpara.bin_radius is None:
@@ -65,6 +72,15 @@ def bin_shape(cpara):
 
 
 def boot_bin_stack(data_bin, n_samples=3000):
+    """Stack data with bootstrap method.
+
+    :param data_bin: Data falling within a bin.
+    :type data_bin: 1-D ndarray of floats
+    :param n_samples: Number of bootstrap samples, defaults to 3000
+    :type n_samples: int, optional
+    :return: Mean, confidence interval and number of data falling within a bin.
+    :rtype: tuple of floats and int
+    """
     warnings.filterwarnings("ignore")
     data_bin = data_bin[~np.isnan(data_bin)]
     count = data_bin.shape[0]
@@ -92,14 +108,15 @@ def _sta_val(stack_range, radius):
 
 
 class CCP3D():
-    def __init__(self, cfg_file=None, log=None):
-        """Class for 3-D CCP stacking, Usually used to study mantle transition zone structure.
+    """
+    Class for 3-D CCP stacking, Usually used to study mantle transition zone structure.
 
-        :param cfg_file: Path to configure file. If not defined a instance of CCP3D.cpara will be initialed, defaults to None
-        :type cfg_file: str, optional
-        :param log: A logger instance. If not defined, seispy.sutuplog.logger will be initialed, defaults to None
-        :type log: seispy.sutuplog.logger , optional
-        """
+    :param cfg_file: Path to configure file. If not defined a instance of CCP3D.cpara will be initialed, defaults to None
+    :type cfg_file: str, optional
+    :param log: A logger instance. If not defined, seispy.sutuplog.logger will be initialed, defaults to None
+    :type log: seispy.sutuplog.logger , optional
+    """
+    def __init__(self, cfg_file=None, log=None):
         if log is None:
             self.logger = setuplog()
         else:
@@ -118,6 +135,11 @@ class CCP3D():
         self.bin_map = None
 
     def load_para(self, cfg_file):
+        """Load parameters from configure file.
+
+        :param cfg_file: Path to configure file.
+        :type cfg_file: str
+        """
         try:
             self.cpara = ccppara(cfg_file)
         except Exception as e:
@@ -130,6 +152,8 @@ class CCP3D():
             raise ValueError('{}'.format(e))
     
     def read_rfdep(self):
+        """Read RFdepth data from npz file.
+        """
         self.logger.CCPlog.info('Loading RFdepth data from {}'.format(self.cpara.depthdat))
         try:
             self.rfdep = read_rfdep(self.cpara.depthdat)
@@ -138,6 +162,8 @@ class CCP3D():
             raise FileNotFoundError('Cannot open file of {}'.format(self.cpara.depthdat))
 
     def initial_grid(self):
+        """Initial grid points and search stations within a distance.
+        """
         self.read_rfdep()
         self.bin_loca, self.bin_mat, self.bin_map = gen_center_bin(*self.cpara.center_bin)
         self.fzone = bin_shape(self.cpara)
@@ -209,11 +235,27 @@ class CCP3D():
         return dep_410, dep_660
 
     def search_good_410_660(self, peak_410_min=380, peak_410_max=440, peak_660_min=630, peak_660_max=690):
+        """Search good 410 and 660 km discontinuities from stacked data.
+
+        :param peak_410_min: Minimum depth of 410 km discontinuity, defaults to 380
+        :type peak_410_min: float, optional
+        :param peak_410_max: Maximum depth of 410 km discontinuity, defaults to 440
+        :type peak_410_max: float, optional
+        :param peak_660_min: Minimum depth of 660 km discontinuity, defaults to 630
+        :type peak_660_min: float, optional
+        :param peak_660_max: Maximum depth of 660 km discontinuity, defaults to 690
+        :type peak_660_max: float, optional
+        """
         self.good_410_660 = np.zeros_like(self.bin_loca)
         for i, boot_stack in enumerate(self.stack_data):
             self.good_410_660[i, 0], self.good_410_660[i, 1] = self._search_peak(boot_stack['mu'], peak_410_min, peak_410_max, peak_660_min, peak_660_max)
 
     def save_good_410_660(self, fname):
+        """Save good 410 and 660 km discontinuities to local.
+
+        :param fname: file name of good 410 and 660 km discontinuities
+        :type fname: str
+        """
         with open(fname, 'w') as f:
             for i, good_peak in enumerate(self.good_410_660):
                 if np.isnan(good_peak[0]):
@@ -236,6 +278,19 @@ class CCP3D():
 
     @classmethod
     def read_stack_data(cls, stack_data_path, cfg_file=None, good_depth_path=None, ismtz=False):
+        """Read stacked data from local.
+
+        :param stack_data_path: Path to stacked data.
+        :type stack_data_path: str
+        :param cfg_file: Path to configure file, defaults to None
+        :type cfg_file: str, optional
+        :param good_depth_path: Path to good depth file, defaults to None
+        :type good_depth_path: str, optional
+        :param ismtz: Whether the good depth file is in mtz format, defaults to False
+        :type ismtz: bool, optional
+        :return: A instance of CCP3D.
+        :rtype: CCP3D
+        """
         ccp = cls(cfg_file)
         data = np.load(stack_data_path, allow_pickle=True)
         ccp.stack_data = data['stack_data']
