@@ -23,7 +23,19 @@ class PlotR:
         self.enf = enf
         self.xlim = xlim
         self.key = key
-        self.fig, self.axr, self.axb, self.axs = self.init_figure()
+        self.init_figure()
+
+    def init_figure(self):
+        self.fig = plt.figure(figsize=(8, 10))
+        self.fig.tight_layout()
+        gs = GridSpec(15, 3)
+        gs.update(wspace=0.25)
+        self.axr = plt.subplot(gs[1:, 0:-1])
+        self.axr.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
+        self.axb = plt.subplot(gs[1:, -1])
+        self.axb.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
+        self.axs = plt.subplot(gs[0, 0:-1])
+        self.axs.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
 
     def plot_waves(self):
         bound = np.zeros(self.stadata.rflength)
