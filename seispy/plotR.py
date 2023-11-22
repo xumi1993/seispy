@@ -76,6 +76,22 @@ def set_fig(axr, axb, axs, stadata, xmin=-2, xmax=80):
 
 
 def plotr(rfsta, out_path='./', xlim=[-2, 80], key='bazi', enf=6, outformat='g', show=False):
+    """ Plot receiver function in R component
+    :param rfsta: receiver function data
+    :type rfsta: sespy.rfcorrect.RFStation
+    :param out_path: output path
+    :type out_path: str
+    :param xlim: xlim
+    :type xlim: list
+    :param key: sort key
+    :type key: str
+    :param enf: enhancement factor
+    :type enf: float
+    :param outformat: output format
+    :type outformat: str
+    :param show: show figure
+    :type show: bool
+    """
     h, axr, axb, axs = init_figure()
     rfsta.sort(key)
     plot_waves(axr, axb, axs, rfsta, enf=enf)

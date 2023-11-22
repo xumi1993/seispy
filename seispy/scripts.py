@@ -226,6 +226,9 @@ def plot_rt():
     parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
     parser.add_argument('-e', help='Enlargement factor, defaults to 3', dest='enf', type=float, default=3, metavar='enf')
+    parser.add_argument('-k', help='The key to sort PRFs, avialible for \'event\', \'evla\', \'evlo\', \'evdp\','
+                                    '\'dis\', \'bazi\', \'rayp\', \'mag\', \'f0\', defaults to \'bazi\'', metavar='key',
+                        default='bazi', type=str)
     parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                         dest='format', default='g', type=str, metavar='f|g')
@@ -234,7 +237,7 @@ def plot_rt():
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
     rfsta = RFStation(arg.rfpath)
-    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xlim=[-2, arg.x])
+    plotrt(rfsta, enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
 
 
 def plot_r():
@@ -242,6 +245,9 @@ def plot_r():
     parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
     parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
+    parser.add_argument('-k', help='The key to sort PRFs, avialible for \'event\', \'evla\', \'evlo\', \'evdp\','
+                                    '\'dis\', \'bazi\', \'rayp\', \'mag\', \'f0\', defaults to \'bazi\'', metavar='key',
+                        default='bazi', type=str)
     parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                     dest='format', default='g', type=str, metavar='f|g')
@@ -255,5 +261,5 @@ def plot_r():
     elif arg.format == 'f':
         fmt = 'pdf'
     rfsta = RFStation(arg.rfpath)
-    plotr(rfsta, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
+    plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], format=fmt)
 

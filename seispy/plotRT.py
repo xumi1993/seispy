@@ -23,6 +23,24 @@ def init_figure():
 
 
 def plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=3):
+    """Plot PRFs with R and T components
+
+    :param axr: The axis of R component
+    :type axr: matplotlib.axes
+    :param axt: The axis of T component
+    :type axt: matplotlib.axes
+    :param axb: The axis of back-azimuth
+    :type axb: matplotlib.axes
+    :param axr_sum: The axis of R component sum
+    :type axr_sum: matplotlib.axes
+    :param axt_sum: The axis of T component sum
+    :type axt_sum: matplotlib.axes
+    :param stadata: The PRFs data
+    :type stadata: seispy.core.StaData
+    :param enf: The enlarge factor, defaults to 3
+    :type enf: int, optional
+    """
+
     bound = np.zeros(stadata.rflength)
     for i in range(stadata.ev_num):
         datar = stadata.datar[i] * enf + (i + 1)
@@ -111,12 +129,15 @@ def set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, station, xmin=-2, xmax=30,
 def plotrt(rfsta, enf=3, out_path='./', key='bazi', outformat='g', xlim=[-2, 30], show=False):
     """Plot PRFs with R and T components
 
-    :param rfpath: Path to PRFs
-    :type rfpath: str
+    :param rfsta: Path to PRFs
+    :type rfsta: seispy.rfcorrect.RFStation
     :param enf: The enlarge factor, defaults to 3
     :type enf: int, optional
     :param out_path: The output path, defaults to current directory
     :type out_path: str, optional
+    :param key: The key to sort PRFs, avialible for ``event``, ``evla``, ``evlo``, ``evdp``,
+        ``dis``, ``bazi``, ``rayp``, ``mag``, ``f0``, defaults to ``bazi``
+    :type key: str, optional
     :param outformat: File format of the image file, g as \'png\', f as \'pdf\', defaults to 'g'
     :type outformat: str, optional
     """
