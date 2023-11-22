@@ -261,5 +261,5 @@ def plot_r():
     elif arg.format == 'f':
         fmt = 'pdf'
     rfsta = RFStation(arg.rfpath)
-    plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], format=fmt)
+    rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], format=fmt)
 

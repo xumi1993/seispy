@@ -169,4 +169,5 @@ class RPickFigure(RFFigure):
         stadata = RFStation.read_stream(newrfs, self.rayp[goodidx],
                                         self.baz[goodidx], prime_comp=self.comp)
         stadata.event = np.array([self.filenames[i] for i in goodidx])
-        self.plotfig = stadata.plotr(enf=self.enf, xlim=self.xlim)
+        pr = stadata.plotr(enf=self.enf, xlim=self.xlim, output=None)
+        self.plotfig = pr.fig
