@@ -8,7 +8,7 @@ import pandas as pd
 from matplotlib.figure import Figure
 from os.path import join, basename
 from seispy.setuplog import setuplog
-from seispy.plotRT import init_figure, set_fig, plot_waves
+from seispy.rfcorrect import RFStation
 
 
 def indexpags(evt_num, maxidx=20):
@@ -158,6 +158,7 @@ class RFFigure(Figure):
         self.log.RFlog.info('A total of {} PRFs loaded'.format(self.evt_num))
         self.baz = np.array([tr.stats.sac.baz for tr in self.rrf])
         self.gcarc = np.array([tr.stats.sac.gcarc for tr in self.rrf])
+        self.rayp = np.array([tr.stats.sac.user0 for tr in self.rrf])
         self._sort(order)
         self.axpages, self.rfidx = indexpags(self.evt_num, self.maxidx)
         self.staname = (self.rrf[0].stats.network+'.'+self.rrf[0].stats.station).strip('.')
@@ -286,8 +287,15 @@ class RFFigure(Figure):
     def plot(self):
         plt.ion()
         plt.rcParams['toolbar'] = 'None'
-        stadata = StaData(self.filenames, self.rrf, self.trf, self.baz, self.goodrf)
-        stadata.time_axis = self.time_axis
-        self.plotfig, axr, axt, axb, axr_sum, axt_sum = init_figure()
-        plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=self.enf)
-        set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, self.staname)
+        goodidx = np.where(self.goodrf == 1)[0]
+        newrfs = obspy.Stream([self.rrf[idx] for idx in goodidx])
+        newtrfs = obspy.Stream([self.trf[idx] for idx in goodidx])
+        stadata = RFStation.read_stream(newrfs, self.rayp[goodidx],
+                                        self.baz[goodidx], prime_comp=self.comp,
+                                        stream_t=newtrfs)
+        stadata.event = np.array([self.filenames[i] for i in goodidx])
+        prt = stadata.plotrt(enf=self.enf, xlim=self.xlim, out_path=None)
+        self.plotfig = prt.fig
+        # self.plotfig, axr, axt, axb, axr_sum, axt_sum = init_figure()
+        # plot_waves(axr, axt, axb, axr_sum, axt_sum, stadata, enf=self.enf)
+        # set_fig(axr, axt, axb, axr_sum, axt_sum, stadata, self.staname)

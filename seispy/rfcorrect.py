@@ -115,7 +115,7 @@ class RFStation(object):
         # self.data_prime = eval('self.data{}'.format(self.comp.lower()))
 
     @classmethod
-    def read_stream(cls, stream, rayp, baz, prime_comp='R'):
+    def read_stream(cls, stream, rayp, baz, prime_comp='R', stream_t=None):
         """Create RFStation instance from ``obspy.Stream``
 
         Parameters
@@ -131,7 +131,13 @@ class RFStation(object):
         """
         if len(stream) == 0:
             raise ValueError('No such RFTrace read')
-        rfsta = cls('', only_r=True, prime_comp=prime_comp)
+        if stream_t is not None and len(stream) != len(stream_t):
+            raise ValueError('Stream and Stream_t must have the same length')
+        if stream_t is not None:
+            only_r = False
+        else:
+            only_r = True
+        rfsta = cls('', only_r=only_r, prime_comp=prime_comp)
         ev_num = len(stream)
         if scalar_instance(rayp):
             rayp = np.ones(ev_num)*rayp
@@ -164,6 +170,10 @@ class RFStation(object):
             except:
                 rfsta.f0[i] = tr.stats.sac.user1
             rfsta.data_prime[i] = tr.data
+        if stream_t is not None:
+            rfsta.datat = np.zeros([rfsta.ev_num, rfsta.rflength])
+            for i, tr in enumerate(stream_t):
+                rfsta.datat[i] = tr.data
         exec('rfsta.data{} = rfsta.data_prime'.format(rfsta.comp.lower()))
         return rfsta
 

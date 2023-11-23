@@ -106,11 +106,13 @@ class PlotR:
         if outformat is None and not show:
             return
         elif outformat == 'g':
-            self.fig.savefig(join(out_path, self.stadata.staname+'_R_{}order_{:.1f}.png'.format(self.key, self.stadata.f0[0])),
-                           dpi=400, bbox_inches='tight')
+            self.fig.savefig(join(out_path, self.stadata.staname+'_{}_{}order_{:.1f}.png'.format(
+                             self.stadata.comp, self.key, self.stadata.f0[0])),
+                             dpi=400, bbox_inches='tight')
         elif outformat == 'f':
-            self.fig.savefig(join(out_path, self.stadata.staname+'_R_{}order_{:.1f}.pdf'.format(self.key, self.stadata.f0[0])),
-                           format='pdf', bbox_inches='tight')
+            self.fig.savefig(join(out_path, self.stadata.staname+'_{}_{}order_{:.1f}.pdf'.format(
+                             self.stadata.comp, self.key, self.stadata.f0[0])),
+                             format='pdf', bbox_inches='tight')
         if show:
             plt.show()
 

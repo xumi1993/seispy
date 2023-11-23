@@ -225,6 +225,8 @@ def plot_rt():
     from seispy.plotRT import plotrt
     parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
+    parser.add_argument('-c', help='prime component to plot, defaults to \'R\'', 
+                         default='R', type=str, metavar='[R|Q]')
     parser.add_argument('-e', help='Enlargement factor, defaults to 3', dest='enf', type=float, default=3, metavar='enf')
     parser.add_argument('-k', help='The key to sort PRFs, avialible for \'event\', \'evla\', \'evlo\', \'evdp\','
                                     '\'dis\', \'bazi\', \'rayp\', \'mag\', \'f0\', defaults to \'bazi\'', metavar='key',
@@ -236,7 +238,7 @@ def plot_rt():
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
-    rfsta = RFStation(arg.rfpath)
+    rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
     plotrt(rfsta, enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
 
 
@@ -244,6 +246,8 @@ def plot_r():
     from seispy.plotR import plotr
     parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
+    parser.add_argument('-c', help='prime component to plot, defaults to \'R\'', 
+                         default='R', type=str, metavar='[R|Q|L|Z]')
     parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
     parser.add_argument('-k', help='The key to sort PRFs, avialible for \'event\', \'evla\', \'evlo\', \'evdp\','
                                     '\'dis\', \'bazi\', \'rayp\', \'mag\', \'f0\', defaults to \'bazi\'', metavar='key',
@@ -260,6 +264,6 @@ def plot_r():
         fmt = 'png'
     elif arg.format == 'f':
         fmt = 'pdf'
-    rfsta = RFStation(arg.rfpath)
+    rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
     rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], format=fmt)
 
