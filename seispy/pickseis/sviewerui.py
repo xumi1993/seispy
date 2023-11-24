@@ -57,7 +57,6 @@ class SFigure(Figure):
         self.axs[2].set_xlabel('Time (s)')
         self.axs[0].legend(loc=2)
 
-
     def clear(self):
         for ax in self.axs:
             ax.cla()
@@ -184,7 +183,7 @@ class MatplotlibWidget(QMainWindow):
 
         self._set_geom_center()
         self._define_global_shortcuts()
-        self.setWindowTitle('Pick S Phase')
+        self.setWindowTitle('Pick Phase')
         self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
 
     def add_btn(self):

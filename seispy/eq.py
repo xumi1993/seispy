@@ -273,20 +273,24 @@ class EQ(object):
         t2 = self.st[2].stats.starttime + (arr + self.trigger_shift + time_after)
         return t1, t2
 
-    def phase_trigger(self, time_before, time_after, stl=5, ltl=10):
+    def phase_trigger(self, time_before, time_after, prepick=True, stl=5, ltl=10):
         t1, t2 = self._get_time(time_before, time_after)
         self.st_pick = self.st.copy().trim(t1, t2)
         if len(self.st_pick) == 0:
             return
-        if self.phase[-1] == 'P':
-            tr = self.st_pick.select(channel='*Z')[0]
+        if prepick:
+            if self.phase[-1] == 'P':
+                tr = self.st_pick.select(channel='*Z')[0]
+            else:
+                tr = self.st_pick.select(channel='*T')[0]
+            df = tr.stats.sampling_rate
+            cft = recursive_sta_lta(tr.data, int(stl*df), int(ltl*df))
+            n_trigger = np.argmax(np.diff(cft)[int(ltl*df):])+int(ltl*df)
+            self.t_trigger = t1 + n_trigger/df
+            self.trigger_shift = n_trigger/df - time_before
         else:
-            tr = self.st_pick.select(channel='*T')[0]
-        df = tr.stats.sampling_rate
-        cft = recursive_sta_lta(tr.data, int(stl*df), int(ltl*df))
-        n_trigger = np.argmax(np.diff(cft)[int(ltl*df):])+int(ltl*df)
-        self.t_trigger = t1 + n_trigger/df
-        self.trigger_shift = n_trigger/df - time_before
+            self.t_trigger = t1
+            self.trigger_shift = 0.0
 
     def trim(self, time_before, time_after, isreturn=False):
         """

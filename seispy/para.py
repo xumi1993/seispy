@@ -32,6 +32,10 @@ class StaInfo():
         self.stel = 0.
         self.channel = '*'
         self.location = '*'
+    
+    def __repr__(self) -> str:
+        # print the station name, channel, location
+        return '{0}.{1}.{2}:{}'.format(self.network, self.station, self.channel, self.location)
 
     def link_server(self, server, user=None, password=None):
         """_summary_
@@ -238,7 +242,20 @@ class RFPara(object):
         sections.remove('path')
         if 'fetch' in sections:
             for key, value in cf.items('fetch'):
-                pa.stainfo.__dict__[key] = value
+                if key == 'use_remote_data':
+                    pa.__dict__[key] = cf.getboolean('fetch', 'use_remote_data')
+                elif key == 'data_server_user':
+                    if value == '':
+                        continue
+                    else:
+                        pa.__dict__[key] = value
+                elif key == 'data_server_password':
+                    if value == '':
+                        continue
+                    else:
+                        pa.__dict__[key] = value
+                else:
+                    pa.stainfo.__dict__[key] = value
             sections.remove('fetch')
         for sec in sections:
             for key, value in cf.items(sec):

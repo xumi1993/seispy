@@ -117,7 +117,7 @@ def fetch_waveform(eq_lst, para, model, logger):
     except:
         logger.RFlog.error('Please load station information and search earthquake before fetch waveform')
     new_col = ['dis', 'bazi', 'data', 'datestr']
-    eq_match = pd.DataFrame(columns=new_col)
+    eqall = []
     for i, row in eq_lst.iterrows():
         datestr = row['date'].strftime('%Y.%j.%H.%M.%S')
         daz = distaz(para.stainfo.stla, para.stainfo.stlo, row['evla'], row['evlo'])
@@ -149,7 +149,8 @@ def fetch_waveform(eq_lst, para, model, logger):
             continue
         this_eq.get_time_offset(row['date'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
-        eq_match = pd.concat([eq_match, this_df])
+        eqall.append(this_df)
+        eq_match = pd.concat(eqall)
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
@@ -494,12 +495,11 @@ class RF(object):
     def pick(self, prepick=True, stl=5, ltl=10):
         if prepick:
             self.logger.RFlog.info('Pre-pick {} arrival using STA/LTA method'.format(self.para.phase))
-            for _, row in self.eqs.iterrows():
-                row['data'].phase_trigger(self.para.time_before, self.para.time_after,
-                                          stl=stl, ltl=ltl)
+        for _, row in self.eqs.iterrows():
+            row['data'].phase_trigger(self.para.time_before, self.para.time_after,
+                                      prepick=prepick, stl=stl, ltl=ltl)
         pickphase(self.eqs, self.para, self.logger)
         self.logger.RFlog.info('{0} events left after visual checking'.format(self.eqs.shape[0]))
-
 
     def deconv(self):
         shift = self.para.time_before

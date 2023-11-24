@@ -19,7 +19,7 @@ class setuplog(object):
 
         """
         self.filename = filename
-        fh = logging.FileHandler(filename)
+        fh = logging.FileHandler(filename, mode='w')
         ch = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s [%(name)s] %(levelname)s: %(message)s')
         fh.setFormatter(formatter)

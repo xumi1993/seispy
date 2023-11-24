@@ -116,15 +116,18 @@ def get_pierce_points():
 def common_parser():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
-    parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
-    parser.add_argument('-r', help='Reverse components: N, E or NE', dest='comp',
-                        metavar='N|E|NE', default=None, type=str)
-    parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
     parser.add_argument('-b', help='Correct back-azimuth. \nIf "baz" is specified, the corr_baz = raw_baz + baz. \n'
                                    'If there is no argument, the back-azimuth will be corrected with minimal '
                                    'energy of T component. The searching range is raw_baz +/- 90',
                                    dest='baz', nargs='?', const=0, type=float)
+    parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
+    parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround P/S phase with a GUI.',
+                        action='store_true', default=False)
+    parser.add_argument('-r', help='Reverse components: N, E or NE', dest='comp',
+                        metavar='N|E|NE', default=None, type=str)
+    parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
     parser.add_argument('-w', help='Write project to localfile', action='store_true')
+    
     return parser
 
 
@@ -179,6 +182,8 @@ def prf():
     if arg.w:
         pjt.savepjt()
     pjt.rotate()
+    if arg.p:
+        pjt.pick(prepick=False)
     pjt.trim()
     pjt.deconv()
     pjt.saverf()
@@ -188,8 +193,6 @@ def prf():
 
 def srf():
     parser = common_parser()
-    parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround S phase with a GUI.',
-                        action='store_true')
     parser.add_argument('-i', help='Wether grid search incidence angle',
                         action='store_true')
     arg = parser.parse_args()
