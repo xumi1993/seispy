@@ -5,6 +5,7 @@ from scipy.interpolate import interp1d
 from seispy.utils import read_rfdep
 from seispy.rf import RF
 from seispy.recalrf import ReRF
+import sys
 
 
 def rfharmo():
@@ -267,3 +268,163 @@ def plot_r():
     rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
     rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], outformat=arg.format)
 
+
+def get_events():
+    from obspy import UTCDateTime
+    from seispy.io import Query
+    parser = argparse.ArgumentParser(description="Get seismic events from IRIS Web-Service")
+    parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304',
+                        metavar='datetime', default=None)
+    parser.add_argument('-c', help='Catalog type',
+                        metavar='GCMT|NEIC PDE|ISC', default=None)
+    parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
+                        metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
+    parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
+                        metavar='datetime', default=None)
+    parser.add_argument('-m', help='Magnitude range, optional for max magnitude',
+                        metavar='<minmagnitude>[/<maxmagnitude>]', default=None)
+    parser.add_argument('-r', help='Box range with min and max latitude and logitude, omited when specify \'-d\' ',
+                        metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
+    parser.add_argument('-p', help='Focal depth, optional for max depth', 
+                        metavar='<mindepth>[/<maxdepth>]', default=None)
+    arg = parser.parse_args()
+    args = {}
+    if arg.c is not None:
+        args['catalog'] = arg.c
+    if arg.p is not None:
+        try:
+            values = [float(value) for value in arg.p.split('/')]
+        except:
+            raise ValueError('Error format with focal depth')
+        if len(values) == 1:
+            args['mindepth'] = values[0]
+        elif len(values) == 2:
+            args['mindepth'] = values[0]
+            args['maxdepth'] = values[1]
+        else:
+            raise ValueError('Error format with focal depth')
+    if arg.m is not None:
+        try:
+            values = [float(value) for value in arg.m.split('/')]
+        except:
+            raise ValueError('Error format with magnitude')
+        if len(values) == 1:
+            args['minmagnitude'] = values[0]
+        elif len(values) == 2:
+            args['minmagnitude'] = values[0]
+            args['maxmagnitude'] = values[1]
+        else:
+            raise ValueError('Error format with focal depth')
+    if arg.r is not None:
+        try:
+            values = [float(value) for value in arg.r.split('/')]
+        except:
+            raise ValueError('Error format with box range')
+        if len(values) == 4:
+            args['minlongitude'] = values[0]
+            args['maxlongitude'] = values[1]
+            args['minlatitude'] = values[2]
+            args['maxlatitude'] = values[3]
+        else:
+            raise ValueError('Error format with box range')
+    elif arg.d is not None:
+        try:
+            values = [float(value) for value in arg.d.split('/')]
+        except:
+            raise ValueError('Error format with Radial geographic constraints')
+        if len(values) == 4:
+            args['latitude'] = values[0]
+            args['longitude'] = values[1]
+            args['minradius'] = values[2]
+            args['maxradius'] = values[3]
+        else:
+            raise ValueError('Error format with radial geographic constraints')
+    else:
+        pass
+    if arg.b is not None:
+        try:
+            args['starttime'] = UTCDateTime(arg.b)
+        except:
+            raise ValueError('-b: Error format with time string')
+    if arg.e is not None:
+        try:
+            args['endtime'] = UTCDateTime(arg.e)
+        except:
+            raise ValueError('-e: Error format with time string')
+    if args == {}:
+        parser.print_usage()
+        sys.exit(1)
+    query = Query()
+    query.get_events(**args)
+    for _, row in query.events.iterrows():
+        print('{} {:.2f} {:.2f} {:.2f} {:.1f} {}'.format(
+              row.date.isoformat(), row.evla, row.evlo,
+              row.evdp, row.mag, row.magtype)
+        )
+
+def get_stations():
+    from obspy import UTCDateTime
+    from seispy.io import Query
+    parser = argparse.ArgumentParser(description="Get stations from IRIS Web-Service")
+    parser.add_argument('-S', help='Server name, defaults to IRIS', metavar='server', default='IRIS')
+    parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304', metavar='datetime', default=None)
+    parser.add_argument('-c', help='Channel, wildcard is available like *,?,[EB]...', metavar='channel', default=None)
+    parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
+                        metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
+    parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
+                        metavar='datetime', default=None)
+    parser.add_argument('-n', help='Network name', metavar='network', default=None)
+    parser.add_argument('-r', help='Box range with min and max latitude and logitude, omited when specify \'-d\'',
+                        metavar='<lon1>/<lon2>/<lat1>/<lat2>', default=None)
+    parser.add_argument('-s', help='Station name', metavar='station', default=None)
+    arg = parser.parse_args()
+    args = {}
+    if arg.n is not None:
+        args['network'] = arg.n
+    if arg.s is not None:
+        args['station'] = arg.s
+    if arg.r is not None:
+        try:
+            values = [float(value) for value in arg.r.split('/')]
+        except:
+            raise ValueError('Error format with box range')
+        if len(values) == 4:
+            args['minlongitude'] = values[0]
+            args['maxlongitude'] = values[1]
+            args['minlatitude'] = values[2]
+            args['maxlatitude'] = values[3]
+        else:
+            raise ValueError('Error format with box range')
+    elif arg.d is not None:
+        try:
+            values = [float(value) for value in arg.d.split('/')]
+        except:
+            raise ValueError('Error format with Radial geographic constraints')
+        args['latitude'] = values[0]
+        args['longitude'] = values[1]
+        args['minradius'] = values[2]
+        args['maxradius'] = values[3]
+    else:
+        pass
+    if arg.b is not None:
+        try:
+            args['starttime'] = UTCDateTime(arg.b)
+        except:
+            raise ValueError('-b: Error format with time string')
+    if arg.e is not None:
+        try:
+            args['endtime'] = UTCDateTime(arg.e)
+        except:
+            raise ValueError('-e: Error format with time string')
+    if arg.c is not None:
+        args['channel'] = arg.c
+    if args == {}:
+        parser.print_usage()
+        sys.exit(1)
+    query = Query(arg.S)
+    query.get_stations(**args)
+    for net in query.stations:
+        for sta in net:
+            print('{} {} {:.6f} {:.6f} {:.4f} {} {}'.format(net.code, sta.code,
+                  sta.latitude, sta.longitude, sta.elevation, sta.start_date, sta.end_date,
+                  sta.restricted_status))

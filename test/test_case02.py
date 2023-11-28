@@ -16,6 +16,8 @@ def test_download():
 def test_sub01():
     rfs = RFStation('ex-rfani/SC.LTA')
     rfs.jointani(3, 8, tlen=3.5, stack_baz_val=10, weight=[0.4, 0.4, 0.2])
+    rfs.ani.plot_stack_baz()
+    rfs.ani.plot_polar()
 
 
 def test_sub02():
@@ -24,6 +26,8 @@ def test_sub02():
     rfs.psrf2depth()
     rfs.psrf_1D_raytracing()
     rfs.slantstack()
+    rfs.slant.syn_tps(['P410s', 'P660s'])
+    rfs.slant.plot()
 
 
 def test_sub03():

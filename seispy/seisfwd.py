@@ -4,9 +4,12 @@ from obspy.signal.util import next_pow_2
 from seispy.utils import scalar_instance, array_instance
 from obspy import Trace, Stream
 from seispy.decon import RFTrace
+from numba import njit
 
 ei = 0+1j
 
+
+@njit(fastmath=True,cache=True)
 def e_inverse(omega, rho, alpha, beta, p):
     """ E_inverse (Aki & Richards, pp. 161, Eq. (5.71))
 
@@ -23,7 +26,7 @@ def e_inverse(omega, rho, alpha, beta, p):
     p : _type_
         _description_
     """
-    e_inv = np.zeros([4,4], dtype=complex)
+    e_inv = np.zeros((4,4), dtype=np.complex128)
     eta = np.sqrt(1.0/(beta*beta) - p*p)
     xi  = np.sqrt(1.0/(alpha*alpha) - p*p)
     bp = 1.0 - 2.0*beta*beta*p*p
@@ -46,7 +49,7 @@ def e_inverse(omega, rho, alpha, beta, p):
     e_inv[3,3] = e_inv[1,3]
     return e_inv
 
-
+@njit(fastmath=True,cache=True)
 def propagator_sol(omega, rho, alpha, beta, p, z):
     """ 
     propagator (Aki & Richards, pp. 398, Eq. (3) in Box 9.1)
@@ -72,7 +75,7 @@ def propagator_sol(omega, rho, alpha, beta, p, z):
         _description_
     """
     
-    p_mat = np.zeros([4,4], dtype=complex)
+    p_mat = np.zeros((4,4), dtype=np.complex128)
     beta2 = beta*beta
     p2 = p*p
     bp = 1.0 -2.0*beta2*p2
@@ -102,15 +105,16 @@ def propagator_sol(omega, rho, alpha, beta, p, z):
 
     return p_mat
 
+@njit(fastmath=True,cache=True)
 def haskell(omega, p, nl, ipha, alpha, beta, rho, h):
     i0 = 0
     e_inv = e_inverse(omega, rho[-1], alpha[-1], beta[-1], p)
     p_mat = propagator_sol(omega, rho[i0], alpha[i0], beta[i0], p, h[i0] )
     for i in range(i0+1, nl):
         p_mat2 = propagator_sol(omega, rho[i], alpha[i], beta[i], p, h[i])
-        p_mat = np.matmul(p_mat2, p_mat)
+        p_mat = p_mat2 @ p_mat
     if nl > i0+1:
-        sl = np.matmul(e_inv, p_mat)
+        sl = e_inv @ p_mat
     else:
         sl = e_inv
     denom = sl[2,0] * sl[3,1] - sl[2,1] * sl[3,0]
@@ -122,21 +126,17 @@ def haskell(omega, p, nl, ipha, alpha, beta, rho, h):
         uz = sl[2,0] / denom
     return ur, uz
 
-
+@njit(fastmath=True,cache=True)
 def fwd_seis(rayp, dt, npts, ipha, alpha, beta, rho, h):
     nlay = h.size
-    npts_max = next_pow_2(npts)
-    ur_freq = np.zeros(npts_max, dtype=complex)
-    uz_freq = np.zeros(npts_max, dtype=complex)
-    nhalf = int(npts_max / 2 + 1)
+    ur_freq = np.zeros(npts, dtype=np.complex128)
+    uz_freq = np.zeros(npts, dtype=np.complex128)
+    nhalf = int(npts / 2 + 1)
     for i in range(1, nhalf):
-        omg = 2*np.pi * i / (npts_max * dt)
+        omg = 2*np.pi * i / (npts * dt)
         ur_freq[i], uz_freq[i] = haskell(omg, rayp, nlay, ipha, 
                                          alpha, beta, rho, h)
-    ur = ifft(ur_freq).real[::-1]/npts_max
-    uz = -ifft(uz_freq).real[::-1]/npts_max
-
-    return ur[0:npts], uz[0:npts]
+    return ur_freq, uz_freq
 
 
 class SynSeis():
@@ -175,10 +175,13 @@ class SynSeis():
         """
         self.rstream = Stream()
         self.zstream = Stream()
+        npts_max = next_pow_2(self.npts)
         for _, rayp in enumerate(self.rayp):
-            ur, uz = fwd_seis(rayp, self.dt, self.npts, self.ipha,
+            ur_freq, uz_freq = fwd_seis(rayp, self.dt, npts_max, self.ipha,
                             self.depmod.vp, self.depmod.vs, self.depmod.rho,
                             self.depmod.thickness)
+            ur = ifft(ur_freq).real[::-1]/npts_max
+            uz = -ifft(uz_freq).real[::-1]/npts_max
             tr = Trace(data=ur)
             tr.stats.delta = self.dt
             self.rstream.append(tr)

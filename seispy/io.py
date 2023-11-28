@@ -17,6 +17,15 @@ class Query():
     def get_events(self, starttime=None,
                    endtime=UTCDateTime.now(), 
                    **kwargs):
+        """Get events from IRIS
+
+        :param starttime: Start time of events, defaults to None
+        :type starttime: :class:`obspy.UTCDateTime`, optional
+        :param endtime: End time of events, defaults to UTCDateTime.now()
+        :type endtime: :class:`obspy.UTCDateTime`, optional
+        :return: Events
+        :rtype: :class:`obspy.Catalog`
+        """
         if endtime > UTCDateTime.now():
             endtime = UTCDateTime.now()
         events = Catalog()
