@@ -25,6 +25,10 @@ def test_sub02():
     dt = 0.1
     depth = np.arange(100)
     basemodel = DepModel.read_layer_model(depth, h, vp, vs, rho=rho)
+    basemodel.plot_model(show=False)
+    basemodel.tpds(rayp, rayp)
+    basemodel.tpppds(rayp)
+    basemodel.tpspds(rayp)
     ssfwd = SynSeis(basemodel, rayp, dt, npts=1200)
     ssfwd.run_fwd()
 
