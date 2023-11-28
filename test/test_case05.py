@@ -1,6 +1,7 @@
 from seispy.core.depmodel import DepModel
 from seispy.seisfwd import SynSeis
 from seispy.rfcorrect import RFStation
+from seispy.geo import skm2srad
 import pytest
 import numpy as np
 
@@ -22,13 +23,14 @@ def test_sub02():
     vs = [3.6, 4.48]
     rho = [2.67, 3.2]
     rayp = 0.06
+    rrayp = skm2srad(rayp)
     dt = 0.1
     depth = np.arange(100)
     basemodel = DepModel.read_layer_model(depth, h, vp, vs, rho=rho)
     basemodel.plot_model(show=False)
-    basemodel.tpds(rayp, rayp)
-    basemodel.tpppds(rayp)
-    basemodel.tpspds(rayp)
+    basemodel.tpds(rrayp, rrayp)
+    basemodel.tpppds(rrayp, rrayp)
+    basemodel.tpspds(rrayp)
     ssfwd = SynSeis(basemodel, rayp, dt, npts=1200)
     ssfwd.run_fwd()
 
