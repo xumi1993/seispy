@@ -30,8 +30,8 @@ def _search_vel_file(mode_name):
     if exists(mode_name):
         filename = mode_name
     ## if not found, search in default vel model fold
-    elif exists(join(dirname(__file__), '../data', mode_name.lower() + '.vel')):
-        filename = join(dirname(__file__), '../data', mode_name.lower() + '.vel')
+    elif exists(join(dirname(dirname(__file__)), 'data', mode_name.lower() + '.vel')):
+        filename = join(dirname(dirname(__file__)), 'data', mode_name.lower() + '.vel')
     else:
         raise ValueError('No such file of velocity model')
 
@@ -75,6 +75,7 @@ def _layer2grid(dep_range, model):
         neo_model[_i, :] = model[_j, :]
     return neo_model[:, 1], neo_model[:, 2], neo_model[:, 3]
 
+
 def _intep_mod(model, depths_elev):
     vp = interp1d(model[:,0], model[:,1], bounds_error=False,
                        fill_value=model[0,1])(depths_elev)
@@ -83,6 +84,28 @@ def _intep_mod(model, depths_elev):
     rho = interp1d(model[:,0], model[:,3], bounds_error=False,
                         fill_value=model[0,3])(depths_elev)
     return vp, vs, rho
+
+def _from_layer_model(dep_range, h, vp, vs, rho=None):
+    dep = 0
+    vp_dep = np.zeros_like(dep_range).astype(float)
+    vs_dep = np.zeros_like(dep_range).astype(float)
+    rho_dep = np.zeros_like(dep_range).astype(float)
+    for i, layer in enumerate(h):
+        if (layer == 0 and i == len(h)-1) or \
+           (dep+layer < dep_range[-1] and i == len(h)-1):
+           idx = np.where(dep_range>=dep)[0]
+        else:
+            idx = np.where((dep_range >= dep) & (dep_range < dep+layer))[0]
+        if idx.size == 0:
+            raise ValueError('The thickness of layer {} less than the depth interval'.format(i+1))
+        vp_dep[idx] = vp[i]
+        vs_dep[idx] = vs[i]
+        if rho is not None:
+            rho_dep[idx] = rho[i]
+        dep += layer
+        if dep > dep_range[-1]:
+            break
+    return np.vstack((dep_range, vp_dep, vs_dep, rho_dep)).T
 
 
 class DepModel(object):
@@ -123,8 +146,8 @@ class DepModel(object):
 
         try:
             self.model_array = _search_vel_file(velmod)
-        except (IOError, ValueError):
-            raise IOError(" failed while loading vel model {}".format(velmod))
+        except (IOError, TypeError):
+            return
         else:
             self._elevation()
             if layer_mod:
@@ -137,6 +160,11 @@ class DepModel(object):
     @classmethod
     def read_layer_model(cls, dep_range, h, vp, vs, rho=None, elevation=0):
         mod = cls(dep_range, velmod=None, layer_mod=True, elevation=elevation)
+        if rho is not None:
+            mod.isrho = True
+        mod._elevation()
+        mod.model_array = _from_layer_model(mod.depths, h, vp, vs, rho=rho)
+        mod.vp, mod.vs, mod.rho = _layer2grid(mod.depths, mod.model_array)
         return mod
 
     def _elevation(self):
