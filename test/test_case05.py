@@ -16,5 +16,18 @@ def test_sub01():
     rfsta.moveoutcorrect(ref_rayp=0.06, dep_range=np.arange(100))
 
 
+def test_sub02():
+    h = [30, 0]
+    vp = [6.5, 8.04]
+    vs = [3.6, 4.48]
+    rho = [2.67, 3.2]
+    rayp = 0.06
+    dt = 0.1
+    depth = np.arange(100)
+    basemodel = DepModel.read_layer_model(depth, h, vp, vs, rho=rho)
+    ssfwd = SynSeis(basemodel, rayp, dt, npts=1200)
+    ssfwd.run_fwd()
+
+
 if __name__ == '__main__':
     test_sub01()
