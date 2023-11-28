@@ -161,6 +161,8 @@ def prf():
         pjt = ReRF(arg.f, cfg_file=arg.cfg_file)
     else:
         pjt = RF(cfg_file=arg.cfg_file)
+    if pjt.para.phase[0] != 'P':
+        pjt.para.phase = 'P'
     pjt.para.switchEN = arg.isswitch
     pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
     pjt.load_stainfo()
@@ -197,7 +199,8 @@ def srf():
                         action='store_true')
     arg = parser.parse_args()
     pjt = RF(cfg_file=arg.cfg_file)
-
+    if pjt.para.phase[0] != 'S':
+        pjt.para.phase = 'S'
     pjt.para.switchEN = arg.isswitch
     pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
     pjt.load_stainfo()
@@ -225,7 +228,6 @@ def srf():
 
 
 def plot_rt():
-    from seispy.plotRT import plotrt
     parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
     parser.add_argument('-c', help='prime component to plot, defaults to \'R\'', 
@@ -242,11 +244,10 @@ def plot_rt():
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
     rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
-    plotrt(rfsta, enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
+    rfsta.plotrt(rfsta, enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
 
 
 def plot_r():
-    from seispy.plotR import plotr
     parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
     parser.add_argument('-c', help='prime component to plot, defaults to \'R\'', 
@@ -263,10 +264,6 @@ def plot_r():
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
         parser.error('Error: The format must be in \'f\' and \'g\'')
-    elif arg.format == 'g':
-        fmt = 'png'
-    elif arg.format == 'f':
-        fmt = 'pdf'
     rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
-    rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], format=fmt)
+    rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], outformat=arg.format)
 
