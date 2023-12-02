@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 import numpy as np
 import obspy
-from obspy.signal.util import next_pow_2
-from numpy.fft import fft, ifft
+from scipy import fft as fftbackend
+from scipy.fft import fft, ifft
+import pyfftw
+from numba import njit, objmode
+from seispy.utils import nextpow
 # from scipy.linalg import solve_toeplitz
 
+fftbackend.set_global_backend(pyfftw.interfaces.scipy_fft)
+pyfftw.interfaces.cache.enable()
 
+
+@njit(fastmath=True, cache=True)
 def gaussFilter(dt, nft, f0):
     """
     Gaussian filter in frequency domain.
@@ -25,16 +32,17 @@ def gaussFilter(dt, nft, f0):
     f = df * np.arange(0, nft21)
     w = 2 * np.pi * f
 
-    gauss = np.zeros([nft, 1])
+    gauss = np.zeros(nft, dtype=np.float64)
     gauss1 = np.exp(-0.25 * (w / f0) ** 2) / dt
-    gauss1.shape = (len(gauss1), 1)
+    # gauss1.shape = (len(gauss1), 1)
     gauss[0:int(nft21)] = gauss1
     gauss[int(nft21):] = np.flipud(gauss[1:int(nft21) - 1])
-    gauss = gauss[:, 0]
+    gauss = gauss
 
     return gauss
 
 
+@njit(fastmath=True, cache=True)
 def gfilter(x, nfft, gauss, dt):
     """
     Apply Gaussian filter on time series.
@@ -51,12 +59,12 @@ def gfilter(x, nfft, gauss, dt):
     :return: Filtered data in time domain
     :rtype: np.ndarray
     """
-    Xf = fft(x, nfft)
-    Xf = Xf * gauss * dt
-    xnew = ifft(Xf, nfft).real
+    with objmode(xnew='f8[:]'):
+        xnew = ifft(fft(x, nfft) * gauss * dt, nfft).real
     return xnew
 
 
+@njit(fastmath=True, cache=True)
 def correl(R, W, nfft):
     """
     Correlation in frequency domain.
@@ -69,11 +77,12 @@ def correl(R, W, nfft):
     :return: Correlation in frequency domain
     :rtype: np.ndarray
     """
-    x = ifft(fft(R, nfft) * np.conj(fft(W, nfft)), nfft)
-    x = x.real
+    with objmode(x='f8[:]'):
+        x = ifft(fft(R, nfft) * np.conj(fft(W, nfft)), nfft).real
     return x
 
 
+@njit(fastmath=True, cache=True)
 def phaseshift(x, nfft, dt, tshift):
     """
     Phase shift in frequency domain.
@@ -90,16 +99,18 @@ def phaseshift(x, nfft, dt, tshift):
     :return: Phase shifted data in time domain
     :rtype: np.ndarray
     """
-    Xf = fft(x, nfft)
+    with objmode(Xf='complex128[:]'):
+        Xf = fft(x, nfft)
     shift_i = int(tshift / dt)
     p = 2 * np.pi * np.arange(1, nfft + 1) * shift_i / nfft
-    Xf = Xf * np.vectorize(complex)(np.cos(p), -np.sin(p))
-    x = ifft(Xf, nfft) / np.cos(2 * np.pi * shift_i / nfft)
-    x = x.real
+    Xf = Xf * (np.cos(p) - 1j*np.sin(p))
+    with objmode(x='f8[:]'):
+        x = ifft(Xf, nfft).real / np.cos(2 * np.pi * shift_i / nfft)
     return x
 
 
-def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, phase='P'):
+@njit(fastmath=True, cache=True)
+def deconit(uin, win, dt:np.float64, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, phase='P'):
     """
     Iterative deconvolution using Ligorria & Ammon method.
     @author: Mijian Xu @ NJU
@@ -135,12 +146,12 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
     else:
         pass
 
-    rms = np.zeros(itmax)
-    nfft = next_pow_2(nt)
-    p0 = np.zeros(nfft)
+    rms = np.zeros(itmax, dtype=np.float64)
+    nfft = nextpow(nt)
+    p0 = np.zeros(nfft, dtype=np.float64)
 
-    u0 = np.zeros(nfft)
-    w0 = np.zeros(nfft)
+    u0 = np.zeros(nfft, dtype=np.float64)
+    w0 = np.zeros(nfft, dtype=np.float64)
 
     u0[0:nt] = uin
     w0[0:nt] = win
@@ -151,7 +162,8 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
     u_flt = gfilter(u0, nfft, gaussF, dt)
     w_flt = gfilter(w0, nfft, gaussF, dt)
 
-    wf = fft(w0, nfft)
+    with objmode(wf='complex128[:]'):
+        wf = fft(w0, nfft)
     r_flt = u_flt
 
     powerU = np.sum(u_flt ** 2)
@@ -162,7 +174,9 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
     maxlag = 0.5 * nfft
     # print('\tMax Spike Display is ' + str((maxlag) * dt))
 
-    while np.abs(d_error) > minderr and it < itmax:
+    for it in range(itmax):
+        if np.abs(d_error) <= minderr:
+            break
         rw = correl(r_flt, w_flt, nfft)
         rw = rw / np.sum(w_flt ** 2)
 
@@ -218,7 +232,7 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, p
     if uin.size != win.size:
         raise ValueError('The length of the \'uin\' must be same as the \'win\'')
     nt = uin.size
-    nft = next_pow_2(nt)
+    nft = nextpow(nt)
     nfpts = nft / 2 + 1     # number of freq samples
     fny = 1. / (2.* dt);     # nyquist
     delf = fny / (0.5 * nft)

@@ -5,8 +5,11 @@ from matplotlib.colors import ListedColormap
 import numpy as np
 from scipy.interpolate import interp1d, interpn
 import pandas as pd
+from numba import njit
+import math
 
 
+@njit(fastmath=True, cache=True)
 def vs2vprho(vs):
     """
     Calculate vp and rho from vs using Brocher (2005) formula.
@@ -51,6 +54,21 @@ def read_rfdep(path):
             return np.load(path+'.npy', allow_pickle=True)
         except Exception as e:
             raise FileNotFoundError('Cannot open file of {}'.format(path))
+
+
+@njit(fastmath=True,cache=True)
+def nextpow(i):
+    """
+    Find the next power of two (copy from Obspy)
+
+    >>> int(next_pow_2(5))
+    8
+    >>> int(next_pow_2(250))
+    256
+    """
+    # do not use NumPy here, math is much faster for single values
+    buf = math.ceil(math.log(i) / math.log(2))
+    return int(math.pow(2, buf))
 
 
 def scalar_instance(v):

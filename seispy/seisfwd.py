@@ -1,12 +1,42 @@
 import numpy as np
 from scipy.fftpack import ifft
-from obspy.signal.util import next_pow_2
-from seispy.utils import scalar_instance, array_instance
+from seispy.utils import scalar_instance, array_instance, nextpow, vs2vprho
+from scipy.signal import butter, filtfilt
 from obspy import Trace, Stream
-from seispy.decon import RFTrace
-from numba import njit
+from seispy.decon import RFTrace, deconit
+from numba import njit, objmode
 
 ei = 0+1j
+
+
+@njit(fastmath=True,cache=True)
+def bandpass_filter(x, dt, fmin, fmax, order):
+    """_summary_
+
+    Parameters
+    ----------
+    x : _type_
+        _description_
+    fmin : _type_
+        _description_
+    fmax : _type_
+        _description_
+    order : _type_
+        _description_
+    zerophase : bool, optional
+        _description_, by default True
+
+    Returns
+    -------
+    _type_
+        _description_
+    """
+    low = 2.0 * fmin * dt
+    high = 2.0 * fmax * dt
+    with objmode(x='f8[:]'):
+        a, b = butter(order, [low, high], btype='bandpass')
+        x = filtfilt(a, b, x)
+    return x
 
 
 @njit(fastmath=True,cache=True)
@@ -129,18 +159,48 @@ def haskell(omega, p, nl, ipha, alpha, beta, rho, h):
 @njit(fastmath=True,cache=True)
 def fwd_seis(rayp, dt, npts, ipha, alpha, beta, rho, h):
     nlay = h.size
-    ur_freq = np.zeros(npts, dtype=np.complex128)
-    uz_freq = np.zeros(npts, dtype=np.complex128)
-    nhalf = int(npts / 2 + 1)
+    npts_max = nextpow(npts)
+    ur_freq = np.zeros(npts_max, dtype=np.complex128)
+    uz_freq = np.zeros(npts_max, dtype=np.complex128)
+    nhalf = int(npts_max / 2 + 1)
     for i in range(1, nhalf):
-        omg = 2*np.pi * i / (npts * dt)
+        omg = 2*np.pi * i / (npts_max * dt)
         ur_freq[i], uz_freq[i] = haskell(omg, rayp, nlay, ipha, 
                                          alpha, beta, rho, h)
-    return ur_freq, uz_freq
+    with objmode(ur='f8[:]', uz='f8[:]'):
+        ur = (ifft(ur_freq).real[::-1]/npts_max)[0:npts]
+        uz = (-ifft(uz_freq).real[::-1]/npts_max)[0:npts]
+    return ur, uz
 
+@njit(fastmath=True,cache=True)
+def sensitivity(rayp, dt, alpha, beta, rho, h, npts=2500, ipha=1, f0=2.0,
+                freqmin=0.5, freqmax=2.0, dlnv=0.01, shift=10):
+    vsm = beta.copy()
+    if ipha == 1:
+        phasename = 'P'
+    else:
+        phasename = 'S'
+    dlnrf_dlnv = np.zeros((npts, beta.size), dtype=np.float64)
+    for i in np.arange(beta.size-1):
+        vsm[i] = beta[i] - 0.5*dlnv*beta[i]
+        vpm, rhom = vs2vprho(vsm)
+        ur, uz = fwd_seis(rayp, dt, npts, ipha, vpm, vsm, rhom, h)
+        ur = bandpass_filter(ur, dt, freqmin, freqmax, 4)
+        uz = bandpass_filter(uz, dt, freqmin, freqmax, 4)
+        rf1, _, _ = deconit(ur, uz, dt, f0=f0, phase=phasename, tshift=shift)
+        vsm[i] = beta[i] + 0.5*dlnv*beta[i]
+        vpm, rhom = vs2vprho(vsm)
+        ur, uz = fwd_seis(rayp, dt, npts, ipha, vpm, vsm, rhom, h)
+        ur = bandpass_filter(ur, dt, freqmin, freqmax, 4)
+        uz = bandpass_filter(uz, dt, freqmin, freqmax, 4)
+        rf2, _, _ = deconit(ur, uz, dt, f0=f0, phase=phasename, tshift=shift)
+        dlnrf_dlnv[:, i] = (rf2 - rf1) / (dlnv*beta[i])
+        vsm[i] = beta[i]
+    return dlnrf_dlnv
+        
 
 class SynSeis():
-    def __init__(self, depmod, rayp, dt, npts=2500, ipha=1, filter=None) -> None:
+    def __init__(self, depmod, rayp, dt, npts=2500, ipha=1) -> None:
         """_summary_
 
         Parameters
@@ -155,6 +215,18 @@ class SynSeis():
             samples of synthetic waveform
         ipha : _type_
             Specify incident wave 1 for P and -1 for S
+        
+        Example
+        -------
+        >>> from seispy.depmode import DepModel
+        >>> from seispy.seisfwd import SynSeis
+        >>> import numpy as np
+        >>> depmod = DepModel(np.arange(0,100,2))
+        >>> synseis = SynSeis(depmod, 0.06, 0.02, 2500, 1)
+        >>> synseis.run_fwd()
+        >>> synseis.filter(0.05, 2)
+        >>> rfstream = synseis.run_deconvolution()
+        >>> rfstream.plot()
         """
         self.depmod = depmod
         self.dt = dt
@@ -175,13 +247,10 @@ class SynSeis():
         """
         self.rstream = Stream()
         self.zstream = Stream()
-        npts_max = next_pow_2(self.npts)
         for _, rayp in enumerate(self.rayp):
-            ur_freq, uz_freq = fwd_seis(rayp, self.dt, npts_max, self.ipha,
+            ur, uz = fwd_seis(rayp, self.dt, self.npts, self.ipha,
                             self.depmod.vp, self.depmod.vs, self.depmod.rho,
                             self.depmod.thickness)
-            ur = ifft(ur_freq).real[::-1]/npts_max
-            uz = -ifft(uz_freq).real[::-1]/npts_max
             tr = Trace(data=ur)
             tr.stats.delta = self.dt
             self.rstream.append(tr)
@@ -216,4 +285,14 @@ class SynSeis():
                                        f0=f0, **kwargs)
             rfstream.append(rftr)
         return rfstream
-
+    
+    def sensitivity(self, dlnv=0.01,pre_filt=[0.05, 2.0], shift=10, f0=2.0):
+        kers = []
+        for i, _ in enumerate(self.rayp):
+            dlnrf_dlnv = sensitivity(self.rayp[i], self.dt, self.depmod.vp, self.depmod.vs,
+                                     self.depmod.rho, self.depmod.thickness, 
+                                     npts=self.npts, ipha=self.ipha, f0=f0, 
+                                     freqmin=pre_filt[0], freqmax=pre_filt[1],
+                                     dlnv=dlnv, shift=shift)
+            kers.append(dlnrf_dlnv)
+        return kers
