@@ -2,7 +2,7 @@ from seispy.rfcorrect import RFStation, psrf2depth, psrf_1D_raytracing,\
     psrf_3D_migration, time2depth, psrf_3D_raytracing
 from seispy.core.pertmod import Mod3DPerturbation
 import numpy as np
-from seispy.ccppara import ccppara
+from seispy.ccppara import ccppara, CCPPara
 from seispy.setuplog import setuplog
 from seispy.geo import latlon_from, rad2deg
 from os.path import join, exists
@@ -26,12 +26,6 @@ class Station(object):
         self.sta_num = self.stla.shape[0]
 
 
-def init_mat(sta_num):
-    dtype = {'names': ('Station', 'stalat', 'stalon', 'Depthrange', 'events', 'bazi', 'rayp', 'phases', 'moveout_correct',
-                      'Piercelat', 'Piercelon', 'StopIndex'),
-             'formats': tuple(['O']*12)}
-    return np.zeros([1, sta_num], dtype=dtype)
-
 
 def _load_mod(datapath, staname):
     """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
@@ -51,110 +45,102 @@ def _load_mod(datapath, staname):
         return modfiles[0]
 
 
-def makedata(cpara, velmod3d=None, modfolder1d=None, log=setuplog()):
-    ismod1d = False
-    if velmod3d is not None:
-        if isinstance(velmod3d, str):
-            velmod = velmod3d
-        else:
-            raise ValueError('Path to 3d velocity model should be in str')
-    elif modfolder1d is not None:
-        if isinstance(modfolder1d, str):
-            if exists(modfolder1d):
-                ismod1d = True
+class RFDepth():
+    def __init__(self, cpara:CCPPara, log=setuplog(), 
+                 raytracing3d=False, velmod3d=None, modfolder1d=None) -> None:
+        self.ismod1d = False
+        self.cpara = cpara
+        self.modfolder1d = modfolder1d
+        self.log = log
+        self.raytracing3d = raytracing3d
+        if velmod3d is not None:
+            if isinstance(velmod3d, str):
+                self.mod3d = Mod3DPerturbation(velmod3d, cpara.depth_axis, velmod=cpara.velmod)
             else:
-                raise FileNotFoundError('No such folder of {}'.format(modfolder1d))
-        else:
-            ValueError('Path to 1d velocity model files should be in str')
-    else:
-        ismod1d = True
-
-    # cpara = ccppara(cfg_file)
-    sta_info = Station(cpara.stalist)
-    RFdepth = []
-    for i in range(sta_info.stla.shape[0]):
-        rfdep = {}
-        rfpath = join(cpara.rfpath, sta_info.station[i])
-        stadatar = RFStation(rfpath, only_r=True)
-        stadatar.stel = sta_info.stel[i]
-        stadatar.stla = sta_info.stla[i]
-        stadatar.stlo = sta_info.stlo[i]
-        log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
-        piercelat = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
-        piercelon = np.zeros([stadatar.ev_num, cpara.depth_axis.shape[0]])
-        if stadatar.prime_phase == 'P':
-            sphere = True
-        else:
-            sphere = False
-        if ismod1d:
-            if modfolder1d is not None:
-                velmod = _load_mod(modfolder1d, sta_info.station[i])
+                log.RF2depthlog.error('Path to 3d velocity model should be in str')
+                sys.exit(1)
+        elif modfolder1d is not None:
+            if isinstance(modfolder1d, str):
+                if exists(modfolder1d):
+                    self.ismod1d = True
+                else:
+                    log.RF2depthlog.error('No such folder of {}'.format(modfolder1d))
+                    sys.exit(1)
             else:
-                velmod = cpara.velmod
-        PS_RFdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
-                            velmod=velmod, srayp=cpara.rayp_lib, sphere=sphere, phase=cpara.phase)
-        for j in range(stadatar.ev_num):
-            piercelat[j], piercelon[j] = latlon_from(sta_info.stla[i], sta_info.stlo[i],
-                                                     stadatar.bazi[j], rad2deg(x_s[j]))
-        rfdep['station'] = sta_info.station[i]
-        rfdep['stalat'] = sta_info.stla[i]
-        rfdep['stalon'] = sta_info.stlo[i]
-        rfdep['depthrange'] = cpara.depth_axis
-        # rfdep['events'] = _convert_str_mat(stadatar.event)
-        rfdep['bazi'] = stadatar.bazi
-        rfdep['rayp'] = stadatar.rayp
-        # rfdep['phases'] = stadatar.phase[i]
-        rfdep['moveout_correct'] = PS_RFdepth
-        rfdep['piercelat'] = piercelat
-        rfdep['piercelon'] = piercelon
-        rfdep['stopindex'] = end_index
-        RFdepth.append(rfdep)
-    # savemat(cpara.depthdat, {'RFdepth': RFdepth})
-    np.save(cpara.depthdat, RFdepth)
+                log.RF2depthlog.error('Folder to 1d velocity model files should be in str')
+                sys.exit(1)
+        else:
+            self.ismod1d = True
+        if cpara.rayp_lib is not None:
+            self.srayp = np.load(cpara.rayp_lib)
+        else:
+            self.srayp = None
+        self.sta_info = Station(cpara.stalist)
+        self.rfdepth = []
+        self._test_comp()
 
+    def _test_comp(self):
+        rfpath = join(cpara.rfpath, self.sta_info.station[0])
+        self.prime_comp = ''
+        for comp in ['R', 'Q', 'L', 'Z']:
+            if glob.glob(join(rfpath, '*{}.sac')):
+                self.prime_comp = comp
+        if not self.prime_comp:
+            self.log.RF2depthlog.error('No such any RF files in \'R\',' 
+                                      '\'Q\', \'L\', and \'Z\' components')
+            sys.exit(1)
 
-def makedata3d(cpara, velmod3d, log=setuplog(), raytracing3d=True):
-    mod3d = Mod3DPerturbation(velmod3d, cpara.depth_axis, velmod=cpara.velmod)
-    sta_info = Station(cpara.stalist)
-    if cpara.rayp_lib is not None:
-        srayp = np.load(cpara.rayp_lib)
-    else:
-        srayp = None
-    RFdepth = []
-    for i in range(sta_info.stla.shape[0]):
+    def makedata(self):
+        for i in range(self.sta_info.stla.shape[0]):
+            rfpath = join(cpara.rfpath, self.sta_info.station[i])
+            stadatar = RFStation(rfpath, only_r=True, prime_comp=self.prime_comp)
+            stadatar.stel = self.sta_info.stel[i]
+            stadatar.stla = self.sta_info.stla[i]
+            stadatar.stlo = self.sta_info.stlo[i]
+            if stadatar.prime_phase == 'P':
+                sphere = True
+            else:
+                sphere = False
+            self.log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, self.sta_info.stla.shape[0], stadatar.ev_num))
+            if self.ismod1d:
+                if self.modfolder1d is not None:
+                    velmod = _load_mod(self.modfolder1d, self.sta_info.station[i])
+                else:
+                    velmod = cpara.velmod
+                ps_rfdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
+                            velmod=velmod, srayp=cpara.rayp_lib, sphere=sphere, phase=stadatar.prime_phase)
+                piercelat, piercelon = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
+                                                            stadatar.bazi, rad2deg(x_s))
+            else:
+                if self.raytracing3d:
+                    pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere)
+                else:
+                    pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
+                        stadatar, cpara.depth_axis, srayp=self.srayp, sphere=sphere, phase=stadatar.prime_phase)
+                    newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
+                                                tps, cpara.depth_axis, self.mod3d)
+                if stadatar.prime_phase == 'P':
+                    piercelat, piercelon = pplat_s, pplon_s
+                else:
+                    piercelat, piercelon = pplat_p, pplon_p
+                ps_rfdepth, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
+            rfdep = self._write_rfdep(stadatar, ps_rfdepth, piercelat, piercelon, end_index)
+            self.rfdepth.append(rfdep)
+        np.save(cpara.depthdat, self.rfdepth)
+
+    def _write_rfdep(self, stadata, amp, pplat, pplon, end_index):
         rfdep = {}
-        rfpath = join(cpara.rfpath, sta_info.station[i])
-        stadatar = RFStation(rfpath, only_r=True)
-        stadatar.stel = sta_info.stel[i]
-        stadatar.stla = sta_info.stla[i]
-        stadatar.stlo = sta_info.stlo[i]
-        if stadatar.prime_phase == 'P':
-            sphere = True
-        else:
-            sphere = False
-        log.RF2depthlog.info('the {}th/{} station with {} events'.format(i + 1, sta_info.stla.shape[0], stadatar.ev_num))
-        if raytracing3d:
-            pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, mod3d, srayp=srayp, sphere=sphere)
-        else:
-            pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
-                stadatar, cpara.depth_axis, srayp=srayp, sphere=sphere, phase=cpara.phase)
-            newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
-                                        tps, cpara.depth_axis, mod3d)
-        amp3d, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
-        rfdep['station'] = sta_info.station[i]
-        rfdep['stalat'] = sta_info.stla[i]
-        rfdep['stalon'] = sta_info.stlo[i]
-        rfdep['depthrange'] = cpara.depth_axis
-        # rfdep['events'] = _convert_str_mat(stadatar.event)
-        rfdep['bazi'] = stadatar.bazi
-        rfdep['rayp'] = stadatar.rayp
-        # rfdep['phases'] = _convert_str_mat(stadatar.phase)
-        rfdep['moveout_correct'] = amp3d
-        rfdep['piercelat'] = pplat_s
-        rfdep['piercelon'] = pplon_s
+        rfdep['station'] = stadata.staname
+        rfdep['stalat'] = stadata.stla
+        rfdep['stalon'] = stadata.stlo
+        rfdep['depthrange'] = self.cpara.depth_axis
+        rfdep['bazi'] = stadata.bazi
+        rfdep['rayp'] = stadata.rayp
+        rfdep['moveout_correct'] = amp
+        rfdep['piercelat'] = pplat
+        rfdep['piercelon'] = pplon
         rfdep['stopindex'] = end_index
-        RFdepth.append(rfdep)
-    np.save(cpara.depthdat, RFdepth)
+        return rfdep
 
 
 def rf2depth():
@@ -167,24 +153,32 @@ def rf2depth():
                         metavar='3d_velmodel_path', type=str, default='')
     parser.add_argument('cfg_file', type=str, help='Path to configure file')
     arg = parser.parse_args()
-    if len(sys.argv) == 1:
-        parser.print_help()
-        sys.exit(1)
     cpara = ccppara(arg.cfg_file)
     if arg.d != '' and arg.r != '':
         raise ValueError('Specify only 1 argument in \'-d\' and \'-r\'')
     elif arg.d != '' and arg.r == '' and arg.m == '':
-        makedata3d(cpara, arg.d, raytracing3d=False)
+        raytracing3d = False
+        velmod3d = arg.d
+        modfolder1d = None
     elif arg.d == '' and arg.r != '' and arg.m == '':
-        makedata3d(cpara, arg.r, raytracing3d=True)
+        raytracing3d = True
+        velmod3d = arg.d
+        modfolder1d = None
     elif arg.d == '' and arg.r == '' and arg.m != '':
-        makedata(cpara, modfolder1d=arg.m)
+        raytracing3d = False
+        velmod3d = None
+        modfolder1d = arg.m
     else:
-        makedata(cpara)
+        raytracing3d = False
+        velmod3d = None
+        modfolder1d = None
+    rfd = RFDepth(
+        cpara, raytracing3d=raytracing3d,
+        velmod3d=velmod3d,
+        modfolder1d=modfolder1d,
+    )
+    rfd.makedata()
 
 
 if __name__ == '__main__':
-    cfg_file = '/Users/xumj/Researches/Tibet_MTZ/process/paraCCP.cfg'
-    vel3d_file = '/Users/xumj/Researches/Tibet_MTZ/models/GYPSUM.npz'
-    cpara = ccppara(cfg_file)
-    makedata3d(cpara, vel3d_file)
+    pass

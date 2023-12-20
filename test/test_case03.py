@@ -1,6 +1,6 @@
 from seispy.ccppara import ccppara
 from seispy.ccpprofile import CCPProfile
-from seispy.rf2depth_makedata import makedata
+from seispy.rf2depth_makedata import RFDepth
 from os.path import exists
 from subprocess import Popen
 import pytest
@@ -20,7 +20,8 @@ def test_sub01():
     para.rfpath = 'ex-ccp/RFresult'
     para.stalist = 'ex-ccp/sta.lst'
     para.stack_sta_list = ''
-    makedata(para)
+    rfd = RFDepth(cpara=para)
+    rfd.makedata()
 
 
 def test_sub02():

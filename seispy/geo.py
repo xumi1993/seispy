@@ -184,6 +184,9 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
                 raise ValueError('lat0 and lon0 must be in the same length')
             elif len(lat0) != npts:
                 raise ValueError('initial points must be in the same length as azimuths')
+            else:
+                lat1 = lat0
+                lon1 = lon0
         elif scalar_instance(lat0) and scalar_instance(lon0):
             lat1 = np.ones(npts) * lat0
             lon1 = np.ones(npts) * lon0
@@ -194,7 +197,7 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
     if hasattr(azimuth, "__iter__") and hasattr(gcarc_dist, "__iter__"):
         if len(azimuth) == len(gcarc_dist):
             npts = len(azimuth)
-            init_lalo(lat0, lon0, npts)
+            lat0, lon0 = init_lalo(lat0, lon0, npts)
         else:
             raise ValueError('azimuth and gcarc_dist must be in the same length')
     elif scalar_instance(azimuth) and scalar_instance(gcarc_dist):
