@@ -83,8 +83,9 @@ class RFDepth():
         rfpath = join(self.cpara.rfpath, self.sta_info.station[0])
         self.prime_comp = ''
         for comp in ['R', 'Q', 'L', 'Z']:
-            if glob.glob(join(rfpath, '*{}.sac')):
+            if glob.glob(join(rfpath, '*{}.sac'.format(comp))):
                 self.prime_comp = comp
+                break
         if not self.prime_comp:
             self.log.RF2depthlog.error('No such any RF files in \'R\',' 
                                       '\'Q\', \'L\', and \'Z\' components')
