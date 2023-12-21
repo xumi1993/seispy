@@ -80,7 +80,7 @@ class RFDepth():
         self._test_comp()
 
     def _test_comp(self):
-        rfpath = join(cpara.rfpath, self.sta_info.station[0])
+        rfpath = join(self.cpara.rfpath, self.sta_info.station[0])
         self.prime_comp = ''
         for comp in ['R', 'Q', 'L', 'Z']:
             if glob.glob(join(rfpath, '*{}.sac')):
@@ -92,7 +92,7 @@ class RFDepth():
 
     def makedata(self):
         for i in range(self.sta_info.stla.shape[0]):
-            rfpath = join(cpara.rfpath, self.sta_info.station[i])
+            rfpath = join(self.cpara.rfpath, self.sta_info.station[i])
             stadatar = RFStation(rfpath, only_r=True, prime_comp=self.prime_comp)
             stadatar.stel = self.sta_info.stel[i]
             stadatar.stla = self.sta_info.stla[i]
@@ -106,27 +106,27 @@ class RFDepth():
                 if self.modfolder1d is not None:
                     velmod = _load_mod(self.modfolder1d, self.sta_info.station[i])
                 else:
-                    velmod = cpara.velmod
-                ps_rfdepth, end_index, x_s, _ = psrf2depth(stadatar, cpara.depth_axis,
-                            velmod=velmod, srayp=cpara.rayp_lib, sphere=sphere, phase=stadatar.prime_phase)
+                    velmod = self.cpara.velmod
+                ps_rfdepth, end_index, x_s, _ = psrf2depth(stadatar, self.cpara.depth_axis,
+                            velmod=velmod, srayp=self.cpara.rayp_lib, sphere=sphere, phase=stadatar.prime_phase)
                 piercelat, piercelon = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
                                                             stadatar.bazi, rad2deg(x_s))
             else:
                 if self.raytracing3d:
-                    pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere)
+                    pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, self.cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere)
                 else:
                     pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
-                        stadatar, cpara.depth_axis, srayp=self.srayp, sphere=sphere, phase=stadatar.prime_phase)
+                        stadatar, self.cpara.depth_axis, srayp=self.srayp, sphere=sphere, phase=stadatar.prime_phase)
                     newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
-                                                tps, cpara.depth_axis, self.mod3d)
+                                                tps, self.cpara.depth_axis, self.mod3d)
                 if stadatar.prime_phase == 'P':
                     piercelat, piercelon = pplat_s, pplon_s
                 else:
                     piercelat, piercelon = pplat_p, pplon_p
-                ps_rfdepth, end_index = time2depth(stadatar, cpara.depth_axis, newtpds)
+                ps_rfdepth, end_index = time2depth(stadatar, self.cpara.depth_axis, newtpds)
             rfdep = self._write_rfdep(stadatar, ps_rfdepth, piercelat, piercelon, end_index)
             self.rfdepth.append(rfdep)
-        np.save(cpara.depthdat, self.rfdepth)
+        np.save(self.cpara.depthdat, self.rfdepth)
 
     def _write_rfdep(self, stadata, amp, pplat, pplon, end_index):
         rfdep = {}
