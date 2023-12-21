@@ -278,17 +278,9 @@ class RFStation(object):
             t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod, **kwargs)
         else:
             t_corr = None
-        if 'datar' in self.__dict__:
-            chan = 'r'
-        elif 'dataz' in self.__dict__:
-            chan = 'z'
-        elif 'datal' in self.__dict__:
-            chan = 'l'
-        else:
-            pass
-        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan=chan, velmod=velmod, **kwargs)
+        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='', velmod=velmod, **kwargs)
         if replace:
-            self.__dict__['data{}'.format(chan)] = rf_corr
+            self.data_prime= rf_corr
             if not self.only_r:
                 self.datat = t_corr
         else:
@@ -434,7 +426,7 @@ def _imag2nan(arr):
 
 
 def moveoutcorrect_ref(stadatar, raypref, YAxisRange, 
-                       chan='r', velmod='iasp91', sphere=True, phase=1):
+                       chan='', velmod='iasp91', sphere=True, phase=1):
     """Moveout correction refer to a specified ray-parameter
     
     :param stadatar: data class of RFStation
@@ -447,16 +439,10 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     """
     sampling = stadatar.sampling
     shift = stadatar.shift
-    if chan == 'r':
-        data = stadatar.datar
-    elif chan == 't':
+    if chan == 't':
         data = stadatar.datat
-    elif chan == 'z':
-        data = stadatar.dataz
-    elif chan == 'l':
-        data = stadatar.datal
     else:
-        raise ValueError('Field \'datar\' or \'datal\' must be in the SACStation')
+        data = stadatar.data_prime
     dep_mod = DepModel(YAxisRange, velmod, stadatar.stel)
     # x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     # x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])

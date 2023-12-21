@@ -12,9 +12,12 @@ import glob
 
 
 class Station(object):
-    def __init__(self, sta_lst):
+    def __init__(self, sta_lst:str):
         """
         Read station list
+
+        :param sta_lst: Path to station list
+        :type sta_lst: string
         """
         dtype = {'names': ('station', 'stla', 'stlo', 'stel'), 'formats': ('U20', 'f4', 'f4', 'f2')}
         try:
@@ -46,8 +49,22 @@ def _load_mod(datapath, staname):
 
 
 class RFDepth():
+    """Convert receiver function to depth axis
+    """
     def __init__(self, cpara:CCPPara, log=setuplog(), 
                  raytracing3d=False, velmod3d=None, modfolder1d=None) -> None:
+        """
+        :param cpara: CCPPara object
+        :type cpara: CCPPara
+        :param log: Log object
+        :type log: setuplog
+        :param raytracing3d: If True, use 3D ray tracing to calculate the travel time
+        :type raytracing3d: bool
+        :param velmod3d: Path to 3D velocity model in npz file
+        :type velmod3d: str
+        :param modfolder1d: Folder path to 1D velocity model files with staname.vel as the file name
+        :type modfolder1d: str
+        """
         self.ismod1d = False
         self.cpara = cpara
         self.modfolder1d = modfolder1d
@@ -91,7 +108,12 @@ class RFDepth():
                                       '\'Q\', \'L\', and \'Z\' components')
             sys.exit(1)
 
-    def makedata(self):
+    def makedata(self, psphase=1):
+        """Convert receiver function to depth axis
+
+        :param psphase: 1 for Ps, 2 for PpPs, 3 for PpSs
+        :type psphase: int
+        """
         for i in range(self.sta_info.stla.shape[0]):
             rfpath = join(self.cpara.rfpath, self.sta_info.station[i])
             stadatar = RFStation(rfpath, only_r=True, prime_comp=self.prime_comp)
@@ -109,7 +131,7 @@ class RFDepth():
                 else:
                     velmod = self.cpara.velmod
                 ps_rfdepth, end_index, x_s, _ = psrf2depth(stadatar, self.cpara.depth_axis,
-                            velmod=velmod, srayp=self.cpara.rayp_lib, sphere=sphere, phase=stadatar.prime_phase)
+                            velmod=velmod, srayp=self.cpara.rayp_lib, sphere=sphere, phase=psphase)
                 piercelat, piercelon = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
                                                             stadatar.bazi, rad2deg(x_s))
             else:
@@ -117,7 +139,7 @@ class RFDepth():
                     pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, self.cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere)
                 else:
                     pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
-                        stadatar, self.cpara.depth_axis, srayp=self.srayp, sphere=sphere, phase=stadatar.prime_phase)
+                        stadatar, self.cpara.depth_axis, srayp=self.srayp, sphere=sphere, phase=psphase)
                     newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
                                                 tps, self.cpara.depth_axis, self.mod3d)
                 if stadatar.prime_phase == 'P':
@@ -145,6 +167,8 @@ class RFDepth():
 
 
 def rf2depth():
+    """Convert receiver function to depth axis
+    """
     parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
     parser.add_argument('-d', help='Path to 3d vel model in npz file for moveout correcting',
                         metavar='3d_velmodel_path', type=str, default='')

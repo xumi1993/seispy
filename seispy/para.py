@@ -238,40 +238,40 @@ class RFPara(object):
             elif key == 'catalogpath':
                 pa.catalogpath = value
             else:
-                pa.__dict__[key] = value
+                exec('pa.{} = {}'.format(key, value))
         sections.remove('path')
         if 'fetch' in sections:
             for key, value in cf.items('fetch'):
                 if key == 'use_remote_data':
-                    pa.__dict__[key] = cf.getboolean('fetch', 'use_remote_data')
+                    pa.use_remote_data = cf.getboolean('fetch', 'use_remote_data')
                 elif key == 'data_server_user':
                     if value == '':
                         continue
                     else:
-                        pa.__dict__[key] = value
+                        pa.data_server_user = value
                 elif key == 'data_server_password':
                     if value == '':
                         continue
                     else:
-                        pa.__dict__[key] = value
+                        pa.data_server_password = value
                 else:
-                    pa.stainfo.__dict__[key] = value
+                    exec('pa.stainfo.{} = {}'.format(key, value))
             sections.remove('fetch')
         for sec in sections:
             for key, value in cf.items(sec):
                 if key == 'date_begin':
-                    pa.__dict__[key] = obspy.UTCDateTime(value)
+                    pa.date_begin = obspy.UTCDateTime(value)
                 elif key == 'date_end':
-                    pa.__dict__[key] = obspy.UTCDateTime(value)
+                    pa.date_end = obspy.UTCDateTime(value)
                 elif key == 'offset':
                     try:
-                        pa.__dict__[key] = float(value)
+                        pa.offset = cf.getfloat(sec, 'offset')
                     except:
-                        pa.__dict__[key] = None
+                        pa.offset = None
                 elif key == 'itmax':
-                    pa.__dict__[key] = int(value)
+                    pa.itmax = int(value)
                 elif key == 'only_r':
-                    pa.__dict__[key] = cf.getboolean(sec, 'only_r')
+                    pa.only_r = cf.getboolean(sec, 'only_r')
                 elif key == 'criterion':
                     pa.criterion = value
                 elif key == 'decon_method':
@@ -289,8 +289,6 @@ class RFPara(object):
                 else:
                     try:
                         exec('pa.{} = {}'.format(key, float(value)))
-                        # pa.__dict__[key] = float(value)
                     except ValueError:
                         exec('pa.{} = value'.format(key))
-                        # pa.__dict__[key] = value
         return pa
