@@ -1,5 +1,5 @@
 from .get_depth import GoodDepth
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QWidget, QHBoxLayout,\
                               QVBoxLayout, QSizePolicy, QGroupBox,\
@@ -56,7 +56,7 @@ class MapUI(QWidget):
     def __init__(self, stack_data_path, depmin=30, depmax=65,
                  width=6, height=11, dpi=100, idx=0, smooth=10):
         super(MapUI, self).__init__()
-        self.log = setuplog()
+        self.log = SetupLog()
         # self._set_geom_center()
         self.add_log_layout()
         self.map_para = {'width': width, 'height':height, 'dpi':dpi}

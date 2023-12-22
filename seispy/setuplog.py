@@ -2,14 +2,15 @@ import logging
 from os.path import expanduser, join
 
 
-class setuplog(object):
+class SetupLog(object):
+    default_level = logging.INFO
     default_logs={
-        "RF2depthlog":("RF2depth","INFO","stream_handler"),
-        "RFlog":("RF","INFO","stream_handler"),
-        "Batlog":("Bat","INFO","stream_handler","file_handler"),
-        "CCPlog":("CCP","INFO","stream_handler"),
-        "ModCreatorlog":("ModCreator","INFO","stream_handler"),
-        "PickDepthlog": ("PickDepth", "INFO","stream_handler")
+        "RF2depthlog":("RF2depth",default_level,"stream_handler"),
+        "RFlog":("RF",default_level,"stream_handler"),
+        "Batlog":("Bat",default_level,"stream_handler","file_handler"),
+        "CCPlog":("CCP",default_level,"stream_handler"),
+        "ModCreatorlog":("ModCreator",default_level,"stream_handler"),
+        "PickDepthlog": ("PickDepth", default_level,"stream_handler")
     }
     def __init__(self, filename=join(expanduser('~'), '.RF.log')):
         """
@@ -29,18 +30,18 @@ class setuplog(object):
             # init, setlevel
             log = logging.getLogger(config[0])
             log.setLevel(config[1])
-            next if log.hasHandlers else None
 
             # add handler
-            if "file_handler" in config:
-                log.addHandler(fh)
-            if "stream_handler" in config:
-                log.addHandler(ch)
+            if not log.hasHandlers():
+                if "file_handler" in config:
+                    log.addHandler(fh)
+                if "stream_handler" in config:
+                    log.addHandler(ch)
 
             # attach to class
             setattr(self,loger_branch,log)
 
 
 if __name__ == '__main__':
-    logger = setuplog()
+    logger = SetupLog()
     logger.RFlog.info('print')

@@ -10,7 +10,7 @@ from seispy.io import Query, _cat2df
 from seispy.para import RFPara
 from seispy import distaz
 from seispy.eq import EQ
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from seispy.catalog import read_catalog_file
 from seispy.utils import scalar_instance
 import glob
@@ -169,7 +169,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
     :param stlo: Station longitude
     :type stlo: float
     :param logger: Logger
-    :type logger: seispy.setuplog.Logger
+    :type logger: seispy.setuplog.SetupLog
     :param ref_comp: Reference component, defaults to 'Z'
     :type ref_comp: str, optional
     :param suffix: Suffix of SAC files, defaults to 'SAC'
@@ -238,7 +238,7 @@ def CfgModify(cfg_file, session, key, value):
 class RF(object):
     def __init__(self, cfg_file=None, log=None):
         if log is None:
-            self.logger = setuplog()
+            self.logger = SetupLog()
         else:
             self.logger = log
         if cfg_file is None:

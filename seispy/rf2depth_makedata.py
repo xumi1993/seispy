@@ -3,7 +3,7 @@ from seispy.rfcorrect import RFStation, psrf2depth, psrf_1D_raytracing,\
 from seispy.core.pertmod import Mod3DPerturbation
 import numpy as np
 from seispy.ccppara import ccppara, CCPPara
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from seispy.geo import latlon_from, rad2deg
 from os.path import join, exists
 import argparse
@@ -51,13 +51,13 @@ def _load_mod(datapath, staname):
 class RFDepth():
     """Convert receiver function to depth axis
     """
-    def __init__(self, cpara:CCPPara, log=setuplog(), 
+    def __init__(self, cpara:CCPPara, log=SetupLog(), 
                  raytracing3d=False, velmod3d=None, modfolder1d=None) -> None:
         """
         :param cpara: CCPPara object
         :type cpara: CCPPara
         :param log: Log object
-        :type log: setuplog
+        :type log: SetupLog
         :param raytracing3d: If True, use 3D ray tracing to calculate the travel time
         :type raytracing3d: bool
         :param velmod3d: Path to 3D velocity model in npz file

@@ -2,7 +2,7 @@ import numpy as np
 from seispy.geo import km2deg, deg2km, latlon_from, \
                        geoproject, sind, rad2deg, skm2srad, \
                        geo2sph, sph2geo
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from seispy.distaz import distaz
 from seispy.core.depmodel import DepModel
 from seispy.rf2depth_makedata import Station
@@ -100,7 +100,7 @@ def init_profile(lat1, lon1, lat2, lon2, val):
 class CCPProfile():
     def __init__(self, cfg_file=None, log=None):
         if log is None:
-            self.logger = setuplog()
+            self.logger = SetupLog()
         else:
             self.logger = log
         if cfg_file is None:

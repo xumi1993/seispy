@@ -1,14 +1,14 @@
 import numpy as np
 from scipy.interpolate import griddata, interp1d
 from seispy.core.depmodel import DepModel
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 import argparse
 
 
 class ModCreator():
     def __init__(self, log=None):
         if log is None:
-            self.logger = setuplog()
+            self.logger = SetupLog()
         else:
             self.logger = log
         self.lats = np.array([])

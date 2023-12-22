@@ -238,7 +238,7 @@ class RFPara(object):
             elif key == 'catalogpath':
                 pa.catalogpath = value
             else:
-                exec('pa.{} = {}'.format(key, value))
+                exec('pa.{} = value'.format(key))
         sections.remove('path')
         if 'fetch' in sections:
             for key, value in cf.items('fetch'):
@@ -254,8 +254,10 @@ class RFPara(object):
                         continue
                     else:
                         pa.data_server_password = value
+                elif key == 'data_server':
+                    pa.data_server = value
                 else:
-                    exec('pa.stainfo.{} = {}'.format(key, value))
+                    exec('pa.stainfo.{} = value'.format(key))
             sections.remove('fetch')
         for sec in sections:
             for key, value in cf.items(sec):

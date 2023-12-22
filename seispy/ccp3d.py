@@ -2,7 +2,7 @@ import numpy as np
 from seispy.geo import km2deg, extrema, skm2srad, rad2deg
 from seispy import distaz
 from seispy.core.depmodel import DepModel
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from scikits.bootstrap import ci
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
@@ -118,7 +118,7 @@ class CCP3D():
     """
     def __init__(self, cfg_file=None, log=None):
         if log is None:
-            self.logger = setuplog()
+            self.logger = SetupLog()
         else:
             self.logger = log
         if cfg_file is None:

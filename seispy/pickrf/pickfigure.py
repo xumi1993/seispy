@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from matplotlib.figure import Figure
 from os.path import join, basename
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from seispy.rfcorrect import RFStation
 
 
@@ -45,7 +45,7 @@ class RFFigure(Figure):
         self.width = width
         self.height = height
         self.dpi = dpi
-        self.log = setuplog()
+        self.log = SetupLog()
         self.rfpath = rfpath
         self.enf = 3.5
         self.ipage = 0
