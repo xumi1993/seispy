@@ -205,8 +205,8 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
             if len(lat0) != len(lon0):
                 raise ValueError('lat0 and lon0 must be in the same length')
             else:
-                azimuth = np.ones(lat0)*azimuth
-                gcarc_dist = np.ones(lat0)*gcarc_dist
+                azimuth = np.ones_like(lat0)*azimuth
+                gcarc_dist = np.ones_like(lat0)*gcarc_dist
         elif scalar_instance(lat0) and scalar_instance(lon0):
             pass
         else:
@@ -219,7 +219,6 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
         npts = len(azimuth)
         gcarc_dist = np.ones(lat0, lon0, npts)*gcarc_dist
         lat0, lon0 = init_lalo(lat0, lon0, npts)
-
     g = Geod(ellps=ellps)
     lon, lat, _ = g.fwd(lon0, lat0, azimuth, deg2km(gcarc_dist)*1000)
     return lat, lon

@@ -132,8 +132,10 @@ class RFDepth():
                     velmod = self.cpara.velmod
                 ps_rfdepth, end_index, x_s, _ = psrf2depth(stadatar, self.cpara.depth_axis,
                             velmod=velmod, srayp=self.cpara.rayp_lib, sphere=sphere, phase=psphase)
-                piercelat, piercelon = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
-                                                            stadatar.bazi, rad2deg(x_s))
+                piercelat, piercelon = np.zeros_like(x_s, dtype=np.float64), np.zeros_like(x_s, dtype=np.float64)
+                for j in range(stadatar.ev_num):
+                    piercelat[j], piercelon[j] = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
+                                                            stadatar.bazi[j], rad2deg(x_s[j]))
             else:
                 if self.raytracing3d:
                     pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, self.cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere)
