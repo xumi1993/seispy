@@ -2,7 +2,10 @@ from os.path import exists, join, dirname
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d
+
 from seispy.utils import vs2vprho
+from seispy.rf2depth_makedata import _load_mod
+from seispy.rfcorrect import interp_depth_model
 
 
 def _search_vel_file(mode_name):
@@ -349,6 +352,45 @@ class DepModel(object):
         #hor_dis = np.sqrt((1. / (rayp ** 2. * (radius / vel) ** -2)) - 1)
         return hor_dis
 
+    def save_tvel(self, filename):
+        """
+        save vel mod in tvel format for taup
+        >>> model = DepModel(np.array([0, 20.1, 35.1, 100]))
+        >>> model.save_tvel("test")
+            0.00     5.80     3.36     2.72
+           20.10    5.800     3.36     2.72
+           20.10     6.50     3.75     2.92
+           35.10    6.500     3.75     2.92
+           35.10     8.04     4.47     3.32
+          100.00    8.040     4.47     3.32
+          100.00     8.05     4.49     3.36
+        """
+        outlines =[]
+        depth = self.depths
+        if depth[0] != 0:
+            depth[0] = 0
+        for _i in range(self.depths.shape[0]):
+            out = f'{depth[_i]:>8.2f} {self.vp[_i]:>8.2f} {self.vs[_i]:>8.2f} {self.rho[_i]:>8.2f}'
+            outlines.append(out)
+            if _i == self.depths.shape[0] - 1:
+                break
+            out = f'{depth[_i+1]:>8.2f} {self.vp[_i]:>8.3f} {self.vs[_i]:>8.2f} {self.rho[_i]:>8.2f}'
+            outlines.append(out)
+        # this switch for doctest
+        if filename == 'test':
+            for _i in range(len(outlines)):
+                print(outlines[_i])
+        else:
+            try:
+                f = open(filename, 'w')
+                f.write("temp_mod-P\ntemp_mod-S")
+                for i in range(len(outlines)):
+                    f.write(outlines[i])
+                f.close()
+            except IOError:
+                raise IOError('cannot write to {}'.format(filename))
+
+
     def raylength(self, rayp, phase='P', sphere=True):
         """
         calculate ray length, P for Sp and S for Ps
@@ -378,6 +420,42 @@ class DepModel(object):
         raylen = (self.dz * radius) / (np.sqrt(((radius / self.vs) ** 2) - (rayp ** 2)) * vel)
         return raylen
 
+    @classmethod
+    def ccp_model(cls, dep_range = np.array([0, 20.1, 35.1, 100]),
+                  elevation = 0, layerd = False, **kwargs):
+        """
+        import ccp configure and init DepModel object for time2depth convertion
+        if any parameters given is wrong, return a default DepModel object
+
+        there's 3 types of input is allowed:
+        1. mod3d, stla, stlo: for 3d model( need modification
+        2. modfolder, staname: for dir
+        3. mod: for single file
+        """
+        if kwargs.get("mod3d", None):
+            stla = kwargs.pop("stla",None)
+            stlo = kwargs.pop("stlo", None)
+            # if stla and stlo is not given return iasp91 model
+            if not stla or not stlo:
+                return cls(dep_range, "iasp91", elevation, layerd)
+            try:
+                mod = np.load(kwargs["mod3d"])
+                dep_tmp = DepModel(dep_range,"iasp91", elevation, layerd)
+                dep_tmp.vp, dep_tmp.vs = interp_depth_model(mod, stla, stlo, dep_range)
+                return dep_tmp
+            except:
+                return cls(dep_range, "iasp91", elevation, layerd)
+
+        elif kwargs.get("modfolder", None):
+            try:
+                mod = _load_mod(kwargs.pop("modfolder", "./"), kwargs.pop("staname", None))
+            except:
+                mod = "iasp91"
+            finally:
+                return cls(dep_range, mod, elevation, layerd)
+        else:
+            mod = kwargs.pop("mod", "iasp91")
+            return cls(dep_range,mod, elevation, layerd)
 
 if __name__ == "__main__":
     import doctest
