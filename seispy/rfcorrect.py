@@ -12,7 +12,7 @@ from seispy.harmonics import Harmonics
 from seispy.plotRT import plotrt as _plotrt
 from seispy.plotR import plotr as _plotr
 from seispy.utils import scalar_instance
-from seispy.core.depmodel import DepModel
+from seispy.core.depmodel import DepModel, interp_depth_model
 from seispy.core.pertmod import Mod3DPerturbation
 import warnings
 import glob
@@ -520,7 +520,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
             try:
                 velmod_3d = np.load(velmod)
                 dep_mod.vp, dep_mod.vs = interp_depth_model(velmod_3d,
-                                         stadatar.stla, stadatar.stlo, dep_mod.depths_elev)
+                                                            stadatar.stla, stadatar.stlo, dep_mod.depths_elev)
             except Exception as e:
                 raise FileNotFoundError('Cannot load 1D or 3D velocity model of \'{}\''.format(velmod))
     else:
@@ -739,34 +739,6 @@ def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0, sph
         if elevation != 0:
             tps[i] = interp1d(YAxisRange, tps_corr)(dep_range)
     return pplat_s, pplon_s, pplat_p, pplon_p, tps
-
-
-def interp_depth_model(model, lat, lon, new_dep):
-    """ Interpolate Vp and Vs from 3D velocity with a specified depth range.
-
-    Parameters
-    ----------
-    mod3d : :meth:`np.lib.npyio.NpzFile`
-        3D velocity loaded from a ``.npz`` file
-    lat : float
-        Latitude of position in 3D velocity model
-    lon : float
-        Longitude of position in 3D velocity model
-    new_dep : :meth:`np.ndarray`
-        1D array of depths in km
-
-    Returns
-    -------
-    Vp : :meth:`np.ndarray`
-        Vp in ``new_dep``
-    Vs : :meth:`np.ndarray`
-        Vs in ``new_dep``
-    """
-    #  model = np.load(modpath)
-    points = [[depth, lat, lon] for depth in new_dep]
-    vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False, fill_value=None)
-    vs = interpn((model['dep'], model['lat'], model['lon']), model['vs'], points, bounds_error=False, fill_value=None)
-    return vp, vs
 
 
 def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, dep_range, mod3d):

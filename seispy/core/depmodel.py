@@ -1,7 +1,9 @@
+import glob
 from os.path import exists, join, dirname
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, interpn
+
 from seispy.utils import vs2vprho
 
 
@@ -349,6 +351,45 @@ class DepModel(object):
         #hor_dis = np.sqrt((1. / (rayp ** 2. * (radius / vel) ** -2)) - 1)
         return hor_dis
 
+    def save_tvel(self, filename):
+        """
+        save vel mod in tvel format for taup
+        >>> model = DepModel(np.array([0, 20.1, 35.1, 100]))
+        >>> model.save_tvel("test")
+            0.00     5.80     3.36     2.72
+           20.10    5.800     3.36     2.72
+           20.10     6.50     3.75     2.92
+           35.10    6.500     3.75     2.92
+           35.10     8.04     4.47     3.32
+          100.00    8.040     4.47     3.32
+          100.00     8.05     4.49     3.36
+        """
+        outlines =[]
+        depth = self.depths
+        if depth[0] != 0:
+            depth[0] = 0
+        for _i in range(self.depths.shape[0]):
+            out = f'{depth[_i]:>8.2f} {self.vp[_i]:>8.2f} {self.vs[_i]:>8.2f} {self.rho[_i]:>8.2f}'
+            outlines.append(out)
+            if _i == self.depths.shape[0] - 1:
+                break
+            out = f'{depth[_i+1]:>8.2f} {self.vp[_i]:>8.3f} {self.vs[_i]:>8.2f} {self.rho[_i]:>8.2f}'
+            outlines.append(out)
+        # this switch for doctest
+        if filename == 'test':
+            for _i in range(len(outlines)):
+                print(outlines[_i])
+        else:
+            try:
+                f = open(filename, 'w')
+                f.write("temp_mod-P\ntemp_mod-S")
+                for i in range(len(outlines)):
+                    f.write(outlines[i])
+                f.close()
+            except IOError:
+                raise IOError('cannot write to {}'.format(filename))
+
+
     def raylength(self, rayp, phase='P', sphere=True):
         """
         calculate ray length, P for Sp and S for Ps
@@ -378,6 +419,86 @@ class DepModel(object):
         raylen = (self.dz * radius) / (np.sqrt(((radius / self.vs) ** 2) - (rayp ** 2)) * vel)
         return raylen
 
+    @classmethod
+    def ccp_model(cls, dep_range = np.array([0, 20.1, 35.1, 100]),
+                  elevation = 0, layerd = False, **kwargs):
+        """
+        import ccp configure and init DepModel object for time2depth convertion
+        if any parameters given is wrong, return a default DepModel object
+
+        there's 3 types of input is allowed:
+        1. mod3d, stla, stlo: for 3d model( need modification
+        2. modfolder, staname: for dir
+        3. mod: for single file
+        """
+        if kwargs.get("mod3d", None):
+            stla = kwargs.pop("stla",None)
+            stlo = kwargs.pop("stlo", None)
+            # if stla and stlo is not given return iasp91 model
+            if not stla or not stlo:
+                return cls(dep_range, "iasp91", elevation, layerd)
+            try:
+                mod = np.load(kwargs["mod3d"])
+                dep_tmp = DepModel(dep_range,"iasp91", elevation, layerd)
+                dep_tmp.vp, dep_tmp.vs = interp_depth_model(mod, stla, stlo, dep_range)
+                return dep_tmp
+            except:
+                return cls(dep_range, "iasp91", elevation, layerd)
+
+        elif kwargs.get("modfolder", None):
+            try:
+                mod = _load_mod(kwargs.pop("modfolder", "./"), kwargs.pop("staname", None))
+            except:
+                mod = "iasp91"
+            finally:
+                return cls(dep_range, mod, elevation, layerd)
+        else:
+            mod = kwargs.pop("mod", "iasp91")
+            return cls(dep_range,mod, elevation, layerd)
+
+def _load_mod(datapath, staname):
+    """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
+
+    :param datapath: Folder name with 1D velocity model files.
+    :type datapath: string
+    :param staname: The station name as a part of file name of 1D velocity model files.
+    :type staname: string
+    """
+    expresion = join(datapath, "*"+staname+"*.vel")
+    modfiles = glob.glob(expresion)
+    if len(modfiles) == 0:
+        raise FileNotFoundError("The model file of {} were not found.".format(expresion))
+    elif len(modfiles) > 1:
+        raise ValueError('More then 1 file were found as the expresion: {}'.format(expresion))
+    else:
+        return modfiles[0]
+
+def interp_depth_model(model, lat, lon, new_dep):
+    """ Interpolate Vp and Vs from 3D velocity with a specified depth range.
+
+    Parameters
+    ----------
+    mod3d : :meth:`np.lib.npyio.NpzFile`
+        3D velocity loaded from a ``.npz`` file
+    lat : float
+        Latitude of position in 3D velocity model
+    lon : float
+        Longitude of position in 3D velocity model
+    new_dep : :meth:`np.ndarray`
+        1D array of depths in km
+
+    Returns
+    -------
+    Vp : :meth:`np.ndarray`
+        Vp in ``new_dep``
+    Vs : :meth:`np.ndarray`
+        Vs in ``new_dep``
+    """
+    #  model = np.load(modpath)
+    points = [[depth, lat, lon] for depth in new_dep]
+    vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False, fill_value=None)
+    vs = interpn((model['dep'], model['lat'], model['lon']), model['vs'], points, bounds_error=False, fill_value=None)
+    return vp, vs
 
 if __name__ == "__main__":
     import doctest
