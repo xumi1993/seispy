@@ -17,6 +17,7 @@ from os.path import isfile, exists
 
 import numpy as np
 
+import obspy
 from obspy.io.sac import SACTrace
 from obspy.core import Stream
 
@@ -24,25 +25,28 @@ from obspy.core import Stream
 class Trace_Clust(UserList):
     """
     user can accese traces from self.data or like a default list
-    >>> from glob import glob
-    >>> st=[];tt=Trace_Clust()
-    >>> st = [SACTrace.read(_i) for _i in glob("../data/*ri")]
+    >>> st= obspy.read();tt=Trace_Clust()
+    >>> for _i in st:
+    ...   _i.stats.sac ={};
+    ...   _i.stats.sac["stla"]=10.0
+    ...   _i.stats.sac["stlo"]=20.0
+    >>> st = [SACTrace.from_obspy_trace(_i) for _i in st]
     >>> len(st)
-    4
+    3
 
     you can directly append trace or traces in SACTrace format
     >>> tt.append(st[0]);len(tt)
     1
     >>> tt.append(st);len(tt)
-    5
+    4
 
     [] is available either
     >>> tt[0].npts
-    900
+    3000
 
     for iter is also available
     >>> [_i.npts for _i in tt]
-    [900, 900, 900, 900, 900]
+    [3000, 3000, 3000, 3000]
     """
 
     def __init__(self, input_list=[]):
@@ -97,10 +101,13 @@ class RFSta(Trace_Clust):
         """
         import sac traces from obspy.core.Stream object\
         so users can use * or other easier way to import sac traces
-        >>> import obspy
-        >>> st = obspy.read("../data/*ri")
+        >>> st= obspy.read();tt=Trace_Clust()
+        >>> for _i in st:
+        ...   _i.stats.sac ={};
+        ...   _i.stats.sac["stla"]=10.0
+        ...   _i.stats.sac["stlo"]=20.0
         >>> tt=RFSta(); tt.from_stream(st);len(tt)
-        4
+        3
         """
         self.data=[SACTrace.from_obspy_trace(_i) for _i in st]
         self.check_unit(accor=True)
@@ -116,11 +123,17 @@ class RFSta(Trace_Clust):
         4. accor_seispy ---- gen ev_num and data_prime
 
         replace read_sample
-        >>> import obspy
-        >>> st = obspy.read("../data/*ri")
+        >>> st= obspy.read();tt=Trace_Clust()
+        >>> for _i in st:
+        ...   _i.stats.sac ={};
+        ...   _i.stats.sac["stla"]=10.0
+        ...   _i.stats.sac["stlo"]=20.0
         >>> tt=RFSta(); tt.from_stream(st);tt.check_unit(accor=True,postion=True, gen_mat=True, accor_seispy=True)
         >>> len(tt)
-        4
+        3
+        >>> tt[2].stla = 15.0; tt.check_unit(position = True)
+        >>> len(tt)
+        2
         """
         if len(self) == 0:
             return -1
