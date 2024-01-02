@@ -1,11 +1,10 @@
+import glob
 from os.path import exists, join, dirname
 import numpy as np
 from matplotlib import pyplot as plt
-from scipy.interpolate import interp1d
+from scipy.interpolate import interp1d, interpn
 
 from seispy.utils import vs2vprho
-from seispy.rf2depth_makedata import _load_mod
-from seispy.rfcorrect import interp_depth_model
 
 
 def _search_vel_file(mode_name):
@@ -456,6 +455,50 @@ class DepModel(object):
         else:
             mod = kwargs.pop("mod", "iasp91")
             return cls(dep_range,mod, elevation, layerd)
+
+def _load_mod(datapath, staname):
+    """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
+
+    :param datapath: Folder name with 1D velocity model files.
+    :type datapath: string
+    :param staname: The station name as a part of file name of 1D velocity model files.
+    :type staname: string
+    """
+    expresion = join(datapath, "*"+staname+"*.vel")
+    modfiles = glob.glob(expresion)
+    if len(modfiles) == 0:
+        raise FileNotFoundError("The model file of {} were not found.".format(expresion))
+    elif len(modfiles) > 1:
+        raise ValueError('More then 1 file were found as the expresion: {}'.format(expresion))
+    else:
+        return modfiles[0]
+
+def interp_depth_model(model, lat, lon, new_dep):
+    """ Interpolate Vp and Vs from 3D velocity with a specified depth range.
+
+    Parameters
+    ----------
+    mod3d : :meth:`np.lib.npyio.NpzFile`
+        3D velocity loaded from a ``.npz`` file
+    lat : float
+        Latitude of position in 3D velocity model
+    lon : float
+        Longitude of position in 3D velocity model
+    new_dep : :meth:`np.ndarray`
+        1D array of depths in km
+
+    Returns
+    -------
+    Vp : :meth:`np.ndarray`
+        Vp in ``new_dep``
+    Vs : :meth:`np.ndarray`
+        Vs in ``new_dep``
+    """
+    #  model = np.load(modpath)
+    points = [[depth, lat, lon] for depth in new_dep]
+    vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False, fill_value=None)
+    vs = interpn((model['dep'], model['lat'], model['lon']), model['vs'], points, bounds_error=False, fill_value=None)
+    return vp, vs
 
 if __name__ == "__main__":
     import doctest

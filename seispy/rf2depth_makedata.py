@@ -1,3 +1,4 @@
+from seispy.core.depmodel import _load_mod
 from seispy.rfcorrect import RFStation, psrf2depth, psrf_1D_raytracing,\
     psrf_3D_migration, time2depth, psrf_3D_raytracing
 from seispy.core.pertmod import Mod3DPerturbation
@@ -27,25 +28,6 @@ class Station(object):
             self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
             self.stel = np.zeros(self.stla.size)
         self.sta_num = self.stla.shape[0]
-
-
-
-def _load_mod(datapath, staname):
-    """Load 1D velocity model files with suffix of ".vel". The model file should be including 3 columns with depth, vp and vs.
-
-    :param datapath: Folder name with 1D velocity model files.
-    :type datapath: string
-    :param staname: The station name as a part of file name of 1D velocity model files.
-    :type staname: string
-    """
-    expresion = join(datapath, "*"+staname+"*.vel")
-    modfiles = glob.glob(expresion)
-    if len(modfiles) == 0:
-        raise FileNotFoundError("The model file of {} were not found.".format(expresion))
-    elif len(modfiles) > 1:
-        raise ValueError('More then 1 file were found as the expresion: {}'.format(expresion))
-    else:
-        return modfiles[0]
 
 
 class RFDepth():
