@@ -69,13 +69,14 @@ def cal_taup(model:str, phase:str,
     ### main
     for _i, _deg in enumerate(dist):
         for _j, _dep in enumerate(depth):
-            print("now at degree {}, dep{}".format(_deg, _dep))
-            arrivals=model.get_travel_times(source_depth_in_km=_dep,
+            #print("now at degree {}, dep{}".format(_deg, _dep))
+            for _k, _phase in enumerate(phase_list):
+                arrivals=model.get_travel_times(source_depth_in_km=_dep,
                                             distance_in_degree=_deg,
-                                            phase_list=phase_list)
-            for _k in range(len(arrivals)):
-                # 101 for change rayp from s/deg to s/km
-                rayp_lib[_i,_j,head+_k] = arrivals[_k].ray_param_sec_degree
+                                            phase_list=[_phase])
+                if len(arrivals) == 0:
+                    continue
+                rayp_lib[_i,_j,head+_k] = arrivals[0].ray_param_sec_degree
     if head > 0:
         for _layer in range(head):
             rayp_lib[:,:,_layer] = rayp_lib[:,:,head]
@@ -83,9 +84,12 @@ def cal_taup(model:str, phase:str,
 
 
 if __name__ == "__main__":
-    phase = "P"
-    dist = "30/50/1"
+    # paras
+    phase = "S"
+    dist = "30/90/5"
     layers = "0/100/2"
     depth = '0/100/5'
     out_put = "G:/Ps_rayp.npz"
-    rayp_input("P", dist, layers, depth, out_put)
+
+    # run
+    rayp_input(phase, dist, layers, depth, out_put)
