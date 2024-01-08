@@ -4,7 +4,7 @@ from obspy.io.sac.sactrace import SACTrace
 import matplotlib.pyplot as plt
 from os.path import join
 from seispy.rfcorrect import RFStation
-from seispy.hkpara import hkpara
+from seispy.hkpara import hkpara, HKPara
 from seispy.geo import srad2skm
 import argparse
 from seispy.utils import load_cyan_map, array_instance
@@ -164,9 +164,9 @@ def print_result(besth, bestk, maxhsig, maxksig, print_comment=True):
     print(msg)
 
 
-def hksta(hpara, isplot=False, isdisplay=False):
+def hksta(hpara:HKPara, isplot=False, isdisplay=False):
     stadata = RFStation(hpara.rfpath, only_r=True)
-    stack, _, allstack, _ = hkstack(stadata.datar, stadata.shift, stadata.sampling, srad2skm(stadata.rayp),
+    stack, _, allstack, _ = hkstack(stadata.data_prime, stadata.shift, stadata.sampling, srad2skm(stadata.rayp),
                                     hpara.hrange, hpara.krange, vp=hpara.vp, weight=hpara.weight)
     besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, hpara.hrange, hpara.krange, stadata.ev_num)
     with open(hpara.hklist, 'a') as f:
@@ -193,32 +193,5 @@ def hk():
     hksta(hpara, isplot=True, isdisplay=arg.isdisplay)
 
 
-def hktest():
-    h = np.arange(40, 80, 0.1)
-    kappa = np.arange(1.6, 1.9, 0.01)
-    path = '/Users/xumj/Researches/YN_crust/dip_study/syn_hk/A1'
-    baz, rayp = np.loadtxt(join(path, 'sample.geom'), usecols=(0, 1), unpack=True)
-    rayp *= 1000
-    with open(join(path, 'sample.tr')) as f:
-        content = f.read()
-    head_list = re.findall(r'#.*\n\s+(\d*)\s+(\d*)\s+(\d*.\d*)\s+(\d*)\s+(\d*.\d*)\n', content)[0]
-    ev_num = int(head_list[0])
-    npts = int(head_list[1])
-    dt = float(head_list[2])
-    shift = float(head_list[4])
-    seis = np.empty([ev_num, npts])
-    for _i, b, r in zip(range(ev_num), baz, rayp):
-        sac = SACTrace.read(join(path, 'tr_{:d}_{:.3f}.r'.format(int(b), r)))
-        seis[_i] = sac.data
-
-    stack, _, allstack, _ = hkstack(seis, shift, dt, rayp, h, kappa, vp=6.3)
-    besth, bestk, cvalue, maxhsig, maxksig = ci(allstack, h, kappa, ev_num)
-    print_result(besth, bestk, maxhsig, maxksig, print_comment=True)
-    plot(stack, allstack, h, kappa, besth, bestk, cvalue)
-
-def hk_sta_test():
-    hpara = hkpara('/Users/xumj/Researches/YNRF/hk.cfg')
-    hksta(hpara, isplot=True)
-
 if __name__ == '__main__':
-    hk_sta_test()
+    pass
