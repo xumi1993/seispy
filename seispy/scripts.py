@@ -11,12 +11,14 @@ import sys
 def rfharmo():
     parser = argparse.ArgumentParser('Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs')
     parser.add_argument('rfpath', type=str, help="Path to PRFs")
+    parser.add_argument('-e', help='Enlarge factor for plotting, defaults to 2', metavar='enf', default=2., type=float)
+    parser.add_argument('-k', help="Suppress stacking RFs by back-azimuth, defaults to False", default=True,
+                        action='store_false')
+    parser.add_argument('-o', help="Specify output path for saving constant component.", metavar='outpath', default=None, type=str)
+    parser.add_argument('-p', help='Figure output path, defaults to ./', metavar='figure_path', default='./', type=str)
+    parser.add_argument('-s', help="Resample RFs with sampling interval of dt", metavar='dt', default=None, type=float)
     parser.add_argument('-t', help="Time window from tb to te for triming RFs, NOTE: do not insert space before this argument, defaults to -2/10",
                         metavar='tb/te', default='-2/10')
-    parser.add_argument('-s', help="Resample RFs with sampling interval of dt", metavar='dt', default=None, type=float)
-    parser.add_argument('-o', help="Specify output path for saving constant component.", metavar='outpath', default=None, type=str)
-    parser.add_argument('-e', help='Enlarge factor, defaults to 2', metavar='enf', default=2., type=float)
-    parser.add_argument('-p', help='Figure output path, defaults to ./', metavar='figure_path', default='./', type=str)
     args = parser.parse_args()
     rfsta = RFStation(args.rfpath)
     if args.s is not None:

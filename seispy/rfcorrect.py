@@ -177,6 +177,33 @@ class RFStation(object):
         exec('rfsta.data{} = rfsta.data_prime'.format(rfsta.comp.lower()))
         return rfsta
 
+    def bin_stack(self, key='bazi', lim=[0, 360], val=10):
+        """Stack RFs by bins of ``key`` with interval of ``val``
+
+        :param key: Key to stack, valid in ['bazi', 'rayp' (in s/km)], defaults to 'bazi'
+        :type key: str, optional
+        :param val: Interval of bins, defaults to 10 degree for bazi
+        :type val: int, optional
+        :return: Stacked RFs
+        :rtype: ``dict`` with keys of ``data_prime``, ``datat`` and ``count``
+        """
+        bins = np.arange(lim[0], lim[1]+val, val)
+        idx = np.digitize(self.__dict__[key], bins)
+        stacked = {
+            'data_prime': np.zeros([bins.size-1, self.rflength]),
+            'count': np.zeros(bins.size-1)
+        }
+        if not self.only_r:
+            stacked['datat'] = np.zeros([bins.size-1, self.rflength])
+        for i in range(1, bins.size):
+            if i not in idx:
+                continue
+            stacked['data_prime'][i-1] = np.mean(self.data_prime[idx==i], axis=0)
+            if not self.only_r:
+                stacked['datat'][i-1] = np.mean(self.datat[idx==i], axis=0)
+            stacked['count'][i-1] = np.sum(idx==i)
+        return stacked
+
     @property
     def stel(self):
         return self._stel
@@ -375,7 +402,7 @@ class RFStation(object):
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
-    def harmonic(self, tb=-5, te=10):
+    def harmonic(self, tb=-5, te=10, is_stack=True):
         """Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
 
         :param tb: Start time relative to P, defaults to -5
@@ -389,11 +416,11 @@ class RFStation(object):
                 Harmonic components with shape of ``(5, nsamp)``, ``nsamp = (te-tb)/RFStation.sampling``
 
         unmodel_trans: numpy.ndarray, float
-                Unmodel components with shape same as harmonic_trans.
+                Unmodel components with same shape as harmonic_trans.
         """
         if self.only_r:
             raise ValueError('Transverse RFs are nessary for harmonic decomposition')
-        self.harmo = Harmonics(self, tb, te)
+        self.harmo = Harmonics(self, tb, te, bin_stack=is_stack)
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
