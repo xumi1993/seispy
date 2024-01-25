@@ -87,7 +87,7 @@ def _intep_mod(model, depths_elev):
                         fill_value=model[0,3])(depths_elev)
     return vp, vs, rho
 
-def _from_layer_model(dep_range, h, vp, vs, rho=None):
+def _from_layer_model(dep_range, h, vs, vp=None, rho=None):
     dep = 0
     vp_dep = np.zeros_like(dep_range).astype(float)
     vs_dep = np.zeros_like(dep_range).astype(float)
@@ -100,10 +100,15 @@ def _from_layer_model(dep_range, h, vp, vs, rho=None):
             idx = np.where((dep_range >= dep) & (dep_range < dep+layer))[0]
         if idx.size == 0:
             raise ValueError('The thickness of layer {} less than the depth interval'.format(i+1))
-        vp_dep[idx] = vp[i]
         vs_dep[idx] = vs[i]
+        if vp is not None:
+            vp_dep[idx] = vp[i]
+        else:
+            vp_dep[idx], _ = vs2vprho(vs[i])
         if rho is not None:
             rho_dep[idx] = rho[i]
+        else:
+            _, rho_dep[idx] = vs2vprho(vs[i])
         dep += layer
         if dep > dep_range[-1]:
             break
