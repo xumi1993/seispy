@@ -182,7 +182,7 @@ class RFDepth():
                 piercelat, piercelon = np.zeros_like(x_s, dtype=np.float64), np.zeros_like(x_s, dtype=np.float64)
 
                 for j in range(stadatar.ev_num):
-                    piercelat[j], piercelon[j] = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
+                    piercelat[j], piercelon[j] = latlon_from(_sta.stla, _sta.stlo,
                                                             stadatar.bazi[j], rad2deg(x_s[j]))
             else:
                 ### 3d model interp
