@@ -61,6 +61,12 @@ class CCPPara(object):
 
 
 def ccppara(cfg_file):
+    """ Read configure file for CCP stacking
+    :param cfg_file: Path to configure file
+    :type cfg_file: str
+    :return: CCPPara object
+    :rtype: CCPPara
+    """
     cpara = CCPPara()
     cf = configparser.ConfigParser()
     try:

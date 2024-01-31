@@ -75,6 +75,8 @@ class StaInfo():
 
 class RFPara(object):
     def __init__(self):
+        """Parameters for receiver function calculation
+        """
         self.datapath = expanduser('~')
         self.rfpath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
@@ -221,6 +223,10 @@ class RFPara(object):
 
     @classmethod
     def read_para(cls, cfg_file):
+        """Read parameters from configure file
+        :param cfg_file: Path to configure file
+        :type cfg_file: str
+        """
         cf = configparser.RawConfigParser(allow_no_value=True)
         pa = cls()
         try:

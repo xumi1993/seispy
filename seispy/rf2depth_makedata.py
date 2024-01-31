@@ -24,27 +24,6 @@ from seispy.geo import latlon_from, rad2deg
 # sta_part is not used
 sta_part = namedtuple('sta_part', ['station', 'stla', 'stlo'])
 sta_full = namedtuple('sta_full', ['station', 'stla', 'stlo', 'stel'])
-_RfInDepth = namedtuple('RfInDepth',
-                       ['station', 'stalat', 'stalon',
-                        'depthrange', 'bazi', 'rayp',
-                        'moveout_correct', 'piercelat', 'piercelon', 'stopindex'])
-class RFInDepth(_RfInDepth):
-    """
-    this class is inheried from a namedtuple, and can be called as a dict
-    mainly to restrict behaviour while output  and
-    provide a better speed while
-
-    warnings: this class is still in develpment
-    """
-    def __getitem__(self, item):
-        """
-        make RFInDepth can be called like dict
-        >>> ll = RFInDepth(station='sta', stalat='stla', stalon='stlo', depthrange='dep', bazi='baz',rayp='rayp', moveout_correct=0, piercelat=0, piercelon=0 )
-        >>> ll['stalat'], ll.stalat
-        ('stla', 'stla')
-        """
-        return getattr(self, item)
-
 
 class Station(object):
     def __init__(self, sta_lst:str):
@@ -62,9 +41,10 @@ class Station(object):
             self.station, self.stla, self.stlo = np.loadtxt(sta_lst, dtype=dtype, unpack=True, ndmin=1)
             self.stel = np.zeros(self.stla.size)
         self.sta_num = self.stla.shape[0]
+
     def __getitem__(self,index):
         """
-        allows  [] do indexing
+        allow for sta[index]
         """
         if hasattr(self,'stel'):
             return sta_full(self.station[index],
@@ -72,9 +52,10 @@ class Station(object):
         else:
             return sta_full(self.station[index],
                             self.stla[index], self.stlo[index], 0)
+
     def __iter__(self):
         """
-        allow for...in to iter
+        allow for sta in stalist
         """
         for index in range(self.stla.shape[0]):
             if hasattr(self, 'stel'):
@@ -91,14 +72,14 @@ class RFDepth():
     """Convert receiver function to depth axis
     """
     def __init__(self, cpara:CCPPara, log:Logger=SetupLog().RF2depthlog,
-                 RAYTRACING3D=False, velmod3d=None, modfolder1d=None) -> None:
+                 raytracing3d=False, velmod3d=None, modfolder1d=None) -> None:
         """
         :param cpara: CCPPara object
         :type cpara: CCPPara
         :param log: Log object
         :type log: logging.Logger
-        :param RAYTRACING3D: If True, use 3D ray tracing to calculate the travel time
-        :type RAYTRACING3D: bool
+        :param raytracing3d: If True, use 3D ray tracing to calculate the travel time
+        :type raytracing3d: bool
         :param velmod3d: Path to 3D velocity model in npz file
         :type velmod3d: str
         :param modfolder1d: Folder path to 1D velocity model files with staname.vel as the file name
@@ -108,7 +89,7 @@ class RFDepth():
         self.cpara = cpara
         self.modfolder1d = modfolder1d
         self.log = log
-        self.RAYTRACING3D = RAYTRACING3D
+        self.raytracing3d = raytracing3d
         if velmod3d is not None:
             if isinstance(velmod3d, str):
                 self.mod3d = Mod3DPerturbation(velmod3d, cpara.depth_axis, velmod=cpara.velmod)
@@ -166,7 +147,6 @@ class RFDepth():
                 sphere = False
             self.log.info('the {}th/{} station with {} events'.format(_i + 1, len(self.sta_info), stadatar.ev_num))
 
-
             #### 1d model for each station
             if self.ismod1d:
                 if self.modfolder1d is not None:
@@ -200,15 +180,15 @@ class RFDepth():
 
                 ps_rfdepth, end_index = time2depth(stadatar, self.cpara.depth_axis, newtpds)
 
-            rfdep = self._write_rfdep(self.cpara,stadatar, ps_rfdepth, piercelat, piercelon, end_index)
+            self._write_rfdep(stadatar, ps_rfdepth, piercelat, piercelon, end_index)
         np.save(self.cpara.depthdat, self.rfdepth)
 
-    def _write_rfdep(self,cpara, stadata, amp, pplat, pplon, end_index):
+    def _write_rfdep(self, stadata, amp, pplat, pplon, end_index):
         rfdep = {}
         rfdep['station'] = stadata.staname
         rfdep['stalat'] = stadata.stla
         rfdep['stalon'] = stadata.stlo
-        rfdep['depthrange'] = cpara.depth_axis
+        rfdep['depthrange'] = self.cpara.depth_axis
         rfdep['bazi'] = stadata.bazi
         rfdep['rayp'] = stadata.rayp
         rfdep['moveout_correct'] = amp
@@ -216,7 +196,6 @@ class RFDepth():
         rfdep['piercelon'] = pplon
         rfdep['stopindex'] = end_index
         self.rfdepth.append(rfdep)
-
 
 
 def rf2depth():
@@ -228,7 +207,6 @@ def rf2depth():
     2. only -r : do raytracing but no moveout correction
     3. -d and -r : do moveout correction and raytracing
     4. -m : use {staname}.vel file for RF2depth conversion
-
 
     """
     parser = argparse.ArgumentParser(description="Convert Ps RF to depth axis")
@@ -271,7 +249,7 @@ def rf2depth():
         modfolder1d = None
     rfd = RFDepth(
         cpara,
-        RAYTRACING3D=raytracing3d,
+        raytracing3d=raytracing3d,
         velmod3d=velmod3d,
         modfolder1d=modfolder1d,
     )
