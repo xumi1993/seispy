@@ -164,7 +164,7 @@ class RFDepth():
                 sphere = True
             else:
                 sphere = False
-            self.log.info('the {}th/{} station with {} events'.format(_i + 1, self.sta_info.shape[0], stadatar.ev_num))
+            self.log.info('the {}th/{} station with {} events'.format(_i + 1, len(self.sta_info), stadatar.ev_num))
 
 
             #### 1d model for each station
