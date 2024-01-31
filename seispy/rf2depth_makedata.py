@@ -164,7 +164,7 @@ class RFDepth():
                 sphere = True
             else:
                 sphere = False
-            self.log.info('the {}th/{} station with {} events'.format(_i + 1, self.sta_info.shape[0], stadatar.ev_num))
+            self.log.info('the {}th/{} station with {} events'.format(_i + 1, len(self.sta_info), stadatar.ev_num))
 
 
             #### 1d model for each station
@@ -182,7 +182,7 @@ class RFDepth():
                 piercelat, piercelon = np.zeros_like(x_s, dtype=np.float64), np.zeros_like(x_s, dtype=np.float64)
 
                 for j in range(stadatar.ev_num):
-                    piercelat[j], piercelon[j] = latlon_from(self.sta_info.stla[i], self.sta_info.stlo[i],
+                    piercelat[j], piercelon[j] = latlon_from(_sta.stla, _sta.stlo,
                                                             stadatar.bazi[j], rad2deg(x_s[j]))
             else:
                 ### 3d model interp
