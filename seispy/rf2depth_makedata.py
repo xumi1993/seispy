@@ -200,7 +200,7 @@ class RFDepth():
 
                 ps_rfdepth, end_index = time2depth(stadatar, self.cpara.depth_axis, newtpds)
 
-            rfdep = self._append_rfdep(self.cpara,stadatar, ps_rfdepth, piercelat, piercelon, end_index)
+            rfdep = self._write_rfdep(self.cpara,stadatar, ps_rfdepth, piercelat, piercelon, end_index)
         np.save(self.cpara.depthdat, self.rfdepth)
 
     def _write_rfdep(self,cpara, stadata, amp, pplat, pplon, end_index):
