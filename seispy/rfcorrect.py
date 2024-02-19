@@ -191,7 +191,8 @@ class RFStation(object):
         idx = np.digitize(self.__dict__[key], bins)
         stacked = {
             'data_prime': np.zeros([bins.size-1, self.rflength]),
-            'count': np.zeros(bins.size-1)
+            'count': np.zeros(bins.size-1),
+            'bins': bins[:-1]+val/2,
         }
         if not self.only_r:
             stacked['datat'] = np.zeros([bins.size-1, self.rflength])
