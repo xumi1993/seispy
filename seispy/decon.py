@@ -274,6 +274,20 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, p
 
 
 def deconvolute(uin, win, dt, method='iter', **kwargs):
+    """ Deconvolute receiver function from waveforms.
+    :param uin: R or Q component for the response function
+    :type uin: np.ndarray
+    :param win: Z or L component for the source function
+    :type win: np.ndarray
+    :param dt: sample interval in second
+    :type dt: float
+    :param method: Method for deconvolution, defaults to 'iter'
+    :type method: str, optional
+    :param kwargs: Parameters for deconvolution
+    :type kwargs: dict
+    :return: RF, rms, [iter]
+    :rtype: np.ndarray, float, int
+    """
     if method.lower() == 'iter':
         return deconit(uin, win, dt, **kwargs)
     elif method.lower() == 'water':

@@ -63,6 +63,9 @@ class EQ(object):
         self.it = 0
         self.trigger_shift = 0
         self.inc_correction = 0
+
+    def __str__(self):
+        return('Event data class {0}'.format(self.datestr))
     
     def _check_comp(self):
         if len(self.st) < 3:
@@ -74,18 +77,26 @@ class EQ(object):
             pass
 
     def readstream(self):
+        """Read SAC files to stream
+        """
         self.rf = obspy.Stream()
         self.st = obspy.read(self.filestr)
         self._check_comp()
         self.st.sort()
         self.set_comp()
 
-    def cleanstream(self):
+    def _cleanstream(self):
         self.st = None
         self.rf = None
 
     @classmethod
     def from_stream(cls, stream):
+        """Create EQ object from obspy stream
+        :param stream: obspy stream
+        :type stream: obspy.Stream
+        :return: EQ object
+        :rtype: EQ
+        """
         eq = cls('', '')
         eq.st = stream
         eq.datestr = eq.st[0].stats.starttime.strftime('%Y.%j.%H.%M.%S')
@@ -95,6 +106,8 @@ class EQ(object):
         return eq
 
     def set_comp(self):
+        """Set component name
+        """
         if self.st.select(channel='*[E2]'):
             self.comp = 'enz'
         elif self.st.select(channel='*R'):
@@ -105,7 +118,7 @@ class EQ(object):
             raise ValueError('No such component in R, E or Q')
 
     def channel_correct(self, switchEN=False, reverseE=False, reverseN=False):
-        """_summary_
+        """Correct channel name for R, E, N components
 
         :param switchEN: _description_, defaults to False
         :type switchEN: bool, optional
@@ -124,9 +137,6 @@ class EQ(object):
             self.st.select(channel='*[E2]')[0].stats.channel = chN
             self.st.select(channel='*[N1]')[0].stats.channel = chE
 
-    def __str__(self):
-        return('Event data class {0}'.format(self.datestr))
-
     def write(self, path, evt_datetime):
         for tr in self.st:
             sac = SACTrace.from_obspy_trace(tr)
@@ -140,14 +150,34 @@ class EQ(object):
             sac.write(fname)
 
     def detrend(self):
+        """Detrend and demean
+        """
         self.st.detrend(type='linear')
         self.st.detrend(type='constant')
         self.fix_channel_name()
 
     def filter(self, freqmin=0.05, freqmax=1, order=4):
+        """Bandpass filter
+        :param freqmin: minimum frequency, defaults to 0.05
+        :type freqmin: float, optional
+        :param freqmax: maximum frequency, defaults to 1
+        :type freqmax: float, optional
+        :param order: filter order, defaults to 4
+        :type order: int, optional
+        """
         self.st.filter('bandpass', freqmin=freqmin, freqmax=freqmax, corners=order, zerophase=True)
 
     def get_arrival(self, model, evdp, dis, phase='P'):
+        """Get arrival time, ray parameter and incident angle from TauP model
+        :param model: TauP model
+        :type model: TauPyModel
+        :param evdp: focal depth
+        :type evdp: float
+        :param dis: epicentral distance
+        :type dis: float
+        :param phase: phase name, defaults to 'P'
+        :type phase: str, optional
+        """
         arrivals = model.get_travel_times(evdp, dis, phase_list=[phase])
         if not arrivals:
             raise ValueError('The phase of {} is not exists'.format(phase))
@@ -161,6 +191,12 @@ class EQ(object):
             self.phase = phase
 
     def search_inc(self, bazi):
+        """Search incident angle for S wave
+        :param bazi: back azimuth
+        :type bazi: float
+        :return: incident angle
+        :rtype: float
+        """
         inc_range = np.arange(0.1, 90, 0.1)
         s_range = self.trim(20, 20, isreturn=True)
         power = np.zeros(inc_range.shape[0])
@@ -174,6 +210,18 @@ class EQ(object):
         self.inc = real_inc
 
     def search_baz(self, bazi, time_b=10, time_e=20, offset=90):
+        """Search back azimuth for P wave
+        :param bazi: back azimuth
+        :type bazi: float
+        :param time_b: time before P arrival, defaults to 10
+        :type time_b: int, optional
+        :param time_e: time after P arrival, defaults to 20
+        :type time_e: int, optional
+        :param offset: offset for searching, defaults to 90
+        :type offset: int, optional
+        :return: back azimuth and amplitude
+        :rtype: (float, np.ndarray)
+        """
         p_arr = self.arr_correct(write_to_sac=False)
         this_st = self.st.copy()
         this_st.filter('bandpass', freqmin=0.03, freqmax=0.5)
@@ -194,6 +242,8 @@ class EQ(object):
         return corr_baz, ampt
 
     def fix_channel_name(self):
+        """Fix channel name for R, E, N components
+        """
         if self.st.select(channel='??1') and self.st.select(channel='??Z') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
             if self.st.select(channel='*1')[0].stats.sac.cmpaz == 0:
                 self.st.select(channel='*1')[0].stats.channel = self.st.select(channel='*1')[0].stats.channel[:-1] + 'N'
@@ -210,6 +260,18 @@ class EQ(object):
             pass
 
     def rotate(self, baz, inc=None, method='NE->RT', search_inc=False, baz_shift=0):
+        """Rotate to radial and transverse components
+        :param baz: back azimuth
+        :type baz: float
+        :param inc: incident angle, defaults to None
+        :type inc: float, optional
+        :param method: method for rotation, defaults to 'NE->RT'
+        :type method: str, optional
+        :param search_inc: whether search incident angle, defaults to False
+        :type search_inc: bool, optional
+        :param baz_shift: shift back azimuth, defaults to 0
+        :type baz_shift: int, optional
+        """
         bazi = np.mod(baz + baz_shift, 360)
         if inc is None:
             if self.phase[-1] == 'S' and search_inc:
@@ -231,6 +293,12 @@ class EQ(object):
             pass
 
     def snr(self, length=50):
+        """Calculate SNR
+        :param length: length for noise, defaults to 50
+        :type length: int, optional
+        :return: SNR of E, N, Z components
+        :rtype: (float, float, float)
+        """
         st_noise = self.trim(length, 0, isreturn=True)
         st_signal = self.trim(0, length, isreturn=True)
         try:
@@ -248,6 +316,10 @@ class EQ(object):
         return snr_E, snr_N, snr_Z
     
     def get_time_offset(self, event_time=None):
+        """Get time offset from SAC header
+        :param event_time: event time, defaults to None
+        :type event_time: obspy.core.utcdatetime.UTCDateTime, optional
+        """
         if event_time is not None and not isinstance(event_time, obspy.core.utcdatetime.UTCDateTime):
             raise TypeError('Event time should be UTCDateTime type in obspy')
         elif event_time is None:
@@ -274,6 +346,18 @@ class EQ(object):
         return t1, t2
 
     def phase_trigger(self, time_before, time_after, prepick=True, stl=5, ltl=10):
+        """ Trigger P or S phase
+        :param time_before: time before P or S arrival
+        :type time_before: float
+        :param time_after: time after P or S arrival
+        :type time_after: float
+        :param prepick: whether use prepick, defaults to True
+        :type prepick: bool, optional
+        :param stl: short time length for STA/LTA, defaults to 5
+        :type stl: int, optional
+        :param ltl: long time length for STA/LTA, defaults to 10
+        :type ltl: int, optional
+        """
         t1, t2 = self._get_time(time_before, time_after)
         self.st_pick = self.st.copy().trim(t1, t2)
         if len(self.st_pick) == 0:
@@ -360,6 +444,12 @@ class EQ(object):
                         tr.stats.delta = target_dt
     
     def decon_p(self, tshift, tcomp=False, **kwargs):
+        """Deconvolution for P wave
+        :param tshift: Time shift before P arrival
+        :type tshift: float
+        :param tcomp: Whether calculate transverse component, defaults to False
+        :type tcomp: bool, optional
+        """
         if self.comp == 'lqt':
             win = self.st.select(channel='*L')[0]
             if tcomp:
@@ -377,6 +467,10 @@ class EQ(object):
         self.rf.append(uout)
 
     def decon_s(self, tshift, **kwargs):
+        """Deconvolution for S wave
+        :param tshift: Time shift before P arrival
+        :type tshift: float
+        """
         if self.comp == 'lqt':
             win = self.st.select(channel='*Q')[0]
             uin = self.st.select(channel='*L')[0]
@@ -389,8 +483,33 @@ class EQ(object):
         uout.data = np.flip(uout.data)
         self.rf.append(uout)
 
-    def saverf(self, path, evtstr=None, shift=0, evla=-12345., evlo=-12345., evdp=-12345., mag=-12345.,
+    def saverf(self, path, evtstr=None, shift=0, evla=-12345., 
+               evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
+        """Save receiver function to SAC file
+        :param path: path to save SAC file
+        :type path: str
+        :param evtstr: event string, defaults to None
+        :type evtstr: str, optional
+        :param shift: time shift before P arrival, defaults to 0
+        :type shift: int, optional
+        :param evla: event latitude, defaults to -12345.
+        :type evla: float, optional
+        :param evlo: event longitude, defaults to -12345.
+        :type evlo: float, optional
+        :param evdp: event depth, defaults to -12345.
+        :type evdp: float, optional
+        :param mag: event magnitude, defaults to -12345.
+        :type mag: float, optional
+        :param gauss: Gaussian factor, defaults to 0
+        :type gauss: float, optional
+        :param baz: back azimuth, defaults to -12345.
+        :type baz: float, optional
+        :param gcarc: epicentral distance, defaults to -12345.
+        :type gcarc: float, optional
+        :param only_r: whether only save R component, defaults to False
+        :type only_r: bool, optional
+        """
         if self.phase[-1] == 'P':
             if self.comp == 'lqt':
                 svcomp = 'Q'
@@ -431,7 +550,7 @@ class EQ(object):
             tr.ka = self.phase
             tr.write(filename + '_{0}_{1}.sac'.format(self.phase, tr.kcmpnm[-1]))
 
-    def s_condition(self, trrf, shift):
+    def _s_condition(self, trrf, shift):
         nt0 = int(np.floor((shift)/trrf.stats.delta))
         nt25 = int(np.floor((shift+25)/trrf.stats.delta))
         if rssq(trrf.data[nt0:nt25]) > rssq(trrf.data[nt25:]):
@@ -440,6 +559,20 @@ class EQ(object):
             return False
 
     def judge_rf(self, gauss, shift, npts, criterion='crust', rmsgate=None):
+        """Judge whether receiver function is valid
+        :param gauss: Gaussian factor
+        :type gauss: float
+        :param shift: time shift before P arrival
+        :type shift: float
+        :param npts: number of points for RF
+        :type npts: int
+        :param criterion: criterion for judging, defaults to 'crust'
+        :type criterion: str, optional
+        :param rmsgate: RMS gate, defaults to None
+        :type rmsgate: float, optional
+        :return: whether RF is valid
+        :rtype: bool
+        """
         if self.phase[-1] == 'P' and self.comp == 'rtz':
             trrfs = self.rf.select(channel='*R')
         elif self.phase[-1] == 'P' and self.comp == 'lqt':
@@ -501,7 +634,7 @@ class EQ(object):
             else:
                 return False
         elif criterion == "lab":
-            return self.s_condition(trrf, shift) and rengpass
+            return self._s_condition(trrf, shift) and rengpass
         elif criterion is None:
             return rmspass and rengpass
         else:

@@ -44,6 +44,8 @@ class Harmonics():
         self.time_axis = np.linspace(self.tmin, self.tmax, self.nsamp)
 
     def harmo_trans(self):
+        """Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
+        """
         self.traces = np.vstack((self.datar, self.datat))
         harmonic = np.zeros((self.trace_num*2, 5))
         unmodel = np.zeros((self.trace_num*2, 5))

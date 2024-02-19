@@ -72,7 +72,7 @@ class distaz:
     and I vaguely remember a perl port. Long live distaz! 
 
     Mijian Xu, Jan 01, 2016
-    Add np.ndarray to availible input varible.
+    Add np.ndarray to available input.
     """
 
     def __init__(self, lat1, lon1, lat2, lon2):

@@ -26,6 +26,8 @@ class PlotR:
         self.init_figure()
 
     def init_figure(self):
+        """Initialize figure
+        """
         self.fig = plt.figure(figsize=(8, 10))
         self.fig.tight_layout()
         gs = GridSpec(15, 3)
@@ -38,6 +40,8 @@ class PlotR:
         self.axs.grid(color='gray', linestyle='--', linewidth=0.4, axis='x')
 
     def plot_waves(self):
+        """Plot PRFs with R component
+        """
         bound = np.zeros(self.stadata.rflength)
         for i in range(self.stadata.ev_num):
             datar = self.stadata.data_prime[i] * self.enf + (i + 1)
@@ -57,6 +61,8 @@ class PlotR:
         # return axp
 
     def set_fig(self):
+        """Set figure
+        """
         y_range = np.arange(self.stadata.ev_num) + 1
         x_range = np.arange(0, self.xlim[1]+2, 5)
         space = 2
