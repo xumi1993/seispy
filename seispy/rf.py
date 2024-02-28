@@ -150,7 +150,10 @@ def fetch_waveform(eq_lst, para, model, logger):
         this_eq.get_time_offset(row['date'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
         eqall.append(this_df)
-        eq_match = pd.concat(eqall)
+    if not eqall:
+        logger.RFlog.error('No waveforms fetched')
+        sys.exit(1)
+    eq_match = pd.concat(eqall)
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
@@ -220,7 +223,10 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=results.index.values)
         eq_match_lst.append(this_df)
-        eq_match = pd.concat(eq_match_lst)
+    if not eq_match_lst:
+        logger.RFlog.error('No earthquakes matched')
+        sys.exit(1)
+    eq_match = pd.concat(eq_match_lst)
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
