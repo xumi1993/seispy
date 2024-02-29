@@ -32,6 +32,11 @@ jobs:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
 
+      - name: Checkout to docs branch
+        uses: actions/checkout@v2.4.0
+        with:
+          ref: docs
+
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2.1.1
         with:
