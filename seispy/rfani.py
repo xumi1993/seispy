@@ -7,14 +7,14 @@ from scipy.interpolate import griddata
 from seispy.utils import load_cyan_map
 
 
-def joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
+def _joint_stack(energy_r, energy_cc, energy_tc, weight=[0.4, 0.3, 0.3]):
     energy_r = energy_r / np.max(energy_r)
     energy_cc = energy_cc / np.max(energy_cc)
     energy_tc = energy_tc / np.max(energy_tc)
     return np.exp(np.log(energy_r) * weight[0] + np.log(energy_cc) * weight[1] - np.log(energy_tc) * weight[2])
 
 
-def average_delay(fd, td):
+def _average_delay(fd, td):
     uniq_fd = np.unique(fd)
     if uniq_fd.size > 2:
         raise ValueError('FVD do not converge, {} gotten'.format(uniq_fd))
@@ -55,19 +55,21 @@ class RFAni():
         self.nbs = int((self.tb + self.sacdatar.shift) / self.sacdatar.sampling)
         self.nes = int((self.te + self.sacdatar.shift) / self.sacdatar.sampling)
         self.sacdatar.moveoutcorrect(ref_rayp=rayp, velmod=model, replace=True)
-        self.baz_stack(val=val)
-        self.search_peak_amp()
-        self.init_ani_para()
+        self._baz_stack(val=val)
+        self._search_peak_amp()
+        self._init_ani_para()
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
 
-    def baz_stack(self, val=10):
+    def _baz_stack(self, val=10):
+        """Stack RF data with back-azimuth.
+        """
         self.stack_range = np.arange(0, 360, val)
         stacked_data = self.sacdatar.bin_stack(lim=[0, 360], val=val)
         self.rfr_baz = stacked_data['data_prime']
         self.rft_baz = stacked_data['datat']
         self.count_baz = stacked_data['count']
 
-    def search_peak_amp(self):
+    def _search_peak_amp(self):
         mean_rf = np.mean(self.rfr_baz, axis=0)
         nmax = extrema(mean_rf[self.nbs:self.nes])+self.nbs
         if nmax.size > 1:
@@ -77,11 +79,13 @@ class RFAni():
         self.nb = int(nps - self.tlen / self.sacdatar.sampling)
         self.ne = int(nps + self.tlen / self.sacdatar.sampling)
 
-    def init_ani_para(self):
+    def _init_ani_para(self):
         self.deltat_1d = np.arange(0, 1.55, 0.05)
         self.fvd_1d = np.arange(0, 365, 5)
 
-    def cut_energy_waveform(self, idx, nb, ne):
+    def _cut_energy_waveform(self, idx, nb, ne):
+        """Cut energy waveform with given index, nb and ne.
+        """
         engr = np.zeros([nb.shape[0], nb.shape[1], self.ne-self.nb])
         for i in range(nb.shape[0]):
             for j in range(nb.shape[1]):
@@ -89,6 +93,8 @@ class RFAni():
         return engr
 
     def radial_energy_max(self):
+        """Calculate the energy of radial component.
+        """
         energy = np.zeros([self.fvd.shape[0], self.fvd.shape[1], self.ne-self.nb])
         # tmp_data = np.zeros(self.ne-self.nb)
         for i, baz in enumerate(self.stack_range):
@@ -96,16 +102,20 @@ class RFAni():
             nt_corr = (t_corr / self.sacdatar.sampling).astype(int)
             new_nb = self.nb - nt_corr
             new_ne = self.ne - nt_corr
-            energy += self.cut_energy_waveform(i, new_nb, new_ne)
+            energy += self._cut_energy_waveform(i, new_nb, new_ne)
         energy = np.max(energy ** 2, axis=2)
         energy /= np.max(np.sum(self.rfr_baz[:, self.nb:self.ne], axis=0)**2)
         return energy
 
     def xyz2grd(self, energy):
+        """Interpolate energy to grid.
+        """
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
         return griddata(self.ani_points, energy, (self.fvd, self.deltat))
 
     def rotate_to_fast_slow(self):
+        """Rotate RF data to fast and slow direction.
+        """
         self.ani_points = np.empty([0, 2])
         for f in self.fvd_1d:
             for d in self.deltat_1d:
@@ -137,6 +147,15 @@ class RFAni():
         return self.xyz2grd(energy_cc), self.xyz2grd(energy_tc)
 
     def plot_stack_baz(self, enf=60, outpath='./'):
+        """Plot the stack of RF data with back-azimuth.
+        
+        Parameters
+        ----------
+        enf : int, optional
+            Enlarge factor for back-azimuth, by default 60
+        outpath : str, optional
+            Output path for saving the figure, by default './'
+        """
         ml = MultipleLocator(5)
         bound = np.zeros_like(self.sacdatar.time_axis)
         plt.style.use("bmh")
@@ -191,6 +210,19 @@ class RFAni():
         fig.savefig(join(outpath, '{}_baz_stack.png'.format(self.sacdatar.staname)), dpi=400, bbox_inches='tight')
 
     def plot_correct(self, fvd=0, dt=0.44, enf=80, outpath=None):
+        """Plot the RF data with back-azimuth and time after P corrected.
+
+        Parameters
+        ----------
+        fvd : int, optional
+            Fast velocity direction, by default 0
+        dt : float, optional
+            Time delay for correction, by default 0.44
+        enf : int, optional
+            Enlarge factor for back-azimuth, by default 80
+        outpath : str, optional
+            Output path for saving the figure, by default None
+        """
         nt_corr = int((dt/2 / self.sacdatar.sampling))
         # nt_fast = np.arange(self.nb, self.ne) + nt_corr
         # nt_slow = np.arange(self.nb, self.ne) - nt_corr
@@ -230,6 +262,15 @@ class RFAni():
             plt.savefig(join(outpath, 'rf_corrected.png'), dpi=400, bbox_inches='tight')
 
     def search_peak_list(self, energy, opt='max'):
+        """Search the peak of energy.
+
+        Parameters
+        ----------
+        energy : np.ndarray
+            Energy matrix
+        opt : str, optional
+            Option for searching peak, by default 'max'
+        """
         if opt == 'max':
             ind = np.argwhere(energy == np.max(energy))
         elif opt == 'min':
@@ -239,6 +280,15 @@ class RFAni():
         return self.ani_points[ind][:, 0], self.ani_points[ind][:, 1]
 
     def search_peak(self, energy, opt='max'):
+        """Search the peak of energy.
+
+        Parameters
+        ----------
+        energy : np.ndarray
+            Energy matrix
+        opt : str, optional
+            Option for searching peak, by default 'max'
+        """
         if opt == 'max':
             ind = np.argwhere(energy == np.max(energy))
         elif opt == 'min':
@@ -250,13 +300,20 @@ class RFAni():
         for i, j in ind:
             best_fvd.append(self.fvd[i, j])
             best_dt.append(self.deltat[i, j])
-        uniq_fd, uniq_td = average_delay(np.array(best_fvd), np.array(best_dt))
+        uniq_fd, uniq_td = _average_delay(np.array(best_fvd), np.array(best_dt))
         return uniq_fd, uniq_td
 
     def joint_ani(self, weight=[0.5, 0.3, 0.2]):
+        """Joint method for crustal anisotropy estimation.
+
+        Parameters
+        ----------
+        weight : list, optional
+            Weight for three energy matrix, by default [0.5, 0.3, 0.2]
+        """
         self.energy_r = self.radial_energy_max()
         self.energy_cc, self.energy_tc = self.rotate_to_fast_slow()
-        self.energy_joint = joint_stack(self.energy_r, self.energy_cc, self.energy_tc, weight)
+        self.energy_joint = _joint_stack(self.energy_r, self.energy_cc, self.energy_tc, weight)
         self.bf, self.bt = self.search_peak(self.energy_joint, opt='max')
         return self.bf, self.bt
 

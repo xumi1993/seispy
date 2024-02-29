@@ -136,6 +136,7 @@ def ci(allstack, h, kappa, ev_num):
     """
     Search best H and kappa from stacked matrix.
     Calculate error for H and kappa
+
     :param allstack: stacked HK matrix
     :param h: 1-D array of H
     :param kappa: 1-D array of kappa

@@ -26,6 +26,15 @@ class SlantStack():
         self.syn_drayp = np.array([])
 
     def stack(self, ref_dis=None, rayp_range=None, tau_range=None):
+        """Slant stack for receiver function
+
+        :param ref_dis: reference distance, by default None
+        :type ref_dis: int or float, optional
+        :param rayp_range: range of ray parameter, by default None
+        :type rayp_range: numpy.ndarray, optional
+        :param tau_range: range of tau, by default None
+        :type tau_range: numpy.ndarray, optional
+        """
         if ref_dis is not None and scalar_instance(ref_dis):
             self.ref_dis = ref_dis
         elif ref_dis is None:
@@ -53,6 +62,15 @@ class SlantStack():
         self.stack_amp /= ev_num
 
     def syn_tps(self, phase_list, velmodel='iasp91', focal_dep=10):
+        """Calculate the theoretical tau and reference rayp for the given phase list
+
+        :param phase_list: phase list for theoretical arrival time
+        :type phase_list: list
+        :param velmodel: velocity model, by default 'iasp91'
+        :type velmodel: str, optional
+        :param focal_dep: focal depth, by default 10
+        :type focal_dep: int or float, optional
+        """
         model = TauPyModel(model=velmodel)
         phase_list.insert(0, 'P')
         arrs = model.get_travel_times(focal_dep, self.ref_dis, phase_list=phase_list)
