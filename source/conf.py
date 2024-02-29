@@ -27,9 +27,9 @@ copyright = '2020, Mijian Xu'
 author = 'Mijian Xu'
 
 # The short X.Y version
-version = f'v{version('python-seispy')}'
+VERSION = f"v{version('python-seispy')}"
 # The full version, including alpha/beta/rc tags
-release = version
+release = VERSION
 
 
 # -- General configuration ---------------------------------------------------
