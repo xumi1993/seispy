@@ -55,13 +55,19 @@ class RFAni():
         self.nbs = int((self.tb + self.sacdatar.shift) / self.sacdatar.sampling)
         self.nes = int((self.te + self.sacdatar.shift) / self.sacdatar.sampling)
         self.sacdatar.moveoutcorrect(ref_rayp=rayp, velmod=model, replace=True)
-        self._baz_stack(val=val)
+        self.baz_stack(val=val)
         self._search_peak_amp()
         self._init_ani_para()
         self.fvd, self.deltat = np.meshgrid(self.fvd_1d, self.deltat_1d)
 
-    def _baz_stack(self, val=10):
+    def baz_stack(self, val=10):
         """Stack RF data with back-azimuth.
+
+        Parameters
+        ----------
+
+        val : int, optional
+            Interval of back-azimuth, by default 10
         """
         self.stack_range = np.arange(0, 360, val)
         stacked_data = self.sacdatar.bin_stack(lim=[0, 360], val=val)
