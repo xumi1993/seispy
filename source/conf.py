@@ -15,7 +15,7 @@
 
 import os
 import sys
-from importlib.metadata import version
+from importlib.metadata import version as get_version
 # sys.path.insert(0, os.path.abspath('./seispy/seispy'))
 # sys.path.insert(0, os.path.abspath('/Users/xumj/Codes/seispy/seispy'))
 
@@ -27,9 +27,9 @@ copyright = '2020, Mijian Xu'
 author = 'Mijian Xu'
 
 # The short X.Y version
-VERSION = f"v{version('python-seispy')}"
+version = f"v{get_version('python-seispy')}"
 # The full version, including alpha/beta/rc tags
-release = VERSION
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -91,7 +91,7 @@ language = 'en'
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+# pygments_style = 'sphinx'
 
 myst_heading_anchors = 3
 

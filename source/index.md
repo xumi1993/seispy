@@ -115,6 +115,14 @@ notes/index
 modules
 :::
 
+```{toctree}
+:caption: Project Links
+
+GitHub <https://github.com/xumi1993/seispy>
+GitLab <https://gitlab.com/xumi1993/seispy>
+Anaconda <https://anaconda.org/conda-forge/seispy>
+PyPI <https://pypi.org/project/python-seispy/>
+```
 
 ## References
 
