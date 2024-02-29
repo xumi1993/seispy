@@ -13,7 +13,7 @@ on:
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   build_deploy:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash -l {0}
@@ -33,10 +33,10 @@ jobs:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
 
-      - name: Checkout to docs branch
-        uses: actions/checkout@v2.4.0
-        with:
-          ref: docs
+      # - name: Checkout to docs branch
+      #   uses: actions/checkout@v5
+      #   with:
+      #     ref: docs
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2.1.1
@@ -47,16 +47,16 @@ jobs:
           # use-mamba: true
   
       - name: Checkout to source branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v5
         with:
           ref: ${{ steps.vars.outputs.branch }}
 
       - name: Install Seispy
         run: |
-          pip install -e .
+          pip install .
 
       - name: Checkout to docs branch
-        uses: actions/checkout@v2.4.0
+        uses: actions/checkout@v5
         with:
           ref: docs
 
