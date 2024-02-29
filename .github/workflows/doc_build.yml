@@ -21,11 +21,12 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Set branch name
+        id: vars
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            branch = ${{ github.event.pull_request.head.ref }}
+            echo ::set-output name=branch::${{ github.event.pull_request.head.ref }}
           else
-            branch = dev
+            echo ::set-output name=branch::${{ github.ref }}
           fi
   
       - name: Cancel Previous Runs
@@ -42,7 +43,7 @@ jobs:
       - name: Checkout to source branch
         uses: actions/checkout@v2.4.0
         with:
-          ref: $branch
+          ref: ${{ steps.vars.outputs.branch }}
 
       - name: Install Seispy
         run: |
