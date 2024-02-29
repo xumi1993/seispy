@@ -24,10 +24,11 @@ jobs:
         id: vars
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo ::set-output name=branch::${{ github.event.pull_request.head.ref }}
+            branch = ${{ github.event.pull_request.head.ref }}
           else
-            echo ::set-output name=branch::"dev"
+            branch = dev
           fi
+  
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
 
@@ -42,7 +43,7 @@ jobs:
       - name: Checkout to source branch
         uses: actions/checkout@v2.4.0
         with:
-          ref: ${{ steps.vars.outputs.branch }}
+          ref: $version
 
       - name: Install Seispy
         run: |
