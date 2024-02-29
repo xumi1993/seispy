@@ -26,7 +26,7 @@ jobs:
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo ::set-output name=branch::${{ github.event.pull_request.head.ref }}
           else
-            echo ::set-output name=branch::${{ github.ref }}
+            echo ::set-output name=branch::dev
           fi
           echo ${{ steps.vars.outputs.branch }}
   
