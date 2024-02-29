@@ -21,7 +21,6 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       - name: Set branch name
-        id: vars
         run: |
           if [[ "${{ github.event_name }}" == "pull_request" ]]; then
             branch = ${{ github.event.pull_request.head.ref }}
@@ -43,7 +42,7 @@ jobs:
       - name: Checkout to source branch
         uses: actions/checkout@v2.4.0
         with:
-          ref: $version
+          ref: $branch
 
       - name: Install Seispy
         run: |
