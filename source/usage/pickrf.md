@@ -42,7 +42,9 @@ When you have selected all PRFs, please click `finish` button to delete all 'poo
 - Magnitude
 - Gaussian factor
 
+```{note}
 This list file is **very important** for derived method such as H-k stacking and CCP stacking.
+```
 
 ## Other functions
 

@@ -3,7 +3,7 @@
 ## Background
 Harmonic decomposition is an effective technique to separate anisotropic and dipping components from radius and transverse RFs ([Bianchi et al., 2010](https://doi.org/10.1029/2009JB007061])). This technique not only used to estimate azimuthal crustal anisotropy and crustal layer dipping , but used to extract isotropic component of RF for 1D RF inversion. In the Seispy, the command `rfharmo` is accessible for computing the harmonic decomposition, plotting different components after the decomposition, and save the isotropic component to a local SAC file.
 
-```Code
+```
 usage: Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs [-h] [-t tb/te] [-s dt] [-o outpath] [-e enf] [-p figure_path] rfpath
 
 positional arguments:
