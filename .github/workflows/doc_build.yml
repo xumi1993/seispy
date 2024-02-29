@@ -50,16 +50,14 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ steps.vars.outputs.branch }}
+          path: seispy_source
+          fetch-depth: 0
 
       - name: Install Seispy
         run: |
-          VERSION=$(python setup.py --version)
+          cd seispy_source
           pip install .
-
-      - name: Checkout to docs branch
-        uses: actions/checkout@v4
-        with:
-          ref: docs
+          cd ..
 
       - name: Build documentation
         run: |
@@ -76,12 +74,13 @@ jobs:
       
       - name: Copy documentation
         run: |
+          cd seispy_source
           if {{ steps.vars.outputs.branch }} == "dev"; then
             version=“$(python setup.py --version)_$(git rev-parse --short HEAD)”
           else
             version=$(python setup.py --version)
           fi
-          cd deploy
+          cd ../deploy
           touch .nojekyll
           echo -e "\nRemoving old files from previous builds of ${version}:"
           rm -rvf dev_* ${version}
