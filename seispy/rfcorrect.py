@@ -123,16 +123,18 @@ class RFStation(object):
     def read_stream(cls, stream, rayp, baz, prime_comp='R', stream_t=None):
         """Create RFStation instance from ``obspy.Stream``
 
-        Parameters
-        ----------
-        stream : ``obspy.Stream``
-            _description_
-        rayp : ``numpy.ndarray`` or ``float``
-            Ray-parameters in s/km.
-        baz : ``numpy.ndarray`` or ``float``
-            Back-azimuth
-        prime_comp : str, optional
-             Prime component of RF, by default 'R'
+        :param stream: Stream of RFs
+        :type stream: :meth:`obspy.Stream`
+        :param rayp: Ray-parameter of RFs
+        :type rayp: float or :meth:`np.ndarray`
+        :param baz: Back-azimuth of RFs
+        :type baz: float or :meth:`np.ndarray`
+        :param prime_comp: Prime component in RF filename. ``R`` or ``Q`` for PRF and ``L`` or ``Z`` for SRF, defaults to 'R'
+        :type prime_comp: str, optional
+        :param stream_t: Stream of transverse RFs, defaults to None
+        :type stream_t: :meth:`obspy.Stream`, optional
+        :return: RFStation instance
+        :rtype: RFStation
         """
         if len(stream) == 0:
             raise ValueError('No such RFTrace read')
@@ -255,10 +257,8 @@ class RFStation(object):
     def resample(self, dt):
         """Resample RFs with specified dt
 
-        Parameters
-        ----------
-        dt : ``float``
-            Target sampling interval in sec
+        :param dt: New sampling rate
+        :type dt: float
         """
         npts = int(self.rflength * (self.sampling / dt)) + 1
         self.data_prime = resample(self.data_prime, npts, axis=1)
@@ -459,14 +459,10 @@ class RFStation(object):
         :type tb: ``float``, optional
         :param te: End time relative to P, defaults to 10
         :type te: ``float``, optional
-
-        Returns
-        -------
-        harmonic_trans: numpy.ndarray, float
-                Harmonic components with shape of ``(5, nsamp)``, ``nsamp = (te-tb)/RFStation.sampling``
-
-        unmodel_trans: numpy.ndarray, float
-                Unmodel components with same shape as harmonic_trans.
+        :param is_stack: Wether stack the result, defaults to True
+        :type is_stack: bool, optional
+        :return: Harmonic components and unmodel components
+        :rtype: ``numpy.ndarray``, ``numpy.ndarray``
         """
         if self.only_r:
             raise ValueError('Transverse RFs are nessary for harmonic decomposition')
@@ -475,11 +471,21 @@ class RFStation(object):
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
     def plotrt(self, outformat=None, **kwargs):
+        """Plot radial and transverse RFs
+
+        :param outformat: Output format for plot, defaults to None
+        :type outformat: str, optional
+        """
         if self.only_r:
             raise ValueError('Transverse RFs are nessary or use RFStation.plotr instead.')
         return _plotrt(self, outformat=outformat, **kwargs)
 
     def plotr(self, outformat=None, **kwargs):
+        """Plot radial RFs
+
+        :param outformat: Output format for plot, defaults to None
+        :type outformat: str, optional
+        """
         return _plotr(self, outformat=outformat, **kwargs)
 
 

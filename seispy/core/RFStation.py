@@ -25,6 +25,9 @@ from obspy.core import Stream
 class Trace_Clust(UserList):
     """
     user can accese traces from self.data or like a default list
+
+    .. rubric:: Example
+    
     >>> st= obspy.read();tt=Trace_Clust()
     >>> for _i in st:
     ...   _i.stats.sac ={};
