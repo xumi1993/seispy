@@ -43,14 +43,14 @@ def _search_vel_file(mode_name):
         raise IOError
     # check cols of file
     if raw_model.shape[1] < 3 or raw_model.shape[1] > 4:
-        raise ValueError
+        raise ValueError('The file should contain 3 or 4 columns')
 
     # cal rho if rho is not given in vel files.
     if raw_model.shape[1] == 3:
         model = np.zeros((raw_model.shape[0], 4))
-        model[:3, :] = raw_model[:, :]
+        model[:, :3] = raw_model[:, :]
         _p, rho = vs2vprho(raw_model[:, 2])
-        model[3, :] = rho
+        model[:, 3] = rho
         return model
     else:
         return raw_model
