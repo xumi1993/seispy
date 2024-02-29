@@ -75,7 +75,7 @@ jobs:
       - name: Copy documentation
         run: |
           cd seispy_source
-          if {{ steps.vars.outputs.branch }} == "dev"; then
+          if [[ ${{ steps.vars.outputs.branch }} == "dev" ]]; then
             version=“$(python setup.py --version)_$(git rev-parse --short HEAD)”
           else
             version=$(python setup.py --version)
