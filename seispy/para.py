@@ -32,6 +32,25 @@ class StaInfo():
         self.stel = 0.
         self.channel = '*'
         self.location = '*'
+    
+    def __repr__(self) -> str:
+        # print the station name, channel, location
+        return '{0}.{1}.{2}:{}'.format(self.network, self.station, self.channel, self.location)
+
+    def link_server(self, server, user=None, password=None):
+        """_summary_
+
+        :param server:  Sever name of FDSN web-service, by default 'IRIS'
+        :type server: str
+        :param user: username, defaults to None
+        :type user: str, optional
+        :param password: password, defaults to None
+        :type password: str, optional
+        """
+        try:
+            self.query = Query(server, user=user, password=password)
+        except Exception as e:
+            raise ConnectionError('Cannot connect with {} server'.format(server))
 
     def get_stainfo(self):
         return self.__dict__
@@ -39,15 +58,11 @@ class StaInfo():
     def load_stainfo(self, pathname, ref_comp, suffix):
         (self.network, self.station, self.stla, self.stlo, self.stel) = _load_station_info(pathname, ref_comp, suffix)
 
-    def get_station_from_ws(self, server='IRIS', **kwargs):
+    def get_station_from_ws(self, **kwargs):
         """Get station information from web-service with given network and station or other optional condition.
 
-        Parameters
-        ----------
-        server : str, optional
-            Sever name of FDSN web-service, by default 'IRIS'
+        
         """
-        self.query = Query(server)
         self.query.get_stations(network=self.network, station=self.station,
                                 channel=self.channel, location=self.location, 
                                 level='channel', **kwargs)
@@ -60,6 +75,8 @@ class StaInfo():
 
 class RFPara(object):
     def __init__(self):
+        """Parameters for receiver function calculation
+        """
         self.datapath = expanduser('~')
         self.rfpath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
@@ -101,6 +118,8 @@ class RFPara(object):
         self.reverseE=False
         self.reverseN=False
         self.use_remote_data=False
+        self.data_server_user = None
+        self.data_server_password = None
         self.stainfo = StaInfo()
 
     def get_para(self):
@@ -204,6 +223,10 @@ class RFPara(object):
 
     @classmethod
     def read_para(cls, cfg_file):
+        """Read parameters from configure file
+        :param cfg_file: Path to configure file
+        :type cfg_file: str
+        """
         cf = configparser.RawConfigParser(allow_no_value=True)
         pa = cls()
         try:
@@ -221,27 +244,42 @@ class RFPara(object):
             elif key == 'catalogpath':
                 pa.catalogpath = value
             else:
-                pa.__dict__[key] = value
+                exec('pa.{} = value'.format(key))
         sections.remove('path')
         if 'fetch' in sections:
             for key, value in cf.items('fetch'):
-                pa.stainfo.__dict__[key] = value
+                if key == 'use_remote_data':
+                    pa.use_remote_data = cf.getboolean('fetch', 'use_remote_data')
+                elif key == 'data_server_user':
+                    if value == '':
+                        continue
+                    else:
+                        pa.data_server_user = value
+                elif key == 'data_server_password':
+                    if value == '':
+                        continue
+                    else:
+                        pa.data_server_password = value
+                elif key == 'data_server':
+                    pa.data_server = value
+                else:
+                    exec('pa.stainfo.{} = value'.format(key))
             sections.remove('fetch')
         for sec in sections:
             for key, value in cf.items(sec):
                 if key == 'date_begin':
-                    pa.__dict__[key] = obspy.UTCDateTime(value)
+                    pa.date_begin = obspy.UTCDateTime(value)
                 elif key == 'date_end':
-                    pa.__dict__[key] = obspy.UTCDateTime(value)
+                    pa.date_end = obspy.UTCDateTime(value)
                 elif key == 'offset':
                     try:
-                        pa.__dict__[key] = float(value)
+                        pa.offset = cf.getfloat(sec, 'offset')
                     except:
-                        pa.__dict__[key] = None
+                        pa.offset = None
                 elif key == 'itmax':
-                    pa.__dict__[key] = int(value)
+                    pa.itmax = int(value)
                 elif key == 'only_r':
-                    pa.__dict__[key] = cf.getboolean(sec, 'only_r')
+                    pa.only_r = cf.getboolean(sec, 'only_r')
                 elif key == 'criterion':
                     pa.criterion = value
                 elif key == 'decon_method':
@@ -259,8 +297,6 @@ class RFPara(object):
                 else:
                     try:
                         exec('pa.{} = {}'.format(key, float(value)))
-                        # pa.__dict__[key] = float(value)
                     except ValueError:
                         exec('pa.{} = value'.format(key))
-                        # pa.__dict__[key] = value
         return pa

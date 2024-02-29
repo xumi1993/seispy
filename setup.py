@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.3.4"
+VERSION = "1.3.5"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -25,6 +25,7 @@ setup(name='python-seispy',
                 'obspy>=1.2.1',
                 'pyside6>=6.2.0',
                 'scikits.bootstrap>=1.0.0',
+                'numba',
                 'pyproj'],
       entry_points={'console_scripts': ['gen_rayp_lib=seispy.psrayp:gen_rayp_lib',
                                         'prf=seispy.scripts:prf',
@@ -42,7 +43,9 @@ setup(name='python-seispy',
                                         'ccp3d=seispy.scripts:ccp3d',
                                         'rfharmo=seispy.scripts:rfharmo',
                                         'get_pierce_points=seispy.scripts:get_pierce_points',
-                                        'veltxt2mod=seispy.modcreator:veltxt2mod']},
+                                        'veltxt2mod=seispy.modcreator:veltxt2mod',
+                                        'get_stations=seispy.scripts:get_stations', 
+                                        'get_events=seispy.scripts:get_events',]},
       zip_safe=False,
       classifiers=['Programming Language :: Python',
                    'Programming Language :: Python :: 3.9',

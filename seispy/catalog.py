@@ -5,12 +5,32 @@ import sys
 import pandas as pd
 
 def download_catalog(fname, server='IRIS', format='seispy', **kwargs):
+    """
+    Download catalog to local file
+    :param fname: file name
+    :type fname: str
+    :param server: service provider, defaults to IRIS
+    :type server: str
+    :param format: file format, defaults to seispy
+    :type format: str
+    :param kwargs: parameters for Query.get_events
+    :type kwargs: dict
+    """
     query = Query(server=server)
     query.get_events(**kwargs)
     write_catalog(query, fname, format)
 
 
 def write_catalog(query, fname, format):
+    """
+    Write catalog to file
+    :param query: Query object
+    :type query: seispy.io.Query
+    :param fname: file name
+    :type fname: str
+    :param format: file format
+    :type format: str
+    """
     if format == 'seispy':
         with open(fname, 'w') as f:
             for i, row in query.events.iterrows():
@@ -23,6 +43,12 @@ def write_catalog(query, fname, format):
 
 
 def read_catalog_file(fname):
+    """
+    Read catalog file
+    :param fname: catalog file name
+    :type fname: str
+    :return: pandas.DataFrame
+    """
     col = ['date', 'evla', 'evlo', 'evdp', 'mag']
     colcata = ['year', 'month', 'day', 'hour', 'minute', 'second']
     data_cata = pd.read_table(fname, header=None, sep='\s+')

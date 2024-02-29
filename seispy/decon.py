@@ -7,6 +7,19 @@ from numpy.fft import fft, ifft
 
 
 def gaussFilter(dt, nft, f0):
+    """
+    Gaussian filter in frequency domain.
+
+    :param dt: sample interval in second
+    :type dt: float
+    :param nft: number of samples
+    :type nft: int
+    :param f0: Gauss factor
+    :type f0: float
+
+    :return: Gaussian filter in frequency domain
+    :rtype: np.ndarray
+    """
     df = 1.0 / (nft * dt)
     nft21 = 0.5 * nft + 1
     f = df * np.arange(0, nft21)
@@ -23,6 +36,21 @@ def gaussFilter(dt, nft, f0):
 
 
 def gfilter(x, nfft, gauss, dt):
+    """
+    Apply Gaussian filter on time series.
+
+    :param x: input trace
+    :type x: np.ndarray
+    :param nfft: number of samples
+    :type nfft: int
+    :param gauss: Gaussian filter in frequency domain
+    :type gauss: np.ndarray
+    :param dt: sample interval in second
+    :type dt: float
+
+    :return: Filtered data in time domain
+    :rtype: np.ndarray
+    """
     Xf = fft(x, nfft)
     Xf = Xf * gauss * dt
     xnew = ifft(Xf, nfft).real
@@ -30,12 +58,38 @@ def gfilter(x, nfft, gauss, dt):
 
 
 def correl(R, W, nfft):
+    """
+    Correlation in frequency domain.
+
+    :param R: numerator
+    :type R: np.ndarray
+    :param W: denominator
+    :type W: np.ndarray
+
+    :return: Correlation in frequency domain
+    :rtype: np.ndarray
+    """
     x = ifft(fft(R, nfft) * np.conj(fft(W, nfft)), nfft)
     x = x.real
     return x
 
 
 def phaseshift(x, nfft, dt, tshift):
+    """
+    Phase shift in frequency domain.
+    
+    :param x: input trace
+    :type x: np.ndarray
+    :param nfft: number of samples
+    :type nfft: int
+    :param dt: sample interval in second
+    :type dt: float
+    :param tshift: Time shift before P arrival
+    :type tshift: float
+
+    :return: Phase shifted data in time domain
+    :rtype: np.ndarray
+    """
     Xf = fft(x, nfft)
     shift_i = int(tshift / dt)
     p = 2 * np.pi * np.arange(1, nfft + 1) * shift_i / nfft
@@ -47,23 +101,31 @@ def phaseshift(x, nfft, dt, tshift):
 
 def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, phase='P'):
     """
-    Created on Wed Sep 10 14:21:38 2014
-
-    In:
-    uin = numerator (radial for PdS)
-    win = denominator (vertical component for PdS)
-    dt = sample interval (s)
-    nt = number of samples
-    tshift = Time until beginning of receiver function (s)
-    f0 = width of gaussian filter
-    itmax = max # iterations
-    minderr = Min change in error required for stopping iterations
-
-    Out:
-    RFI = receiver function
-    rms = Root mean square error for predicting numerator after each iteration
-
+    Iterative deconvolution using Ligorria & Ammon method.
     @author: Mijian Xu @ NJU
+    Created on Wed Sep 10 14:21:38 2014 
+
+    :param uin: R or Q component for the response function
+    :type uin: np.ndarray
+    :param win: Z or L component for the source function
+    :type win: np.ndarray
+    :param dt: sample interval in second
+    :type dt: float
+    :param nt: number of samples, defaults to None
+    :type nt: int, optional
+    :param tshift: Time shift before P arrival, defaults to 10.
+    :type tshift: float, optional
+    :param f0: Gauss factor, defaults to 2.0
+    :type f0: float, optional
+    :param itmax: Max iterations, defaults to 400
+    :type itmax: int, optional
+    :param minderr: Min change in error required for stopping iterations, defaults to 0.001
+    :type minderr: float, optional
+    :param phase: Phase of the RF, defaults to 'P'
+    :type phase: str, optional
+
+    :return: (RFI, rms, it) RF, rms and number of iterations.
+    :rtype: (np.ndarray, np.ndarray, int)
     """
     # print('Iterative Decon (Ligorria & Ammon):\n')
     if len(uin) != len(win):
@@ -212,6 +274,20 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, p
 
 
 def deconvolute(uin, win, dt, method='iter', **kwargs):
+    """ Deconvolute receiver function from waveforms.
+    :param uin: R or Q component for the response function
+    :type uin: np.ndarray
+    :param win: Z or L component for the source function
+    :type win: np.ndarray
+    :param dt: sample interval in second
+    :type dt: float
+    :param method: Method for deconvolution, defaults to 'iter'
+    :type method: str, optional
+    :param kwargs: Parameters for deconvolution
+    :type kwargs: dict
+    :return: RF, rms, [iter]
+    :rtype: np.ndarray, float, int
+    """
     if method.lower() == 'iter':
         return deconit(uin, win, dt, **kwargs)
     elif method.lower() == 'water':
@@ -221,11 +297,29 @@ def deconvolute(uin, win, dt, method='iter', **kwargs):
 
 
 class RFTrace(obspy.Trace):
+    """ 
+    Class for receiver function trace.
+    """
     def __init__(self, data=..., header=None):
         super().__init__(data=data, header=header)
 
     @classmethod
     def deconvolute(cls, utr, wtr, method='iter', **kwargs):
+        """
+        Deconvolute receiver function from waveforms.
+
+        :param utr: R or Q component for the response function
+        :type utr: obspy.Trace
+        :param wtr: Z or L component for the source function
+        :type wtr: obspy.Trace
+        :param method: Method for deconvolution, defaults to 'iter'
+        :type method: str, optional
+        :param kwargs: Parameters for deconvolution
+        :type kwargs: dict
+
+        :return: RFTrace object
+        :rtype: RFTrace
+        """
         header = utr.stats.__getstate__()
         for key, value in kwargs.items():
             header[key] = value

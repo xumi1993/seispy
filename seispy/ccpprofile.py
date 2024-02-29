@@ -2,9 +2,9 @@ import numpy as np
 from seispy.geo import km2deg, deg2km, latlon_from, \
                        geoproject, sind, rad2deg, skm2srad, \
                        geo2sph, sph2geo
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from seispy.distaz import distaz
-from seispy.rfcorrect import DepModel
+from seispy.core.depmodel import DepModel
 from seispy.rf2depth_makedata import Station
 from seispy.ccppara import ccppara, CCPPara
 from scikits.bootstrap import ci
@@ -15,7 +15,7 @@ from os.path import exists, dirname, basename, join
 import sys
 
 
-def prof_range(lat, lon):
+def _prof_range(lat, lon):
     dis = [0]
     for i in range(lat.size-1):
         dis.append(distaz(lat[i], lon[i], lat[i+1], lon[i+1]).degreesToKilometers())
@@ -23,9 +23,19 @@ def prof_range(lat, lon):
 
 
 def create_center_bin_profile(stations, val=5, method='linear'):
+    """Create bins along a profile with given stations
+    :param stations: Stations along a profile
+    :type stations: :class:`seispy.rf2depth_makedata.Station`
+    :param val: The interval between two points in km
+    :type val: float
+    :param method: Method for interpolation
+    :type method: str
+    :return: The location of bins (bin_loca), and length between each bin and the start point (profile_range)
+    :rtype: (numpy.array, numpy.array)
+    """
     if not isinstance(stations, Station):
         raise TypeError('Stations should be seispy.rf2depth_makedata.Station')
-    dis_sta = prof_range(stations.stla, stations.stlo)
+    dis_sta = _prof_range(stations.stla, stations.stlo)
     dis_inter = np.append(np.arange(0, dis_sta[-1], val), dis_sta[-1])
     r, theta, phi = geo2sph(np.zeros(stations.stla.size), stations.stla, stations.stlo)
     # t_po = np.arange(stations.stla.size)
@@ -33,11 +43,10 @@ def create_center_bin_profile(stations, val=5, method='linear'):
     theta_i = interp1d(dis_sta, theta, kind=method, bounds_error=False, fill_value='extrapolate')(dis_inter)
     phi_i = interp1d(dis_sta, phi, kind=method, bounds_error=False, fill_value='extrapolate')(dis_inter)
     _, lat, lon = sph2geo(r, theta_i, phi_i)
-    # dis = prof_range(lat, lon)
     return lat, lon, dis_inter
 
 
-def line_proj(lat1, lon1, lat2, lon2):
+def _line_proj(lat1, lon1, lat2, lon2):
     daz = distaz(lat1, lon1, lat2, lon2)
     az1_begin = (daz.baz - 90) % 360
     az2_begin = (daz.baz + 90) % 360
@@ -46,7 +55,7 @@ def line_proj(lat1, lon1, lat2, lon2):
     return az1_begin, az2_begin, az1_end, az2_end, daz
 
 
-def fix_filename(filename, typ='dat'):
+def _fix_filename(filename, typ='dat'):
     dname = dirname(filename)
     if not exists(dname) and dname != '':
         raise FileExistsError('internal error')
@@ -61,7 +70,7 @@ def fix_filename(filename, typ='dat'):
         return filename
 
 
-def bin_shape(cpara):
+def _bin_shape(cpara):
     if cpara.bin_radius is None:
         depmod = DepModel(cpara.stack_range)
         fzone = km2deg(np.sqrt(0.5*cpara.domperiod*depmod.vs*cpara.stack_range))
@@ -98,11 +107,14 @@ def init_profile(lat1, lon1, lat2, lon2, val):
 
 
 class CCPProfile():
-    def __init__(self, cfg_file=None, log=None):
-        if log is None:
-            self.logger = setuplog()
-        else:
-            self.logger = log
+    def __init__(self, cfg_file=None, log:SetupLog=SetupLog()):
+        """CCPProfile class for CCP stacking along a profile
+        :param cfg_file: Configure file for CCP stacking
+        :type cfg_file: str
+        :param log: Log class for logging
+        :type log: :class:`seispy.setuplog.SetupLog`
+        """
+        self.logger = log
         if cfg_file is None:
             self.cpara = CCPPara()
         elif isinstance(cfg_file, str):
@@ -149,7 +161,7 @@ class CCPProfile():
             self.bin_loca = np.vstack((lat, lon)).T
         else:
             self.bin_loca, self.profile_range = init_profile(*self.cpara.line, self.cpara.slide_val)
-        self.fzone = bin_shape(self.cpara)
+        self.fzone = _bin_shape(self.cpara)
         self._get_sta()
         self._select_sta()
     
@@ -199,7 +211,7 @@ class CCPProfile():
                 self.stalst[idx,0], self.stalst[idx, 1]))
 
     def _proj_sta(self, width):
-        az1_begin, az2_begin, az1_end, az2_end, daz = line_proj(*self.cpara.line)
+        az1_begin, az2_begin, az1_end, az2_end, daz = _line_proj(*self.cpara.line)
         az_sta_begin = distaz(self.stalst[:, 0], self.stalst[:, 1], self.cpara.line[0], self.cpara.line[1]).az
         az_sta_end = distaz(self.stalst[:, 0], self.stalst[:, 1], self.cpara.line[2], self.cpara.line[3]).az
         if 0 <= daz.baz < 90 or 270 <= daz.baz < 360:
@@ -275,7 +287,7 @@ class CCPProfile():
         :param format: Format for stacked data
         :type format: str
         """
-        self.cpara.stackfile = fix_filename(self.cpara.stackfile, format)
+        self.cpara.stackfile = _fix_filename(self.cpara.stackfile, format)
         self.logger.CCPlog.info('Saving stacked data to {}'.format(self.cpara.stackfile))
         if not isinstance(self.cpara.stackfile, str):
             self.logger.CCPlog.error('fname should be in \'str\'')

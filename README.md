@@ -5,7 +5,8 @@
 [![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
 [![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
 [![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)]()
-[![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
+[![Static Badge](https://img.shields.io/badge/DOI-10.1785%2F0220220288-pink)](https://doi.org/10.1785/0220220288)
+
 
 [![CRV test](https://github.com/xumi1993/seispy/actions/workflows/test.yml/badge.svg?branch=dev)](https://github.com/xumi1993/seispy/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/xumi1993/seispy/branch/dev/graph/badge.svg?token=XN3E3N6S3V)](https://codecov.io/gh/xumi1993/seispy)
@@ -32,15 +33,18 @@ Seispy is a Python module for processing seismological data and calculating Rece
 
 For the use of the Seispy package, please cite as:
 
-- Xu, M. & He, J. (2023). Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. Seismological Research Letters, 94 (2A): 935–943. doi: https://doi.org/10.1785/0220220288
+- Xu, M. & He, J. (2023). Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. Seismological Research Letters, 94 (2A): 935–943. [![Static Badge](https://img.shields.io/badge/DOI-10.1785%2F0220220288-pink)](https://doi.org/10.1785/0220220288)
 
 For 3D time-difference correction, please also consider citing:
 
-- Xu, M., Huang, H., Huang, Z., Wang, P., Wang, L., Xu, M., ... & Yuan, X. (2018). Insight into the subducted Indian slab and origin of the Tengchong volcano in SE Tibet from receiver function analysis. Earth and Planetary Science Letters, 482, 567-579. doi: https://doi.org/10.1016/j.epsl.2017.11.048
+- Xu, M., Huang, H., Huang, Z., Wang, P., Wang, L., Xu, M., ... & Yuan, X. (2018). Insight into the subducted Indian slab and origin of the Tengchong volcano in SE Tibet from receiver function analysis. Earth and Planetary Science Letters, 482, 567-579.  [![Static Badge](https://img.shields.io/badge/DOI-10.1016%2Fj.epsl.2017.11.048-pink)
+](https://doi.org/10.1785/0220220288)
+
+- Xu, M., Huang, Z., Wang, L., Xu, M., Mi, N., & Yu, D. (2020). Lateral variation of the mantle transition zone beneath the Tibetan plateau: Insight into thermal processes during Indian–Asian collision. Physics of the Earth and Planetary Interiors, 301, 106452. [![Static Badge](https://img.shields.io/badge/DOI-10.1016%2Fj.pepi.2020.106452-pink)](https://doi.org/10.1016/j.pepi.2020.106452)
 
 For 2D and 3D CCP stacking, please also consider citing:
 
-- Xu, M., Huang, Z., Wang, L., Xu, M., Zhang, Y., Mi, N., ... & Yuan, X. (2020). Sharp lateral Moho variations across the SE Tibetan margin and their implications for plateau growth. Journal of Geophysical Research: Solid Earth, 125(5), e2019JB018117. doi: https://doi.org/10.1029/2019JB018117
+- Xu, M., Huang, Z., Wang, L., Xu, M., Zhang, Y., Mi, N., ... & Yuan, X. (2020). Sharp lateral Moho variations across the SE Tibetan margin and their implications for plateau growth. Journal of Geophysical Research: Solid Earth, 125(5), e2019JB018117. [![Static Badge](https://img.shields.io/badge/DOI-10.1029%2F2019JB018117-pink)](https://doi.org/10.1029/2019JB018117)
 
 ## Installation
 

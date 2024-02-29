@@ -5,17 +5,20 @@ from scipy.interpolate import interp1d
 from seispy.utils import read_rfdep
 from seispy.rf import RF
 from seispy.recalrf import ReRF
+import sys
 
 
 def rfharmo():
     parser = argparse.ArgumentParser('Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs')
     parser.add_argument('rfpath', type=str, help="Path to PRFs")
+    parser.add_argument('-e', help='Enlarge factor for plotting, defaults to 2', metavar='enf', default=2., type=float)
+    parser.add_argument('-k', help="Suppress stacking RFs by back-azimuth, defaults to False", default=True,
+                        action='store_false')
+    parser.add_argument('-o', help="Specify output path for saving constant component.", metavar='outpath', default=None, type=str)
+    parser.add_argument('-p', help='Figure output path, defaults to ./', metavar='figure_path', default='./', type=str)
+    parser.add_argument('-s', help="Resample RFs with sampling interval of dt", metavar='dt', default=None, type=float)
     parser.add_argument('-t', help="Time window from tb to te for triming RFs, NOTE: do not insert space before this argument, defaults to -2/10",
                         metavar='tb/te', default='-2/10')
-    parser.add_argument('-s', help="Resample RFs with sampling interval of dt", metavar='dt', default=None, type=float)
-    parser.add_argument('-o', help="Specify output path for saving constant component.", metavar='outpath', default=None, type=str)
-    parser.add_argument('-e', help='Enlarge factor, defaults to 2', metavar='enf', default=2., type=float)
-    parser.add_argument('-p', help='Figure output path, defaults to ./', metavar='figure_path', default='./', type=str)
     args = parser.parse_args()
     rfsta = RFStation(args.rfpath)
     if args.s is not None:
@@ -116,15 +119,18 @@ def get_pierce_points():
 def common_parser():
     parser = argparse.ArgumentParser(description="Calculating RFs for single station")
     parser.add_argument('cfg_file', type=str, help='Path to RF configure file')
-    parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
-    parser.add_argument('-r', help='Reverse components: N, E or NE', dest='comp',
-                        metavar='N|E|NE', default=None, type=str)
-    parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
     parser.add_argument('-b', help='Correct back-azimuth. \nIf "baz" is specified, the corr_baz = raw_baz + baz. \n'
                                    'If there is no argument, the back-azimuth will be corrected with minimal '
                                    'energy of T component. The searching range is raw_baz +/- 90',
                                    dest='baz', nargs='?', const=0, type=float)
+    parser.add_argument('-l', help="use local catalog, defaults to false", dest='islocal', action='store_true')
+    parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround P/S phase with a GUI.',
+                        action='store_true', default=False)
+    parser.add_argument('-r', help='Reverse components: N, E or NE', dest='comp',
+                        metavar='N|E|NE', default=None, type=str)
+    parser.add_argument('-s', help='Switch the East and North components', dest='isswitch', action='store_true')
     parser.add_argument('-w', help='Write project to localfile', action='store_true')
+    
     return parser
 
 
@@ -158,6 +164,8 @@ def prf():
         pjt = ReRF(arg.f, cfg_file=arg.cfg_file)
     else:
         pjt = RF(cfg_file=arg.cfg_file)
+    if pjt.para.phase[0] != 'P':
+        pjt.para.phase = 'P'
     pjt.para.switchEN = arg.isswitch
     pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
     pjt.load_stainfo()
@@ -179,6 +187,8 @@ def prf():
     if arg.w:
         pjt.savepjt()
     pjt.rotate()
+    if arg.p:
+        pjt.pick(prepick=False)
     pjt.trim()
     pjt.deconv()
     pjt.saverf()
@@ -188,13 +198,12 @@ def prf():
 
 def srf():
     parser = common_parser()
-    parser.add_argument('-p', help='Wether or not manually pick arrival time and waveforms arround S phase with a GUI.',
-                        action='store_true')
     parser.add_argument('-i', help='Wether grid search incidence angle',
                         action='store_true')
     arg = parser.parse_args()
     pjt = RF(cfg_file=arg.cfg_file)
-
+    if pjt.para.phase[0] != 'S':
+        pjt.para.phase = 'S'
     pjt.para.switchEN = arg.isswitch
     pjt.para.reverseE ,pjt.para.reverseN= parse_common_args(arg)
     pjt.load_stainfo()
@@ -222,10 +231,14 @@ def srf():
 
 
 def plot_rt():
-    from seispy.plotRT import plotrt
     parser = argparse.ArgumentParser(description="Plot R(Q)&T components for P receiver functions (PRFs)")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str, default=None)
+    parser.add_argument('-c', help='prime component to plot, defaults to \'R\'', 
+                         default='R', type=str, metavar='[R|Q]')
     parser.add_argument('-e', help='Enlargement factor, defaults to 3', dest='enf', type=float, default=3, metavar='enf')
+    parser.add_argument('-k', help='The key to sort PRFs, avialible for \'event\', \'evla\', \'evlo\', \'evdp\','
+                                    '\'dis\', \'bazi\', \'rayp\', \'mag\', \'f0\', defaults to \'bazi\'', metavar='key',
+                        default='bazi', type=str)
     parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                         dest='format', default='g', type=str, metavar='f|g')
@@ -233,15 +246,19 @@ def plot_rt():
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
-    rfsta = RFStation(arg.rfpath)
-    plotrt(rfsta, enf=arg.enf, out_path=arg.output, outformat=arg.format, xlim=[-2, arg.x])
+    rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
+    rfsta.plotrt(rfsta, enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
 
 
 def plot_r():
-    from seispy.plotR import plotr
     parser = argparse.ArgumentParser(description="Plot R&T receiver functions")
     parser.add_argument('rfpath', help='Path to PRFs with a \'finallist.dat\' in it', type=str)
+    parser.add_argument('-c', help='prime component to plot, defaults to \'R\'', 
+                         default='R', type=str, metavar='[R|Q|L|Z]')
     parser.add_argument('-e', help='Enlargement factor, defaults to 6', dest='enf', type=float, default=6, metavar='enf')
+    parser.add_argument('-k', help='The key to sort PRFs, avialible for \'event\', \'evla\', \'evlo\', \'evdp\','
+                                    '\'dis\', \'bazi\', \'rayp\', \'mag\', \'f0\', defaults to \'bazi\'', metavar='key',
+                        default='bazi', type=str)
     parser.add_argument('-o', help='Output path without file name, defaults to current path', dest='output', default='./', type=str, metavar='outpath')
     parser.add_argument('-t', help='Specify figure format. f = \'.pdf\', g = \'.png\', defaults to \'g\'',
                     dest='format', default='g', type=str, metavar='f|g')
@@ -250,10 +267,166 @@ def plot_r():
     arg = parser.parse_args()
     if arg.format not in ('f', 'g'):
         parser.error('Error: The format must be in \'f\' and \'g\'')
-    elif arg.format == 'g':
-        fmt = 'png'
-    elif arg.format == 'f':
-        fmt = 'pdf'
-    rfsta = RFStation(arg.rfpath)
-    plotr(rfsta, arg.output, enf=arg.enf, xlim=[-2, arg.x], format=fmt)
+    rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
+    rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], outformat=arg.format)
 
+
+def get_events():
+    from obspy import UTCDateTime
+    from seispy.io import Query
+    parser = argparse.ArgumentParser(description="Get seismic events from IRIS Web-Service")
+    parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304',
+                        metavar='datetime', default=None)
+    parser.add_argument('-c', help='Catalog type',
+                        metavar='GCMT|NEIC PDE|ISC', default=None)
+    parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
+                        metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
+    parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
+                        metavar='datetime', default=None)
+    parser.add_argument('-m', help='Magnitude range, optional for max magnitude',
+                        metavar='<minmagnitude>[/<maxmagnitude>]', default=None)
+    parser.add_argument('-r', help='Box range with min and max latitude and logitude, omited when specify \'-d\' ',
+                        metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
+    parser.add_argument('-p', help='Focal depth, optional for max depth', 
+                        metavar='<mindepth>[/<maxdepth>]', default=None)
+    arg = parser.parse_args()
+    args = {}
+    if arg.c is not None:
+        args['catalog'] = arg.c
+    if arg.p is not None:
+        try:
+            values = [float(value) for value in arg.p.split('/')]
+        except:
+            raise ValueError('Error format with focal depth')
+        if len(values) == 1:
+            args['mindepth'] = values[0]
+        elif len(values) == 2:
+            args['mindepth'] = values[0]
+            args['maxdepth'] = values[1]
+        else:
+            raise ValueError('Error format with focal depth')
+    if arg.m is not None:
+        try:
+            values = [float(value) for value in arg.m.split('/')]
+        except:
+            raise ValueError('Error format with magnitude')
+        if len(values) == 1:
+            args['minmagnitude'] = values[0]
+        elif len(values) == 2:
+            args['minmagnitude'] = values[0]
+            args['maxmagnitude'] = values[1]
+        else:
+            raise ValueError('Error format with focal depth')
+    if arg.r is not None:
+        try:
+            values = [float(value) for value in arg.r.split('/')]
+        except:
+            raise ValueError('Error format with box range')
+        if len(values) == 4:
+            args['minlongitude'] = values[0]
+            args['maxlongitude'] = values[1]
+            args['minlatitude'] = values[2]
+            args['maxlatitude'] = values[3]
+        else:
+            raise ValueError('Error format with box range')
+    elif arg.d is not None:
+        try:
+            values = [float(value) for value in arg.d.split('/')]
+        except:
+            raise ValueError('Error format with Radial geographic constraints')
+        if len(values) == 4:
+            args['latitude'] = values[0]
+            args['longitude'] = values[1]
+            args['minradius'] = values[2]
+            args['maxradius'] = values[3]
+        else:
+            raise ValueError('Error format with radial geographic constraints')
+    else:
+        pass
+    if arg.b is not None:
+        try:
+            args['starttime'] = UTCDateTime(arg.b)
+        except:
+            raise ValueError('-b: Error format with time string')
+    if arg.e is not None:
+        try:
+            args['endtime'] = UTCDateTime(arg.e)
+        except:
+            raise ValueError('-e: Error format with time string')
+    if args == {}:
+        parser.print_usage()
+        sys.exit(1)
+    query = Query()
+    query.get_events(**args)
+    for _, row in query.events.iterrows():
+        print('{} {:.2f} {:.2f} {:.2f} {:.1f} {}'.format(
+              row.date.isoformat(), row.evla, row.evlo,
+              row.evdp, row.mag, row.magtype)
+        )
+
+def get_stations():
+    from obspy import UTCDateTime
+    from seispy.io import Query
+    parser = argparse.ArgumentParser(description="Get stations from IRIS Web-Service")
+    parser.add_argument('-S', help='Server name, defaults to IRIS', metavar='server', default='IRIS')
+    parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304', metavar='datetime', default=None)
+    parser.add_argument('-c', help='Channel, wildcard is available like *,?,[EB]...', metavar='channel', default=None)
+    parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
+                        metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
+    parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
+                        metavar='datetime', default=None)
+    parser.add_argument('-n', help='Network name', metavar='network', default=None)
+    parser.add_argument('-r', help='Box range with min and max latitude and logitude, omited when specify \'-d\'',
+                        metavar='<lon1>/<lon2>/<lat1>/<lat2>', default=None)
+    parser.add_argument('-s', help='Station name', metavar='station', default=None)
+    arg = parser.parse_args()
+    args = {}
+    if arg.n is not None:
+        args['network'] = arg.n
+    if arg.s is not None:
+        args['station'] = arg.s
+    if arg.r is not None:
+        try:
+            values = [float(value) for value in arg.r.split('/')]
+        except:
+            raise ValueError('Error format with box range')
+        if len(values) == 4:
+            args['minlongitude'] = values[0]
+            args['maxlongitude'] = values[1]
+            args['minlatitude'] = values[2]
+            args['maxlatitude'] = values[3]
+        else:
+            raise ValueError('Error format with box range')
+    elif arg.d is not None:
+        try:
+            values = [float(value) for value in arg.d.split('/')]
+        except:
+            raise ValueError('Error format with Radial geographic constraints')
+        args['latitude'] = values[0]
+        args['longitude'] = values[1]
+        args['minradius'] = values[2]
+        args['maxradius'] = values[3]
+    else:
+        pass
+    if arg.b is not None:
+        try:
+            args['starttime'] = UTCDateTime(arg.b)
+        except:
+            raise ValueError('-b: Error format with time string')
+    if arg.e is not None:
+        try:
+            args['endtime'] = UTCDateTime(arg.e)
+        except:
+            raise ValueError('-e: Error format with time string')
+    if arg.c is not None:
+        args['channel'] = arg.c
+    if args == {}:
+        parser.print_usage()
+        sys.exit(1)
+    query = Query(arg.S)
+    query.get_stations(**args)
+    for net in query.stations:
+        for sta in net:
+            print('{} {} {:.6f} {:.6f} {:.4f} {} {}'.format(net.code, sta.code,
+                  sta.latitude, sta.longitude, sta.elevation, sta.start_date, sta.end_date,
+                  sta.restricted_status))

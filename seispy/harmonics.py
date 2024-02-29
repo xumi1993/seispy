@@ -7,7 +7,7 @@ from os.path import join
 
 
 class Harmonics():
-    def __init__(self, rfsta, tmin=-5, tmax=10) -> None:
+    def __init__(self, rfsta, tmin=-5, tmax=10, bin_stack=True) -> None:
         """ Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
 
         :param rfsta: data class of RFStation
@@ -20,6 +20,17 @@ class Harmonics():
         self.rfsta = rfsta
         self.tmin = tmin
         self.tmax = tmax
+        if bin_stack:
+            val = 10
+            stacked_data = self.rfsta.bin_stack(lim=[0, 360], val=val)
+            self.datar = stacked_data['data_prime']
+            self.datat = stacked_data['datat']
+            self.bazi = np.arange(0, 360, val)+val/2
+        else:
+            self.datar = self.rfsta.data_prime
+            self.datat = self.rfsta.datat
+            self.bazi = self.rfsta.bazi
+        self.trace_num = self.datar.shape[0]
         self.cut_trace()
 
     def cut_trace(self):
@@ -27,22 +38,24 @@ class Harmonics():
         """
         nb = int((self.tmin + self.rfsta.shift) / self.rfsta.sampling)
         ne = int((self.tmax + self.rfsta.shift) / self.rfsta.sampling)
-        self.datar = self.rfsta.datar[:, nb:ne+1]
-        self.datat = self.rfsta.datat[:, nb:ne+1]
+        self.datar = self.datar[:, nb:ne+1]
+        self.datat = self.datat[:, nb:ne+1]
         self.nsamp = ne - nb + 1
         self.time_axis = np.linspace(self.tmin, self.tmax, self.nsamp)
 
     def harmo_trans(self):
+        """Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
+        """
         self.traces = np.vstack((self.datar, self.datat))
-        harmonic = np.zeros((self.rfsta.ev_num*2, 5))
-        unmodel = np.zeros((self.rfsta.ev_num*2, 5))
+        harmonic = np.zeros((self.trace_num*2, 5))
+        unmodel = np.zeros((self.trace_num*2, 5))
         self.harmonic_trans = np.zeros((5, self.nsamp))
         self.unmodel_trans = np.zeros((5, self.nsamp))
-        for i, baz in enumerate(self.rfsta.bazi):
+        for i, baz in enumerate(self.bazi):
             harmonic[i] = np.array([1, cosd(baz), sind(baz), cosd(baz*2), sind(baz*2)])
-            harmonic[i+self.rfsta.ev_num] = np.array([0, cosd(baz+90), sind(baz+90), cosd(baz*2+90), sind(baz*2+90)])
+            harmonic[i+self.trace_num] = np.array([0, cosd(baz+90), sind(baz+90), cosd(baz*2+90), sind(baz*2+90)])
             unmodel[i] = np.array([1, cosd(baz), sind(baz), cosd(baz*2), sind(baz*2)])
-            unmodel[i+self.rfsta.ev_num] = np.array([0, cosd(baz-90), sind(baz-90), cosd(baz*2-90), sind(baz*2-90)])
+            unmodel[i+self.trace_num] = np.array([0, cosd(baz-90), sind(baz-90), cosd(baz*2-90), sind(baz*2-90)])
         for i in range(self.nsamp):
             b = self.traces[:, i]
             self.harmonic_trans[:, i] = lsqr(harmonic, b, damp=0)[0]

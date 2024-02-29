@@ -11,7 +11,9 @@ from seispy.slantstack import SlantStack
 from seispy.harmonics import Harmonics
 from seispy.plotRT import plotrt as _plotrt
 from seispy.plotR import plotr as _plotr
-from seispy.utils import DepModel, Mod3DPerturbation, scalar_instance
+from seispy.utils import scalar_instance
+from seispy.core.depmodel import DepModel, interp_depth_model
+from seispy.core.pertmod import Mod3DPerturbation
 import warnings
 import glob
 
@@ -113,7 +115,7 @@ class RFStation(object):
         # self.data_prime = eval('self.data{}'.format(self.comp.lower()))
 
     @classmethod
-    def read_stream(cls, stream, rayp, baz, prime_comp='R'):
+    def read_stream(cls, stream, rayp, baz, prime_comp='R', stream_t=None):
         """Create RFStation instance from ``obspy.Stream``
 
         Parameters
@@ -129,7 +131,13 @@ class RFStation(object):
         """
         if len(stream) == 0:
             raise ValueError('No such RFTrace read')
-        rfsta = cls('', only_r=True, prime_comp=prime_comp)
+        if stream_t is not None and len(stream) != len(stream_t):
+            raise ValueError('Stream and Stream_t must have the same length')
+        if stream_t is not None:
+            only_r = False
+        else:
+            only_r = True
+        rfsta = cls('', only_r=only_r, prime_comp=prime_comp)
         ev_num = len(stream)
         if scalar_instance(rayp):
             rayp = np.ones(ev_num)*rayp
@@ -162,8 +170,40 @@ class RFStation(object):
             except:
                 rfsta.f0[i] = tr.stats.sac.user1
             rfsta.data_prime[i] = tr.data
+        if stream_t is not None:
+            rfsta.datat = np.zeros([rfsta.ev_num, rfsta.rflength])
+            for i, tr in enumerate(stream_t):
+                rfsta.datat[i] = tr.data
         exec('rfsta.data{} = rfsta.data_prime'.format(rfsta.comp.lower()))
         return rfsta
+
+    def bin_stack(self, key='bazi', lim=[0, 360], val=10):
+        """Stack RFs by bins of ``key`` with interval of ``val``
+
+        :param key: Key to stack, valid in ['bazi', 'rayp' (in s/km)], defaults to 'bazi'
+        :type key: str, optional
+        :param val: Interval of bins, defaults to 10 degree for bazi
+        :type val: int, optional
+        :return: Stacked RFs
+        :rtype: ``dict`` with keys of ``data_prime``, ``datat`` and ``count``
+        """
+        bins = np.arange(lim[0], lim[1]+val, val)
+        idx = np.digitize(self.__dict__[key], bins)
+        stacked = {
+            'data_prime': np.zeros([bins.size-1, self.rflength]),
+            'count': np.zeros(bins.size-1),
+            'bins': bins[:-1]+val/2,
+        }
+        if not self.only_r:
+            stacked['datat'] = np.zeros([bins.size-1, self.rflength])
+        for i in range(1, bins.size):
+            if i not in idx:
+                continue
+            stacked['data_prime'][i-1] = np.mean(self.data_prime[idx==i], axis=0)
+            if not self.only_r:
+                stacked['datat'][i-1] = np.mean(self.datat[idx==i], axis=0)
+            stacked['count'][i-1] = np.sum(idx==i)
+        return stacked
 
     @property
     def stel(self):
@@ -266,17 +306,9 @@ class RFStation(object):
             t_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='t', velmod=velmod, **kwargs)
         else:
             t_corr = None
-        if 'datar' in self.__dict__:
-            chan = 'r'
-        elif 'dataz' in self.__dict__:
-            chan = 'z'
-        elif 'datal' in self.__dict__:
-            chan = 'l'
-        else:
-            pass
-        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan=chan, velmod=velmod, **kwargs)
+        rf_corr, _ = moveoutcorrect_ref(self, skm2srad(ref_rayp), dep_range, chan='', velmod=velmod, **kwargs)
         if replace:
-            self.__dict__['data{}'.format(chan)] = rf_corr
+            self.data_prime= rf_corr
             if not self.only_r:
                 self.datat = t_corr
         else:
@@ -371,7 +403,7 @@ class RFStation(object):
         self.slant.stack(ref_dis, rayp_range, tau_range)
         return self.slant.stack_amp
 
-    def harmonic(self, tb=-5, te=10):
+    def harmonic(self, tb=-5, te=10, is_stack=True):
         """Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs
 
         :param tb: Start time relative to P, defaults to -5
@@ -385,11 +417,11 @@ class RFStation(object):
                 Harmonic components with shape of ``(5, nsamp)``, ``nsamp = (te-tb)/RFStation.sampling``
 
         unmodel_trans: numpy.ndarray, float
-                Unmodel components with shape same as harmonic_trans.
+                Unmodel components with same shape as harmonic_trans.
         """
         if self.only_r:
             raise ValueError('Transverse RFs are nessary for harmonic decomposition')
-        self.harmo = Harmonics(self, tb, te)
+        self.harmo = Harmonics(self, tb, te, bin_stack=is_stack)
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
@@ -422,7 +454,7 @@ def _imag2nan(arr):
 
 
 def moveoutcorrect_ref(stadatar, raypref, YAxisRange, 
-                       chan='r', velmod='iasp91', sphere=True, phase=1):
+                       chan='', velmod='iasp91', sphere=True, phase=1):
     """Moveout correction refer to a specified ray-parameter
     
     :param stadatar: data class of RFStation
@@ -435,16 +467,10 @@ def moveoutcorrect_ref(stadatar, raypref, YAxisRange,
     """
     sampling = stadatar.sampling
     shift = stadatar.shift
-    if chan == 'r':
-        data = stadatar.datar
-    elif chan == 't':
+    if chan == 't':
         data = stadatar.datat
-    elif chan == 'z':
-        data = stadatar.dataz
-    elif chan == 'l':
-        data = stadatar.datal
     else:
-        raise ValueError('Field \'datar\' or \'datal\' must be in the SACStation')
+        data = stadatar.data_prime
     dep_mod = DepModel(YAxisRange, velmod, stadatar.stel)
     # x_s = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
     # x_p = np.zeros([stadatar.ev_num, YAxisRange.shape[0]])
@@ -522,7 +548,7 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
             try:
                 velmod_3d = np.load(velmod)
                 dep_mod.vp, dep_mod.vs = interp_depth_model(velmod_3d,
-                                         stadatar.stla, stadatar.stlo, dep_mod.depths_elev)
+                                                            stadatar.stla, stadatar.stlo, dep_mod.depths_elev)
             except Exception as e:
                 raise FileNotFoundError('Cannot load 1D or 3D velocity model of \'{}\''.format(velmod))
     else:
@@ -557,7 +583,8 @@ def psrf2depth(stadatar, YAxisRange, velmod='iasp91', srayp=None, normalize='sin
     return ps_rfdepth, endindex, x_s, x_p
 
 
-def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
+def xps_tps_map(dep_mod: DepModel, srayp, prayp,
+                is_raylen=False, sphere=True, phase=1):
     """Calculate horizontal distance and time difference at depths
 
     :param dep_mod: 1D velocity model class 
@@ -611,7 +638,7 @@ def xps_tps_map(dep_mod, srayp, prayp, is_raylen=False, sphere=True, phase=1):
         tps = interp1d(dep_mod.depths_elev, tps, bounds_error=False, fill_value=(np.nan, tps[-1]))(dep_mod.depths)
         if is_raylen:
             raylength_s = interp1d(dep_mod.depths_elev, raylength_s, bounds_error=False, fill_value=(np.nan, raylength_s[-1]))(dep_mod.depths)
-            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=(np.nan, raylength_p[-1]))(dep_mod.depths)         
+            raylength_p = interp1d(dep_mod.depths_elev, raylength_p, bounds_error=False, fill_value=(np.nan, raylength_p[-1]))(dep_mod.depths)
     if is_raylen:
         return tps, x_s, x_p, raylength_s, raylength_p
     else:
@@ -740,34 +767,6 @@ def psrf_3D_raytracing(stadatar, YAxisRange, mod3d, srayp=None, elevation=0, sph
         if elevation != 0:
             tps[i] = interp1d(YAxisRange, tps_corr)(dep_range)
     return pplat_s, pplon_s, pplat_p, pplon_p, tps
-
-
-def interp_depth_model(model, lat, lon, new_dep):
-    """ Interpolate Vp and Vs from 3D velocity with a specified depth range.
-
-    Parameters
-    ----------
-    mod3d : :meth:`np.lib.npyio.NpzFile`
-        3D velocity loaded from a ``.npz`` file
-    lat : float
-        Latitude of position in 3D velocity model
-    lon : float
-        Longitude of position in 3D velocity model
-    new_dep : :meth:`np.ndarray`
-        1D array of depths in km
-
-    Returns
-    -------
-    Vp : :meth:`np.ndarray`
-        Vp in ``new_dep``
-    Vs : :meth:`np.ndarray`
-        Vs in ``new_dep``
-    """
-    #  model = np.load(modpath)
-    points = [[depth, lat, lon] for depth in new_dep]
-    vp = interpn((model['dep'], model['lat'], model['lon']), model['vp'], points, bounds_error=False, fill_value=None)
-    vs = interpn((model['dep'], model['lat'], model['lon']), model['vs'], points, bounds_error=False, fill_value=None)
-    return vp, vs
 
 
 def psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, Tpds, dep_range, mod3d):

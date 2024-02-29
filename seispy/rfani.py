@@ -62,16 +62,10 @@ class RFAni():
 
     def baz_stack(self, val=10):
         self.stack_range = np.arange(0, 360, val)
-        self.rft_baz = np.zeros([self.stack_range.shape[0], self.sacdatar.rflength])
-        self.rfr_baz = np.zeros_like(self.rft_baz)
-        self.count_baz = np.zeros(self.stack_range.shape[0])
-        search_range = np.append(self.stack_range, self.stack_range[-1]+val)
-        for i in range(self.stack_range.size):
-            idx = np.where((self.sacdatar.bazi > search_range[i]) & (self.sacdatar.bazi < search_range[i+1]))[0]
-            self.count_baz[i] = idx.size
-            if idx.size != 0:
-                self.rft_baz[i] = np.mean(self.sacdatar.datat[idx], axis=0)
-                self.rfr_baz[i] = np.mean(self.sacdatar.datar[idx], axis=0)
+        stacked_data = self.sacdatar.bin_stack(lim=[0, 360], val=val)
+        self.rfr_baz = stacked_data['data_prime']
+        self.rft_baz = stacked_data['datat']
+        self.count_baz = stacked_data['count']
 
     def search_peak_amp(self):
         mean_rf = np.mean(self.rfr_baz, axis=0)

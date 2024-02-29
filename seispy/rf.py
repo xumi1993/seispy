@@ -10,7 +10,7 @@ from seispy.io import Query, _cat2df
 from seispy.para import RFPara
 from seispy import distaz
 from seispy.eq import EQ
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from seispy.catalog import read_catalog_file
 from seispy.utils import scalar_instance
 import glob
@@ -112,9 +112,12 @@ def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
 def fetch_waveform(eq_lst, para, model, logger):
     tb = np.max([2*para.noiselen, 2*para.time_before])
     te = np.max([2*para.noiselen, 2*para.time_after])
-    query = Query(para.data_server)
+    try:
+        query = para.stainfo.query
+    except:
+        logger.RFlog.error('Please load station information and search earthquake before fetch waveform')
     new_col = ['dis', 'bazi', 'data', 'datestr']
-    eq_match = pd.DataFrame(columns=new_col)
+    eqall = []
     for i, row in eq_lst.iterrows():
         datestr = row['date'].strftime('%Y.%j.%H.%M.%S')
         daz = distaz(para.stainfo.stla, para.stainfo.stlo, row['evla'], row['evlo'])
@@ -146,7 +149,11 @@ def fetch_waveform(eq_lst, para, model, logger):
             continue
         this_eq.get_time_offset(row['date'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
-        eq_match = pd.concat([eq_match, this_df])
+        eqall.append(this_df)
+    if not eqall:
+        logger.RFlog.error('No waveforms fetched')
+        sys.exit(1)
+    eq_match = pd.concat(eqall)
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
@@ -154,6 +161,31 @@ def fetch_waveform(eq_lst, para, model, logger):
 
 def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', offset=None,
              tolerance=210, dateformat='%Y.%j.%H.%M.%S'):
+    """Match earthquakes with local SAC files
+
+    :param eq_lst: Earthquake list
+    :type eq_lst: pandas.DataFrame
+    :param pathname: Path to SAC files
+    :type pathname: str
+    :param stla: Station latitude
+    :type stla: float
+    :param stlo: Station longitude
+    :type stlo: float
+    :param logger: Logger
+    :type logger: seispy.setuplog.SetupLog
+    :param ref_comp: Reference component, defaults to 'Z'
+    :type ref_comp: str, optional
+    :param suffix: Suffix of SAC files, defaults to 'SAC'
+    :type suffix: str, optional
+    :param offset: Time offset between SAC files and earthquakes, defaults to None
+    :type offset: float, optional
+    :param tolerance: Tolerance of time offset, defaults to 210
+    :type tolerance: int, optional
+    :param dateformat: Date format of SAC files, defaults to '%Y.%j.%H.%M.%S'
+    :type dateformat: str, optional
+    :return: Earthquake list with matched SAC files
+    :rtype: pandas.DataFrame
+    """
     pattern = datestr2regex(dateformat)
     ref_eqs = glob.glob(join(pathname, '*{0}*{1}'.format(ref_comp, suffix)))
     if len(ref_eqs) == 0:
@@ -175,7 +207,7 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         else:
             raise TypeError('offset should be int or float type')
     new_col = ['dis', 'bazi', 'data', 'datestr']
-    eq_match = pd.DataFrame(columns=new_col)
+    eq_match_lst = []
     for datestr, b_time, offs in sac_files:
         date_range_begin = b_time + timedelta(seconds=offs - tolerance)
         date_range_end = b_time + timedelta(seconds=offs + tolerance)
@@ -190,7 +222,11 @@ def match_eq(eq_lst, pathname, stla, stlo, logger, ref_comp='Z', suffix='SAC', o
         this_eq.get_time_offset(results.iloc[0]['date'])
         daz = distaz(stla, stlo, results.iloc[0]['evla'], results.iloc[0]['evlo'])
         this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=results.index.values)
-        eq_match = pd.concat([eq_match, this_df])
+        eq_match_lst.append(this_df)
+    if not eq_match_lst:
+        logger.RFlog.error('No earthquakes matched')
+        sys.exit(1)
+    eq_match = pd.concat(eq_match_lst)
     ind = eq_match.index.drop_duplicates(keep=False)
     eq_match = eq_match.loc[ind]
     return pd.concat([eq_lst, eq_match], axis=1, join='inner')
@@ -209,7 +245,7 @@ def CfgModify(cfg_file, session, key, value):
 class RF(object):
     def __init__(self, cfg_file=None, log=None):
         if log is None:
-            self.logger = setuplog()
+            self.logger = SetupLog()
         else:
             self.logger = log
         if cfg_file is None:
@@ -250,14 +286,18 @@ class RF(object):
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Load station info of {}.{} from {} web-service'.format(
                     self.para.stainfo.network, self.para.stainfo.station, self.para.data_server))
+                self.para.stainfo.link_server(
+                    self.para.data_server,
+                    self.para.data_server_user,
+                    self.para.data_server_password
+                )
                 if use_date_range:
                     self.para.stainfo.get_station_from_ws(
-                        self.para.data_server,
                         starttime=self.para.date_begin,
                         endtime=self.para.date_end
                     )
                 else:
-                    self.para.stainfo.get_station_from_ws(self.para.data_server)
+                    self.para.stainfo.get_station_from_ws()
                 try:
                     self.para._check_date_range()
                 except Exception as e:
@@ -304,6 +344,8 @@ class RF(object):
         self.logger.RFlog.info('{} earthquakes are found'.format(self.eq_lst.shape[0]))
 
     def match_eq(self):
+        """Assosiate earthquakes with local data file or online data.
+        """
         try:
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
@@ -460,12 +502,11 @@ class RF(object):
     def pick(self, prepick=True, stl=5, ltl=10):
         if prepick:
             self.logger.RFlog.info('Pre-pick {} arrival using STA/LTA method'.format(self.para.phase))
-            for _, row in self.eqs.iterrows():
-                row['data'].phase_trigger(self.para.time_before, self.para.time_after,
-                                          stl=stl, ltl=ltl)
+        for _, row in self.eqs.iterrows():
+            row['data'].phase_trigger(self.para.time_before, self.para.time_after,
+                                      prepick=prepick, stl=stl, ltl=ltl)
         pickphase(self.eqs, self.para, self.logger)
         self.logger.RFlog.info('{0} events left after visual checking'.format(self.eqs.shape[0]))
-
 
     def deconv(self):
         shift = self.para.time_before

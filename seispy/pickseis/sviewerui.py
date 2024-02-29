@@ -5,7 +5,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QVBoxLayout, \
                             QSizePolicy, QWidget, \
                             QPushButton, QHBoxLayout, QFileDialog
 from os.path import exists, dirname, join
-from seispy.setuplog import setuplog
+from seispy.setuplog import SetupLog
 from matplotlib.backends.backend_qtagg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -21,7 +21,7 @@ class SFigure(Figure):
         self.picker_time = pd.DataFrame({'trigger_shift': np.array([eqs.iloc[i]['data'].trigger_shift for i in range(self.row_num)])})
         self.picker_time.set_index(eqs.index, inplace=True)
         self.para = para
-        self.log = setuplog()
+        self.log = SetupLog()
         self.idx = 0
         self.init_figure(width=width, height=height, dpi=dpi)
         self.plot()
@@ -56,7 +56,6 @@ class SFigure(Figure):
             ax.minorticks_on()
         self.axs[2].set_xlabel('Time (s)')
         self.axs[0].legend(loc=2)
-
 
     def clear(self):
         for ax in self.axs:
@@ -184,7 +183,7 @@ class MatplotlibWidget(QMainWindow):
 
         self._set_geom_center()
         self._define_global_shortcuts()
-        self.setWindowTitle('Pick S Phase')
+        self.setWindowTitle('Pick Phase')
         self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
 
     def add_btn(self):
