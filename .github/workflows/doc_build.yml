@@ -39,10 +39,12 @@ jobs:
           # miniforge-variant: Mambaforge
           # use-mamba: true
   
-      - name: Install Seispy
+      - name: Checkout to source branch
         uses: actions/checkout@v2.4.0
         with:
           ref: ${{ steps.vars.outputs.branch }}
+
+      - name: Install Seispy
         run: |
           pip install -e .
 
