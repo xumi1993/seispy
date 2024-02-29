@@ -33,10 +33,10 @@ jobs:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
 
-      # - name: Checkout to docs branch
-      #   uses: actions/checkout@v5
-      #   with:
-      #     ref: docs
+      - name: Checkout to docs branch
+        uses: actions/checkout@v4
+        with:
+          ref: docs
 
       - name: Setup Mambaforge
         uses: conda-incubator/setup-miniconda@v2.1.1
@@ -47,7 +47,7 @@ jobs:
           # use-mamba: true
   
       - name: Checkout to source branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           ref: ${{ steps.vars.outputs.branch }}
 
@@ -56,7 +56,7 @@ jobs:
           pip install .
 
       - name: Checkout to docs branch
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           ref: docs
 
