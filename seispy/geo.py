@@ -5,6 +5,7 @@ from seispy.utils import scalar_instance, array_instance
 
 def sind(deg):
     """ Sine function with degree as input
+
     :param deg: Degree
     :type deg: float
     :return: Sine value
@@ -16,6 +17,7 @@ def sind(deg):
 
 def cosd(deg):
     """ Cosine function with degree as input
+
     :param deg: Degree
     :type deg: float
     :return: Cosine value
@@ -27,6 +29,7 @@ def cosd(deg):
 
 def tand(deg):
     """ Tangent function with degree as input
+
     :param deg: Degree
     :type deg: float
     :return: Tangent value
@@ -38,6 +41,7 @@ def tand(deg):
 
 def cotd(deg):
     """ Cotangent function with degree as input
+
     :param deg: Degree
     :type deg: float
     :return: Cotangent value
@@ -49,6 +53,7 @@ def cotd(deg):
 
 def asind(x):
     """ Inverse sine function with degree as output
+
     :param x: Sine value
     :type x: float
     :return: Degree
@@ -60,6 +65,7 @@ def asind(x):
 
 def acosd(x):
     """ Inverse cosine function with degree as output
+
     :param x: Cosine value
     :type x: float
     :return: Degree 
@@ -71,6 +77,7 @@ def acosd(x):
 
 def atand(x):
     """ Inverse tangent function with degree as output
+
     :param x: Tangent value
     :type x: float
     :return: Degree
@@ -82,6 +89,7 @@ def atand(x):
 
 def km2deg(km):
     """ Convert km to degree
+
     :param km: Distance in km
     :type km: float
     :return: Distance in degree
@@ -96,6 +104,7 @@ def km2deg(km):
 
 def deg2km(deg):
     """ Convert degree to km
+
     :param deg: Distance in degree
     :type deg: float
     :return: Distance in km
@@ -110,6 +119,7 @@ def deg2km(deg):
 
 def rad2deg(rad):
     """ Convert radian to degree
+
     :param rad: Radian
     :type rad: float
     :return: Degree
@@ -121,6 +131,7 @@ def rad2deg(rad):
 
 def skm2sdeg(skm):
     """ Convert s/km to s/degree
+
     :param skm: s/km
     :type skm: float
     :return: s/degree
@@ -132,6 +143,7 @@ def skm2sdeg(skm):
 
 def sdeg2skm(sdeg):
     """ Convert s/degree to s/km
+
     :param sdeg: s/degree
     :type sdeg: float
     :return: s/km
@@ -143,6 +155,7 @@ def sdeg2skm(sdeg):
 
 def srad2skm(srad):
     """ Convert s/rad to s/km
+
     :param srad: s/rad
     :type srad: float
     :return: s/km
@@ -154,6 +167,7 @@ def srad2skm(srad):
 
 def skm2srad(skm):
     """ Convert s/km to s/rad
+
     :param skm: s/km
     :type skm: float
     :return: s/rad
@@ -166,9 +180,12 @@ def skm2srad(skm):
 def rot3D(bazi, inc):
     """
     Rotate components from ZRT to LQT
-    M = [cos(inc)     -sin(inc)*sin(bazi)    -sin(inc)*cos(bazi);
-        sin(inc)      cos(inc)*sin(bazi)     cos(inc)*cos(bazi);
-        0              -cos(bazi)             sin(bazi)];
+    
+    .. code-block:: python
+
+    M = [[cos(inc)     -sin(inc)*sin(bazi)    -sin(inc)*cos(bazi)],
+         [sin(inc)      cos(inc)*sin(bazi)     cos(inc)*cos(bazi)],
+         [0              -cos(bazi)             sin(bazi)]]
     
     :param bazi: back-azimuth of station-event pair
     :param inc: Incidence angle
@@ -194,6 +211,7 @@ def rot3D(bazi, inc):
 
 def rotateSeisZENtoLQT(z, e, n, bazi, inc):
     """ Rotate ZEN to LQT
+
     :param z: Vertical component
     :type z: np.ndarray
     :param e: East component
@@ -215,6 +233,7 @@ def rotateSeisZENtoLQT(z, e, n, bazi, inc):
 
 def spherical2cartesian(lon, lat, dep):
     """ Convert spherical coordinates to cartesian coordinates
+
     :param lon: Longitude
     :type lon: float
     :param lat: Latitude
@@ -234,6 +253,7 @@ def spherical2cartesian(lon, lat, dep):
 
 def rotateSeisENtoTR(e, n, baz):
     """ Rotate EN to TR
+
     :param e: East component
     :type e: np.ndarray
     :param n: North component
@@ -261,6 +281,7 @@ def rssq(x):
 
 def snr(x, y):
     """ Signal-to-noise ratio
+    
     :param x: Signal
     :type x: np.ndarray
     :param y: Noise
@@ -358,6 +379,7 @@ def latlon_from(lat0, lon0, azimuth, gcarc_dist, ellps="WGS84"):
 
 def geoproject(lat_p, lon_p, lat1, lon1, lat2, lon2):
     """ Project a point to a line
+
     :param lat_p: Latitude of the point
     :type lat_p: float
     :param lon_p: Longitude of the point
@@ -411,6 +433,7 @@ def geo2sph(dep, lat, lon):
 def sph2geo(r, theta, phi):
     """
     Convert spherical coordinates to geographic coordinates.
+
     :param float r: radial distance from coordinate system origin
                     {**Units**: km, **Range**: [0, inf)}
     :param float theta: polar angle {**Units**: radians, **Range**: [0,
