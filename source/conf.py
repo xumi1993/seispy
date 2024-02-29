@@ -15,7 +15,8 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('./seispy/seispy'))
+from importlib.metadata import version
+# sys.path.insert(0, os.path.abspath('./seispy/seispy'))
 # sys.path.insert(0, os.path.abspath('/Users/xumj/Codes/seispy/seispy'))
 
 
@@ -26,7 +27,7 @@ copyright = '2020, Mijian Xu'
 author = 'Mijian Xu'
 
 # The short X.Y version
-version = '1.3.5'
+version = f'v{version('python-seispy')}'
 # The full version, including alpha/beta/rc tags
 release = version
 
