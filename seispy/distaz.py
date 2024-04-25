@@ -2,59 +2,15 @@ import math
 import numpy as np
 
 
-def sind(deg):
-    rad = math.radians(deg)
-    return math.sin(rad)
-
-
-def cosd(deg):
-    rad = math.radians(deg)
-    return math.cos(rad)
-
-
-def tand(deg):
-    rad = math.radians(deg)
-    return math.tan(rad)
-
-
-def cotd(deg):
-    rad = math.radians(deg)
-    return math.cos(rad) / math.sin(rad)
-
-
-def asind(x):
-    rad = math.asin(x)
-    return math.degrees(rad)
-
-
-def acosd(x):
-    rad = math.acos(x)
-    return math.degrees(rad)
-
-
-def atand(x):
-    rad = math.atan(x)
-    return math.degrees(rad)
-
-
-def km2deg(kilometers):
-    return kilometers / 111.19
-
-
-def deg2km(degree):
-    return degree * 111.19
-
-
 class distaz:
     """
-    c Subroutine to calculate the Great Circle Arc distance
-    c    between two sets of geographic coordinates
-    c
-    c Equations take from Bullen, pages 154, 155
-    c
-    c T. Owens, September 19, 1991
-    c           Sept. 25 -- fixed az and baz calculations
-    c
+    Subroutine to calculate the Great Circle Arc distance
+        between two sets of geographic coordinates
+    
+    Equations take from Bullen, pages 154, 155
+    
+    T. Owens, September 19, 1991
+              Sept. 25 -- fixed az and baz calculations
     P. Crotwell, Setember 27, 1995
     Converted to c to fix annoying problem of fortran giving wrong
     answers if the input doesn't contain a decimal point.

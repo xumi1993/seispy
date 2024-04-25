@@ -25,6 +25,8 @@ class TooMoreComponents(Exception):
         return '{}'.format(self.matchkey)
 
 def rotateZNE(st):
+    """Rotate Z, N, E components to Z, N, E components
+    """
     try:
         zne = rotate2zne(
             st[0], st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc,
@@ -92,6 +94,7 @@ class EQ(object):
     @classmethod
     def from_stream(cls, stream):
         """Create EQ object from obspy stream
+
         :param stream: obspy stream
         :type stream: obspy.Stream
         :return: EQ object
@@ -138,6 +141,13 @@ class EQ(object):
             self.st.select(channel='*[N1]')[0].stats.channel = chE
 
     def write(self, path, evt_datetime):
+        """Write raw stream to SAC files
+
+        :param path: path to save SAC files
+        :type path: str
+        :param evt_datetime: event datetime
+        :type evt_datetime: obspy.core.utcdatetime.UTCDateTime
+        """
         for tr in self.st:
             sac = SACTrace.from_obspy_trace(tr)
             sac.b = 0
@@ -158,6 +168,7 @@ class EQ(object):
 
     def filter(self, freqmin=0.05, freqmax=1, order=4):
         """Bandpass filter
+
         :param freqmin: minimum frequency, defaults to 0.05
         :type freqmin: float, optional
         :param freqmax: maximum frequency, defaults to 1
@@ -169,6 +180,7 @@ class EQ(object):
 
     def get_arrival(self, model, evdp, dis, phase='P'):
         """Get arrival time, ray parameter and incident angle from TauP model
+
         :param model: TauP model
         :type model: TauPyModel
         :param evdp: focal depth
@@ -192,6 +204,7 @@ class EQ(object):
 
     def search_inc(self, bazi):
         """Search incident angle for S wave
+
         :param bazi: back azimuth
         :type bazi: float
         :return: incident angle
@@ -211,6 +224,7 @@ class EQ(object):
 
     def search_baz(self, bazi, time_b=10, time_e=20, offset=90):
         """Search back azimuth for P wave
+
         :param bazi: back azimuth
         :type bazi: float
         :param time_b: time before P arrival, defaults to 10
@@ -261,6 +275,7 @@ class EQ(object):
 
     def rotate(self, baz, inc=None, method='NE->RT', search_inc=False, baz_shift=0):
         """Rotate to radial and transverse components
+
         :param baz: back azimuth
         :type baz: float
         :param inc: incident angle, defaults to None
@@ -294,6 +309,7 @@ class EQ(object):
 
     def snr(self, length=50):
         """Calculate SNR
+
         :param length: length for noise, defaults to 50
         :type length: int, optional
         :return: SNR of E, N, Z components
@@ -317,6 +333,7 @@ class EQ(object):
     
     def get_time_offset(self, event_time=None):
         """Get time offset from SAC header
+
         :param event_time: event time, defaults to None
         :type event_time: obspy.core.utcdatetime.UTCDateTime, optional
         """
@@ -347,6 +364,7 @@ class EQ(object):
 
     def phase_trigger(self, time_before, time_after, prepick=True, stl=5, ltl=10):
         """ Trigger P or S phase
+
         :param time_before: time before P or S arrival
         :type time_before: float
         :param time_after: time after P or S arrival
@@ -445,6 +463,7 @@ class EQ(object):
     
     def decon_p(self, tshift, tcomp=False, **kwargs):
         """Deconvolution for P wave
+
         :param tshift: Time shift before P arrival
         :type tshift: float
         :param tcomp: Whether calculate transverse component, defaults to False
@@ -468,6 +487,7 @@ class EQ(object):
 
     def decon_s(self, tshift, **kwargs):
         """Deconvolution for S wave
+
         :param tshift: Time shift before P arrival
         :type tshift: float
         """
@@ -487,6 +507,7 @@ class EQ(object):
                evlo=-12345., evdp=-12345., mag=-12345.,
                gauss=0, baz=-12345., gcarc=-12345., only_r=False, **kwargs):
         """Save receiver function to SAC file
+
         :param path: path to save SAC file
         :type path: str
         :param evtstr: event string, defaults to None
@@ -560,6 +581,7 @@ class EQ(object):
 
     def judge_rf(self, gauss, shift, npts, criterion='crust', rmsgate=None):
         """Judge whether receiver function is valid
+        
         :param gauss: Gaussian factor
         :type gauss: float
         :param shift: time shift before P arrival

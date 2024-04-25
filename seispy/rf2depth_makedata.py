@@ -74,6 +74,8 @@ class RFDepth():
     def __init__(self, cpara:CCPPara, log:Logger=SetupLog().RF2depthlog,
                  raytracing3d=False, velmod3d=None, modfolder1d=None) -> None:
         """
+        Convert receiver function to depth axis
+        
         :param cpara: CCPPara object
         :type cpara: CCPPara
         :param log: Log object

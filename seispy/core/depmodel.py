@@ -43,14 +43,14 @@ def _search_vel_file(mode_name):
         raise IOError
     # check cols of file
     if raw_model.shape[1] < 3 or raw_model.shape[1] > 4:
-        raise ValueError
+        raise ValueError('The file should contain 3 or 4 columns')
 
     # cal rho if rho is not given in vel files.
     if raw_model.shape[1] == 3:
         model = np.zeros((raw_model.shape[0], 4))
-        model[:3, :] = raw_model[:, :]
+        model[:, :3] = raw_model[:, :]
         _p, rho = vs2vprho(raw_model[:, 2])
-        model[3, :] = rho
+        model[:, 3] = rho
         return model
     else:
         return raw_model
@@ -117,10 +117,10 @@ def _from_layer_model(dep_range, h, vs, vp=None, rho=None):
 
 class DepModel(object):
     """
-    radiu_s is used to call piercing point
-    tps,tpsps or so are used to cal displacement
+    Class for constructing 1D velocity model and computing delay time of Ps, PpPs and PsPs Rays.
 
-    examples:
+    .. rubric:: Examples
+
     >>> model = DepModel(np.array([0, 20.1, 35.1, 100]))
     >>> print(model.dz)
     [ 0.  20.1 15.  64.9]
@@ -131,18 +131,17 @@ class DepModel(object):
     """
 
     def __init__(self, dep_range, velmod='iasp91', elevation=0., layer_mod=False):
-        """Class for computing back projection of Ps Ray paths.
-
-        Parameters
-        ----------
-        dep_range : numpy.ndarray
-            Depth range for conversion
-            Depth for each layer, not thickness
-        velmod : str, optional
-            Text file of 1D velocity model with first 3 columns of depth/thickness, Vp and Vs,
-            by default 'iasp91'
-        elevation : float, optional Elevation in km, by default 0.0
-        layer_mod: True for search, and False for interp1d
+        """ Initialize DepModel object
+        
+        :type dep_range: numpy.ndarray
+        :param dep_range: Depth range for conversion
+        :type velmod: str, optional
+        :param velmod: Text file of 1D velocity model with first 3 columns of depth/thickness, Vp and Vs, by default 'iasp91'
+        :type elevation: float, optional
+        :param elevation: Elevation in km, by default 0.0
+        :type layer_mod: bool, optional
+        :param layer_mod: True for search, and False for interp1d, by default False
+        
         """
         self.isrho = False
         self.elevation = elevation
@@ -166,6 +165,31 @@ class DepModel(object):
 
     @classmethod
     def read_layer_model(cls, dep_range, h, vp, vs, rho=None, elevation=0):
+        """ Read layer model from given parameters
+
+        :type dep_range: numpy.ndarray
+        :param dep_range: Depth range for conversion
+        :type h: numpy.ndarray
+        :param h: Thickness of each layer
+        :type vp: numpy.ndarray
+        :param vp: P-wave velocity of each layer
+        :type vs: numpy.ndarray
+        :param vs: S-wave velocity of each layer
+        :type rho: numpy.ndarray
+        :param rho: Density of each layer, by default None
+        :type elevation: float
+        :param elevation: Elevation in km, by default 0
+        :rtype: DepModel
+        :return: DepModel object
+
+        .. rubric:: Examples
+        
+        >>> dep_range = np.arange(100)
+        >>> h = np.array([20, 15., 0])
+        >>> vp = np.array([5.8, 6.5, 8.04])
+        >>> vs = np.array([3.36, 3.75, 4.47])
+        >>> model = DepModel.read_layer_model(dep_range, h, vp, vs)
+        """
         mod = cls(dep_range, velmod=None, layer_mod=True, elevation=elevation)
         if rho is not None:
             mod.isrho = True
@@ -182,6 +206,10 @@ class DepModel(object):
         3. dz: 0, thick_1, thick_2....
         4. thickness: thick_1, thick_2, ... , 0
         requires elevation, depths_range or other component
+
+        .. rubric:: Examples
+
+
         >>> model = DepModel(np.array([0, 20.1, 35.1, 100]))
         >>> model.depths_elev
         array([  0. ,  20.1,  35.1, 100. ])
@@ -219,10 +247,8 @@ class DepModel(object):
         """
         plot model with matplotlib
         
-        Parameters
-        ----------
-        show : bool, optional
-        whether to show the plot, by default True
+        :type show: bool, optional
+        :param show: whether to show the plot, by default True
         """        
         plt.style.use('bmh')
         if self.isrho:
@@ -253,18 +279,15 @@ class DepModel(object):
         # generate docstring
         """
         calculate travel time of Pds
-        Parameters
-        ----------
-        rayps : float or numpy.ndarray
-            ray parameter of Ps wave
-        raypp : float or numpy.ndarray
-            ray parameter of P wave
-        sphere : bool, optional
-            whether to use sphere earth, by default True
-        
-        Returns
-        -------
-        travel time of Pds
+
+        :type rayps: float or numpy.ndarray
+        :param rayps: ray parameter of Ps wave
+        :type raypp: float or numpy.ndarray
+        :param raypp: ray parameter of P wave
+        :type sphere: bool, optional
+        :param sphere: whether to use sphere earth, by default True
+        :rtype: numpy.ndarray
+        :return: travel time of Pds
         """
 
         if sphere:
@@ -280,18 +303,14 @@ class DepModel(object):
         """
         calculate travel time of Ppds
 
-        Parameters
-        ----------
-        rayps : float or numpy.ndarray
-            ray parameter of Ps wave
-        raypp : float or numpy.ndarray
-            ray parameter of P wave
-        sphere : bool, optional
-            whether to use sphere earth, by default True
-        
-        Returns
-        -------
-        travel time of Ppds
+        :type rayps: float or numpy.ndarray
+        :param rayps: ray parameter of Ps wave
+        :type raypp: float or numpy.ndarray
+        :param raypp: ray parameter of P wave
+        :type sphere: bool, optional
+        :param sphere: whether to use sphere earth, by default True
+        :rtype: numpy.ndarray
+        :return: travel time of Ppds
         """
         if sphere:
             radius = self.R
@@ -306,16 +325,12 @@ class DepModel(object):
         """
         calculate travel time of Ppsds
         
-        Parameters
-        ----------
-        rayps : float or numpy.ndarray
-            ray parameter of Ps wave
-        sphere : bool, optional
-            whether to use sphere earth, by default True
-        
-        Returns
-        -------
-        travel time of Ppsds
+        :type rayps: float or numpy.ndarray
+        :param rayps: ray parameter of Ps wave
+        :type sphere: bool, optional
+        :param sphere: whether to use sphere earth, by default True
+        :rtype: numpy.ndarray
+        :return: travel time of Ppsds
         """
         if sphere:
             radius = self.R
@@ -327,15 +342,21 @@ class DepModel(object):
 
     def radius_s(self, rayp, phase='P', sphere=True):
         """
-        calculate piercing point, P for Sp and S for Ps
-        Parameters
-        ----------
-        rayp
-        phase
-        sphere
+        calculate horizontal radius from piercing point to station postion.
+        
+        P for Sp and S for Ps.
 
-        Returns
-        -------
+        :type rayp: float or numpy.ndarray
+        :param rayp: ray parameter
+        :type phase: str, optional
+        :param phase: phase name, by default 'P'
+        :type sphere: bool, optional
+        :param sphere: whether to use sphere earth, by default True
+        :rtype: numpy.ndarray
+        :return: horizontal radius
+        
+        .. rubric:: Examples
+
         >>> model = DepModel(np.array([0, 20.1, 35.1, 100]))
         >>> model.dz
         array([ 0. , 20.1, 15. , 64.9])
@@ -359,6 +380,12 @@ class DepModel(object):
     def save_tvel(self, filename):
         """
         save vel mod in tvel format for taup
+
+        :type filename: str
+        :param filename: output file name
+
+        .. rubric:: Examples
+
         >>> model = DepModel(np.array([0, 20.1, 35.1, 100]))
         >>> model.save_tvel("test")
             0.00     5.80     3.36     2.72
@@ -399,18 +426,14 @@ class DepModel(object):
         """
         calculate ray length, P for Sp and S for Ps
         
-        Parameters
-        ----------
-        rayp: float or numpy.ndarray
-            ray parameter
-        phase: str, optional
-            phase name, by default 'P'
-        sphere: bool, optional
-            whether to use sphere earth, by default True
-        
-        Returns
-        -------
-        ray length
+        :type rayp: float or numpy.ndarray
+        :param rayp: ray parameter
+        :type phase: str, optional
+        :param phase: phase name, by default 'P'
+        :type sphere: bool, optional
+        :param sphere: whether to use sphere earth, by default True
+        :rtype: numpy.ndarray
+        :return: ray length
         """
 
         if phase == 'P':
@@ -432,8 +455,11 @@ class DepModel(object):
         if any parameters given is wrong, return a default DepModel object
 
         there's 3 types of input is allowed:
+
         1. mod3d, stla, stlo: for 3d model( need modification
+
         2. modfolder, staname: for dir
+
         3. mod: for single file
         """
         if kwargs.get("mod3d", None):
@@ -481,23 +507,17 @@ def _load_mod(datapath, staname):
 def interp_depth_model(model, lat, lon, new_dep):
     """ Interpolate Vp and Vs from 3D velocity with a specified depth range.
 
-    Parameters
-    ----------
-    mod3d : :meth:`np.lib.npyio.NpzFile`
-        3D velocity loaded from a ``.npz`` file
-    lat : float
-        Latitude of position in 3D velocity model
-    lon : float
-        Longitude of position in 3D velocity model
-    new_dep : :meth:`np.ndarray`
-        1D array of depths in km
-
-    Returns
-    -------
-    Vp : :meth:`np.ndarray`
-        Vp in ``new_dep``
-    Vs : :meth:`np.ndarray`
-        Vs in ``new_dep``
+    :param mod3d: 3D velocity loaded from a ``.npz`` file
+    :type mod3d: :meth:`np.lib.npyio.NpzFile`
+    :param lat: Latitude of position in 3D velocity model
+    :type lat: float
+    :param lon: Longitude of position in 3D velocity model
+    :type lon: float
+    :param new_dep: 1D array of depths in km
+    :type new_dep: :meth:`np.ndarray`
+    :rtype: :meth:`np.ndarray`
+    :return: Vp and Vs in ``new_dep``
+    
     """
     #  model = np.load(modpath)
     points = [[depth, lat, lon] for depth in new_dep]

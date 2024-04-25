@@ -53,9 +53,23 @@ class StaInfo():
             raise ConnectionError('Cannot connect with {} server'.format(server))
 
     def get_stainfo(self):
+        """Get station information
+
+        :return: Station information
+        :rtype: dict
+        """
         return self.__dict__
 
     def load_stainfo(self, pathname, ref_comp, suffix):
+        """Load station information from SAC file
+
+        :param pathname: Path to SAC file
+        :type pathname: str
+        :param ref_comp: Reference component
+        :type ref_comp: str
+        :param suffix: Suffix of SAC file
+        :type suffix: str
+        """
         (self.network, self.station, self.stla, self.stlo, self.stel) = _load_station_info(pathname, ref_comp, suffix)
 
     def get_station_from_ws(self, **kwargs):

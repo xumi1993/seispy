@@ -24,6 +24,7 @@ def _prof_range(lat, lon):
 
 def create_center_bin_profile(stations, val=5, method='linear'):
     """Create bins along a profile with given stations
+
     :param stations: Stations along a profile
     :type stations: :class:`seispy.rf2depth_makedata.Station`
     :param val: The interval between two points in km
@@ -109,6 +110,7 @@ def init_profile(lat1, lon1, lat2, lon2, val):
 class CCPProfile():
     def __init__(self, cfg_file=None, log:SetupLog=SetupLog()):
         """CCPProfile class for CCP stacking along a profile
+
         :param cfg_file: Configure file for CCP stacking
         :type cfg_file: str
         :param log: Log class for logging
@@ -118,12 +120,12 @@ class CCPProfile():
         if cfg_file is None:
             self.cpara = CCPPara()
         elif isinstance(cfg_file, str):
-            self.load_para(cfg_file)
+            self._load_para(cfg_file)
         else:
             raise ValueError('cfg_file must be str format.')
         self.stack_data = []
 
-    def load_para(self, cfg_file):
+    def _load_para(self, cfg_file):
         try:
             self.cpara = ccppara(cfg_file)
         except Exception as e:
@@ -277,12 +279,19 @@ class CCPProfile():
             self.stack_data.append(boot_stack)   
 
     def save_stack_data(self, format='npz'):
-        """If format is \'npz\', saving stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
-        data['cpara'] is the parameters when CCP stacking.
-        data['stack_data'] is the result of stacked data.
+        """If format is ``npz``, saving stacked data and parameters to local as a npz file. To load the file, please use data = np.load(fname, allow_pickle=True).
+        ``data['cpara']`` is the parameters when CCP stacking.
+        ``data['stack_data']`` is the result of stacked data.
 
-        If format is \'dat\' the stacked data will be save into a txt file with 8 columns, including bin_lat, bin_lon, profile_dis, depth, amp, ci_low, ci_high and count.
-        where bin_lat and bin_lon represent the position of each bin; profile_dis represents the distance in km between each bin and the start point of the profile; depth represents depth of each bin; amp means the stacked amplitude; ci_low and ci_high mean confidence interval with bootstrap method; count represents stacking number of each bin.
+        If format is ``dat`` the stacked data will be save into a txt file with 8 columns,
+        including ``bin_lat``, ``bin_lon``, ``profile_dis``, ``depth``, ``amp``, ``ci_low``, ``ci_high`` and ``count``.
+        
+        - ``bin_lat`` and ``bin_lon`` represent the position of each bin; 
+        - ``profile_dis`` represents the distance in km between each bin and the start point of the profile;
+        - ``depth`` represents depth of each bin;
+        - ``amp`` means the stacked amplitude; 
+        - ``ci_low`` and ``ci_high`` mean confidence interval with bootstrap method;
+        - ``count`` represents stacking number of each bin.
 
         :param format: Format for stacked data
         :type format: str
