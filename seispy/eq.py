@@ -190,17 +190,16 @@ class EQ(object):
         :param phase: phase name, defaults to 'P'
         :type phase: str, optional
         """
+        self.phase = phase
         arrivals = model.get_travel_times(evdp, dis, phase_list=[phase])
         if not arrivals:
-            raise ValueError('The phase of {} is not exists'.format(phase))
-        if len(arrivals) > 1:
-            raise ValueError('More than one phase were calculated with distance of {} and focal depth of {}'.format(dis, evdp))
-        else:
-            # self.arrival = arrivals[0]
-            self.arr_time = arrivals[0].time
-            self.rayp = arrivals[0].ray_param
-            self.inc = arrivals[0].incident_angle
-            self.phase = phase
+            raise ValueError('The phase of {} is not exists. Please check the setting of distance and phase'.format(phase))
+        # if len(arrivals) > 1:
+        #     raise ValueError('More than one phase were calculated with distance of {} and focal depth of {}'.format(dis, evdp))
+        # else:
+        self.arr_time = arrivals[0].time
+        self.rayp = arrivals[0].ray_param
+        self.inc = arrivals[0].incident_angle
 
     def search_inc(self, bazi):
         """Search incident angle for S wave
