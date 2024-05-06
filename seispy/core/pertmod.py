@@ -9,8 +9,8 @@ class Mod3DPerturbation:
     def __init__(self, modpath, YAxisRange, velmod='iasp91'):
         dep_mod = DepModel(YAxisRange, velmod=velmod)
         self.model = np.load(modpath)
-        new1dvp = interp1d(dep_mod.depthsraw, dep_mod.vpraw)(self.model['dep'])
-        new1dvs = interp1d(dep_mod.depthsraw, dep_mod.vsraw)(self.model['dep'])
+        new1dvp = interp1d(dep_mod.depths, dep_mod.vp)(self.model['dep'])
+        new1dvs = interp1d(dep_mod.depths, dep_mod.vs)(self.model['dep'])
         new1dvp, _, _ = np.meshgrid(new1dvp, self.model['lat'], self.model['lon'], indexing='ij')
         new1dvs, _, _ = np.meshgrid(new1dvs, self.model['lat'], self.model['lon'], indexing='ij')
         self.dvp = (self.model['vp'] - new1dvp) / new1dvp

@@ -3,8 +3,10 @@ from os.path import exists, join, dirname
 import numpy as np
 from matplotlib import pyplot as plt
 from scipy.interpolate import interp1d, interpn
-
 from seispy.utils import vs2vprho
+import warnings
+
+warnings.filterwarnings("ignore", "invalid value encountered in sqrt")
 
 
 def _search_vel_file(mode_name):
