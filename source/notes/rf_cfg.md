@@ -11,7 +11,7 @@ rfpath = ./RFresult/CB.NJ2
 # Catalog path
 catalogpath = events_all.dat
 
-path to project file
+# path to project file
 pjtpath = rfpjt.pkl
 
 [search_eq]

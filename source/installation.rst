@@ -35,44 +35,11 @@ Once the ``conda-forge`` channel has been enabled, ``seispy`` can be installed w
 
 .. code-block:: shell
 
-    conda create -n seispy seispy
+    conda create -n seispy matplotlib-base obspy pandas pyside6 scikits-bootstrap pyproj numba
     conda activate seispy
-
-
-``Seispy`` can be updated with:
-
-.. code-block:: shell
-
-    conda update seispy
-
-
-Install and update via `PyPi <https://pypi.org/>`_
----------------------------------------------------
-
-Recommended for normal users to install Seispy with a stable version
-
-.. code-block:: shell
-
     pip install python-seispy
 
-.. note::
-
-    - We recommend Chinese users to use `清华大学 pypi 镜像 <https://mirrors.tuna.tsinghua.edu.cn/help/pypi/>`_ to install Seispy.
-    
-    - An error may be raised during installing Obspy via PyPi on Linux platform as following:
-
-        .. code-block:: shell
-
-            ERROR: Could not build wheels for obspy which use PEP 517 and cannot be installed directly
-
-        Please `install Obspy via conda <https://github.com/obspy/obspy/wiki/Installation-via-Anaconda>`_ first.
-
-        .. code-block:: shell
-
-            conda config --add channels conda-forge
-            conda install obspy
-
-Upgrading Seispy to the next stable version. 
+``Seispy`` can be updated with:
 
 .. code-block:: shell
 
