@@ -15,20 +15,21 @@
 
 import os
 import sys
-sys.path.insert(0, os.path.abspath('./seispy/seispy'))
+from importlib.metadata import version as get_version
+# sys.path.insert(0, os.path.abspath('./seispy/seispy'))
 # sys.path.insert(0, os.path.abspath('/Users/xumj/Codes/seispy/seispy'))
 
 
 # -- Project information -----------------------------------------------------
 
-project = 'seispy'
+project = 'Seispy'
 copyright = '2020, Mijian Xu'
 author = 'Mijian Xu'
 
 # The short X.Y version
-version = ''
+version = f"v{get_version('python-seispy')}"
 # The full version, including alpha/beta/rc tags
-release = 'latest'
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -90,7 +91,7 @@ language = 'en'
 exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+# pygments_style = 'sphinx'
 
 myst_heading_anchors = 3
 
@@ -101,16 +102,14 @@ myst_heading_anchors = 3
 #
 
 html_baseurl = "seispy.xumijian.me"
-# html_theme = 'classic'
-html_theme = 'pydata_sphinx_theme'
+html_theme = 'furo'
+# html_theme = 'pydata_sphinx_theme'
 # html_theme_path = [lsst_dd_rtd_theme.get_html_theme_path()]
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
-
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
@@ -126,19 +125,24 @@ templates_path = ['_templates']
 # default: ``['localtoc.html', 'relations.html', 'sourcelink.html',
 # 'searchbox.html']``.
 html_theme_options = {
-    "icon_links": [
-        {
-            # Label for this link
-            "name": "GitHub",
-            # URL where the link will redirect
-            "url": "https://github.com/xumi1993/seispy",  # required
-            # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
-            "icon": "fab fa-github-square",
-            # Whether icon should be a FontAwesome class, or a local file
-            # "type": "fontawesome OR local",  # Default is fontawesome
-        }
-   ]
+#     "icon_links": [
+#         {
+#             # Label for this link
+#             "name": "GitHub",
+#             # URL where the link will redirect
+#             "url": "https://github.com/xumi1993/seispy",  # required
+#             # Icon class (if "type": "fontawesome"), or path to local image (if "type": "local")
+#             "icon": "fab fa-github-square",
+#             # Whether icon should be a FontAwesome class, or a local file
+#             # "type": "fontawesome OR local",  # Default is fontawesome
+#         }
+#    ],
+    "light_css_variables": {
+        "color-brand-primary": "#0080C4",
+        "color-brand-content": "#0080C4",
+    },
 }
+
 #
 # html_sidebars = {}
 html_favicon = os.path.abspath(os.path.join('.', '_static', 'seispy_100.png'))

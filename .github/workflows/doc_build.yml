@@ -5,26 +5,36 @@ name: Seispy docs
 
 on:
   push:
-    branches: [ docs ]
+    branches: [ docs, dev ]
   pull_request:
     branches: [ master ]
     
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  deploy:
-    runs-on: macos-latest
+  build_deploy:
+    runs-on: ubuntu-latest
     defaults:
       run:
         shell: bash -l {0}
 
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
+      - name: Set branch name
+        id: vars
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo ::set-output name=branch::${{ github.event.pull_request.head.ref }}
+          else
+            echo ::set-output name=branch::dev
+          fi
+          echo ${{ steps.vars.outputs.branch }}
+  
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.9.1
 
-      - name: Checkout
-        uses: actions/checkout@v2.4.0
+      - name: Checkout to docs branch
+        uses: actions/checkout@v4
         with:
           ref: docs
 
@@ -35,16 +45,56 @@ jobs:
           environment-file: environment.yml
           # miniforge-variant: Mambaforge
           # use-mamba: true
-      
+  
+      - name: Checkout to source branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.vars.outputs.branch }}
+          path: seispy_source
+          fetch-depth: 0
+
+      - name: Install Seispy
+        run: |
+          cd seispy_source
+          pip install .
+          cd ..
+
       - name: Build documentation
         run: |
           make html
+      
+      - name: Checkout the gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          # Checkout to this folder instead of the current one
+          path: deploy
+          # Download the entire history
+          fetch-depth: 0
+      
+      - name: Copy documentation
+        run: |
+          cd seispy_source
+          if [[ ${{ steps.vars.outputs.branch }} == "dev" ]]; then
+            version=“$(python setup.py --version)_$(git rev-parse --short HEAD)”
+          else
+            version=$(python setup.py --version)
+          fi
+          cd ../deploy
+          touch .nojekyll
+          echo -e "\nRemoving old files from previous builds of ${version}:"
+          rm -rvf dev_* ${version}
+          echo -e "\nCopying new files from ${version}:"
+          cp -rvf ../build/html ${version}
+          rm -rfv latest
+          ln -sfv ${version} latest
+          cd ..
         
       - name: Deploy documentation
         uses: peaceiris/actions-gh-pages@068dc23d9710f1ba62e86896f84735d869951305
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/html
+          publish_dir: deploy
           # Only keep the latest commit to avoid bloating the repository
           force_orphan: true
           cname: seispy.xumijian.me

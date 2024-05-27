@@ -165,7 +165,7 @@ The output structure would be saved as a ``.npy`` file, which can be read with `
 
 .. note::
   
-  The layer_num was determined by field ``[depth]`` in parameter file.
+  The ``layer_num`` was determined by field ``[depth]`` in parameter file.
 
 CCP Stack PRFs along a profile
 ================================

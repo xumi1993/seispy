@@ -5,11 +5,10 @@
 
 # Seispy Documentation
 
-[![License](https://img.shields.io/github/license/xumi1993/seispy)]()
-[![](https://img.shields.io/github/last-commit/xumi1993/seispy)]()
-[![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)]()
-[![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)]()
-[![DOI](https://zenodo.org/badge/41006349.svg)](https://zenodo.org/badge/latestdoi/41006349)
+![License](https://img.shields.io/github/license/xumi1993/seispy)
+![Last commit](https://img.shields.io/github/last-commit/xumi1993/seispy)
+![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/xumi1993/seispy)
+![GitHub repo size](https://img.shields.io/github/repo-size/xumi1993/seispy)
 
 [![CRV test](https://github.com/xumi1993/seispy/actions/workflows/test.yml/badge.svg?branch=dev)](https://github.com/xumi1993/seispy/actions/workflows/test.yml)
 [![codecov](https://codecov.io/gh/xumi1993/seispy/branch/dev/graph/badge.svg?token=XN3E3N6S3V)](https://codecov.io/gh/xumi1993/seispy)
@@ -26,8 +25,11 @@
 [![PyPI](https://img.shields.io/pypi/v/python-seispy)](https://pypi.org/project/python-seispy/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/python-seispy)](https://pypi.org/project/python-seispy/)
 
-[![GitHub stars](https://img.shields.io/github/stars/xumi1993/seispy?style=social)]()
-[![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)]()
+[![Static Badge](https://img.shields.io/badge/DOI-10.1785%2F0220220288-pink)](https://doi.org/10.1785/0220220288)
+
+[![GitHub stars](https://img.shields.io/github/stars/xumi1993/seispy?style=social)](https://github.com/xumi1993/seispy)
+[![](https://img.shields.io/github/forks/xumi1993/seispy?style=social)](https://github.com/xumi1993/seispy)
+
 
 Seispy is a graphical interface Python module for receiver function (RF) calculation and post-processing in seismological research. Automated workflows of RF calculations facilitate processing large volumes of different types of seismic data. The graphic user interface enables an intuitive and straightforward evaluation of RF quality control. Seispy contains the basic RF-based methods. Five main modules for the post-processing of RF are H-k stacking, crustal anisotropic estimation, harmonic decomposition, 2D and 3D common conversion point (CCP) stacking. The CCP staking in the different application scenarios can be handled by rich modules, such as time-to-depth conversion, 2D or 3D CCP stacking, and adaptive station or bin selection for CCP stacking profiles in a dense seismic array or a linear seismic array. As a Python module, functions in the Seispy can be called easily in python scripts for other purposes. The modular design allows new functionality to be added in a collaborative development environment. Seispy licensed under GPLv3 can be open accessed on [Github repository](https://github.com/xumi1993/seispy).
 
@@ -56,7 +58,8 @@ Further details are available in the [Installation Guide](installation).
 Users using Seispy in their research please cite our peer-reviewed journal article in manuscripts
 
 ```{admonition} Reference
-Mijian Xu, Jing He; Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. *Seismological Research Letters* 2022; doi: [https://doi.org/10.1785/0220220288](https://doi.org/10.1785/0220220288)
+Mijian Xu, Jing He; Seispy: Python Module for Batch Calculation and Postprocessing of Receiver Functions. *Seismological Research Letters* 2022; [![Static Badge](https://img.shields.io/badge/DOI-10.1785%2F0220220288-pink)](https://doi.org/10.1785/0220220288)
+
 ```
 
 
@@ -115,6 +118,15 @@ notes/index
 modules
 :::
 
+```{toctree}
+:caption: Project Links
+:hidden:
+
+GitHub <https://github.com/xumi1993/seispy>
+GitLab <https://gitlab.com/xumi1993/seispy>
+Anaconda <https://anaconda.org/conda-forge/seispy>
+PyPI <https://pypi.org/project/python-seispy/>
+```
 
 ## References
 

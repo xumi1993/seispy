@@ -1,6 +1,14 @@
 Post-processing package
 ====================
 
+seispy.core.depmodel module
+---------------------------
+
+.. automodule:: seispy.core.depmodel
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 seispy.hk module
 ----------------
 

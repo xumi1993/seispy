@@ -1,5 +1,5 @@
 Module Index
-======
+============
 
 .. toctree::
    :maxdepth: 2
@@ -7,5 +7,3 @@ Module Index
    rf
    post
    ccp
-   .. gui
-   .. seispy
