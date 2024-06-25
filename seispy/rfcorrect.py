@@ -716,7 +716,6 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere
         for i in range(stadatar.ev_num):
             tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(
                 dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True, sphere=sphere, phase=phase)
-            print(type(stadatar.bazi[i]), type(rad2deg(x_s)))
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))
             pplat_p[i], pplon_p[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_p))
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):
