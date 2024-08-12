@@ -28,6 +28,19 @@ magmax = 10
 dismin = 30
 dismax = 90
 
+[fetch]
+# Use remote data or not 
+use_remote_data = True
+
+# Data server, defaults to IRIS
+data_server = IRIS
+
+# Station information
+network = CN
+station = YUK2
+location =
+channel = HH?
+
 [match_eq]
 # Date format in SAC filenames
 dateformat = %Y.%j.%H%M%S
