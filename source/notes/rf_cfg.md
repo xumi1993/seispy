@@ -36,10 +36,10 @@ use_remote_data = True
 data_server = IRIS
 
 # Station information
-network = CN
-station = YUK2
+network = CB
+station = NJ2
 location =
-channel = HH?
+channel = BH?
 
 [match_eq]
 # Date format in SAC filenames
