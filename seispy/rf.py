@@ -130,7 +130,7 @@ def process_row(i, size, row, para, model, query, tb, te, logger):
     t1 = row['date'] + arr_time - tb
     t2 = row['date'] + arr_time + te
     try:
-        logger.RFlog.info('Fetch waveforms of event {} ({}/{}) from {}'.format(datestr, i, size, para.data_server))
+        logger.RFlog.info('Fetch waveforms of event {} ({}/{}) from {}'.format(datestr, i+1, size, para.data_server))
         st = query.client.get_waveforms(para.stainfo.network, para.stainfo.station,
                                         para.stainfo.location, para.stainfo.channel, t1, t2)
         _add_header(st, row['date'], para.stainfo)
