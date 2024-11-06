@@ -134,6 +134,7 @@ class RFPara(object):
         self.use_remote_data=False
         self.data_server_user = None
         self.data_server_password = None
+        self.n_proc = 1
         self.stainfo = StaInfo()
 
     def get_para(self):
@@ -276,6 +277,8 @@ class RFPara(object):
                         pa.data_server_password = value
                 elif key == 'data_server':
                     pa.data_server = value
+                elif key == 'n_proc':
+                    pa.n_proc = cf.getint('fetch', 'n_proc')
                 else:
                     exec('pa.stainfo.{} = value'.format(key))
             sections.remove('fetch')

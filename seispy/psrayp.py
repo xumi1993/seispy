@@ -50,7 +50,6 @@ class PsRayp(object):
 
     def get_rayp(self):
         for i in range(self.dis.shape[0]):
-            print('{}'.format(self.dis[i]))
             for j in range(self.dep.shape[0]):
                 self.rayp[i, j, :] = self.taup_rayp(this_dis=self.dis[i], this_dep=self.dep[j])[1]
 

@@ -148,16 +148,15 @@ class PlotRT:
         """
         self.plot_waves()
         self.set_fig()
-        if outformat is None and not show:
-            return
-        elif outformat == 'g':
-            self.fig.savefig(join(out_path, self.stadata.staname+'_{}T_{}order_{:.1f}.png'.format(
-                             self.stadata.comp, self.key, self.stadata.f0[0])),
-                             dpi=400, bbox_inches='tight')
-        elif outformat == 'f':
-            self.fig.savefig(join(out_path, self.stadata.staname+'_{}T_{}order_{:.1f}.pdf'.format(
-                             self.stadata.comp, self.key, self.stadata.f0[0])),
-                             format='pdf', bbox_inches='tight')
+        if out_path is not None:
+            if outformat == 'g':
+                self.fig.savefig(join(out_path, self.stadata.staname+'_{}T_{}order_{:.1f}.png'.format(
+                                self.stadata.comp, self.key, self.stadata.f0[0])),
+                                dpi=400, bbox_inches='tight')
+            elif outformat == 'f':
+                self.fig.savefig(join(out_path, self.stadata.staname+'_{}T_{}order_{:.1f}.pdf'.format(
+                                self.stadata.comp, self.key, self.stadata.f0[0])),
+                                format='pdf', bbox_inches='tight')
         if show:
             plt.show()
 

@@ -470,23 +470,19 @@ class RFStation(object):
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
-    def plotrt(self, outformat=None, **kwargs):
+    def plotrt(self, **kwargs):
         """Plot radial and transverse RFs
-
-        :param outformat: Output format for plot, defaults to None
-        :type outformat: str, optional
+        :param kwargs: Parameters for plot, see :meth:`seispy.plotRT.plotrt` for detail
         """
         if self.only_r:
             raise ValueError('Transverse RFs are nessary or use RFStation.plotr instead.')
-        return _plotrt(self, outformat=outformat, **kwargs)
+        return _plotrt(self, **kwargs)
 
-    def plotr(self, outformat=None, **kwargs):
+    def plotr(self,**kwargs):
         """Plot radial RFs
-
-        :param outformat: Output format for plot, defaults to None
-        :type outformat: str, optional
+        :param kwargs: Parameters for plot, see :meth:`seispy.plotR.plotr` for detail
         """
-        return _plotr(self, outformat=outformat, **kwargs)
+        return _plotr(self, **kwargs)
 
 
 class SACStation(RFStation):
@@ -716,7 +712,6 @@ def psrf_1D_raytracing(stadatar, YAxisRange, velmod='iasp91', srayp=None, sphere
         for i in range(stadatar.ev_num):
             tps[i], x_s, x_p, raylength_s[i], raylength_p[i] = xps_tps_map(
                 dep_mod, stadatar.rayp[i], stadatar.rayp[i], is_raylen=True, sphere=sphere, phase=phase)
-            print(type(stadatar.bazi[i]), type(rad2deg(x_s)))
             pplat_s[i], pplon_s[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_s))
             pplat_p[i], pplon_p[i] = latlon_from(stadatar.stla, stadatar.stlo, stadatar.bazi[i], rad2deg(x_p))
     elif isinstance(srayp, str) or isinstance(srayp, np.lib.npyio.NpzFile):

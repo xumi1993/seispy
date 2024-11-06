@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 
-VERSION = "1.3.7"
+VERSION = "1.3.8"
 setup(name='python-seispy',
       version=VERSION,
       author='Mijian Xu',
@@ -18,7 +18,7 @@ setup(name='python-seispy',
       package_dir={'seispy': 'seispy'},
       package_data={'': ['data/*']},
       install_requires=[
-                'numpy>=1.19.0',
+                'numpy>=1.19.0,<2.0',
                 'scipy>=1.9.1',
                 'matplotlib>=3.5.0',
                 'pandas>=1.0.0',
