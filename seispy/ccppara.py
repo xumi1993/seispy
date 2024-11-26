@@ -15,7 +15,7 @@ class CCPPara(object):
         self.stalist = 'sta.lst'
         self.peakfile = 'good_410_660.dat'
         self.adaptive= False
-        self.velmod = ''
+        self.velmod = 'iasp91'
         self.stack_sta_list = ''
         self.domperiod = 5
         self.shape = 'circle'
@@ -58,6 +58,19 @@ class CCPPara(object):
             raise ValueError('ccppara.shape must be in \'circle\' or \'rect\'')
         else:
             self._shape = value.lower()
+
+    @property
+    def velmod(self):
+        return self._velmod
+
+    @velmod.setter
+    def velmod(self, value):
+        if not isinstance(value, str):
+            raise TypeError('ccppara.velmod must be str type')
+        elif value == "":
+            self._velmod = 'iasp91'
+        else:
+            self._velmod = value
 
 
 def ccppara(cfg_file):
