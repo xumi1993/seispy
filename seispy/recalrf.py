@@ -1,4 +1,4 @@
-from seispy.rf import RF, datestr2regex, SACFileNotFoundError
+from seispy.rf import RF, datestr2regex, SACFileNotFoundError, fetch_waveform
 from seispy.eq import EQ
 from seispy.utils import scalar_instance
 import numpy as np
@@ -88,12 +88,20 @@ class ReRF(RF):
         return pd.DataFrame(lst, columns=cols)
     
     def match_eq(self, **kwarg):
+        """
+        Match or download teleseismic data according to final list.
+        """
         try:
-            self.logger.RFlog.info('Match SAC files')
-            self.eqs = match_eq(self.eq_lst, self.para.datapath, self.logger,
-                                ref_comp=self.para.ref_comp, suffix=self.para.suffix,
-                                offset=self.para.offset, tolerance=self.para.tolerance,
-                                dateformat=self.para.dateformat)
+            if self.para.use_remote_data:
+                self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
+                self.eq_lst = self.eq_lst.drop(columns=['dis', 'bazi'])
+                self.eqs = fetch_waveform(self.eq_lst, self.para, self.model, self.logger)
+            else:
+                self.logger.RFlog.info('Match SAC files')
+                self.eqs = match_eq(self.eq_lst, self.para.datapath, self.logger,
+                                    ref_comp=self.para.ref_comp, suffix=self.para.suffix,
+                                    offset=self.para.offset, tolerance=self.para.tolerance,
+                                    dateformat=self.para.dateformat)
         except Exception as e:
             self.logger.RFlog.error('{0}'.format(e))
             raise e
