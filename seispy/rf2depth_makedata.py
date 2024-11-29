@@ -153,7 +153,6 @@ class RFDepth():
             if self.ismod1d:
                 if self.modfolder1d is not None:
                     velmod = _load_mod(self.modfolder1d, _sta.station)
-
                 else:
                     velmod = self.cpara.velmod
 
@@ -169,12 +168,17 @@ class RFDepth():
             else:
                 ### 3d model interp
                 if self.raytracing3d:
-                    pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(stadatar, self.cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere)
+                    pplat_s, pplon_s, pplat_p, pplon_p, newtpds = psrf_3D_raytracing(
+                        stadatar, self.cpara.depth_axis, self.mod3d, srayp=self.srayp, sphere=sphere
+                    )
                 else:
                     pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p, tps = psrf_1D_raytracing(
-                        stadatar, self.cpara.depth_axis, srayp=self.srayp, sphere=sphere, phase=psphase)
-                    newtpds = psrf_3D_migration(pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
-                                                tps, self.cpara.depth_axis, self.mod3d)
+                        stadatar, self.cpara.depth_axis, velmod=self.cpara.velmod, srayp=self.srayp, sphere=sphere, phase=psphase
+                    )
+                    newtpds = psrf_3D_migration(
+                        pplat_s, pplon_s, pplat_p, pplon_p, raylength_s, raylength_p,
+                        tps, self.cpara.depth_axis, self.mod3d
+                    )
                 if stadatar.prime_phase == 'P':
                     piercelat, piercelon = pplat_s, pplon_s
                 else:
