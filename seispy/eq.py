@@ -25,7 +25,7 @@ class TooMoreComponents(Exception):
         return '{}'.format(self.matchkey)
 
 def rotateZNE(st):
-    """Rotate Z, N, E components to Z, N, E components
+    """Rotate non-traditional components (e.g., Z, 1, 2) to Z, N, E components
     """
     try:
         zne = rotate2zne(
