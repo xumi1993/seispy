@@ -43,7 +43,7 @@ def _add_header(st, evt_time, stainfo):
         for ch in sta.channels:
             if ch.code == channel:
                 header.cmpaz = ch.azimuth
-                header.cmpinc = -ch.dip
+                header.cmpinc = ch.dip + 90
         header.stla = stainfo.stla
         header.stlo = stainfo.stlo
         header.stel = stainfo.stel
