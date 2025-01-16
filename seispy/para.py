@@ -35,7 +35,7 @@ class StaInfo():
     
     def __repr__(self) -> str:
         # print the station name, channel, location
-        return '{0}.{1}.{2}:{3}'.format(self.network, self.station, self.channel, self.location)
+        return '{0}.{1}.{2}:{}'.format(self.network, self.station, self.channel, self.location)
 
     def link_server(self, server, user=None, password=None):
         """_summary_
