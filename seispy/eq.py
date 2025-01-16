@@ -29,9 +29,9 @@ def rotateZNE(st):
     """
     try:
         zne = rotate2zne(
-            st[0], st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc,
-            st[1], st[1].stats.sac.cmpaz, st[1].stats.sac.cmpinc,
-            st[2], st[2].stats.sac.cmpaz, st[2].stats.sac.cmpinc)
+            st[0].data, st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc - 90,
+            st[1].data, st[1].stats.sac.cmpaz, st[1].stats.sac.cmpinc - 90,
+            st[2].data, st[2].stats.sac.cmpaz, st[2].stats.sac.cmpinc - 90)
     except Exception as e:
         raise ValueError('No specified cmpaz or cmpinc. {}'.format(e))
     for tr, new_data, component in zip(st, zne, "ZNE"):
