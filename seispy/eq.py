@@ -72,7 +72,7 @@ class EQ(object):
     def _check_comp(self):
         if len(self.st) < 3:
             channel = ' '.join([tr.stats.channel for tr in self.st])
-            raise NotEnoughComponent('Sismogram must be in 3 components, but there are only channel {} of {}'.format(channel, self.datestr))
+            raise NotEnoughComponent('Seismogram must be in 3 components, but there are only channel {} of {}'.format(channel, self.datestr))
         elif len(self.st) > 3:
             raise TooMoreComponents('{} has more than 3 components, please select to delete redundant seismic components'.format(self.datestr))
         else:
@@ -255,7 +255,7 @@ class EQ(object):
         return corr_baz, ampt
 
     def fix_channel_name(self):
-        """Fix channel name for R, E, N components
+        """Change channel name of Z12 to ZNE, rotate to ZNE for non-standard orientation
         """
         if self.st.select(channel='??1') and self.st.select(channel='??Z') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
             if self.st.select(channel='*1')[0].stats.sac.cmpaz == 0:
@@ -263,11 +263,6 @@ class EQ(object):
                 self.st.select(channel='*2')[0].stats.channel = self.st.select(channel='*2')[0].stats.channel[:-1] + 'E'
             elif self.st.select(channel='*1')[0].stats.sac.cmpaz != 0:
                 rotateZNE(self.st)
-            self.st.sort(['channel'])
-        elif self.st.select(channel='*1'):
-            self.st.select(channel='*1')[0].stats.channel = 'Z'
-            self.st.select(channel='*2')[0].stats.channel = 'N'
-            self.st.select(channel='*3')[0].stats.channel = 'E'
             self.st.sort(['channel'])
         else:
             pass
