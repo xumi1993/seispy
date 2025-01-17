@@ -25,16 +25,18 @@ class TooMoreComponents(Exception):
         return '{}'.format(self.matchkey)
 
 def rotateZNE(st):
-    """Rotate non-traditional components (e.g., Z, 1, 2) to Z, N, E components
+    """Rotate non-standard components (e.g., 1, 2, Z) to N, E, Z components
+    and reorder the components to ensure that the final *.BHZ.SAC files have correct cmpaz (=0) and cmpinc (=0) headers.
     """
     try:
         zne = rotate2zne(
             st[0].data, st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc - 90,
             st[1].data, st[1].stats.sac.cmpaz, st[1].stats.sac.cmpinc - 90,
             st[2].data, st[2].stats.sac.cmpaz, st[2].stats.sac.cmpinc - 90)
+        nez = [zne[1], zne[2], zne[0]]  # change order from ZNE to NEZ
     except Exception as e:
         raise ValueError('No specified cmpaz or cmpinc. {}'.format(e))
-    for tr, new_data, component in zip(st, zne, "ZNE"):
+    for tr, new_data, component in zip(st, nez, "NEZ"):
         tr.data = new_data
         tr.stats.channel = tr.stats.channel[:-1] + component
 
