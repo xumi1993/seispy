@@ -41,9 +41,11 @@ def _add_header(st, evt_time, stainfo):
         header = SACTrace.from_obspy_trace(tr).to_obspy_trace().stats.sac
         channel = tr.stats.channel
         for ch in sta.channels:
-            if ch.code == channel:
+            if (ch.code == channel and ch.start_date <= tr.stats.starttime and
+                    (tr.stats.endtime <= ch.end_date or ch.end_date is None)):
                 header.cmpaz = ch.azimuth
                 header.cmpinc = ch.dip + 90
+                break
         header.stla = stainfo.stla
         header.stlo = stainfo.stlo
         header.stel = stainfo.stel
