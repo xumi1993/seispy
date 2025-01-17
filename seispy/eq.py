@@ -257,7 +257,7 @@ class EQ(object):
         return corr_baz, ampt
 
     def fix_channel_name(self):
-        """Fix channel name for R, E, N components
+        """Fix channel name for Z, E, N components
         """
         if self.st.select(channel='??1') and self.st.select(channel='??Z') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
             if self.st.select(channel='*1')[0].stats.sac.cmpaz == 0:
