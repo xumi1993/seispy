@@ -470,23 +470,19 @@ class RFStation(object):
         self.harmo.harmo_trans()
         return self.harmo.harmonic_trans, self.harmo.unmodel_trans
 
-    def plotrt(self, outformat=None, **kwargs):
+    def plotrt(self, **kwargs):
         """Plot radial and transverse RFs
-
-        :param outformat: Output format for plot, defaults to None
-        :type outformat: str, optional
+        :param kwargs: Parameters for plot, see :meth:`seispy.plotRT.plotrt` for detail
         """
         if self.only_r:
             raise ValueError('Transverse RFs are nessary or use RFStation.plotr instead.')
-        return _plotrt(self, outformat=outformat, **kwargs)
+        return _plotrt(self, **kwargs)
 
-    def plotr(self, outformat=None, **kwargs):
+    def plotr(self,**kwargs):
         """Plot radial RFs
-
-        :param outformat: Output format for plot, defaults to None
-        :type outformat: str, optional
+        :param kwargs: Parameters for plot, see :meth:`seispy.plotR.plotr` for detail
         """
-        return _plotr(self, outformat=outformat, **kwargs)
+        return _plotr(self, **kwargs)
 
 
 class SACStation(RFStation):

@@ -247,7 +247,7 @@ def plot_rt():
     if arg.format not in ('f', 'g'):
         raise ValueError('Error: The format must be in \'f\' and \'g\'')
     rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
-    rfsta.plotrt(rfsta, enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
+    rfsta.plotrt(enf=arg.enf, out_path=arg.output, key=arg.k, outformat=arg.format, xlim=[-2, arg.x])
 
 
 def plot_r():
@@ -268,7 +268,7 @@ def plot_r():
     if arg.format not in ('f', 'g'):
         parser.error('Error: The format must be in \'f\' and \'g\'')
     rfsta = RFStation(arg.rfpath, prime_comp=arg.c)
-    rfsta.plotr(rfsta, arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], outformat=arg.format)
+    rfsta.plotr(arg.output, enf=arg.enf, key=arg.k, xlim=[-2, arg.x], outformat=arg.format)
 
 
 def get_events():
