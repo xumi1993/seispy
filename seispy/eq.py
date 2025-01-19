@@ -25,16 +25,18 @@ class TooMoreComponents(Exception):
         return '{}'.format(self.matchkey)
 
 def rotateZNE(st):
-    """Rotate Z, N, E components to Z, N, E components
+    """Rotate non-standard components (e.g., 1, 2, Z) to N, E, Z components
+    and reorder the components to ensure that the final *.BHZ.SAC files have correct cmpaz (=0) and cmpinc (=0) headers.
     """
     try:
         zne = rotate2zne(
-            st[0], st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc,
-            st[1], st[1].stats.sac.cmpaz, st[1].stats.sac.cmpinc,
-            st[2], st[2].stats.sac.cmpaz, st[2].stats.sac.cmpinc)
+            st[0].data, st[0].stats.sac.cmpaz, st[0].stats.sac.cmpinc - 90,
+            st[1].data, st[1].stats.sac.cmpaz, st[1].stats.sac.cmpinc - 90,
+            st[2].data, st[2].stats.sac.cmpaz, st[2].stats.sac.cmpinc - 90)
+        nez = [zne[1], zne[2], zne[0]]  # change order from ZNE to NEZ
     except Exception as e:
         raise ValueError('No specified cmpaz or cmpinc. {}'.format(e))
-    for tr, new_data, component in zip(st, zne, "ZNE"):
+    for tr, new_data, component in zip(st, nez, "NEZ"):
         tr.data = new_data
         tr.stats.channel = tr.stats.channel[:-1] + component
 
@@ -255,7 +257,7 @@ class EQ(object):
         return corr_baz, ampt
 
     def fix_channel_name(self):
-        """Fix channel name for R, E, N components
+        """Fix channel name for Z, E, N components
         """
         if self.st.select(channel='??1') and self.st.select(channel='??Z') and hasattr(self.st.select(channel='*1')[0].stats.sac, 'cmpaz'):
             if self.st.select(channel='*1')[0].stats.sac.cmpaz == 0:
