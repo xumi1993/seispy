@@ -51,7 +51,7 @@ class RFAni():
         self.te = te
         self.tlen = tlen
         self.sacdatar = sacdatar
-        self.sacdatar.resample(0.1)
+        self.sacdatar.resample(0.01)
         self.nbs = int((self.tb + self.sacdatar.shift) / self.sacdatar.sampling)
         self.nes = int((self.te + self.sacdatar.shift) / self.sacdatar.sampling)
         self.sacdatar.moveoutcorrect(ref_rayp=rayp, velmod=model, replace=True)
@@ -86,8 +86,8 @@ class RFAni():
         self.ne = int(nps + self.tlen / self.sacdatar.sampling)
 
     def _init_ani_para(self):
-        self.deltat_1d = np.arange(0, 1.55, 0.05)
-        self.fvd_1d = np.arange(0, 365, 5)
+        self.deltat_1d = np.arange(0, 1.55, 0.02)
+        self.fvd_1d = np.arange(0, 361, 1)
 
     def _cut_energy_waveform(self, idx, nb, ne):
         """Cut energy waveform with given index, nb and ne.
@@ -122,10 +122,7 @@ class RFAni():
     def rotate_to_fast_slow(self):
         """Rotate RF data to fast and slow direction.
         """
-        self.ani_points = np.empty([0, 2])
-        for f in self.fvd_1d:
-            for d in self.deltat_1d:
-                self.ani_points = np.vstack((self.ani_points, np.array([f, d])))
+        self.ani_points = np.array([[f, d] for f in self.fvd_1d for d in self.deltat_1d])
         energy_cc = np.zeros(self.ani_points.shape[0])
         energy_tc = np.zeros(self.ani_points.shape[0])
         raw_energy_r = np.sum(np.sum(self.rfr_baz[:, self.nb:self.ne], axis=0) ** 2 - np.sum(self.rfr_baz[:, self.nb:self.ne] ** 2, axis=0))
@@ -297,17 +294,24 @@ class RFAni():
         """
         if opt == 'max':
             ind = np.argwhere(energy == np.max(energy))
-        elif opt == 'min':
-            ind = np.argwhere(energy == np.min(energy))
+        # elif opt == 'min':
+        #     ind = np.argwhere(energy == np.min(energy))
         else:
-            raise ValueError('\'opt\' must be max or min')
+            raise ValueError('\'opt\' must be in max or min')
+        cvalue = np.max(energy) - np.std(energy.reshape(energy.size))
+        cs = plt.contour(self.fvd, self.deltat, energy, [cvalue])
+        # Add for compatibility with matplotlib 3.10.0
+        # try:
+        #     cs_path = cs.get_paths()[0].vertices
+        # except:
+        #     cs_path = cs.collections[0].get_paths()[0].vertices
         best_fvd = []
         best_dt = []
         for i, j in ind:
             best_fvd.append(self.fvd[i, j])
             best_dt.append(self.deltat[i, j])
         uniq_fd, uniq_td = _average_delay(np.array(best_fvd), np.array(best_dt))
-        return uniq_fd, uniq_td
+        return uniq_fd, uniq_td, cvalue
 
     def joint_ani(self, weight=[0.5, 0.3, 0.2]):
         """Joint method for crustal anisotropy estimation.
@@ -320,8 +324,17 @@ class RFAni():
         self.energy_r = self.radial_energy_max()
         self.energy_cc, self.energy_tc = self.rotate_to_fast_slow()
         self.energy_joint = _joint_stack(self.energy_r, self.energy_cc, self.energy_tc, weight)
-        self.bf, self.bt = self.search_peak(self.energy_joint, opt='max')
-        return self.bf, self.bt
+        self.best_velues = {}
+        for i, energy in enumerate([self.energy_r, self.energy_cc, -self.energy_tc, self.energy_joint]):
+            bf, bt, cvalue = self.search_peak(energy, opt='max')
+            if i == 2:
+                cvalue *= -1.
+            self.best_velues[i] = {
+                'bestf': bf,
+                'bestt': bt,
+                'cvalue': cvalue
+            }
+        return bf, bt
 
     def plot_polar(self, cmap=load_cyan_map(), show=False, outpath='./'):
         """Polar map of crustal anisotropy. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.
@@ -337,7 +350,7 @@ class RFAni():
         axs = [axes[0, 0], axes[0, 1], axes[1, 0], axes[1, 1]]
         energy_all = [self.energy_r, self.energy_cc, self.energy_tc, self.energy_joint]
         energy_title = ['R cosine energy', 'R cross-correlation', 'T energy', 'Joint']
-        for ax, energy, title in zip(axs, energy_all, energy_title):
+        for i, ax, energy, title in zip(range(4), axs, energy_all, energy_title):
             ax.set_theta_direction(-1)
             ax.set_theta_zero_location("N")
             if title == 'T energy':
@@ -345,16 +358,19 @@ class RFAni():
             else:
                 eng = ax.pcolor(np.radians(self.fvd), self.deltat, energy, cmap=cmap)
             ax.grid(True, color='lightgray', linewidth=0.5)
-            ax.scatter(np.radians(self.bf), self.bt, color='white', marker='X', s=48)
+            # ax.contour(np.radians(self.fvd), self.deltat, energy, levels=[self.best_velues[i]['cvalue']])
+            ax.scatter(np.radians(self.best_velues[i]['bestf']), self.best_velues[i]['bestt'], color='white', marker='X', s=48)
             ax.set_xticks(np.radians(np.arange(0, 360, 30)))
             ax.set_yticks(np.arange(0, 1.5, 0.5))
+            title = '{}\nFVD = ${:.0f}^\circ$, $\delta t$ = ${:.2f}$ s'.format(title, self.best_velues[i]['bestf'][0], self.best_velues[i]['bestt'][0])
             ax.set_title(title)
             fig.colorbar(eng, ax=ax)
-        fig.suptitle('{}\nFVD = ${:.0f}^\circ$, $\delta t$ = ${:.1f}$ s'.format(self.sacdatar.staname, self.bf[0], self.bt[0]), fontsize=16)
+        fig.suptitle(self.sacdatar.staname, fontsize=16)
+        # fig.suptitle('{}\nFVD = ${:.0f}^\circ$, $\delta t$ = ${:.1f}$ s'.format(self.sacdatar.staname, self.bf[0], self.bt[0]), fontsize=16)
         if show:
             plt.show()
         else:
-            fig.savefig(join(outpath, self.sacdatar.staname+'_joint_ani.png'), dpi=400, bbox_inches='tight')
+            fig.savefig(join(outpath, f'{self.sacdatar.staname}_joint_ani.png'), dpi=400, bbox_inches='tight')
 
 
 if __name__ == "__main__":
