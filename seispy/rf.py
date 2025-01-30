@@ -22,6 +22,10 @@ import argparse
 import sys
 import pickle
 import concurrent.futures
+import multiprocessing
+
+
+multiprocessing.set_start_method('spawn', force=True)
 
 
 def pickphase(eqs, para, logger):
