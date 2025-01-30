@@ -29,8 +29,8 @@ jobs:
           channels: conda-forge
       - name: Install dependencies
         run: |
-          conda install pytest pytest-cov
           python -m pip install --upgrade pip
+          pip intall pytest pytest-cov
           pip install .
       - name: test
         run: |
