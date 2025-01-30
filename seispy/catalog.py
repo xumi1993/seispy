@@ -51,7 +51,7 @@ def read_catalog_file(fname):
     """
     col = ['date', 'evla', 'evlo', 'evdp', 'mag']
     colcata = ['year', 'month', 'day', 'hour', 'minute', 'second']
-    data_cata = pd.read_table(fname, header=None, sep='\s+')
+    data_cata = pd.read_table(fname, header=None, sep=r'\s+')
     date_cols = data_cata.loc[:, [0,1,2,4,5,6]]
     date_cols.columns = colcata
     dates = pd.DataFrame(pd.to_datetime(date_cols))[0].apply(UTCDateTime)

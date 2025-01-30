@@ -14,6 +14,7 @@ def test_sub01():
     rf.para.magmin = 6.5
     rf.para.gauss = [1.0, 1.5]
     rf.para.use_remote_data = True
+    rf.para.n_proc = 2
     rf.load_stainfo()
 
     rf.para.date_begin = UTCDateTime('20220101')

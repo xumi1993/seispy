@@ -23,6 +23,7 @@ import sys
 import pickle
 import concurrent.futures
 import multiprocessing
+import copy
 
 
 multiprocessing.set_start_method('spawn', force=True)
@@ -115,45 +116,6 @@ def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
                     (dis>=dismin) & (dis<=dismax)]
     return eq_lst
 
-
-def process_row(i, size, row, para, model, query, tb, te, logger):
-    new_col = ['dis', 'bazi', 'data', 'datestr']
-    datestr = row['date'].strftime('%Y.%j.%H.%M.%S')
-    daz = distaz(para.stainfo.stla, para.stainfo.stlo, row['evla'], row['evlo'])
-    arrivals = model.get_travel_times(row['evdp'], daz.delta, phase_list=[para.phase])
-
-    if not arrivals:
-        logger.RFlog.error('The phase of {} with source depth {} and distance {} is not exists'.format(
-            para.phase, row['evdp'], daz.delta))
-        return None
-
-    if len(arrivals) > 1:
-        logger.RFlog.error('More than one phase were calculated with source depth of {} and distance of {}'.format(
-            row['evdp'], daz.delta))
-        return None
-
-    arr_time = arrivals[0].time
-    t1 = row['date'] + arr_time - tb
-    t2 = row['date'] + arr_time + te
-    try:
-        logger.RFlog.info('Fetch waveforms of event {} ({}/{}) from {}'.format(datestr, i+1, size, para.data_server))
-        st = query.client.get_waveforms(para.stainfo.network, para.stainfo.station,
-                                        para.stainfo.location, para.stainfo.channel, t1, t2)
-        _add_header(st, row['date'], para.stainfo)
-    except Exception as e:
-        logger.RFlog.error('Error in fetching waveforms of event {}: {}'.format(datestr, str(e).strip()))
-        return None
-
-    try:
-        this_eq = EQ.from_stream(st)
-    except Exception as e:
-        logger.RFlog.error('{}'.format(e))
-        return None
-
-    this_eq.get_time_offset(row['date'])
-    this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
-    return this_df
-
 def fetch_waveform(eq_lst, para, model, logger):
     """Fetch waveforms from remote data server
 
@@ -170,15 +132,60 @@ def fetch_waveform(eq_lst, para, model, logger):
     """
     tb = np.max([2*para.noiselen, 2*para.time_before])
     te = np.max([2*para.noiselen, 2*para.time_after])
+
     try:
         query = para.stainfo.query
     except:
         logger.RFlog.error('Please load station information and search earthquake before fetch waveform')
-    eqall = []
+
+    def process_row(i, size, row):
+        new_col = ['dis', 'bazi', 'data', 'datestr']
+        datestr = row['date'].strftime('%Y.%j.%H.%M.%S')
+        daz = distaz(para.stainfo.stla, para.stainfo.stlo, row['evla'], row['evlo'])
+        arrivals = model.get_travel_times(row['evdp'], daz.delta, phase_list=[para.phase])
+
+        if not arrivals:
+            logger.RFlog.error('The phase of {} with source depth {} and distance {} is not exists'.format(
+                para.phase, row['evdp'], daz.delta))
+            return None
+
+        if len(arrivals) > 1:
+            logger.RFlog.error('More than one phase were calculated with source depth of {} and distance of {}'.format(
+                row['evdp'], daz.delta))
+            return None
+
+        arr_time = arrivals[0].time
+        t1 = row['date'] + arr_time - tb
+        t2 = row['date'] + arr_time + te
+        try:
+            logger.RFlog.info('Fetch waveforms of event {} ({}/{}) from {}'.format(datestr, i+1, size, para.data_server))
+            st = query.client.get_waveforms(para.stainfo.network, para.stainfo.station,
+                                            para.stainfo.location, para.stainfo.channel, t1, t2)
+            _add_header(st, row['date'], para.stainfo)
+        except Exception as e:
+            logger.RFlog.error('Error in fetching waveforms of event {}: {}'.format(datestr, str(e).strip()))
+            return None
+
+        try:
+            this_eq = EQ.from_stream(st)
+        except Exception as e:
+            logger.RFlog.error('{}'.format(e))
+            return None
+
+        this_eq.get_time_offset(row['date'])
+        this_df = pd.DataFrame([[daz.delta, daz.baz, this_eq, datestr]], columns=new_col, index=[i])
+        return this_df
 
     # parallel downloading waveforms
-    with concurrent.futures.ProcessPoolExecutor(max_workers=para.n_proc) as executor:
-        futures = {executor.submit(process_row, i, eq_lst.shape[0], row, para, model, query, tb, te, logger): i for i, row in eq_lst.iterrows()}
+    eqall = []
+    # with concurrent.futures.ProcessPoolExecutor(max_workers=para.n_proc) as executor:
+    with concurrent.futures.ThreadPoolExecutor(
+        max_workers=para.n_proc,
+    ) as executor:
+        futures = {
+            executor.submit(process_row, i, eq_lst.shape[0], row): i
+            for i, row in eq_lst.iterrows()
+        }
 
         for future in concurrent.futures.as_completed(futures):
             result = future.result()
@@ -404,7 +411,7 @@ class RF(object):
         """
         try:
             if self.para.use_remote_data:
-                self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
+                self.logger.RFlog.info('Fetch seismic data from {} with {} threads'.format(self.para.data_server, self.para.n_proc))
                 self.eqs = fetch_waveform(self.eq_lst, self.para, self.model, self.logger)
             else:
                 self.logger.RFlog.info('Associating SAC files with earthquakes')
