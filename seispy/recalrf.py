@@ -95,7 +95,7 @@ class ReRF(RF):
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Fetch seismic data from {}'.format(self.para.data_server))
                 self.eq_lst = self.eq_lst.drop(columns=['dis', 'bazi'])
-                self.eqs = fetch_waveform(self.eq_lst, self.para, self.model, self.logger)
+                self.eqs = fetch_waveform(self.eq_lst, self.para, self.logger)
             else:
                 self.logger.RFlog.info('Match SAC files')
                 self.eqs = match_eq(self.eq_lst, self.para.datapath, self.logger,

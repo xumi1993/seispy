@@ -40,7 +40,7 @@ class RFStation(object):
         self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         if not exists(data_path):
-            return
+            raise FileNotFoundError("No such directory of {}".format(data_path))
         self._chech_comp()
         if isfile(data_path):
             data_path = dirname(abspath(data_path))

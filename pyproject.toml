@@ -40,7 +40,8 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["seispy"]
+where = ["."]
+include = ["seispy", "seispy.*"]
 
 [tool.setuptools.package-data]
 "seispy" = ["data/*"]

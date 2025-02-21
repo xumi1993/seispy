@@ -116,7 +116,7 @@ def read_catalog(logpath:str, b_time, e_time, stla:float, stlo:float,
                     (dis>=dismin) & (dis<=dismax)]
     return eq_lst
 
-def fetch_waveform(eq_lst, para, model, logger):
+def fetch_waveform(eq_lst, para, logger):
     """Fetch waveforms from remote data server
 
     :param eq_lst: Earthquake list
@@ -139,6 +139,11 @@ def fetch_waveform(eq_lst, para, model, logger):
         logger.RFlog.error('Please load station information and search earthquake before fetch waveform')
 
     def process_row(i, size, row):
+        try:
+            model = TauPyModel(para.velmod)
+        except:
+            logger.RFlog.error('Cannot load velocity model {}'.format(para.velmod))
+            sys.exit(1)
         new_col = ['dis', 'bazi', 'data', 'datestr']
         datestr = row['date'].strftime('%Y.%j.%H.%M.%S')
         daz = distaz(para.stainfo.stla, para.stainfo.stlo, row['evla'], row['evlo'])
@@ -187,10 +192,10 @@ def fetch_waveform(eq_lst, para, model, logger):
             for i, row in eq_lst.iterrows()
         }
 
-        for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            if result is not None:
-                eqall.append(result)
+    for future in concurrent.futures.as_completed(futures):
+        result = future.result()
+        if result is not None:
+            eqall.append(result)
     
     if not eqall:
         logger.RFlog.error('No waveforms fetched')
@@ -412,7 +417,7 @@ class RF(object):
         try:
             if self.para.use_remote_data:
                 self.logger.RFlog.info('Fetch seismic data from {} with {} threads'.format(self.para.data_server, self.para.n_proc))
-                self.eqs = fetch_waveform(self.eq_lst, self.para, self.model, self.logger)
+                self.eqs = fetch_waveform(self.eq_lst, self.para, self.logger)
             else:
                 self.logger.RFlog.info('Associating SAC files with earthquakes')
                 self.eqs = match_eq(self.eq_lst, self.para.datapath, self.para.stainfo.stla, 
