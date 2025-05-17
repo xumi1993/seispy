@@ -140,6 +140,9 @@ class RFDepth():
         for _i, _sta in enumerate(self.sta_info):
             rfpath = join(self.cpara.rfpath, _sta.station)
             stadatar = RFStation(rfpath, only_r=True, prime_comp=self.prime_comp)
+            if stadatar.prime_phase == '':
+                self.log.error('Error in reading RF data of station {}'.format(_sta.station))
+                continue
             stadatar.stel = _sta.stel
             stadatar.stla = _sta.stla
             stadatar.stlo = _sta.stlo

@@ -121,7 +121,7 @@ class SlantStack():
         if xlim is not None and array_instance(xlim):
             self.ax.set_xlim(xlim)
         self.ax.set_xlabel('Time (s)')
-        self.ax.set_ylabel('Slowness (s/$^\circ$)')
+        self.ax.set_ylabel(r'Slowness (s/$^\circ$)')
         if figpath is not None and isinstance(figpath, str):
             self.fig.savefig(figpath, format='png', dpi=400, bbox_inches='tight')
         else:

@@ -149,7 +149,11 @@ def ci(allstack, h, kappa, ev_num):
 
     cvalue = 1 - np.std(allstack.reshape(allstack.size)) / np.sqrt(ev_num)
     cs = plt.contour(h, kappa, allstack, [cvalue])
-    cs_path = cs.collections[0].get_paths()[0].vertices
+    # Add for compatibility with matplotlib 3.10.0
+    try:
+        cs_path = cs.get_paths()[0].vertices
+    except:
+        cs_path = cs.collections[0].get_paths()[0].vertices
     maxhsig = (np.max(cs_path[:, 0]) - np.min(cs_path[:, 0])) / 2
     maxksig = (np.max(cs_path[:, 1]) - np.min(cs_path[:, 1])) / 2
     plt.close()

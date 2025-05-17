@@ -37,6 +37,7 @@ class RFStation(object):
         
         self.only_r = only_r
         self.comp = prime_comp
+        self.prime_phase = ''
         self.dtype = {'names': ('event', 'phase', 'evla', 'evlo', 'evdp', 'dis', 'bazi', 'rayp', 'mag', 'f0'),
                  'formats': ('U20', 'U20', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4', 'f4')}
         if not exists(data_path):
