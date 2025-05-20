@@ -56,9 +56,9 @@ class RFFigure(Figure):
     def init_canvas(self, order='baz'):
         self.init_figure(width=self.width, height=self.height, dpi=self.dpi)
         self.read_sac(order=order)
+        self.init_variables()
         self.set_figure()
         self.set_page()
-        self.init_variables()
         self.plotwave()
         self.plotbaz()
 
@@ -77,6 +77,11 @@ class RFFigure(Figure):
         ticklabels = [''] * (self.maxidx+1)
         ticklabels[1: len(self.azi_label)+1] = self.azi_label
         self.axb.set_yticklabels(ticklabels)
+        tls = [self.axr.get_yticklabels(), self.axt.get_yticklabels()]
+        for itr in range(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1):
+            itr_loc = itr % self.maxidx + 1
+            for i in range(len(tls)):
+                tls[i][itr_loc].set_color(self.yticklabel_color[itr])
 
     def set_ax_baz_dis(self):
         self.axb.set_xlim(0, 360)
@@ -106,6 +111,7 @@ class RFFigure(Figure):
         self.rwvfillnag = [[] for i in range(self.evt_num)]
         self.twvfillpos = [[] for i in range(self.evt_num)]
         self.twvfillnag = [[] for i in range(self.evt_num)]
+        self.yticklabel_color = ['black' for i in range(self.evt_num)]
 
     def init_figure(self, width=21, height=11, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi) 
@@ -212,6 +218,8 @@ class RFFigure(Figure):
             self.rwvfillnag[click_idx-1].set_facecolor('gray')
             self.twvfillpos[click_idx-1].set_facecolor('gray')
             self.twvfillnag[click_idx-1].set_facecolor('gray')
+            self.yticklabel_color[click_idx-1] = 'gray'
+            self._set_ylabel_color(click_idx-1, color='gray')
         else:
             self.log.RFlog.info("Canceled "+self.filenames[click_idx-1])
             self.goodrf[click_idx-1] = 1
@@ -219,6 +227,13 @@ class RFFigure(Figure):
             self.rwvfillnag[click_idx-1].set_facecolor('blue')
             self.twvfillpos[click_idx-1].set_facecolor('red')
             self.twvfillnag[click_idx-1].set_facecolor('blue')
+            self._set_ylabel_color(click_idx-1, color='black')
+
+    def _set_ylabel_color(self, index, color='gray'):
+        itr_loc = index % self.maxidx + 1
+        ticklabels = [self.axr.get_yticklabels(), self.axt.get_yticklabels()]
+        for i in range(len(ticklabels)):
+            ticklabels[i][itr_loc].set_color(color)
 
     def _set_gray(self):
         for i in np.where(self.goodrf == 0)[0]:
