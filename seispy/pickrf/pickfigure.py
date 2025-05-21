@@ -78,7 +78,7 @@ class RFFigure(Figure):
         ticklabels[1: len(self.azi_label)+1] = self.azi_label
         self.axb.set_yticklabels(ticklabels)
         tls = [self.axr.get_yticklabels(), self.axt.get_yticklabels()]
-        for itr in range(self.rfidx[self.ipage][0], self.rfidx[self.ipage][0]+self.maxidx+1):
+        for itr in self.rfidx[self.ipage]:
             itr_loc = itr % self.maxidx + 1
             for i in range(len(tls)):
                 tls[i][itr_loc].set_color(self.yticklabel_color[itr])
@@ -200,6 +200,22 @@ class RFFigure(Figure):
             self.rwvfillnag[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis <i+1, facecolor='blue', alpha=0.3)
             self.twvfillpos[i] = self.axt.fill_between(self.time_axis, t_amp_axis, bound+i+1, where=t_amp_axis >i+1, facecolor='red', alpha=0.3)
             self.twvfillnag[i] = self.axt.fill_between(self.time_axis, t_amp_axis, bound+i+1, where=t_amp_axis <i+1, facecolor='blue', alpha=0.3)
+    
+    def set_y_data(self):
+        bound = np.zeros(self.time_axis.shape[0])
+        for i in range(self.evt_num):
+            r_amp_axis = self.rrf[i].data*self.enf+i+1
+            t_amp_axis = self.trf[i].data*self.enf+i+1
+            self.rlines[i].set_ydata(r_amp_axis)
+            self.tlines[i].set_ydata(t_amp_axis)
+            self.rwvfillpos[i].remove()
+            self.rwvfillnag[i].remove()
+            self.twvfillpos[i].remove()
+            self.twvfillnag[i].remove()
+            self.rwvfillpos[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis >i+1, facecolor='red', alpha=0.3)
+            self.rwvfillnag[i] = self.axr.fill_between(self.time_axis, r_amp_axis, bound+i+1, where=r_amp_axis <i+1, facecolor='blue', alpha=0.3)
+            self.twvfillpos[i] = self.axt.fill_between(self.time_axis, t_amp_axis, bound+i+1, where=t_amp_axis >i+1, facecolor='red', alpha=0.3)
+            self.twvfillnag[i] = self.axt.fill_between(self.time_axis, t_amp_axis, bound+i+1, where=t_amp_axis <i+1, facecolor='blue', alpha=0.3)
 
     def plotbaz(self):
         self.axb.scatter(self.baz, np.arange(self.evt_num)+1, color='#1f77b4')
@@ -260,9 +276,10 @@ class RFFigure(Figure):
 
     def enlarge(self):
         self.enf += 1
-        self.axr.cla()
-        self.axt.cla()
-        self.plotwave()
+        # self.axr.cla()
+        # self.axt.cla()
+        # self.plotwave()
+        self.set_y_data()
         self._set_gray()
         self.set_page()
         self.set_figure()
@@ -272,9 +289,10 @@ class RFFigure(Figure):
             self.enf -= 1
         else:
             self.enf = 1/(1/self.enf + 1)
-        self.axr.cla()
-        self.axt.cla()
-        self.plotwave()
+        # self.axr.cla()
+        # self.axt.cla()
+        # self.plotwave()
+        self.set_y_data()
         self._set_gray()
         self.set_page()
         self.set_figure()

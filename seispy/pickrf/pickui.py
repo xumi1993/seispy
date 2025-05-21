@@ -71,23 +71,23 @@ class MatplotlibWidget(QMainWindow):
 
     def on_click(self, event):
         self.mpl.rffig.onclick(event)
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def previous_connect(self):
         self.mpl.rffig.butprevious()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def next_connect(self):
         self.mpl.rffig.butnext()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def enlarge(self):
         self.mpl.rffig.enlarge()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def reduce(self):
         self.mpl.rffig.reduce()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def finish(self):
         self.mpl.rffig.finish()
@@ -175,6 +175,9 @@ def main():
                         default='baz', type=str, metavar='baz|dis|date')
     parser.add_argument('-x', help="Set x limits of the current axes, defaults to 30s for RT, 85s for R.",
                         dest='xlim', default=None, type=float, metavar='xmax')
+    Warning.warn('To streamline the seispy we recommend using the seispy.pickrf.pickui_tk.py instead of this one.'
+                  'The Pyside6 has been removed from the seispy dependencies.'
+                  'The Qt supporting will be deprecated after version 1.4.0')
     arg = parser.parse_args()
     rfpath = arg.rf_path
     if not exists(rfpath):
