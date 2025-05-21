@@ -243,6 +243,7 @@ class RFFigure(Figure):
             self.rwvfillnag[click_idx-1].set_facecolor('blue')
             self.twvfillpos[click_idx-1].set_facecolor('red')
             self.twvfillnag[click_idx-1].set_facecolor('blue')
+            self.yticklabel_color[click_idx-1] = 'black'
             self._set_ylabel_color(click_idx-1, color='black')
 
     def _set_ylabel_color(self, index, color='gray'):

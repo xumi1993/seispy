@@ -207,8 +207,7 @@ class TKPickUI:
             self.rffig.log.RFlog.error(str(e))
 
     def _on_close(self):
-        # ensure any cleanup
-        self.finish()
+        self.root.destroy()
 
     def start(self):
         self.root.mainloop()
@@ -219,6 +218,8 @@ def main():
     parser.add_argument('rf_path', type=str, help='Path to PRFs')
     parser.add_argument('-a', dest='order', default='baz', metavar='baz|dis|date',
                         help="Arrangement of RFs, defaults to 'baz'")
+    parser.add_argument('-r', dest='only_r', action='store_true', 
+                        help="Only plot R component")
     parser.add_argument('-x', dest='xlim', default=None, type=float,
                         help="Set x-axis max limit; defaults to 30s for RT, 85s for R.")
     args = parser.parse_args()
@@ -235,6 +236,8 @@ def main():
     else:
         only_r = False
         xlim = 30
+    if args.only_r:
+        only_r = True
     if args.xlim is not None:
         xlim = args.xlim
 

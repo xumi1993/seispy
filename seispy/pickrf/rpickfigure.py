@@ -105,12 +105,17 @@ class RPickFigure(RFFigure):
         ticklabels = [''] * (self.maxidx+1)
         ticklabels[1: len(self.azi_label)+1] = self.azi_label
         self.axb.set_yticklabels(ticklabels)
+        tl = self.axr.get_yticklabels()
+        for itr in self.rfidx[self.ipage]:
+            itr_loc = itr % self.maxidx + 1
+            tl[itr_loc].set_color(self.yticklabel_color[itr])
     
     def init_variables(self):
         self.goodrf = np.ones(self.evt_num)
         self.rlines = [[]]*self.evt_num
         self.rwvfillpos = [[]]*self.evt_num
         self.rwvfillnag = [[]]*self.evt_num
+        self.yticklabel_color = ['black']*self.evt_num
     
     def plotwave(self):
         bound = np.zeros(self.time_axis.shape[0])
@@ -131,11 +136,21 @@ class RPickFigure(RFFigure):
             self.goodrf[click_idx-1] = 0
             self.rwvfillpos[click_idx-1].set_facecolor('gray')
             self.rwvfillnag[click_idx-1].set_facecolor('gray')
+            self.yticklabel_color[click_idx-1] = 'gray'
+            self._set_ylabel_color(click_idx-1, color='gray')
+
         else:
             self.log.RFlog.info("Canceled "+self.filenames[click_idx-1])
             self.goodrf[click_idx-1] = 1
             self.rwvfillpos[click_idx-1].set_facecolor('red')
             self.rwvfillnag[click_idx-1].set_facecolor('blue')
+            self.yticklabel_color[click_idx-1] = 'black'
+            self._set_ylabel_color(click_idx-1, color='black')
+
+    def _set_ylabel_color(self, index, color='gray'):
+        itr_loc = index % self.maxidx + 1
+        ticklabel = self.axr.get_yticklabels()
+        ticklabel[itr_loc].set_color(color)
 
     def _set_gray(self):
         for i in np.where(self.goodrf == 0)[0]:
