@@ -23,6 +23,7 @@ dependencies = [
     "matplotlib>=3.5.0",
     "pandas>=1.0.0",
     "obspy>=1.2.1",
+    "pyside6>=6.2.0",
     "scikits-bootstrap>=1.0.0",
     "numba",
     "pyproj"
