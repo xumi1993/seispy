@@ -1,0 +1,1150 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="CCP package" href="ccp.html" /><link rel="prev" title="RF package" href="rf.html" />
+        <link rel="canonical" href="seispy.xumijian.me/post.html" />
+
+    <link rel="shortcut icon" href="_static/seispy_100.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2024.05.06 -->
+        <title>Post-processing package - Seispy v1.3.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=387cc868" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #0080C4;
+  --color-brand-content: #0080C4;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" /
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Seispy v1.3.7 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/seispy-long.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Seispy v1.3.7 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="usage/index.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/PRF_Process.html">Calculate a P-wave Receiver Function (PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/rf-sta.html">Calculate PRFs for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/rf-from-ws.html">Fetch seismic data from web-service and calculate RF automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/srf.html">Calculate S wave Receiver Functions (SRF) for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/pickrf.html">Visual check PRFs with an user interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/ps-depth.html">Relationship between time difference and depth in 1D velocity model.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/ccp.html">Stack PRFs with Common Conversion points (CCP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/pickdepths.html">Visually pick depth of the discontinuities after CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-prf.html">PRFs calculation and H-k stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-ccp.html">Batch calculation and CCP stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-ccp3d.html">3-D CCP stacking for mantle transition zone structure under the Tibet.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-rfani.html">Crustal anisotropic estimation with a single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-harmo.html">Harmonic decomposition</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notes/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Configurations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="notes/rf_cfg.html">RF calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes/hk_cfg.html">Hk stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes/ccp_cfg.html">CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">Module Index</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Module Index</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="rf.html">RF package</a></li>
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">Post-processing package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccp.html">CCP package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/xumi1993/seispy">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitlab.com/xumi1993/seispy">GitLab</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://anaconda.org/conda-forge/seispy">Anaconda</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/python-seispy/">PyPI</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/post.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="post-processing-package">
+<h1>Post-processing package<a class="headerlink" href="#post-processing-package" title="Link to this heading">¶</a></h1>
+<section id="module-seispy.core.depmodel">
+<span id="seispy-core-depmodel-module"></span><h2>seispy.core.depmodel module<a class="headerlink" href="#module-seispy.core.depmodel" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.core.depmodel.</span></span><span class="sig-name descname"><span class="pre">DepModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dep_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velmod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_mod</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class for constructing 1D velocity model and computing delay time of Ps, PpPs and PsPs Rays.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DepModel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">20.1</span><span class="p">,</span> <span class="mf">35.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dz</span><span class="p">)</span>
+<span class="go">[ 0.  20.1 15.  64.9]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vp</span><span class="p">)</span>
+<span class="go">[5.8        6.5        8.04001059 8.04764706]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">vs</span><span class="p">)</span>
+<span class="go">[3.36       3.75       4.47003177 4.49294118]</span>
+</pre></div>
+</div>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.ccp_model" title="seispy.core.depmodel.DepModel.ccp_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ccp_model</span></code></a>([dep_range, elevation, layerd])</p></td>
+<td><p>import ccp configure and init DepModel object for time2depth convertion if any parameters given is wrong, return a default DepModel object</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.plot_model" title="seispy.core.depmodel.DepModel.plot_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_model</span></code></a>([show])</p></td>
+<td><p>plot model with matplotlib</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.radius_s" title="seispy.core.depmodel.DepModel.radius_s"><code class="xref py py-obj docutils literal notranslate"><span class="pre">radius_s</span></code></a>(rayp[, phase, sphere])</p></td>
+<td><p>calculate horizontal radius from piercing point to station postion.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.raylength" title="seispy.core.depmodel.DepModel.raylength"><code class="xref py py-obj docutils literal notranslate"><span class="pre">raylength</span></code></a>(rayp[, phase, sphere])</p></td>
+<td><p>calculate ray length, P for Sp and S for Ps</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.read_layer_model" title="seispy.core.depmodel.DepModel.read_layer_model"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_layer_model</span></code></a>(dep_range, h, vp, vs[, ...])</p></td>
+<td><p>Read layer model from given parameters</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.save_tvel" title="seispy.core.depmodel.DepModel.save_tvel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_tvel</span></code></a>(filename)</p></td>
+<td><p>save vel mod in tvel format for taup</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.tpds" title="seispy.core.depmodel.DepModel.tpds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tpds</span></code></a>(rayps, raypp[, sphere])</p></td>
+<td><p>calculate travel time of Pds</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.tpppds" title="seispy.core.depmodel.DepModel.tpppds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tpppds</span></code></a>(rayps, raypp[, sphere])</p></td>
+<td><p>calculate travel time of Ppds</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.core.depmodel.DepModel.tpspds" title="seispy.core.depmodel.DepModel.tpspds"><code class="xref py py-obj docutils literal notranslate"><span class="pre">tpspds</span></code></a>(rayps[, sphere])</p></td>
+<td><p>calculate travel time of Ppsds</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.ccp_model">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ccp_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dep_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">array([0.,</span> <span class="pre">20.1,</span> <span class="pre">35.1,</span> <span class="pre">100.])</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layerd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.ccp_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.ccp_model" title="Link to this definition">¶</a></dt>
+<dd><p>import ccp configure and init DepModel object for time2depth convertion
+if any parameters given is wrong, return a default DepModel object</p>
+<p>there’s 3 types of input is allowed:</p>
+<ol class="arabic simple">
+<li><p>mod3d, stla, stlo: for 3d model( need modification</p></li>
+<li><p>modfolder, staname: for dir</p></li>
+<li><p>mod: for single file</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.plot_model">
+<span class="sig-name descname"><span class="pre">plot_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">show</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.plot_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.plot_model" title="Link to this definition">¶</a></dt>
+<dd><p>plot model with matplotlib</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to show the plot, by default True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.radius_s">
+<span class="sig-name descname"><span class="pre">radius_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.radius_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.radius_s" title="Link to this definition">¶</a></dt>
+<dd><p>calculate horizontal radius from piercing point to station postion.</p>
+<p>P for Sp and S for Ps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayp</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter</p></li>
+<li><p><strong>phase</strong> (<em>str</em><em>, </em><em>optional</em>) – phase name, by default ‘P’</p></li>
+<li><p><strong>sphere</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to use sphere earth, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>horizontal radius</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DepModel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">20.1</span><span class="p">,</span> <span class="mf">35.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">dz</span>
+<span class="go">array([ 0. , 20.1, 15. , 64.9])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">R</span>
+<span class="go">array([6371. , 6350.9, 6335.9, 6271. ])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">radius_s</span><span class="p">(</span><span class="mf">1.2</span><span class="p">,</span><span class="n">phase</span><span class="o">=</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">sphere</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">*</span><span class="mf">111.2</span>
+<span class="go">array([0.        , 0.0002478 , 0.00046823, 0.00142685])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.raylength">
+<span class="sig-name descname"><span class="pre">raylength</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.raylength"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.raylength" title="Link to this definition">¶</a></dt>
+<dd><p>calculate ray length, P for Sp and S for Ps</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayp</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter</p></li>
+<li><p><strong>phase</strong> (<em>str</em><em>, </em><em>optional</em>) – phase name, by default ‘P’</p></li>
+<li><p><strong>sphere</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to use sphere earth, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>ray length</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.read_layer_model">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_layer_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dep_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rho</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">elevation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.read_layer_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.read_layer_model" title="Link to this definition">¶</a></dt>
+<dd><p>Read layer model from given parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dep_range</strong> (<em>numpy.ndarray</em>) – Depth range for conversion</p></li>
+<li><p><strong>h</strong> (<em>numpy.ndarray</em>) – Thickness of each layer</p></li>
+<li><p><strong>vp</strong> (<em>numpy.ndarray</em>) – P-wave velocity of each layer</p></li>
+<li><p><strong>vs</strong> (<em>numpy.ndarray</em>) – S-wave velocity of each layer</p></li>
+<li><p><strong>rho</strong> (<em>numpy.ndarray</em>) – Density of each layer, by default None</p></li>
+<li><p><strong>elevation</strong> (<em>float</em>) – Elevation in km, by default 0</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="#seispy.core.depmodel.DepModel" title="seispy.core.depmodel.DepModel">DepModel</a></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>DepModel object</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">dep_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">h</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">20</span><span class="p">,</span> <span class="mf">15.</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">5.8</span><span class="p">,</span> <span class="mf">6.5</span><span class="p">,</span> <span class="mf">8.04</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">3.36</span><span class="p">,</span> <span class="mf">3.75</span><span class="p">,</span> <span class="mf">4.47</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DepModel</span><span class="o">.</span><span class="n">read_layer_model</span><span class="p">(</span><span class="n">dep_range</span><span class="p">,</span> <span class="n">h</span><span class="p">,</span> <span class="n">vp</span><span class="p">,</span> <span class="n">vs</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.save_tvel">
+<span class="sig-name descname"><span class="pre">save_tvel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.save_tvel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.save_tvel" title="Link to this definition">¶</a></dt>
+<dd><p>save vel mod in tvel format for taup</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – output file name</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">DepModel</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">20.1</span><span class="p">,</span> <span class="mf">35.1</span><span class="p">,</span> <span class="mi">100</span><span class="p">]))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">save_tvel</span><span class="p">(</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+<span class="go">    0.00     5.80     3.36     2.72</span>
+<span class="go">   20.10    5.800     3.36     2.72</span>
+<span class="go">   20.10     6.50     3.75     2.92</span>
+<span class="go">   35.10    6.500     3.75     2.92</span>
+<span class="go">   35.10     8.04     4.47     3.32</span>
+<span class="go">  100.00    8.040     4.47     3.32</span>
+<span class="go">  100.00     8.05     4.49     3.36</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.tpds">
+<span class="sig-name descname"><span class="pre">tpds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raypp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.tpds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.tpds" title="Link to this definition">¶</a></dt>
+<dd><p>calculate travel time of Pds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayps</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter of Ps wave</p></li>
+<li><p><strong>raypp</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter of P wave</p></li>
+<li><p><strong>sphere</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to use sphere earth, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>travel time of Pds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.tpppds">
+<span class="sig-name descname"><span class="pre">tpppds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">raypp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.tpppds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.tpppds" title="Link to this definition">¶</a></dt>
+<dd><p>calculate travel time of Ppds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayps</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter of Ps wave</p></li>
+<li><p><strong>raypp</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter of P wave</p></li>
+<li><p><strong>sphere</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to use sphere earth, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>travel time of Ppds</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.core.depmodel.DepModel.tpspds">
+<span class="sig-name descname"><span class="pre">tpspds</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rayps</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sphere</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#DepModel.tpspds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.DepModel.tpspds" title="Link to this definition">¶</a></dt>
+<dd><p>calculate travel time of Ppsds</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rayps</strong> (<em>float</em><em> or </em><em>numpy.ndarray</em>) – ray parameter of Ps wave</p></li>
+<li><p><strong>sphere</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether to use sphere earth, by default True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy.ndarray</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>travel time of Ppsds</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.core.depmodel.interp_depth_model">
+<span class="sig-prename descclassname"><span class="pre">seispy.core.depmodel.</span></span><span class="sig-name descname"><span class="pre">interp_depth_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dep</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/core/depmodel.html#interp_depth_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.core.depmodel.interp_depth_model" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolate Vp and Vs from 3D velocity with a specified depth range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mod3d</strong> (<code class="xref py py-meth docutils literal notranslate"><span class="pre">np.lib.npyio.NpzFile()</span></code>) – 3D velocity loaded from a <code class="docutils literal notranslate"><span class="pre">.npz</span></code> file</p></li>
+<li><p><strong>lat</strong> (<em>float</em>) – Latitude of position in 3D velocity model</p></li>
+<li><p><strong>lon</strong> (<em>float</em>) – Longitude of position in 3D velocity model</p></li>
+<li><p><strong>new_dep</strong> (<code class="xref py py-meth docutils literal notranslate"><span class="pre">np.ndarray()</span></code>) – 1D array of depths in km</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">np.ndarray()</span></code></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Vp and Vs in <code class="docutils literal notranslate"><span class="pre">new_dep</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-seispy.hk">
+<span id="seispy-hk-module"></span><h2>seispy.hk module<a class="headerlink" href="#module-seispy.hk" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.ci">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">ci</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">allstack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ev_num</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#ci"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.ci" title="Link to this definition">¶</a></dt>
+<dd><p>Search best H and kappa from stacked matrix.
+Calculate error for H and kappa</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>allstack</strong> – stacked HK matrix</p></li>
+<li><p><strong>h</strong> – 1-D array of H</p></li>
+<li><p><strong>kappa</strong> – 1-D array of kappa</p></li>
+<li><p><strong>ev_num</strong> – event number</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.hk">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">hk</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#hk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.hk" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.hksta">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">hksta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hpara</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="seispy.html#seispy.hkpara.HKPara" title="seispy.hkpara.HKPara"><span class="pre">HKPara</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">isplot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isdisplay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#hksta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.hksta" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.hkstack">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">hkstack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">6.3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(0.7,</span> <span class="pre">0.2,</span> <span class="pre">0.1)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#hkstack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.hkstack" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.plot">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allstack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">h</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kappa</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">besth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bestk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cvalue</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cmap=&lt;matplotlib.colors.ListedColormap</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.plot" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.print_result">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">print_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">besth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bestk</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxhsig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxksig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_comment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#print_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.print_result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.time2idx">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">time2idx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">times</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ti0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#time2idx"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.time2idx" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.tppps">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">tppps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#tppps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.tppps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.tps">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">tps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#tps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.tps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.tpsps">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">tpsps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">depth</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">eta_s</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#tpsps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.tpsps" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.transarray">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">transarray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">array</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#transarray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.transarray" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hk.vslow">
+<span class="sig-prename descclassname"><span class="pre">seispy.hk.</span></span><span class="sig-name descname"><span class="pre">vslow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">v</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rayp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hk.html#vslow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hk.vslow" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<span class="target" id="module-seispy.hkpara"></span><dl class="py class">
+<dt class="sig sig-object py" id="seispy.hkpara.HKPara">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.hkpara.</span></span><span class="sig-name descname"><span class="pre">HKPara</span></span><a class="reference internal" href="_modules/seispy/hkpara.html#HKPara"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hkpara.HKPara" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>hrange</strong></dt><dd></dd>
+<dt><strong>krange</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.hkpara.HKPara.hrange">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hrange</span></span><a class="headerlink" href="#seispy.hkpara.HKPara.hrange" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.hkpara.HKPara.krange">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">krange</span></span><a class="headerlink" href="#seispy.hkpara.HKPara.krange" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.hkpara.hkpara">
+<span class="sig-prename descclassname"><span class="pre">seispy.hkpara.</span></span><span class="sig-name descname"><span class="pre">hkpara</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/hkpara.html#hkpara"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.hkpara.hkpara" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-seispy.slantstack">
+<span id="seispy-slantstack-module"></span><h2>seispy.slantstack module<a class="headerlink" href="#module-seispy.slantstack" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.slantstack.SlantStack">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.slantstack.</span></span><span class="sig-name descname"><span class="pre">SlantStack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">seis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeaxis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dis</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/slantstack.html#SlantStack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.slantstack.SlantStack" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.slantstack.SlantStack.plot" title="seispy.slantstack.SlantStack.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([cmap, xlim, vmin, vmax, figpath, colorbar])</p></td>
+<td><p>Imaging for slant stacking</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.slantstack.SlantStack.stack" title="seispy.slantstack.SlantStack.stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stack</span></code></a>([ref_dis, rayp_range, tau_range])</p></td>
+<td><p>Slant stack for receiver function</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.slantstack.SlantStack.syn_tps" title="seispy.slantstack.SlantStack.syn_tps"><code class="xref py py-obj docutils literal notranslate"><span class="pre">syn_tps</span></code></a>(phase_list[, velmodel, focal_dep])</p></td>
+<td><p>Calculate the theoretical tau and reference rayp for the given phase list</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.slantstack.SlantStack.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'jet'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colorbar</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/slantstack.html#SlantStack.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.slantstack.SlantStack.plot" title="Link to this definition">¶</a></dt>
+<dd><p>Imaging for slant stacking</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>cmap</strong><span class="classifier">str, optional</span></dt><dd><p>The colormap to use, by default ‘jet’</p>
+</dd>
+<dt><strong>xlim</strong><span class="classifier">_type_, optional</span></dt><dd><p>Set the x limits of the current axes., by default None</p>
+</dd>
+<dt><strong>vmin</strong><span class="classifier">_type_, optional</span></dt><dd><p>Normalize the minium value data to the <code class="docutils literal notranslate"><span class="pre">vmin</span></code>, by default None</p>
+</dd>
+<dt><strong>vmax</strong><span class="classifier">_type_, optional</span></dt><dd><p>Normalize the maximum value data to the <code class="docutils literal notranslate"><span class="pre">vmax</span></code>, by default None</p>
+</dd>
+<dt><strong>figpath</strong><span class="classifier">_type_, optional</span></dt><dd><p>Output path to the image, by default None</p>
+</dd>
+<dt><strong>colorbar</strong><span class="classifier">bool, optional</span></dt><dd><p>Wether plot the colorbar, by default True</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.slantstack.SlantStack.stack">
+<span class="sig-name descname"><span class="pre">stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ref_dis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rayp_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tau_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/slantstack.html#SlantStack.stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.slantstack.SlantStack.stack" title="Link to this definition">¶</a></dt>
+<dd><p>Slant stack for receiver function</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ref_dis</strong> (<em>int</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – reference distance, by default None</p></li>
+<li><p><strong>rayp_range</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – range of ray parameter, by default None</p></li>
+<li><p><strong>tau_range</strong> (<em>numpy.ndarray</em><em>, </em><em>optional</em>) – range of tau, by default None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.slantstack.SlantStack.syn_tps">
+<span class="sig-name descname"><span class="pre">syn_tps</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velmodel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">focal_dep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/slantstack.html#SlantStack.syn_tps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.slantstack.SlantStack.syn_tps" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the theoretical tau and reference rayp for the given phase list</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>phase_list</strong> (<em>list</em>) – phase list for theoretical arrival time</p></li>
+<li><p><strong>velmodel</strong> (<em>str</em><em>, </em><em>optional</em>) – velocity model, by default ‘iasp91’</p></li>
+<li><p><strong>focal_dep</strong> (<em>int</em><em> or </em><em>float</em><em>, </em><em>optional</em>) – focal depth, by default 10</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-seispy.rfani">
+<span id="seispy-rfani-module"></span><h2>seispy.rfani module<a class="headerlink" href="#module-seispy.rfani" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.rfani.</span></span><span class="sig-name descname"><span class="pre">RFAni</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sacdatar</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tb</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">te</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tlen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rayp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iasp91'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.baz_stack" title="seispy.rfani.RFAni.baz_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">baz_stack</span></code></a>([val])</p></td>
+<td><p>Stack RF data with back-azimuth.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.joint_ani" title="seispy.rfani.RFAni.joint_ani"><code class="xref py py-obj docutils literal notranslate"><span class="pre">joint_ani</span></code></a>([weight])</p></td>
+<td><p>Joint method for crustal anisotropy estimation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.plot_correct" title="seispy.rfani.RFAni.plot_correct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_correct</span></code></a>([fvd, dt, enf, outpath])</p></td>
+<td><p>Plot the RF data with back-azimuth and time after P corrected.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.plot_polar" title="seispy.rfani.RFAni.plot_polar"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_polar</span></code></a>([cmap, show, outpath])</p></td>
+<td><p>Polar map of crustal anisotropy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.plot_stack_baz" title="seispy.rfani.RFAni.plot_stack_baz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_stack_baz</span></code></a>([enf, outpath])</p></td>
+<td><p>Plot the stack of RF data with back-azimuth.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.radial_energy_max" title="seispy.rfani.RFAni.radial_energy_max"><code class="xref py py-obj docutils literal notranslate"><span class="pre">radial_energy_max</span></code></a>()</p></td>
+<td><p>Calculate the energy of radial component.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.rotate_to_fast_slow" title="seispy.rfani.RFAni.rotate_to_fast_slow"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate_to_fast_slow</span></code></a>()</p></td>
+<td><p>Rotate RF data to fast and slow direction.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.search_peak" title="seispy.rfani.RFAni.search_peak"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_peak</span></code></a>(energy[, opt])</p></td>
+<td><p>Search the peak of energy.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.search_peak_list" title="seispy.rfani.RFAni.search_peak_list"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_peak_list</span></code></a>(energy[, opt])</p></td>
+<td><p>Search the peak of energy.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rfani.RFAni.xyz2grd" title="seispy.rfani.RFAni.xyz2grd"><code class="xref py py-obj docutils literal notranslate"><span class="pre">xyz2grd</span></code></a>(energy)</p></td>
+<td><p>Interpolate energy to grid.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.baz_stack">
+<span class="sig-name descname"><span class="pre">baz_stack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.baz_stack"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.baz_stack" title="Link to this definition">¶</a></dt>
+<dd><p>Stack RF data with back-azimuth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>val</strong><span class="classifier">int, optional</span></dt><dd><p>Interval of back-azimuth, by default 10</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.joint_ani">
+<span class="sig-name descname"><span class="pre">joint_ani</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[0.5,</span> <span class="pre">0.3,</span> <span class="pre">0.2]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.joint_ani"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.joint_ani" title="Link to this definition">¶</a></dt>
+<dd><p>Joint method for crustal anisotropy estimation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>weight</strong><span class="classifier">list, optional</span></dt><dd><p>Weight for three energy matrix, by default [0.5, 0.3, 0.2]</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.plot_correct">
+<span class="sig-name descname"><span class="pre">plot_correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fvd</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.44</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">80</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.plot_correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.plot_correct" title="Link to this definition">¶</a></dt>
+<dd><p>Plot the RF data with back-azimuth and time after P corrected.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>fvd</strong><span class="classifier">int, optional</span></dt><dd><p>Fast velocity direction, by default 0</p>
+</dd>
+<dt><strong>dt</strong><span class="classifier">float, optional</span></dt><dd><p>Time delay for correction, by default 0.44</p>
+</dd>
+<dt><strong>enf</strong><span class="classifier">int, optional</span></dt><dd><p>Enlarge factor for back-azimuth, by default 80</p>
+</dd>
+<dt><strong>outpath</strong><span class="classifier">str, optional</span></dt><dd><p>Output path for saving the figure, by default None</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.plot_polar">
+<span class="sig-name descname"><span class="pre">plot_polar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cmap=&lt;matplotlib.colors.ListedColormap</span> <span class="pre">object&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show=False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath='./'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.plot_polar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.plot_polar" title="Link to this definition">¶</a></dt>
+<dd><p>Polar map of crustal anisotropy. See Liu and Niu (2012, doi: 10.1111/j.1365-246X.2011.05249.x) in detail.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cmap</strong> (<em>optional</em>) – Colormap of matplotlib, defaults to ‘rainbow’</p></li>
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – If show the polar map in the Matplotlib window, defaults to True</p></li>
+<li><p><strong>outpath</strong> (<em>str</em><em>, </em><em>optional</em>) – Output path to saving the figure. If show the figure in the Matplotlib window, this option will be invalid, defaults to current directory.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.plot_stack_baz">
+<span class="sig-name descname"><span class="pre">plot_stack_baz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">enf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.plot_stack_baz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.plot_stack_baz" title="Link to this definition">¶</a></dt>
+<dd><p>Plot the stack of RF data with back-azimuth.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>enf</strong><span class="classifier">int, optional</span></dt><dd><p>Enlarge factor for back-azimuth, by default 60</p>
+</dd>
+<dt><strong>outpath</strong><span class="classifier">str, optional</span></dt><dd><p>Output path for saving the figure, by default ‘./’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.radial_energy_max">
+<span class="sig-name descname"><span class="pre">radial_energy_max</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.radial_energy_max"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.radial_energy_max" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate the energy of radial component.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.rotate_to_fast_slow">
+<span class="sig-name descname"><span class="pre">rotate_to_fast_slow</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.rotate_to_fast_slow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.rotate_to_fast_slow" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate RF data to fast and slow direction.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.search_peak">
+<span class="sig-name descname"><span class="pre">search_peak</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.search_peak"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.search_peak" title="Link to this definition">¶</a></dt>
+<dd><p>Search the peak of energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>energy</strong><span class="classifier">np.ndarray</span></dt><dd><p>Energy matrix</p>
+</dd>
+<dt><strong>opt</strong><span class="classifier">str, optional</span></dt><dd><p>Option for searching peak, by default ‘max’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.search_peak_list">
+<span class="sig-name descname"><span class="pre">search_peak_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'max'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.search_peak_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.search_peak_list" title="Link to this definition">¶</a></dt>
+<dd><p>Search the peak of energy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>energy</strong><span class="classifier">np.ndarray</span></dt><dd><p>Energy matrix</p>
+</dd>
+<dt><strong>opt</strong><span class="classifier">str, optional</span></dt><dd><p>Option for searching peak, by default ‘max’</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rfani.RFAni.xyz2grd">
+<span class="sig-name descname"><span class="pre">xyz2grd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">energy</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rfani.html#RFAni.xyz2grd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rfani.RFAni.xyz2grd" title="Link to this definition">¶</a></dt>
+<dd><p>Interpolate energy to grid.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-seispy.harmonics">
+<span id="seispy-harmonics-module"></span><h2>seispy.harmonics module<a class="headerlink" href="#module-seispy.harmonics" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.harmonics.Harmonics">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.harmonics.</span></span><span class="sig-name descname"><span class="pre">Harmonics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfsta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bin_stack</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/harmonics.html#Harmonics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.harmonics.Harmonics" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.harmonics.Harmonics.cut_trace" title="seispy.harmonics.Harmonics.cut_trace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cut_trace</span></code></a>()</p></td>
+<td><p>Trim RFs from tmin to tmax</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.harmonics.Harmonics.harmo_trans" title="seispy.harmonics.Harmonics.harmo_trans"><code class="xref py py-obj docutils literal notranslate"><span class="pre">harmo_trans</span></code></a>()</p></td>
+<td><p>Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.harmonics.Harmonics.plot" title="seispy.harmonics.Harmonics.plot"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot</span></code></a>([outpath, enf])</p></td>
+<td><p>Plot harmonic and unmodeled components</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#seispy.harmonics.Harmonics.write_constant" title="seispy.harmonics.Harmonics.write_constant"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write_constant</span></code></a>([out_sac_path])</p></td>
+<td><p>Write constant component to SAC file.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.harmonics.Harmonics.cut_trace">
+<span class="sig-name descname"><span class="pre">cut_trace</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/harmonics.html#Harmonics.cut_trace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.harmonics.Harmonics.cut_trace" title="Link to this definition">¶</a></dt>
+<dd><p>Trim RFs from tmin to tmax</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.harmonics.Harmonics.harmo_trans">
+<span class="sig-name descname"><span class="pre">harmo_trans</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/harmonics.html#Harmonics.harmo_trans"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.harmonics.Harmonics.harmo_trans" title="Link to this definition">¶</a></dt>
+<dd><p>Harmonic decomposition for extracting anisotropic and isotropic features from the radial and transverse RFs</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.harmonics.Harmonics.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outpath</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">enf</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/harmonics.html#Harmonics.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.harmonics.Harmonics.plot" title="Link to this definition">¶</a></dt>
+<dd><p>Plot harmonic and unmodeled components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outpath</strong> (<em>str</em><em>, </em><em>optional</em>) – Output path, defaults to ‘./’</p></li>
+<li><p><strong>enf</strong> (<em>float</em><em>, </em><em>optional</em>) – Amplification factor, defaults to 2.0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.harmonics.Harmonics.write_constant">
+<span class="sig-name descname"><span class="pre">write_constant</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out_sac_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'./'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/harmonics.html#Harmonics.write_constant"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.harmonics.Harmonics.write_constant" title="Link to this definition">¶</a></dt>
+<dd><p>Write constant component to SAC file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>out_sac_path</strong> (<em>str</em><em>, </em><em>optional</em>) – Output path, defaults to ‘./’</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="ccp.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">CCP package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="rf.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">RF package</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2020, Mijian Xu
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Post-processing package</a><ul>
+<li><a class="reference internal" href="#module-seispy.core.depmodel">seispy.core.depmodel module</a><ul>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel"><code class="docutils literal notranslate"><span class="pre">DepModel</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.ccp_model"><code class="docutils literal notranslate"><span class="pre">DepModel.ccp_model()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.plot_model"><code class="docutils literal notranslate"><span class="pre">DepModel.plot_model()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.radius_s"><code class="docutils literal notranslate"><span class="pre">DepModel.radius_s()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.raylength"><code class="docutils literal notranslate"><span class="pre">DepModel.raylength()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.read_layer_model"><code class="docutils literal notranslate"><span class="pre">DepModel.read_layer_model()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.save_tvel"><code class="docutils literal notranslate"><span class="pre">DepModel.save_tvel()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.tpds"><code class="docutils literal notranslate"><span class="pre">DepModel.tpds()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.tpppds"><code class="docutils literal notranslate"><span class="pre">DepModel.tpppds()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.core.depmodel.DepModel.tpspds"><code class="docutils literal notranslate"><span class="pre">DepModel.tpspds()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy.core.depmodel.interp_depth_model"><code class="docutils literal notranslate"><span class="pre">interp_depth_model()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-seispy.hk">seispy.hk module</a><ul>
+<li><a class="reference internal" href="#seispy.hk.ci"><code class="docutils literal notranslate"><span class="pre">ci()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.hk"><code class="docutils literal notranslate"><span class="pre">hk()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.hksta"><code class="docutils literal notranslate"><span class="pre">hksta()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.hkstack"><code class="docutils literal notranslate"><span class="pre">hkstack()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.plot"><code class="docutils literal notranslate"><span class="pre">plot()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.print_result"><code class="docutils literal notranslate"><span class="pre">print_result()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.time2idx"><code class="docutils literal notranslate"><span class="pre">time2idx()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.tppps"><code class="docutils literal notranslate"><span class="pre">tppps()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.tps"><code class="docutils literal notranslate"><span class="pre">tps()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.tpsps"><code class="docutils literal notranslate"><span class="pre">tpsps()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.transarray"><code class="docutils literal notranslate"><span class="pre">transarray()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hk.vslow"><code class="docutils literal notranslate"><span class="pre">vslow()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hkpara.HKPara"><code class="docutils literal notranslate"><span class="pre">HKPara</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.hkpara.HKPara.hrange"><code class="docutils literal notranslate"><span class="pre">HKPara.hrange</span></code></a></li>
+<li><a class="reference internal" href="#seispy.hkpara.HKPara.krange"><code class="docutils literal notranslate"><span class="pre">HKPara.krange</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy.hkpara.hkpara"><code class="docutils literal notranslate"><span class="pre">hkpara()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-seispy.slantstack">seispy.slantstack module</a><ul>
+<li><a class="reference internal" href="#seispy.slantstack.SlantStack"><code class="docutils literal notranslate"><span class="pre">SlantStack</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.slantstack.SlantStack.plot"><code class="docutils literal notranslate"><span class="pre">SlantStack.plot()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.slantstack.SlantStack.stack"><code class="docutils literal notranslate"><span class="pre">SlantStack.stack()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.slantstack.SlantStack.syn_tps"><code class="docutils literal notranslate"><span class="pre">SlantStack.syn_tps()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-seispy.rfani">seispy.rfani module</a><ul>
+<li><a class="reference internal" href="#seispy.rfani.RFAni"><code class="docutils literal notranslate"><span class="pre">RFAni</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.baz_stack"><code class="docutils literal notranslate"><span class="pre">RFAni.baz_stack()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.joint_ani"><code class="docutils literal notranslate"><span class="pre">RFAni.joint_ani()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.plot_correct"><code class="docutils literal notranslate"><span class="pre">RFAni.plot_correct()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.plot_polar"><code class="docutils literal notranslate"><span class="pre">RFAni.plot_polar()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.plot_stack_baz"><code class="docutils literal notranslate"><span class="pre">RFAni.plot_stack_baz()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.radial_energy_max"><code class="docutils literal notranslate"><span class="pre">RFAni.radial_energy_max()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.rotate_to_fast_slow"><code class="docutils literal notranslate"><span class="pre">RFAni.rotate_to_fast_slow()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.search_peak"><code class="docutils literal notranslate"><span class="pre">RFAni.search_peak()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.search_peak_list"><code class="docutils literal notranslate"><span class="pre">RFAni.search_peak_list()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rfani.RFAni.xyz2grd"><code class="docutils literal notranslate"><span class="pre">RFAni.xyz2grd()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-seispy.harmonics">seispy.harmonics module</a><ul>
+<li><a class="reference internal" href="#seispy.harmonics.Harmonics"><code class="docutils literal notranslate"><span class="pre">Harmonics</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.harmonics.Harmonics.cut_trace"><code class="docutils literal notranslate"><span class="pre">Harmonics.cut_trace()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.harmonics.Harmonics.harmo_trans"><code class="docutils literal notranslate"><span class="pre">Harmonics.harmo_trans()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.harmonics.Harmonics.plot"><code class="docutils literal notranslate"><span class="pre">Harmonics.plot()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.harmonics.Harmonics.write_constant"><code class="docutils literal notranslate"><span class="pre">Harmonics.write_constant()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=2f149631"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=4e2eecee"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=36754332"></script>
+    </body>
+</html>

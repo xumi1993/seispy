@@ -1,0 +1,993 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" />
+        <link rel="canonical" href="seispy.xumijian.me/gui.html" />
+
+    <link rel="shortcut icon" href="_static/seispy_100.png"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>GUI package - Seispy v1.3.8 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #0080C4;
+  --color-brand-content: #0080C4;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Seispy v1.3.8 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/seispy-long.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Seispy v1.3.8 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="usage/index.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/PRF_Process.html">Calculate a P-wave Receiver Function (PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/rf-sta.html">Calculate PRFs for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/rf-from-ws.html">Fetch seismic data from web-service and calculate RF automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/srf.html">Calculate S wave Receiver Functions (SRF) for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/pickrf.html">Visual check PRFs with an user interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/ps-depth.html">Relationship between time difference and depth in 1D velocity model.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/ccp.html">Stack PRFs with Common Conversion points (CCP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/pickdepths.html">Visually pick depth of the discontinuities after CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-prf.html">PRFs calculation and H-k stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-ccp.html">Batch calculation and CCP stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-ccp3d.html">3-D CCP stacking for mantle transition zone structure under the Tibet.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-rfani.html">Crustal anisotropic estimation with a single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-harmo.html">Harmonic decomposition</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notes/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Configurations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="notes/rf_cfg.html">RF calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes/hk_cfg.html">Hk stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes/ccp_cfg.html">CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="modules.html">Module Index</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Module Index</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="rf.html">RF package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.html">Post-processing package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccp.html">CCP package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/xumi1993/seispy">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitlab.com/xumi1993/seispy">GitLab</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://anaconda.org/conda-forge/seispy">Anaconda</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/python-seispy/">PyPI</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/gui.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="gui-package">
+<h1>GUI package<a class="headerlink" href="#gui-package" title="Link to this heading">¶</a></h1>
+<section id="seispy-pickrf-pickfigure-module">
+<h2>seispy.pickrf.pickfigure module<a class="headerlink" href="#seispy-pickrf-pickfigure-module" title="Link to this heading">¶</a></h2>
+<span class="target" id="module-seispy.pickrf.pickfigure"></span><dl class="py class">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.pickrf.pickfigure.</span></span><span class="sig-name descname"><span class="pre">RFFigure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rfpath</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[-2,</span> <span class="pre">30]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Figure</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">axes</span></code></dt><dd><p>List of Axes in the Figure.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">dpi</span></code></dt><dd><p>The resolution in dots per inch.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">frameon</span></code></dt><dd><p>Return the figure’s background patch visibility, i.e.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">mouseover</span></code></dt><dd><p>Return whether this artist is queried for custom context information when the mouse cursor moves over it.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">stale</span></code></dt><dd><p>Whether the artist is ‘stale’ and needs to be re-drawn for the output to match the internal state of the artist.</p>
+</dd>
+<dt><code class="xref py py-obj docutils literal notranslate"><span class="pre">sticky_edges</span></code></dt><dd><p><code class="docutils literal notranslate"><span class="pre">x</span></code> and <code class="docutils literal notranslate"><span class="pre">y</span></code> sticky edge lists for autoscaling.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_artist</span></code>(artist[, clip])</p></td>
+<td><p>Add an <cite>.Artist</cite> to the figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_axes</span></code>(*args, **kwargs)</p></td>
+<td><p>Add an <cite>~.axes.Axes</cite> to the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_axobserver</span></code>(func)</p></td>
+<td><p>Whenever the Axes state change, <code class="docutils literal notranslate"><span class="pre">func(self)</span></code> will be called.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_callback</span></code>(func)</p></td>
+<td><p>Add a callback function that will be called whenever one of the <cite>.Artist</cite>'s properties changes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_gridspec</span></code>([nrows, ncols])</p></td>
+<td><p>Return a <cite>.GridSpec</cite> that has this figure as a parent.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_subfigure</span></code>(subplotspec, **kwargs)</p></td>
+<td><p>Add a <cite>.SubFigure</cite> to the figure as part of a subplot arrangement.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_subplot</span></code>(*args, **kwargs)</p></td>
+<td><p>Add an <cite>~.axes.Axes</cite> to the figure as part of a subplot arrangement.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">align_labels</span></code>([axs])</p></td>
+<td><p>Align the xlabels and ylabels of subplots with the same subplots row or column (respectively) if label alignment is being done automatically (i.e. the label position is not manually set).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">align_xlabels</span></code>([axs])</p></td>
+<td><p>Align the xlabels of subplots in the same subplot column if label alignment is being done automatically (i.e. the label position is not manually set).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">align_ylabels</span></code>([axs])</p></td>
+<td><p>Align the ylabels of subplots in the same subplot column if label alignment is being done automatically (i.e. the label position is not manually set).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">autofmt_xdate</span></code>([bottom, rotation, ha, which])</p></td>
+<td><p>Date ticklabels often overlap, so it is useful to rotate them and right align them.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clear</span></code>([keep_observers])</p></td>
+<td><p>Clear the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">clf</span></code>([keep_observers])</p></td>
+<td><p>[<em>Discouraged</em>] Alias for the <cite>clear()</cite> method.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">colorbar</span></code>(mappable[, cax, ax, use_gridspec])</p></td>
+<td><p>Add a colorbar to a plot.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">contains</span></code>(mouseevent)</p></td>
+<td><p>Test whether the mouse event occurred on the figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_xunits</span></code>(x)</p></td>
+<td><p>Convert <em>x</em> using the unit type of the xaxis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">convert_yunits</span></code>(y)</p></td>
+<td><p>Convert <em>y</em> using the unit type of the yaxis.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">delaxes</span></code>(ax)</p></td>
+<td><p>Remove the <cite>~.axes.Axes</cite> <em>ax</em> from the figure; update the current Axes.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw</span></code>(renderer)</p></td>
+<td><p>Draw the Artist (and its children) using the given renderer.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_artist</span></code>(a)</p></td>
+<td><p>Draw <cite>.Artist</cite> <em>a</em> only.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">draw_without_rendering</span></code>()</p></td>
+<td><p>Draw the figure with no output.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">figimage</span></code>(X[, xo, yo, alpha, norm, cmap, ...])</p></td>
+<td><p>Add a non-resampled image to the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">findobj</span></code>([match, include_self])</p></td>
+<td><p>Find artist objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">format_cursor_data</span></code>(data)</p></td>
+<td><p>Return a string representation of <em>data</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">gca</span></code>()</p></td>
+<td><p>Get the current Axes.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_agg_filter</span></code>()</p></td>
+<td><p>Return filter function to be used for agg filter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_alpha</span></code>()</p></td>
+<td><p>Return the alpha value used for blending - not supported on all backends.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_animated</span></code>()</p></td>
+<td><p>Return whether the artist is animated.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_axes</span></code>()</p></td>
+<td><p>List of Axes in the Figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_children</span></code>()</p></td>
+<td><p>Get a list of artists contained in the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_clip_box</span></code>()</p></td>
+<td><p>Return the clipbox.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_clip_on</span></code>()</p></td>
+<td><p>Return whether the artist uses clipping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_clip_path</span></code>()</p></td>
+<td><p>Return the clip path.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_constrained_layout</span></code>()</p></td>
+<td><p>Return whether constrained layout is being used.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_constrained_layout_pads</span></code>([relative])</p></td>
+<td><p>[<em>Deprecated</em>] Get padding for <code class="docutils literal notranslate"><span class="pre">constrained_layout</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_cursor_data</span></code>(event)</p></td>
+<td><p>Return the cursor data for a given event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_dpi</span></code>()</p></td>
+<td><p>Return the resolution in dots per inch as a float.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_edgecolor</span></code>()</p></td>
+<td><p>Get the edge color of the Figure rectangle.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_facecolor</span></code>()</p></td>
+<td><p>Get the face color of the Figure rectangle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_figheight</span></code>()</p></td>
+<td><p>Return the figure height in inches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_figure</span></code>()</p></td>
+<td><p>Return the <cite>.Figure</cite> instance the artist belongs to.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_figwidth</span></code>()</p></td>
+<td><p>Return the figure width in inches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_frameon</span></code>()</p></td>
+<td><p>Return the figure's background patch visibility, i.e. whether the figure background will be drawn.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_gid</span></code>()</p></td>
+<td><p>Return the group id.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_in_layout</span></code>()</p></td>
+<td><p>Return boolean flag, <code class="docutils literal notranslate"><span class="pre">True</span></code> if artist is included in layout calculations.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_label</span></code>()</p></td>
+<td><p>Return the label used for this artist in the legend.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_linewidth</span></code>()</p></td>
+<td><p>Get the line width of the Figure rectangle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_mouseover</span></code>()</p></td>
+<td><p>Return whether this artist is queried for custom context information when the mouse cursor moves over it.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_picker</span></code>()</p></td>
+<td><p>Return the picking behavior of the artist.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_rasterized</span></code>()</p></td>
+<td><p>Return whether the artist is to be rasterized.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_size_inches</span></code>()</p></td>
+<td><p>Return the current size of the figure in inches.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sketch_params</span></code>()</p></td>
+<td><p>Return the sketch parameters for the artist.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_snap</span></code>()</p></td>
+<td><p>Return the snap setting.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_suptitle</span></code>()</p></td>
+<td><p>Return the suptitle as string or an empty string if not set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_supxlabel</span></code>()</p></td>
+<td><p>Return the supxlabel as string or an empty string if not set.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_supylabel</span></code>()</p></td>
+<td><p>Return the supylabel as string or an empty string if not set.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tight_layout</span></code>()</p></td>
+<td><p>Return whether <cite>.tight_layout</cite> is called when drawing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tightbbox</span></code>([renderer, bbox_extra_artists])</p></td>
+<td><p>Return a (tight) bounding box of the figure <em>in inches</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transform</span></code>()</p></td>
+<td><p>Return the <cite>.Transform</cite> instance used by this artist.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_transformed_clip_path_and_affine</span></code>()</p></td>
+<td><p>Return the clip path with the non-affine part of its transformation applied, and the remaining affine part of its transformation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_url</span></code>()</p></td>
+<td><p>Return the url.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_visible</span></code>()</p></td>
+<td><p>Return the visibility.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_window_extent</span></code>([renderer])</p></td>
+<td><p>Get the artist's bounding box in display space.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_zorder</span></code>()</p></td>
+<td><p>Return the artist's zorder.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">ginput</span></code>([n, timeout, show_clicks, mouse_add, ...])</p></td>
+<td><p>Blocking call to interact with a figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">have_units</span></code>()</p></td>
+<td><p>Return whether units are set on any axis.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_transform_set</span></code>()</p></td>
+<td><p>Return whether the Artist has an explicitly set transform.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">legend</span></code>(*args, **kwargs)</p></td>
+<td><p>Place a legend on the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pchanged</span></code>()</p></td>
+<td><p>Call all of the registered callbacks.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pick</span></code>(mouseevent)</p></td>
+<td><p>Process a pick event.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">pickable</span></code>()</p></td>
+<td><p>Return whether the artist is pickable.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">properties</span></code>()</p></td>
+<td><p>Return a dictionary of all the properties of the artist.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove</span></code>()</p></td>
+<td><p>Remove the artist from the figure if possible.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_callback</span></code>(oid)</p></td>
+<td><p>Remove a callback based on its observer id.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">savefig</span></code>(fname, *[, transparent])</p></td>
+<td><p>Save the current figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">sca</span></code>(a)</p></td>
+<td><p>Set the current Axes to be <em>a</em> and return <em>a</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set" title="seispy.pickrf.pickfigure.RFFigure.set"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set</span></code></a>(*[, agg_filter, alpha, animated, ...])</p></td>
+<td><p>Set multiple properties at once.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_agg_filter</span></code>(filter_func)</p></td>
+<td><p>Set the agg filter.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_alpha</span></code>(alpha)</p></td>
+<td><p>Set the alpha value used for blending - not supported on all backends.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_animated</span></code>(b)</p></td>
+<td><p>Set whether the artist is intended to be used in an animation.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_canvas</span></code>(canvas)</p></td>
+<td><p>Set the canvas that contains the figure</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_box</span></code>(clipbox)</p></td>
+<td><p>Set the artist's clip <cite>.Bbox</cite>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_on</span></code>(b)</p></td>
+<td><p>Set whether the artist uses clipping.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_clip_path</span></code>(path[, transform])</p></td>
+<td><p>Set the artist's clip path.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_constrained_layout</span></code>(constrained)</p></td>
+<td><p>[<em>Deprecated</em>] Set whether <code class="docutils literal notranslate"><span class="pre">constrained_layout</span></code> is used upon drawing.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_constrained_layout_pads</span></code>(**kwargs)</p></td>
+<td><p>[<em>Deprecated</em>] Set padding for <code class="docutils literal notranslate"><span class="pre">constrained_layout</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_dpi</span></code>(val)</p></td>
+<td><p>Set the resolution of the figure in dots-per-inch.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_edgecolor</span></code>(color)</p></td>
+<td><p>Set the edge color of the Figure rectangle.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_facecolor</span></code>(color)</p></td>
+<td><p>Set the face color of the Figure rectangle.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_figheight</span></code>(val[, forward])</p></td>
+<td><p>Set the height of the figure in inches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set_figure" title="seispy.pickrf.pickfigure.RFFigure.set_figure"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_figure</span></code></a>()</p></td>
+<td><p>Set the <cite>.Figure</cite> instance the artist belongs to.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_figwidth</span></code>(val[, forward])</p></td>
+<td><p>Set the width of the figure in inches.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_frameon</span></code>(b)</p></td>
+<td><p>Set the figure's background patch visibility, i.e. whether the figure background will be drawn.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_gid</span></code>(gid)</p></td>
+<td><p>Set the (group) id for the artist.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_in_layout</span></code>(in_layout)</p></td>
+<td><p>Set if artist is to be included in layout calculations, E.g.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_label</span></code>(s)</p></td>
+<td><p>Set a label that will be displayed in the legend.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_layout_engine</span></code>([layout])</p></td>
+<td><p>Set the layout engine for this figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_linewidth</span></code>(linewidth)</p></td>
+<td><p>Set the line width of the Figure rectangle.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_mouseover</span></code>(mouseover)</p></td>
+<td><p>Set whether this artist is queried for custom context information when the mouse cursor moves over it.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_path_effects</span></code>(path_effects)</p></td>
+<td><p>Set the path effects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_picker</span></code>(picker)</p></td>
+<td><p>Define the picking behavior of the artist.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_rasterized</span></code>(rasterized)</p></td>
+<td><p>Force rasterized (bitmap) drawing for vector graphics output.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_size_inches</span></code>(w[, h, forward])</p></td>
+<td><p>Set the figure size in inches.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_sketch_params</span></code>([scale, length, randomness])</p></td>
+<td><p>Set the sketch parameters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_snap</span></code>(snap)</p></td>
+<td><p>Set the snapping behavior.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_tight_layout</span></code>(tight)</p></td>
+<td><p>[<em>Deprecated</em>] Set whether and how <cite>.tight_layout</cite> is called when drawing.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_transform</span></code>(t)</p></td>
+<td><p>Set the artist transform.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_url</span></code>(url)</p></td>
+<td><p>Set the url for the artist.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_visible</span></code>(b)</p></td>
+<td><p>Set the artist's visibility.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_zorder</span></code>(level)</p></td>
+<td><p>Set the zorder for the artist.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">show</span></code>([warn])</p></td>
+<td><p>If using a GUI backend with pyplot, display the figure window.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subfigures</span></code>([nrows, ncols, squeeze, wspace, ...])</p></td>
+<td><p>Add a set of subfigures to this figure or subfigure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subplot_mosaic</span></code>(mosaic, *[, sharex, sharey, ...])</p></td>
+<td><p>Build a layout of Axes based on ASCII art or nested lists.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subplots</span></code>([nrows, ncols, sharex, sharey, ...])</p></td>
+<td><p>Add a set of subplots to this figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">subplots_adjust</span></code>([left, bottom, right, top, ...])</p></td>
+<td><p>Adjust the subplot layout parameters.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">suptitle</span></code>(t, **kwargs)</p></td>
+<td><p>Add a centered suptitle to the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">supxlabel</span></code>(t, **kwargs)</p></td>
+<td><p>Add a centered supxlabel to the figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">supylabel</span></code>(t, **kwargs)</p></td>
+<td><p>Add a centered supylabel to the figure.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">text</span></code>(x, y, s[, fontdict])</p></td>
+<td><p>Add text to figure.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">tight_layout</span></code>(*[, pad, h_pad, w_pad, rect])</p></td>
+<td><p>Adjust the padding between and around subplots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update</span></code>(props)</p></td>
+<td><p>Update this artist's properties from the dict <em>props</em>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_from</span></code>(other)</p></td>
+<td><p>Copy properties from <em>other</em> to <em>self</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">waitforbuttonpress</span></code>([timeout])</p></td>
+<td><p>Blocking call to interact with the figure.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>butnext</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>butprevious</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>enlarge</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>finish</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>get_default_bbox_extra_artists</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>get_layout_engine</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>get_path_effects</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>init_canvas</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>init_figure</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>init_variables</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>onclick</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>plot</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>plotbaz</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>plotwave</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>read_sac</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>reduce</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>set_ax_baz_dis</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p><strong>set_page</strong></p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p><strong>set_ylabels</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.butnext">
+<span class="sig-name descname"><span class="pre">butnext</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.butnext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.butnext" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.butprevious">
+<span class="sig-name descname"><span class="pre">butprevious</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.butprevious"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.butprevious" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.enlarge">
+<span class="sig-name descname"><span class="pre">enlarge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.enlarge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.enlarge" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.finish">
+<span class="sig-name descname"><span class="pre">finish</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.finish"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.finish" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.init_canvas">
+<span class="sig-name descname"><span class="pre">init_canvas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'baz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.init_canvas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.init_canvas" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.init_figure">
+<span class="sig-name descname"><span class="pre">init_figure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">21</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">11</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.init_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.init_figure" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.init_variables">
+<span class="sig-name descname"><span class="pre">init_variables</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.init_variables"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.init_variables" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.onclick">
+<span class="sig-name descname"><span class="pre">onclick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.onclick"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.onclick" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.plot">
+<span class="sig-name descname"><span class="pre">plot</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.plot" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.plotbaz">
+<span class="sig-name descname"><span class="pre">plotbaz</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.plotbaz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.plotbaz" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.plotwave">
+<span class="sig-name descname"><span class="pre">plotwave</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.plotwave"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.plotwave" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.read_sac">
+<span class="sig-name descname"><span class="pre">read_sac</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'baz'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.read_sac"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.read_sac" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.reduce">
+<span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.reduce" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agg_filter=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animated=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canvas=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_box=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_on=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clip_path=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constrained_layout=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constrained_layout_pads=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dpi=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">edgecolor=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">facecolor=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figheight=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figwidth=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frameon=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gid=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_layout=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layout_engine=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">linewidth=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mouseover=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path_effects=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">picker=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rasterized=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_inches=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sketch_params=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snap=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tight_layout=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">visible=&lt;UNSET&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zorder=&lt;UNSET&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.set" title="Link to this definition">¶</a></dt>
+<dd><p>Set multiple properties at once.</p>
+<p>Supported properties are</p>
+<dl class="simple">
+<dt>Properties:</dt><dd><p>agg_filter: a filter function, which takes a (m, n, 3) float array and a dpi value, and returns a (m, n, 3) array and two offsets from the bottom left corner of the image
+alpha: scalar or None
+animated: bool
+canvas: FigureCanvas
+clip_box: <cite>~matplotlib.transforms.BboxBase</cite> or None
+clip_on: bool
+clip_path: Patch or (Path, Transform) or None
+constrained_layout: unknown
+constrained_layout_pads: unknown
+dpi: float
+edgecolor: color
+facecolor: color
+figheight: float
+figwidth: float
+frameon: bool
+gid: str
+in_layout: bool
+label: object
+layout_engine: {‘constrained’, ‘compressed’, ‘tight’, ‘none’, <cite>.LayoutEngine</cite>, None}
+linewidth: number
+mouseover: bool
+path_effects: list of <cite>.AbstractPathEffect</cite>
+picker: None or bool or float or callable
+rasterized: bool
+size_inches: (float, float) or float
+sketch_params: (scale: float, length: float, randomness: float)
+snap: bool or None
+tight_layout: unknown
+transform: <cite>~matplotlib.transforms.Transform</cite>
+url: str
+visible: bool
+zorder: float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.set_ax_baz_dis">
+<span class="sig-name descname"><span class="pre">set_ax_baz_dis</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.set_ax_baz_dis"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.set_ax_baz_dis" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.set_figure">
+<span class="sig-name descname"><span class="pre">set_figure</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.set_figure"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.set_figure" title="Link to this definition">¶</a></dt>
+<dd><p>Set the <cite>.Figure</cite> instance the artist belongs to.</p>
+<dl class="field-list">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl>
+<dt><strong>fig</strong><span class="classifier"><cite>~matplotlib.figure.Figure</cite></span></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.set_page">
+<span class="sig-name descname"><span class="pre">set_page</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.set_page"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.set_page" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.RFFigure.set_ylabels">
+<span class="sig-name descname"><span class="pre">set_ylabels</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#RFFigure.set_ylabels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.RFFigure.set_ylabels" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.StaData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.pickrf.pickfigure.</span></span><span class="sig-name descname"><span class="pre">StaData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filenames</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rrf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trf</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">goodrf</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#StaData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.StaData" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.pickrf.pickfigure.indexpags">
+<span class="sig-prename descclassname"><span class="pre">seispy.pickrf.pickfigure.</span></span><span class="sig-name descname"><span class="pre">indexpags</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evt_num</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxidx</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/pickrf/pickfigure.html#indexpags"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.pickrf.pickfigure.indexpags" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="seispy-pickrf-pickui-module">
+<h2>seispy.pickrf.pickui module<a class="headerlink" href="#seispy-pickrf-pickui-module" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2020, Mijian Xu
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">GUI package</a><ul>
+<li><a class="reference internal" href="#seispy-pickrf-pickfigure-module">seispy.pickrf.pickfigure module</a><ul>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure"><code class="docutils literal notranslate"><span class="pre">RFFigure</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.butnext"><code class="docutils literal notranslate"><span class="pre">RFFigure.butnext()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.butprevious"><code class="docutils literal notranslate"><span class="pre">RFFigure.butprevious()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.enlarge"><code class="docutils literal notranslate"><span class="pre">RFFigure.enlarge()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.finish"><code class="docutils literal notranslate"><span class="pre">RFFigure.finish()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.init_canvas"><code class="docutils literal notranslate"><span class="pre">RFFigure.init_canvas()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.init_figure"><code class="docutils literal notranslate"><span class="pre">RFFigure.init_figure()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.init_variables"><code class="docutils literal notranslate"><span class="pre">RFFigure.init_variables()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.onclick"><code class="docutils literal notranslate"><span class="pre">RFFigure.onclick()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.plot"><code class="docutils literal notranslate"><span class="pre">RFFigure.plot()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.plotbaz"><code class="docutils literal notranslate"><span class="pre">RFFigure.plotbaz()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.plotwave"><code class="docutils literal notranslate"><span class="pre">RFFigure.plotwave()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.read_sac"><code class="docutils literal notranslate"><span class="pre">RFFigure.read_sac()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.reduce"><code class="docutils literal notranslate"><span class="pre">RFFigure.reduce()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set"><code class="docutils literal notranslate"><span class="pre">RFFigure.set()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set_ax_baz_dis"><code class="docutils literal notranslate"><span class="pre">RFFigure.set_ax_baz_dis()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set_figure"><code class="docutils literal notranslate"><span class="pre">RFFigure.set_figure()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set_page"><code class="docutils literal notranslate"><span class="pre">RFFigure.set_page()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.RFFigure.set_ylabels"><code class="docutils literal notranslate"><span class="pre">RFFigure.set_ylabels()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.StaData"><code class="docutils literal notranslate"><span class="pre">StaData</span></code></a></li>
+<li><a class="reference internal" href="#seispy.pickrf.pickfigure.indexpags"><code class="docutils literal notranslate"><span class="pre">indexpags()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy-pickrf-pickui-module">seispy.pickrf.pickui module</a></li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=c70e35f3"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

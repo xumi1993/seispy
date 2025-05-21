@@ -1,0 +1,1041 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+        <link rel="canonical" href="seispy.xumijian.me/_modules/seispy/rf.html" />
+
+    <link rel="shortcut icon" href="../../_static/seispy_100.png"/><!-- Generated with Sphinx 7.3.7 and Furo 2024.01.29 -->
+        <title>seispy.rf - Seispy v1.3.6 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=135e06be" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.1e8bd061cd6da7fc9cf755528e8ffc24.min.css?v=0a3b3ea7" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=36a5483c" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #0080C4;
+  --color-brand-content: #0080C4;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">Seispy v1.3.6 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../_static/seispy-long.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Seispy v1.3.6 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../usage/index.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/PRF_Process.html">Calculate a P-wave Receiver Function (PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/rf-sta.html">Calculate PRFs for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/rf-from-ws.html">Fetch seismic data from web-service and calculate RF automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/srf.html">Calculate S wave Receiver Functions (SRF) for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/pickrf.html">Visual check PRFs with an user interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/ps-depth.html">Relationship between time difference and depth in 1D velocity model.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/ccp.html">Stack PRFs with Common Conversion points (CCP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/pickdepths.html">Visually pick depth of the discontinuities after CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-prf.html">PRFs calculation and H-k stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-ccp.html">Batch calculation and CCP stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-ccp3d.html">3-D CCP stacking for mantle transition zone structure under the Tibet.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-rfani.html">Crustal anisotropic estimation with a single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-harmo.html">Harmonic decomposition</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notes/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Configurations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/rf_cfg.html">RF calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/hk_cfg.html">Hk stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/ccp_cfg.html">CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../modules.html">Module Index</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Module Index</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rf.html">RF package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../post.html">Post-processing package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ccp.html">CCP package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/xumi1993/seispy">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitlab.com/xumi1993/seispy">GitLab</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://anaconda.org/conda-forge/seispy">Anaconda</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/python-seispy/">PyPI</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <h1>Source code for seispy.rf</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">obspy</span>
+<span class="kn">from</span> <span class="nn">obspy</span> <span class="kn">import</span> <span class="n">UTCDateTime</span>
+<span class="kn">from</span> <span class="nn">obspy.taup</span> <span class="kn">import</span> <span class="n">TauPyModel</span>
+<span class="kn">from</span> <span class="nn">obspy.io.sac</span> <span class="kn">import</span> <span class="n">SACTrace</span>
+<span class="kn">from</span> <span class="nn">obspy.core.event.catalog</span> <span class="kn">import</span> <span class="n">read_events</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">exists</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">makedirs</span>
+<span class="kn">from</span> <span class="nn">seispy.io</span> <span class="kn">import</span> <span class="n">Query</span><span class="p">,</span> <span class="n">_cat2df</span>
+<span class="kn">from</span> <span class="nn">seispy.para</span> <span class="kn">import</span> <span class="n">RFPara</span>
+<span class="kn">from</span> <span class="nn">seispy</span> <span class="kn">import</span> <span class="n">distaz</span>
+<span class="kn">from</span> <span class="nn">seispy.eq</span> <span class="kn">import</span> <span class="n">EQ</span>
+<span class="kn">from</span> <span class="nn">seispy.setuplog</span> <span class="kn">import</span> <span class="n">SetupLog</span>
+<span class="kn">from</span> <span class="nn">seispy.catalog</span> <span class="kn">import</span> <span class="n">read_catalog_file</span>
+<span class="kn">from</span> <span class="nn">seispy.utils</span> <span class="kn">import</span> <span class="n">scalar_instance</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">configparser</span>
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
+
+<div class="viewcode-block" id="pickphase">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.pickphase">[docs]</a>
+<span class="k">def</span> <span class="nf">pickphase</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">para</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">PySide6.QtWidgets</span> <span class="kn">import</span> <span class="n">QApplication</span>
+    <span class="kn">from</span> <span class="nn">seispy.pickseis.sviewerui</span> <span class="kn">import</span> <span class="n">MatplotlibWidget</span>
+    <span class="n">app</span> <span class="o">=</span> <span class="n">QApplication</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+    <span class="n">ui</span> <span class="o">=</span> <span class="n">MatplotlibWidget</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">para</span><span class="p">,</span> <span class="n">logger</span><span class="p">)</span>
+    <span class="n">ui</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">app</span><span class="o">.</span><span class="n">exec</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ui</span><span class="o">.</span><span class="n">exit_app</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_add_header</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">evt_time</span><span class="p">,</span> <span class="n">stainfo</span><span class="p">):</span>
+    <span class="n">sta</span> <span class="o">=</span> <span class="n">stainfo</span><span class="o">.</span><span class="n">query</span><span class="o">.</span><span class="n">stations</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">tr</span> <span class="ow">in</span> <span class="n">st</span><span class="p">:</span>
+        <span class="n">header</span> <span class="o">=</span> <span class="n">SACTrace</span><span class="o">.</span><span class="n">from_obspy_trace</span><span class="p">(</span><span class="n">tr</span><span class="p">)</span><span class="o">.</span><span class="n">to_obspy_trace</span><span class="p">()</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sac</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">channel</span>
+        <span class="k">for</span> <span class="n">ch</span> <span class="ow">in</span> <span class="n">sta</span><span class="o">.</span><span class="n">channels</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">ch</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">channel</span><span class="p">:</span>
+                <span class="n">header</span><span class="o">.</span><span class="n">cmpaz</span> <span class="o">=</span> <span class="n">ch</span><span class="o">.</span><span class="n">azimuth</span>
+                <span class="n">header</span><span class="o">.</span><span class="n">cmpinc</span> <span class="o">=</span> <span class="o">-</span><span class="n">ch</span><span class="o">.</span><span class="n">dip</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">stla</span> <span class="o">=</span> <span class="n">stainfo</span><span class="o">.</span><span class="n">stla</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">stlo</span> <span class="o">=</span> <span class="n">stainfo</span><span class="o">.</span><span class="n">stlo</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">stel</span> <span class="o">=</span> <span class="n">stainfo</span><span class="o">.</span><span class="n">stel</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">o</span> <span class="o">=</span> <span class="n">evt_time</span> <span class="o">-</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span>
+        <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;sac&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">header</span>
+
+
+<div class="viewcode-block" id="SACFileNotFoundError">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.SACFileNotFoundError">[docs]</a>
+<span class="k">class</span> <span class="nc">SACFileNotFoundError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matchkey</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matchkey</span> <span class="o">=</span> <span class="n">matchkey</span>
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No sac files found with </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matchkey</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="datestr2regex">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.datestr2regex">[docs]</a>
+<span class="k">def</span> <span class="nf">datestr2regex</span><span class="p">(</span><span class="n">datestr</span><span class="p">):</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">datestr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%y&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%Y&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{4}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%m&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%j&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{3}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%H&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%M&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">pattern</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%S&#39;</span><span class="p">,</span> <span class="sa">r</span><span class="s1">&#39;\d</span><span class="si">{2}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pattern</span></div>
+
+
+
+<div class="viewcode-block" id="read_catalog">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.read_catalog">[docs]</a>
+<span class="k">def</span> <span class="nf">read_catalog</span><span class="p">(</span><span class="n">logpath</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">b_time</span><span class="p">,</span> <span class="n">e_time</span><span class="p">,</span> <span class="n">stla</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">stlo</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span>
+                 <span class="n">magmin</span><span class="o">=</span><span class="mf">5.5</span><span class="p">,</span> <span class="n">magmax</span><span class="o">=</span><span class="mf">10.</span><span class="p">,</span> <span class="n">dismin</span><span class="o">=</span><span class="mf">30.</span><span class="p">,</span> <span class="n">dismax</span><span class="o">=</span><span class="mf">90.</span><span class="p">,</span>
+                 <span class="n">depthmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">depthmax</span><span class="o">=</span><span class="mi">800</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read local catalog with seispy or QUAKEML format</span>
+
+<span class="sd">    :param logpath: Path to catalogs</span>
+<span class="sd">    :type logpath: str</span>
+<span class="sd">    :param b_time: Start time </span>
+<span class="sd">    :type b_time: obspy.UTCDateTime</span>
+<span class="sd">    :param e_time: End time</span>
+<span class="sd">    :type e_time: obspy.UTCDateTime</span>
+<span class="sd">    :param stla: Station latitude</span>
+<span class="sd">    :type stla: float</span>
+<span class="sd">    :param stlo: Station longitude</span>
+<span class="sd">    :type stlo: float</span>
+<span class="sd">    :param magmin: Minimum magnitude, defaults to 5.5</span>
+<span class="sd">    :type magmin: float, optional</span>
+<span class="sd">    :param magmax: Maximum magnitude, defaults to 10</span>
+<span class="sd">    :type magmax: float, optional</span>
+<span class="sd">    :param dismin: Minimum distance, defaults to 30</span>
+<span class="sd">    :type dismin: float, optional</span>
+<span class="sd">    :param dismax: Maximum distance, defaults to 90</span>
+<span class="sd">    :type dismax: float, optional</span>
+<span class="sd">    :return: list of earthquakes</span>
+<span class="sd">    :rtype: pandas.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">eq_lst</span> <span class="o">=</span> <span class="n">read_catalog_file</span><span class="p">(</span><span class="n">logpath</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">events</span> <span class="o">=</span> <span class="n">read_events</span><span class="p">(</span><span class="n">logpath</span><span class="p">,</span> <span class="s1">&#39;QUAKEML&#39;</span><span class="p">)</span>
+        <span class="n">eq_lst</span> <span class="o">=</span> <span class="n">_cat2df</span><span class="p">(</span><span class="n">events</span><span class="p">)</span>
+    <span class="n">dis</span> <span class="o">=</span> <span class="n">distaz</span><span class="p">(</span><span class="n">stla</span><span class="p">,</span> <span class="n">stlo</span><span class="p">,</span> <span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;evla&#39;</span><span class="p">],</span> <span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;evlo&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">delta</span>
+    <span class="n">eq_lst</span> <span class="o">=</span> <span class="n">eq_lst</span><span class="p">[(</span><span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">&gt;=</span><span class="n">b_time</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">e_time</span><span class="p">)</span> <span class="o">&amp;</span> \
+                    <span class="p">(</span><span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span><span class="o">&gt;=</span><span class="n">magmin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">magmax</span><span class="p">)</span> <span class="o">&amp;</span> \
+                    <span class="p">(</span><span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">]</span><span class="o">&gt;=</span><span class="n">depthmin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">eq_lst</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">depthmax</span><span class="p">)</span> <span class="o">&amp;</span> \
+                    <span class="p">(</span><span class="n">dis</span><span class="o">&gt;=</span><span class="n">dismin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">dis</span><span class="o">&lt;=</span><span class="n">dismax</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">eq_lst</span></div>
+
+
+
+<div class="viewcode-block" id="fetch_waveform">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.fetch_waveform">[docs]</a>
+<span class="k">def</span> <span class="nf">fetch_waveform</span><span class="p">(</span><span class="n">eq_lst</span><span class="p">,</span> <span class="n">para</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">logger</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Fetch waveforms from remote data server</span>
+
+<span class="sd">    :param eq_lst: Earthquake list</span>
+<span class="sd">    :type eq_lst: pandas.DataFrame</span>
+<span class="sd">    :param para: RFPara object</span>
+<span class="sd">    :type para: seispy.para.RFPara</span>
+<span class="sd">    :param model: TauPyModel object</span>
+<span class="sd">    :type model: obspy.taup.TauPyModel</span>
+<span class="sd">    :param logger: Logger</span>
+<span class="sd">    :type logger: seispy.setuplog.SetupLog</span>
+<span class="sd">    :return: Earthquake list with fetched waveforms</span>
+<span class="sd">    :rtype: pandas.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">2</span><span class="o">*</span><span class="n">para</span><span class="o">.</span><span class="n">noiselen</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span><span class="p">])</span>
+    <span class="n">te</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">([</span><span class="mi">2</span><span class="o">*</span><span class="n">para</span><span class="o">.</span><span class="n">noiselen</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">query</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Please load station information and search earthquake before fetch waveform&#39;</span><span class="p">)</span>
+    <span class="n">new_col</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;bazi&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;datestr&#39;</span><span class="p">]</span>
+    <span class="n">eqall</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">eq_lst</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+        <span class="n">datestr</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y.%j.%H.%M.%S&#39;</span><span class="p">)</span>
+        <span class="n">daz</span> <span class="o">=</span> <span class="n">distaz</span><span class="p">(</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stla</span><span class="p">,</span> <span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stlo</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;evla&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;evlo&#39;</span><span class="p">])</span>
+        <span class="n">arrivals</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_travel_times</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">],</span> <span class="n">daz</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span> <span class="n">phase_list</span><span class="o">=</span><span class="p">[</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">arrivals</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;The phase of </span><span class="si">{}</span><span class="s1"> with source depth </span><span class="si">{}</span><span class="s1"> and distance </span><span class="si">{}</span><span class="s1"> is not exists&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                     <span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">],</span> <span class="n">daz</span><span class="o">.</span><span class="n">delta</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">arrivals</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;More than one phase were calculated with source depth of </span><span class="si">{}</span><span class="s1"> and distance of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                               <span class="n">row</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">],</span> <span class="n">daz</span><span class="o">.</span><span class="n">delta</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">arr_time</span> <span class="o">=</span> <span class="n">arrivals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">time</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">arr_time</span><span class="o">-</span><span class="n">tb</span>
+        <span class="n">t2</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">arr_time</span><span class="o">+</span><span class="n">te</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Fetch waveforms of (</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">) event </span><span class="si">{}</span><span class="s1"> from </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                              <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">eq_lst</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datestr</span><span class="p">,</span> <span class="n">para</span><span class="o">.</span><span class="n">data_server</span><span class="p">))</span>
+            <span class="n">st</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">get_waveforms</span><span class="p">(</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">station</span><span class="p">,</span>
+                                            <span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">location</span><span class="p">,</span> <span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">t2</span><span class="p">)</span>
+            <span class="n">_add_header</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">],</span> <span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error in fetching waveforms of event </span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">datestr</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">this_eq</span> <span class="o">=</span> <span class="n">EQ</span><span class="o">.</span><span class="n">from_stream</span><span class="p">(</span><span class="n">st</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="n">this_eq</span><span class="o">.</span><span class="n">get_time_offset</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span>
+        <span class="n">this_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">daz</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span> <span class="n">daz</span><span class="o">.</span><span class="n">baz</span><span class="p">,</span> <span class="n">this_eq</span><span class="p">,</span> <span class="n">datestr</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">new_col</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">eqall</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_df</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">eqall</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;No waveforms fetched&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">eq_match</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">eqall</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">eq_match</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">eq_match</span> <span class="o">=</span> <span class="n">eq_match</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">eq_lst</span><span class="p">,</span> <span class="n">eq_match</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="match_eq">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.match_eq">[docs]</a>
+<span class="k">def</span> <span class="nf">match_eq</span><span class="p">(</span><span class="n">eq_lst</span><span class="p">,</span> <span class="n">pathname</span><span class="p">,</span> <span class="n">stla</span><span class="p">,</span> <span class="n">stlo</span><span class="p">,</span> <span class="n">logger</span><span class="p">,</span> <span class="n">ref_comp</span><span class="o">=</span><span class="s1">&#39;Z&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s1">&#39;SAC&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+             <span class="n">tolerance</span><span class="o">=</span><span class="mi">210</span><span class="p">,</span> <span class="n">dateformat</span><span class="o">=</span><span class="s1">&#39;%Y.%j.%H.%M.%S&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Match earthquakes with local SAC files</span>
+
+<span class="sd">    :param eq_lst: Earthquake list</span>
+<span class="sd">    :type eq_lst: pandas.DataFrame</span>
+<span class="sd">    :param pathname: Path to SAC files</span>
+<span class="sd">    :type pathname: str</span>
+<span class="sd">    :param stla: Station latitude</span>
+<span class="sd">    :type stla: float</span>
+<span class="sd">    :param stlo: Station longitude</span>
+<span class="sd">    :type stlo: float</span>
+<span class="sd">    :param logger: Logger</span>
+<span class="sd">    :type logger: seispy.setuplog.SetupLog</span>
+<span class="sd">    :param ref_comp: Reference component, defaults to &#39;Z&#39;</span>
+<span class="sd">    :type ref_comp: str, optional</span>
+<span class="sd">    :param suffix: Suffix of SAC files, defaults to &#39;SAC&#39;</span>
+<span class="sd">    :type suffix: str, optional</span>
+<span class="sd">    :param offset: Time offset between SAC files and earthquakes, defaults to None</span>
+<span class="sd">    :type offset: float, optional</span>
+<span class="sd">    :param tolerance: Tolerance of time offset, defaults to 210</span>
+<span class="sd">    :type tolerance: int, optional</span>
+<span class="sd">    :param dateformat: Date format of SAC files, defaults to &#39;%Y.%j.%H.%M.%S&#39;</span>
+<span class="sd">    :type dateformat: str, optional</span>
+<span class="sd">    :return: Earthquake list with matched SAC files</span>
+<span class="sd">    :rtype: pandas.DataFrame</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">datestr2regex</span><span class="p">(</span><span class="n">dateformat</span><span class="p">)</span>
+    <span class="n">ref_eqs</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s1">&#39;*</span><span class="si">{0}</span><span class="s1">*</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ref_comp</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ref_eqs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">SACFileNotFoundError</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="s1">&#39;*</span><span class="si">{0}</span><span class="s1">*</span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ref_comp</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)))</span>
+    <span class="n">sac_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ref_sac</span> <span class="ow">in</span> <span class="n">ref_eqs</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">datestr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">ref_sac</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="s1">&#39;Error data format of </span><span class="si">{}</span><span class="s1"> in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">ref_sac</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+            <span class="n">sac_files</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datestr</span><span class="p">,</span> <span class="n">UTCDateTime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">datestr</span><span class="p">,</span> <span class="n">dateformat</span><span class="p">),</span> <span class="o">-</span><span class="n">offset</span><span class="p">])</span>
+        <span class="k">elif</span> <span class="n">offset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">tr</span> <span class="o">=</span> <span class="n">obspy</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">ref_sac</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">sac_files</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datestr</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">starttime</span><span class="o">-</span><span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sac</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="n">tr</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sac</span><span class="o">.</span><span class="n">o</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;offset should be int or float type&#39;</span><span class="p">)</span>
+    <span class="n">new_col</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">,</span> <span class="s1">&#39;bazi&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="s1">&#39;datestr&#39;</span><span class="p">]</span>
+    <span class="n">eq_match_lst</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">datestr</span><span class="p">,</span> <span class="n">b_time</span><span class="p">,</span> <span class="n">offs</span> <span class="ow">in</span> <span class="n">sac_files</span><span class="p">:</span>
+        <span class="n">date_range_begin</span> <span class="o">=</span> <span class="n">b_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">offs</span> <span class="o">-</span> <span class="n">tolerance</span><span class="p">)</span>
+        <span class="n">date_range_end</span> <span class="o">=</span> <span class="n">b_time</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">offs</span> <span class="o">+</span> <span class="n">tolerance</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">eq_lst</span><span class="p">[(</span><span class="n">eq_lst</span><span class="o">.</span><span class="n">date</span> <span class="o">&gt;</span> <span class="n">date_range_begin</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">eq_lst</span><span class="o">.</span><span class="n">date</span> <span class="o">&lt;</span> <span class="n">date_range_end</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">this_eq</span> <span class="o">=</span> <span class="n">EQ</span><span class="p">(</span><span class="n">pathname</span><span class="p">,</span> <span class="n">datestr</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">continue</span>
+        <span class="n">this_eq</span><span class="o">.</span><span class="n">get_time_offset</span><span class="p">(</span><span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;date&#39;</span><span class="p">])</span>
+        <span class="n">daz</span> <span class="o">=</span> <span class="n">distaz</span><span class="p">(</span><span class="n">stla</span><span class="p">,</span> <span class="n">stlo</span><span class="p">,</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;evla&#39;</span><span class="p">],</span> <span class="n">results</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;evlo&#39;</span><span class="p">])</span>
+        <span class="n">this_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([[</span><span class="n">daz</span><span class="o">.</span><span class="n">delta</span><span class="p">,</span> <span class="n">daz</span><span class="o">.</span><span class="n">baz</span><span class="p">,</span> <span class="n">this_eq</span><span class="p">,</span> <span class="n">datestr</span><span class="p">]],</span> <span class="n">columns</span><span class="o">=</span><span class="n">new_col</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">results</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="n">eq_match_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">this_df</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">eq_match_lst</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;No earthquakes matched&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">eq_match</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">eq_match_lst</span><span class="p">)</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">eq_match</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">keep</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">eq_match</span> <span class="o">=</span> <span class="n">eq_match</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">eq_lst</span><span class="p">,</span> <span class="n">eq_match</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">join</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="CfgModify">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.CfgModify">[docs]</a>
+<span class="k">def</span> <span class="nf">CfgModify</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span> <span class="n">session</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">cf</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">RawConfigParser</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">cf</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;Cannot open configure file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cfg_file</span><span class="p">)</span>
+    <span class="n">cf</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">session</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">cf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="RF">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF">[docs]</a>
+<span class="k">class</span> <span class="nc">RF</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cfg_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">log</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Procedure of Receiver function analysis</span>
+
+<span class="sd">        :param cfg_file: Path to configure file, defaults to None</span>
+<span class="sd">        :type cfg_file: str, optional</span>
+<span class="sd">        :param log: Logger, defaults to None</span>
+<span class="sd">        :type log: seispy.setuplog.SetupLog, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">log</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">SetupLog</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">log</span>
+        <span class="k">if</span> <span class="n">cfg_file</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">para</span> <span class="o">=</span> <span class="n">RFPara</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;No such file of </span><span class="si">{}</span><span class="s1">.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">))</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">para</span> <span class="o">=</span> <span class="n">RFPara</span><span class="o">.</span><span class="n">read_para</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;cfg should be in </span><span class="se">\&#39;</span><span class="s1">str</span><span class="se">\&#39;</span><span class="s1"> format rather than </span><span class="se">\&#39;</span><span class="si">{0}</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">cfg_file</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="p">,</span> <span class="n">RFPara</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Input value should be class seispy.rf.para&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eq_lst</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">TauPyModel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">velmod</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stainfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">baz_shift</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">date_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_begin</span>
+
+    <span class="nd">@date_begin</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">date_begin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_begin</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">date_end</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span>
+
+    <span class="nd">@date_end</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">date_end</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="RF.load_stainfo">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.load_stainfo">[docs]</a>
+    <span class="k">def</span> <span class="nf">load_stainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_date_range</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load station information from local file or remote web-service</span>
+<span class="sd">        </span>
+<span class="sd">        :param use_date_range: Use date range to search station information, defaults to True</span>
+<span class="sd">        :type use_date_range: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">use_remote_data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Load station info of </span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1"> from </span><span class="si">{}</span><span class="s1"> web-service&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">data_server</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">link_server</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">data_server</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">data_server_user</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">data_server_password</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">use_date_range</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">get_station_from_ws</span><span class="p">(</span>
+                        <span class="n">starttime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_begin</span><span class="p">,</span>
+                        <span class="n">endtime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span>
+                    <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">get_station_from_ws</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">_check_date_range</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Load station info from </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">load_stainfo</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">ref_comp</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">.</span><span class="si">{}</span><span class="s1">, latitude: </span><span class="si">{:.3f}</span><span class="s1">, longitude: </span><span class="si">{:.3f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">network</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">station</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stla</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stlo</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Error in loading station info: </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RF.search_eq">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.search_eq">[docs]</a>
+    <span class="k">def</span> <span class="nf">search_eq</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">catalog</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Search earthquakes from local or online data server</span>
+
+<span class="sd">        :param local: Search from local data, defaults to False</span>
+<span class="sd">        :type local: bool, optional</span>
+<span class="sd">        :param catalog: Catalog type, defaults to None</span>
+<span class="sd">        :type catalog: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">local</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Searching earthquakes from </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">cata_server</span><span class="p">))</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span> <span class="o">&gt;</span> <span class="n">UTCDateTime</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span> <span class="o">=</span> <span class="n">UTCDateTime</span><span class="p">()</span>
+                <span class="n">query</span> <span class="o">=</span> <span class="n">Query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">cata_server</span><span class="p">)</span>
+                <span class="n">query</span><span class="o">.</span><span class="n">get_events</span><span class="p">(</span><span class="n">starttime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_begin</span><span class="p">,</span> <span class="n">endtime</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span><span class="p">,</span>
+                                 <span class="n">latitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stla</span><span class="p">,</span> <span class="n">longitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stlo</span><span class="p">,</span>
+                                 <span class="n">minmagnitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">magmin</span><span class="p">,</span> <span class="n">maxmagnitude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">magmax</span><span class="p">,</span>
+                                 <span class="n">minradius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">dismin</span><span class="p">,</span> <span class="n">maxradius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">dismax</span><span class="p">,</span> 
+                                 <span class="n">mindepth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">depthmin</span><span class="p">,</span> <span class="n">maxdepth</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">depthmax</span><span class="p">,</span>
+                                 <span class="n">catalog</span><span class="o">=</span><span class="n">catalog</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">eq_lst</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">events</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ConnectionError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;Searching earthquakes from </span><span class="si">{0}</span><span class="s1"> to </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">date_begin</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y.%m.</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">),</span>
+                                                                   <span class="bp">self</span><span class="o">.</span><span class="n">date_end</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y.%m.</span><span class="si">%d</span><span class="s1">T%H:%M:%S&#39;</span><span class="p">)))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">eq_lst</span> <span class="o">=</span> <span class="n">read_catalog</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">catalogpath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_begin</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">date_end</span><span class="p">,</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stla</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stlo</span><span class="p">,</span>
+                                           <span class="n">magmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">magmin</span><span class="p">,</span> <span class="n">magmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">magmax</span><span class="p">,</span>
+                                           <span class="n">dismin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">dismin</span><span class="p">,</span> <span class="n">dismax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">dismax</span><span class="p">,</span>
+                                           <span class="n">depthmin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">depthmin</span><span class="p">,</span> <span class="n">depthmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">depthmax</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">raise</span> <span class="n">e</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> earthquakes are found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eq_lst</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="RF.match_eq">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.match_eq">[docs]</a>
+    <span class="k">def</span> <span class="nf">match_eq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Assosiate earthquakes with local data file or online data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">use_remote_data</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Fetch seismic data from </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">data_server</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span> <span class="o">=</span> <span class="n">fetch_waveform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eq_lst</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Associating SAC files with earthquakes&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span> <span class="o">=</span> <span class="n">match_eq</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eq_lst</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stla</span><span class="p">,</span> 
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">stainfo</span><span class="o">.</span><span class="n">stlo</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">,</span>
+                                    <span class="n">ref_comp</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">ref_comp</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">suffix</span><span class="p">,</span>
+                                    <span class="n">offset</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">tolerance</span><span class="p">,</span>
+                                    <span class="n">dateformat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">dateformat</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;No earthquakes associated, please check configurations.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> earthquakes are associated&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="RF.save_raw_data">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.save_raw_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">save_raw_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save raw data to local disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">):</span>
+            <span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="RF.savepjt">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.savepjt">[docs]</a>
+    <span class="k">def</span> <span class="nf">savepjt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save project to local disk</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cleanstream</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Saving project to </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">pjtpath</span><span class="p">))</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">pjtpath</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">({</span><span class="s1">&#39;para&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="p">,</span> <span class="s1">&#39;eqs&#39;</span><span class="p">:</span> <span class="n">eqs</span><span class="p">},</span> <span class="n">f</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
+
+ 
+<div class="viewcode-block" id="RF.loadpjt">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.loadpjt">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">loadpjt</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Load project from local disk</span>
+
+<span class="sd">        :param path: Path to project file</span>
+<span class="sd">        :type path: str</span>
+<span class="sd">        :return: Project object</span>
+<span class="sd">        :rtype: seispy.rf.RF</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">rfdata</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="n">pjt</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">phase</span><span class="o">=</span><span class="n">rfdata</span><span class="p">[</span><span class="s1">&#39;para&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span>
+        <span class="n">pjt</span><span class="o">.</span><span class="n">para</span> <span class="o">=</span> <span class="n">rfdata</span><span class="p">[</span><span class="s1">&#39;para&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">pjt</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">):</span>
+            <span class="n">pjt</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Data path </span><span class="si">{}</span><span class="s1"> was not found&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pjt</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">datapath</span><span class="p">))</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pjt</span><span class="o">.</span><span class="n">load_stainfo</span><span class="p">()</span>
+        <span class="n">pjt</span><span class="o">.</span><span class="n">eqs</span> <span class="o">=</span> <span class="n">rfdata</span><span class="p">[</span><span class="s1">&#39;eqs&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">pjt</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">readstream</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">pjt</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Cannot read </span><span class="si">{}</span><span class="s1">, skipping&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">filestr</span><span class="p">))</span>
+                <span class="k">continue</span>
+        <span class="k">return</span> <span class="n">pjt</span></div>
+
+
+<div class="viewcode-block" id="RF.channel_correct">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.channel_correct">[docs]</a>
+    <span class="k">def</span> <span class="nf">channel_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Correct channel components</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">switchEN</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">reverseN</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">reverseE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Correct components with switchEN: </span><span class="si">{}</span><span class="s1">, reverseE: </span><span class="si">{}</span><span class="s1">, reverseN: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">switchEN</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">reverseE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">reverseN</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">channel_correct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">switchEN</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">reverseE</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">reverseN</span><span class="p">)</span></div>
+
+        
+<div class="viewcode-block" id="RF.detrend">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.detrend">[docs]</a>
+    <span class="k">def</span> <span class="nf">detrend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Detrend all data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Detrend all data&#39;</span><span class="p">)</span>
+        <span class="n">drop_idx</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">detrend</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Data error in </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y.%j.%H.%M.%S&#39;</span><span class="p">)))</span>
+                <span class="n">drop_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_idx</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RF.filter">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.filter">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">freqmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Filter all data</span>
+
+<span class="sd">        :param freqmin: Minimum frequency, defaults to self.para.freqmin</span>
+<span class="sd">        :type freqmin: float, optional</span>
+<span class="sd">        :param freqmax: Maximum frequency, defaults to self.para.freqmax</span>
+<span class="sd">        :type freqmax: float, optional</span>
+<span class="sd">        :param order: Order of filter, defaults to 4</span>
+<span class="sd">        :type order: int, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">freqmin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">freqmin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">freqmin</span>
+        <span class="k">if</span> <span class="n">freqmax</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">freqmax</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">freqmax</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Filter all data from </span><span class="si">{0}</span><span class="s1"> to </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">freqmin</span><span class="o">=</span><span class="n">freqmin</span><span class="p">,</span> <span class="n">freqmax</span><span class="o">=</span><span class="n">freqmax</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RF.cal_phase">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.cal_phase">[docs]</a>
+    <span class="k">def</span> <span class="nf">cal_phase</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Calculate arrivals and ray parameters for all data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Calculate </span><span class="si">{}</span><span class="s1"> arrivals and ray parameters for all data&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_arrival</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">],</span> <span class="n">phase</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RF.baz_correct">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.baz_correct">[docs]</a>
+    <span class="k">def</span> <span class="nf">baz_correct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time_b</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">time_e</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">90</span><span class="p">,</span> <span class="n">correct_angle</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Correct back-azimuth for all data</span>
+
+<span class="sd">        :param time_b: Begin time of searching, defaults to 10</span>
+<span class="sd">        :type time_b: int, optional</span>
+<span class="sd">        :param time_e: End time of searching, defaults to 20</span>
+<span class="sd">        :type time_e: int, optional</span>
+<span class="sd">        :param offset: Offset of searching, defaults to 90</span>
+<span class="sd">        :type offset: int, optional</span>
+<span class="sd">        :param correct_angle: Correct angle, defaults to None</span>
+<span class="sd">        :type correct_angle: float, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">correct_angle</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;correct back-azimuth with </span><span class="si">{}</span><span class="s1"> deg.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">correct_angle</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="p">[</span><span class="s1">&#39;bazi&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="p">[</span><span class="s1">&#39;bazi&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">correct_angle</span><span class="p">,</span> <span class="mi">360</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;correct back-azimuth with T energy minimization&#39;</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">shift_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="o">-</span><span class="n">offset</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+            <span class="n">ampt_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                <span class="n">curr_baz</span><span class="p">,</span> <span class="n">ampt</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">search_baz</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;bazi&#39;</span><span class="p">],</span> <span class="n">time_b</span><span class="o">=</span><span class="n">time_b</span><span class="p">,</span> <span class="n">time_e</span><span class="o">=</span><span class="n">time_e</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">shift_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift_all</span><span class="p">,</span> <span class="n">curr_baz</span><span class="p">)</span>
+                <span class="n">ampt_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">ampt_all</span><span class="p">,</span> <span class="n">ampt</span><span class="p">))</span>
+            <span class="k">if</span> <span class="kc">None</span> <span class="ow">in</span> <span class="n">shift_all</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Range of searching bazi is too small.&#39;</span><span class="p">)</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">baz_shift</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">shift_all</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">shift_all</span><span class="p">)))])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Average </span><span class="si">{:.1f}</span><span class="s1"> deg offset in back-azimuth&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baz_shift</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="RF.rotate">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.rotate">[docs]</a>
+    <span class="k">def</span> <span class="nf">rotate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">search_inc</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Rotate all data to ZNE or RTZ</span>
+
+<span class="sd">        :param search_inc: Search incidence angle, defaults to False</span>
+<span class="sd">        :type search_inc: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">targ_comp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">comp</span><span class="o">.</span><span class="n">upper</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">targ_comp</span> <span class="o">==</span> <span class="s1">&#39;RTZ&#39;</span><span class="p">:</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NE-&gt;RT&#39;</span>
+        <span class="k">elif</span> <span class="n">targ_comp</span> <span class="o">==</span> <span class="s1">&#39;LQT&#39;</span><span class="p">:</span>
+            <span class="n">method</span><span class="o">=</span><span class="s1">&#39;ZNE-&gt;LQT&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;comp must be in RTZ or LQT.&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Rotate </span><span class="si">{0}</span><span class="s1"> phase to </span><span class="si">{1}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">,</span> <span class="n">method</span><span class="p">))</span>
+        <span class="n">drop_idx</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;bazi&#39;</span><span class="p">],</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">search_inc</span><span class="o">=</span><span class="n">search_inc</span><span class="p">,</span> <span class="n">baz_shift</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">baz_shift</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">datestr</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">drop_idx</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">search_inc</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;The incidence angle of </span><span class="si">{}</span><span class="s1"> was corrected by </span><span class="si">{:.1f}</span><span class="s1"> deg&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                       <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">datestr</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">inc_correction</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_idx</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RF.drop_eq_snr">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.drop_eq_snr">[docs]</a>
+    <span class="k">def</span> <span class="nf">drop_eq_snr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_only</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Drop earthquakes with low SNR</span>
+
+<span class="sd">        :param length: Length of data, defaults to None</span>
+<span class="sd">        :type length: int, optional</span>
+<span class="sd">        :param z_only: Use Z component only, defaults to False</span>
+<span class="sd">        :type z_only: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">noiselen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Reject data record with SNR less than </span><span class="si">{0}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">noisegate</span><span class="p">))</span>
+        <span class="n">drop_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">snr_E</span><span class="p">,</span> <span class="n">snr_N</span><span class="p">,</span> <span class="n">snr_Z</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">snr</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">length</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">z_only</span><span class="p">:</span>
+                <span class="n">mean_snr</span> <span class="o">=</span> <span class="n">snr_Z</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mean_snr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="n">snr_E</span><span class="p">,</span> <span class="n">snr_N</span><span class="p">,</span> <span class="n">snr_Z</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">mean_snr</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">noisegate</span><span class="p">:</span>
+                <span class="n">drop_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_lst</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> events left after SNR calculation&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="RF.trim">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.trim">[docs]</a>
+    <span class="k">def</span> <span class="nf">trim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Trim waveforms from start to end</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Trim waveforms from </span><span class="si">{0:.2f}</span><span class="s1"> before </span><span class="si">{2}</span><span class="s1"> to </span><span class="si">{1:.2f}</span><span class="s1"> after </span><span class="si">{2}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                               <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">trim</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span><span class="p">)</span></div>
+
+    
+<div class="viewcode-block" id="RF.pick">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.pick">[docs]</a>
+    <span class="k">def</span> <span class="nf">pick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prepick</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">stl</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">ltl</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Pick phase arrival</span>
+
+<span class="sd">        :param prepick: Use STA/LTA method, defaults to True</span>
+<span class="sd">        :type prepick: bool, optional</span>
+<span class="sd">        :param stl: Short time length, defaults to 5</span>
+<span class="sd">        :type stl: int, optional</span>
+<span class="sd">        :param ltl: Long time length, defaults to 10</span>
+<span class="sd">        :type ltl: int, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">prepick</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Pre-pick </span><span class="si">{}</span><span class="s1"> arrival using STA/LTA method&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">phase_trigger</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span><span class="p">,</span>
+                                      <span class="n">prepick</span><span class="o">=</span><span class="n">prepick</span><span class="p">,</span> <span class="n">stl</span><span class="o">=</span><span class="n">stl</span><span class="p">,</span> <span class="n">ltl</span><span class="o">=</span><span class="n">ltl</span><span class="p">)</span>
+        <span class="n">pickphase</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{0}</span><span class="s1"> events left after visual checking&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span></div>
+
+
+<div class="viewcode-block" id="RF.deconv">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.deconv">[docs]</a>
+    <span class="k">def</span> <span class="nf">deconv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Deconvolution for all data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span>
+        <span class="n">time_after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span>
+        <span class="n">drop_lst</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">deconvolute</span><span class="p">(</span><span class="n">shift</span><span class="p">,</span> <span class="n">time_after</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">decon_method</span><span class="p">,</span> <span class="n">f0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">gauss</span><span class="p">,</span>
+                                        <span class="n">only_r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">only_r</span><span class="p">,</span> <span class="n">itmax</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">itmax</span><span class="p">,</span> <span class="n">minderr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">minderr</span><span class="p">,</span>
+                                        <span class="n">wlevel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">wlevel</span><span class="p">,</span> <span class="n">target_dt</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">target_dt</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">decon_method</span> <span class="o">==</span> <span class="s1">&#39;iter&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Iterative Decon </span><span class="si">{0}</span><span class="s1"> (</span><span class="si">{3}</span><span class="s1">/</span><span class="si">{4}</span><span class="s1">) iterations: </span><span class="si">{1}</span><span class="s1">; final RMS: </span><span class="si">{2:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">datestr</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">iter</span><span class="p">,</span>
+                        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">rms</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">decon_method</span> <span class="o">==</span> <span class="s1">&#39;water&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Water level Decon </span><span class="si">{}</span><span class="s1"> (</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">); RMS: </span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">datestr</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">rf</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">rms</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1">: </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">datestr</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">drop_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_lst</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="RF.saverf">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.RF.saverf">[docs]</a>
+    <span class="k">def</span> <span class="nf">saverf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gauss</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Save receiver functions to local disk</span>
+<span class="sd">        </span>
+<span class="sd">        :param gauss: Gaussian width, defaults to self.para.gauss</span>
+<span class="sd">        :type gauss: float, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">npts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span><span class="p">)</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">target_dt</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;P&#39;</span><span class="p">:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_before</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">phase</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;S&#39;</span><span class="p">:</span>
+            <span class="n">shift</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">time_after</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">good_lst</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">scalar_instance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">gauss</span><span class="p">):</span>
+            <span class="n">gauss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">gauss</span>
+        <span class="k">elif</span> <span class="n">gauss</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">gauss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">gauss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">gauss</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">gauss</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;gauss should be a element in the seispy.para.RFPara.gauss&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">rmsgate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Save RFs with final RMS less than </span><span class="si">{:.2f}</span><span class="s1"> and criterion of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">rmsgate</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">criterion</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Save RFs with and criterion of </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">criterion</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">judge_rf</span><span class="p">(</span><span class="n">gauss</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">npts</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">criterion</span><span class="p">,</span> <span class="n">rmsgate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">rmsgate</span><span class="p">):</span>
+                <span class="n">row</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">saverf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">rfpath</span><span class="p">,</span> <span class="n">evtstr</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;date&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y.%j.%H.%M.%S&#39;</span><span class="p">),</span> <span class="n">shift</span><span class="o">=</span><span class="n">shift</span><span class="p">,</span>
+                                   <span class="n">evla</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;evla&#39;</span><span class="p">],</span> <span class="n">evlo</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;evlo&#39;</span><span class="p">],</span> <span class="n">evdp</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;evdp&#39;</span><span class="p">],</span> <span class="n">baz</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;bazi&#39;</span><span class="p">],</span>
+                                   <span class="n">mag</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;mag&#39;</span><span class="p">],</span> <span class="n">gcarc</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;dis&#39;</span><span class="p">],</span> <span class="n">gauss</span><span class="o">=</span><span class="n">gauss</span><span class="p">,</span> <span class="n">only_r</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">para</span><span class="o">.</span><span class="n">only_r</span><span class="p">,</span>
+                                   <span class="n">user9</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">baz_shift</span><span class="p">)</span>
+                <span class="n">good_lst</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">RFlog</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{}</span><span class="s1"> PRFs are saved.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">good_lst</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eqs</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">good_lst</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="setpar">
+<a class="viewcode-back" href="../../seispy.html#seispy.rf.setpar">[docs]</a>
+<span class="k">def</span> <span class="nf">setpar</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set parameters to configure file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="s2">&quot;Set parameters to configure file&quot;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;cfg_file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Path to configure file&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;session&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;session name&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;key name&#39;</span><span class="p">)</span>
+    <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">)</span>
+    <span class="n">arg</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+    <span class="n">CfgModify</span><span class="p">(</span><span class="n">arg</span><span class="o">.</span><span class="n">cfg_file</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">session</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">arg</span><span class="o">.</span><span class="n">value</span><span class="p">)</span></div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="k">pass</span>
+    <span class="c1"># get_events_test()</span>
+    <span class="c1"># prf()</span>
+    <span class="c1"># proj_test()</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2020, Mijian Xu
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=8b6c1228"></script>
+    <script src="../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=32e29ea5"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=36754332"></script>
+    </body>
+</html>
