@@ -56,6 +56,20 @@ class Query():
         self.events = _cat2df(events)
         self.events_raw = events
 
+    def write_events(self, filename, format='QUAKEML'):
+        """Write events to file
+
+        :param filename: Output filename
+        :type filename: str
+        :param format: Output format, defaults to 'QUAKEML'. See the ObsPy documentation for supported formats. 
+                       The 'TXT' format is supported to write a space-separated text file.
+        :type format: str, optional
+        """
+        if format.upper() == 'TXT':
+            self.events.to_csv(filename, index=False, sep=' ', header=False)
+        else:
+            self.events_raw.write(filename, format=format)
+
     def get_stations(self, includerestricted=False, **kwargs):
         self.stations = self.client.get_stations(includerestricted=includerestricted, **kwargs)
 

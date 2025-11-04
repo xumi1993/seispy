@@ -3,7 +3,7 @@ import numpy as np
 import obspy
 from obspy.signal.util import next_pow_2
 from obspy.io.sac import SACTrace
-from numpy.fft import fft, ifft
+from scipy.fftpack import fft, ifft
 # from scipy.linalg import solve_toeplitz
 
 
@@ -163,7 +163,8 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
     maxlag = 0.5 * nfft
     # print('\tMax Spike Display is ' + str((maxlag) * dt))
 
-    while np.abs(d_error) > minderr and it < itmax:
+    # while np.abs(d_error) > minderr and it < itmax:
+    for it in range(itmax):
         rw = correl(r_flt, w_flt, nfft)
         rw = rw / np.sum(w_flt ** 2)
 
@@ -181,10 +182,10 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
         sumsq = np.sum(r_flt ** 2) / powerU
         rms[it] = sumsq
         d_error = 100 * (sumsq_i - sumsq)
-
         sumsq_i = sumsq
-
-        it = it + 1
+        if np.abs(d_error) < minderr:
+            break
+        # it = it + 1
 
     p_flt = gfilter(p0, nfft, gaussF, dt)
     p_flt = phaseshift(p_flt, nfft, dt, tshift)

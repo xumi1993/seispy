@@ -290,6 +290,8 @@ def get_events():
                         metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
     parser.add_argument('-p', help='Focal depth, optional for max depth', 
                         metavar='<mindepth>[/<maxdepth>]', default=None)
+    parser.add_argument('-o', help='Output filename, defaults to stdout', metavar='filename', default=None)
+    parser.add_argument('-f', help='Output format, QUAKEML or CSV, defaults to CSV', metavar='QUAKEML', default='QUAKEML')
     arg = parser.parse_args()
     args = {}
     if arg.c is not None:
@@ -364,6 +366,8 @@ def get_events():
               row.date.isoformat(), row.evla, row.evlo,
               row.evdp, row.mag, row.magtype)
         )
+    if arg.o is not None:
+        query.write_events(arg.o, format=arg.f)
 
 def get_stations():
     from obspy import UTCDateTime

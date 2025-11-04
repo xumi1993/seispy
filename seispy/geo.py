@@ -1,5 +1,5 @@
 import numpy as np
-from seispy import distaz
+from .distaz import distaz
 from pyproj import Geod
 from seispy.utils import scalar_instance, array_instance
 
