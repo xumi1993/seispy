@@ -372,6 +372,12 @@ class RFStation(object):
         :return tps: Time difference of Ps at each depth
         :rtype: list
         """
+        import warnings
+        warnings.warn(
+            "The function is unsafe and will be deprecated in future versions. Please use psrf_3D_timecorrect instead.",
+            DeprecationWarning,
+            stacklevel=2
+        )
         self.dep_range = dep_range
         mod3d = Mod3DPerturbation(mod3dpath, dep_range)
         pplat_s, pplon_s, _, _, tps = psrf_3D_raytracing(self, dep_range, mod3d, srayp=srayp)
