@@ -66,7 +66,6 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
 - `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and D660.
 
   [lithospheric seismology program at USC]: http://www.seis.sc.edu/software/distaz/
-  [scikits-bootstrap]: https://github.com/cgevans/scikits-bootstrap
   [iwbailey/processRFmatlab]: https://github.com/iwbailey/processRFmatlab
   [Obspy]: https://docs.obspy.org/
   [Xu et al., 2018 EPSL]: https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub

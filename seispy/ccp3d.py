@@ -88,7 +88,7 @@ def boot_bin_stack(data_bin, n_samples=3000, confidence_level=0.95):
     count = data_bin.shape[0]
     if count > 1:
         if n_samples is not None:
-            res = bootstrap(data_bin, np.mean, n_samples=n_samples, confidence_level=confidence_level)
+            res = bootstrap(data_bin, np.mean, n_resamples=n_samples, confidence_level=confidence_level)
             cci = np.array([res.confidence_interval.low, res.confidence_interval.high])
         else:
             cci = np.array([np.nan, np.nan])
