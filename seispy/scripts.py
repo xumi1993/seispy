@@ -274,12 +274,12 @@ def plot_r():
 def get_events():
     from obspy import UTCDateTime
     from seispy.io import Query
-    parser = argparse.ArgumentParser(description="Get seismic events from IRIS Web-Service")
-    parser.add_argument('-S', help='Server name, defaults to IRIS', metavar='server', default='IRIS')
+    parser = argparse.ArgumentParser(description="Get seismic events from USGS Web-Service")
+    parser.add_argument('-S', help='Server name, defaults to USGS', metavar='server', default='USGS')
     parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304',
                         metavar='datetime', default=None)
     parser.add_argument('-c', help='Catalog type',
-                        metavar='GCMT|NEIC PDE|ISC', default=None)
+                        default=None)
     parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
                         metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
     parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
@@ -372,8 +372,8 @@ def get_events():
 def get_stations():
     from obspy import UTCDateTime
     from seispy.io import Query
-    parser = argparse.ArgumentParser(description="Get stations from IRIS Web-Service")
-    parser.add_argument('-S', help='Server name, defaults to IRIS', metavar='server', default='IRIS')
+    parser = argparse.ArgumentParser(description="Get stations from EARTHSCOPE Web-Service")
+    parser.add_argument('-S', help='Server name, defaults to EARTHSCOPE', metavar='server', default='EARTHSCOPE')
     parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304', metavar='datetime', default=None)
     parser.add_argument('-c', help='Channel, wildcard is available like *,?,[EB]...', metavar='channel', default=None)
     parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',

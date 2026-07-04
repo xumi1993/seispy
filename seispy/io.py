@@ -11,13 +11,13 @@ def _cat2df(cat):
 
 
 class Query():
-    def __init__(self, server='IRIS', **kwargs):
+    def __init__(self, server='EARTHSCOPE', **kwargs):
         self.client = Client(server, **kwargs)
 
     def get_events(self, starttime=None,
                    endtime=UTCDateTime.now(), 
                    **kwargs):
-        """Get events from IRIS
+        """Get events from EARTHSCOPE
 
         :param starttime: Start time of events, defaults to None
         :type starttime: :class:`obspy.UTCDateTime`, optional
