@@ -96,7 +96,7 @@ class RFPara(object):
         self.rfpath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
         self.pjtpath = 'rfpjt.pkl'
-        self.cata_server = 'EARTHSCOPE'
+        self.cata_server = 'USGS'
         self.data_server = 'EARTHSCOPE'
         self.velmod = 'iasp91'
         self.offset = None

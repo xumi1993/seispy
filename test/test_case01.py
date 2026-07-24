@@ -25,6 +25,7 @@ def init_RF():
     rf.para.phase = 'P'
     rf.para.datapath = 'ex-prf/Data.CB.NJ2'
     rf.para.rfpath = 'ex-prf/RFresult/CB.NJ2'
+    rf.para.cata_server = 'USGS'
     rf.load_stainfo()
     rf.search_eq()
     rf.match_eq()
