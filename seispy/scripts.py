@@ -279,7 +279,7 @@ def get_events():
     parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304',
                         metavar='datetime', default=None)
     parser.add_argument('-c', help='Catalog type',
-                        default=None)
+                        default=None, metavar="catalog")
     parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
                         metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
     parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
@@ -359,7 +359,7 @@ def get_events():
     if args == {}:
         parser.print_usage()
         sys.exit(1)
-    query = Query()
+    query = Query(server=arg.S)
     query.get_events(**args)
     for _, row in query.events.iterrows():
         print('{} {:.2f} {:.2f} {:.2f} {:.1f} {}'.format(
