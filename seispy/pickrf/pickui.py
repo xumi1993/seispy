@@ -67,27 +67,27 @@ class MatplotlibWidget(QMainWindow):
         self._set_geom_center()
         self._define_global_shortcuts()
         self.setWindowTitle('PickRF')
-        self.setWindowIcon(QIcon(join(dirname(__file__), 'data', 'seispy.png')))
+        self.setWindowIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'seispy.png')))
 
     def on_click(self, event):
         self.mpl.rffig.onclick(event)
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def previous_connect(self):
         self.mpl.rffig.butprevious()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def next_connect(self):
         self.mpl.rffig.butnext()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def enlarge(self):
         self.mpl.rffig.enlarge()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def reduce(self):
         self.mpl.rffig.reduce()
-        self.mpl.draw()
+        self.mpl.draw_idle()
 
     def finish(self):
         self.mpl.rffig.finish()
@@ -139,12 +139,16 @@ class MatplotlibWidget(QMainWindow):
 
     def add_btn(self):
         pre_btn = QPushButton("Back (z)")
+        pre_btn.setIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'back.png')))
         pre_btn.clicked.connect(self.previous_connect)
         next_btn = QPushButton("Next (c)")
+        next_btn.setIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'next.png')))
         next_btn.clicked.connect(self.next_connect)
         plot_btn = QPushButton("Preview (Space)")
+        plot_btn.setIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'preview.png')))
         plot_btn.clicked.connect(self.plot_ui)
         finish_btn = QPushButton("Finish")
+        finish_btn.setIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'finish.png')))
         finish_btn.clicked.connect(self.finish)
         btnbox = QHBoxLayout()
         btnbox.addStretch(1)
@@ -154,8 +158,10 @@ class MatplotlibWidget(QMainWindow):
         btnbox.addWidget(finish_btn)
 
         enlarge_btn = QPushButton("Amp enlarge")
+        enlarge_btn.setIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'zoom_in.png')))
         enlarge_btn.clicked.connect(self.enlarge)
         areduce_btn = QPushButton("Amp reduce")
+        areduce_btn.setIcon(QIcon(join(dirname(dirname(__file__)), 'data', 'zoom_out.png')))
         areduce_btn.clicked.connect(self.reduce)
         pathbox = QHBoxLayout()
         pathbox.addWidget(enlarge_btn)
@@ -168,14 +174,17 @@ class MatplotlibWidget(QMainWindow):
         self.layout.addLayout(ctrl_layout)
 
 
-def main():
-    parser = argparse.ArgumentParser(description="User interface for picking PRFs")
-    parser.add_argument('rf_path', type=str, help='Path to PRFs')
-    parser.add_argument('-a', help='Arrangement of RFs, defaults to \'baz\'', dest='order',
-                        default='baz', type=str, metavar='baz|dis|date')
-    parser.add_argument('-x', help="Set x limits of the current axes, defaults to 30s for RT, 85s for R.",
-                        dest='xlim', default=None, type=float, metavar='xmax')
-    arg = parser.parse_args()
+def pickviewer_qt(arg):
+    # parser = argparse.ArgumentParser(description="User interface for picking PRFs")
+    # parser.add_argument('rf_path', type=str, help='Path to PRFs')
+    # parser.add_argument('-a', help='Arrangement of RFs, defaults to \'baz\'', dest='order',
+    #                     default='baz', type=str, metavar='baz|dis|date')
+    # parser.add_argument('-x', help="Set x limits of the current axes, defaults to 30s for RT, 85s for R.",
+    #                     dest='xlim', default=None, type=float, metavar='xmax')
+    # Warning.warn('To streamline the seispy we recommend using the seispy.pickrf.pickui_tk.py instead of this one.'
+    #               'The Pyside6 has been removed from the seispy dependencies.'
+    #               'The Qt supporting will be deprecated after version 1.4.0')
+    # arg = parser.parse_args()
     rfpath = arg.rf_path
     if not exists(rfpath):
         raise FileNotFoundError('No such directory of {}'.format(rfpath))
@@ -192,6 +201,3 @@ def main():
     ui.show()
     sys.exit(app.exec())
 
-
-if __name__ == '__main__':
-    main()

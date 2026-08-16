@@ -1,186 +1,154 @@
-import math
 import numpy as np
+
+
+# Geographic latitude is converted to geocentric latitude before calculating
+# the spherical arc.  This is the factor used by the reference MATLAB
+# implementation (distaz.m).
+_GEOCENTRIC_FACTOR = 0.993270
+_AZIMUTH_ZERO_TOL = 1.0e-5
+
+
+def _geocentric_latitude(latitude):
+    """Return geocentric latitude in radians."""
+    latitude = np.deg2rad(latitude)
+
+    # atan2 is equivalent to atan(factor * tan(latitude)) for valid
+    # geographic latitudes, but remains well defined at both poles.
+    return np.arctan2(
+        _GEOCENTRIC_FACTOR * np.sin(latitude),
+        np.cos(latitude),
+    )
+
+
+def _normalize_azimuth(angle):
+    """Normalize an angle to [0, 360), mapping round-off near 360 to zero."""
+    angle = np.mod(np.rad2deg(angle), 360.0)
+    near_zero = (
+        (np.abs(angle) < _AZIMUTH_ZERO_TOL)
+        | (np.abs(angle - 360.0) < _AZIMUTH_ZERO_TOL)
+    )
+    return np.where(near_zero, 0.0, angle)
+
+
+def _scalar_or_array(value):
+    """Return a float for scalar input and an ndarray for broadcast input."""
+    value = np.asarray(value, dtype=float)
+    if value.ndim == 0:
+        return value.item()
+    return value
 
 
 class distaz:
     """
-    Subroutine to calculate the Great Circle Arc distance
-        between two sets of geographic coordinates
-    
-    Equations take from Bullen, pages 154, 155
-    
-    T. Owens, September 19, 1991
-              Sept. 25 -- fixed az and baz calculations
-    P. Crotwell, Setember 27, 1995
-    Converted to c to fix annoying problem of fortran giving wrong
-    answers if the input doesn't contain a decimal point.
-    
-    H. P. Crotwell, September 18, 1997
-    Java version for direct use in java programs.
-    *
-    * C. Groves, May 4, 2004
-    * Added enough convenience constructors to choke a horse and made public double
-    * values use accessors so we can use this class as an immutable
+    Calculate distance, azimuth and back-azimuth between two surface points.
 
-    H.P. Crotwell, May 31, 2006
-    Port to python, thus adding to the great list of languages to which
-    distaz has been ported from the origin fortran: C, Tcl, Java and now python
-    and I vaguely remember a perl port. Long live distaz! 
+    ``lat1``/``lon1`` describe point 1 (normally the station), and
+    ``lat2``/``lon2`` describe point 2 (normally the event). Inputs may be
+    scalars or any mutually broadcastable array-like objects.
 
-    Mijian Xu, Jan 01, 2016
-    Add np.ndarray to available input.
+    The public angle names retain seispy's historical convention:
+
+    * ``baz`` is the bearing from point 1 to point 2 (MATLAB ``daze``).
+    * ``az`` is the bearing from point 2 to point 1 (MATLAB ``dazs``).
+    * ``delta`` is the geocentric great-circle arc in degrees (MATLAB ``dd``).
+
+    The calculation follows the supplied MATLAB ``distaz.m`` implementation,
+    while using division-free ``atan2`` expressions so that poles and
+    arbitrary-dimensional NumPy broadcasting are handled safely.
+
+    Parameters
+    ----------
+    lat1, lon1, lat2, lon2 : float or array-like
+        Geographic coordinates in degrees.
+
+    Notes
+    -----
+    Equations are from Bullen, sections 10.2, pages 154--155. The original
+    routine was written by T. Owens (1991) and subsequently ported through
+    Fortran, C, Tcl, Java, and Python. NumPy array support was added to seispy
+    by Mijian Xu.
+
+    ObsPy's :func:`obspy.geodetics.locations2degrees` uses geographic
+    latitudes on a sphere, while this routine first converts them to
+    geocentric latitudes to match ``distaz.m``. ObsPy's
+    :func:`obspy.geodetics.gps2dist_azimuth` uses a WGS84 ellipsoid by
+    default. Results agree when the same geocentric latitudes and a spherical
+    Earth (``f=0``) are used.
     """
 
     def __init__(self, lat1, lon1, lat2, lon2):
-        
         self.stalat = lat1
         self.stalon = lon1
         self.evtlat = lat2
         self.evtlon = lon2
-        '''
-        if (lat1 == lat2) and (lon1 == lon2):
-            self.delta = 0.0
-            self.az = 0.0
-            self.baz = 0.0
-            return
-        '''
 
-        rad = 2. * math.pi / 360.0
-        """
-        c
-        c scolat and ecolat are the geocentric colatitudes
-        c as defined by Richter (pg. 318)
-        c
-        c Earth Flattening of 1/298.257 take from Bott (pg. 3)
-        c
-        """
-        sph = 1.0 / 298.257
+        lat1_array, lon1_array, lat2_array, lon2_array = np.broadcast_arrays(
+            np.asarray(lat1, dtype=float),
+            np.asarray(lon1, dtype=float),
+            np.asarray(lat2, dtype=float),
+            np.asarray(lon2, dtype=float),
+        )
 
-        scolat = math.pi / 2.0 - np.arctan((1. - sph) * (1. - sph) * np.tan(lat1 * rad))
-        ecolat = math.pi / 2.0 - np.arctan((1. - sph) * (1. - sph) * np.tan(lat2 * rad))
-        slon = lon1 * rad
-        elon = lon2 * rad
-        """
-	c
-	c  a - e are as defined by Bullen (pg. 154, Sec 10.2)
-	c     These are defined for the pt. 1
-	c
-        """
-        a = np.sin(scolat) * np.cos(slon)
-        b = np.sin(scolat) * np.sin(slon)
-        c = np.cos(scolat)
-        d = np.sin(slon)
-        e = -np.cos(slon)
-        g = -c * e
-        h = c * d
-        k = -np.sin(scolat)
-        """
-	c
-	c  aa - ee are the same as a - e, except for pt. 2
-	c
-        """
-        aa = np.sin(ecolat) * np.cos(elon)
-        bb = np.sin(ecolat) * np.sin(elon)
-        cc = np.cos(ecolat)
-        dd = np.sin(elon)
-        ee = -np.cos(elon)
-        gg = -cc * ee
-        hh = cc * dd
-        kk = -np.sin(ecolat)
-        """
-	c
-	c  Bullen, Sec 10.2, eqn. 4
-	c
-        """
-        delrad = np.arccos(a * aa + b * bb + c * cc)
-        self.delta = delrad / rad
-        """
-	c
-	c  Bullen, Sec 10.2, eqn 7 / eqn 8
-	c
-	c    pt. 1 is unprimed, so this is technically the baz
-	c
-	c  Calculate baz this way to avoid quadrant problems
-	c
-        """
-        rhs1 = (aa - d) * (aa - d) + (bb - e) * (bb - e) + cc * cc - 2.
-        rhs2 = (aa - g) * (aa - g) + (bb - h) * (bb - h) + (cc - k) * (cc - k) - 2.
-        dbaz = np.arctan2(rhs1, rhs2)
+        geocentric_lat1 = _geocentric_latitude(lat1_array)
+        geocentric_lat2 = _geocentric_latitude(lat2_array)
 
-        dbaz_idx = np.where(dbaz < 0.0)[0]
-        if len(dbaz_idx) != 0:
-            if isinstance(dbaz, (int, float, np.integer, np.floating)):
-                dbaz += 2 * math.pi
-            else:
-                dbaz[dbaz_idx] += 2 * math.pi
+        sin_lat1 = np.sin(geocentric_lat1)
+        cos_lat1 = np.cos(geocentric_lat1)
+        sin_lat2 = np.sin(geocentric_lat2)
+        cos_lat2 = np.cos(geocentric_lat2)
 
-        self.baz = dbaz / rad
-        """
-	c
-	c  Bullen, Sec 10.2, eqn 7 / eqn 8
-	c
-	c    pt. 2 is unprimed, so this is technically the az
-	c
-	"""
-        rhs1 = (a - dd) * (a - dd) + (b - ee) * (b - ee) + c * c - 2.
-        rhs2 = (a - gg) * (a - gg) + (b - hh) * (b - hh) + (c - kk) * (c - kk) - 2.
-        daz = np.arctan2(rhs1, rhs2)
+        # Reducing the longitude difference before converting to radians
+        # avoids avoidable precision loss for longitudes outside [-180, 180].
+        longitude_difference = lon2_array - lon1_array
+        wrapped_longitude_difference = (
+            np.remainder(longitude_difference + 180.0, 360.0) - 180.0
+        )
+        longitude_difference_rad = np.deg2rad(wrapped_longitude_difference)
+        sin_dlon = np.sin(longitude_difference_rad)
+        cos_dlon = np.cos(longitude_difference_rad)
 
-        daz_idx = np.where(daz < 0.0)[0]
-        if len(daz_idx) != 0:
-            if isinstance(daz, (int, float)):
-                daz += 2 * math.pi
-            else:
-                daz[daz_idx] += 2 * math.pi
+        # The two components below are also the numerator and denominator of
+        # the point-1-to-point-2 bearing. Together with the dot product they
+        # form atan2(|cross product|, dot product), a stable equivalent of the
+        # MATLAB acos/atan distance calculation.
+        east = cos_lat2 * sin_dlon
+        north = (
+            cos_lat1 * sin_lat2
+            - sin_lat1 * cos_lat2 * cos_dlon
+        )
+        dot_product = (
+            sin_lat1 * sin_lat2
+            + cos_lat1 * cos_lat2 * cos_dlon
+        )
+        cross_product_norm = np.hypot(east, north)
 
-        self.az = daz / rad
-        """
-	c
-	c   Make sure 0.0 is always 0.0, not 360.
-	c
-	"""
-        idx = np.where(np.abs(self.baz - 360.) < .00001)[0]
-        if len(idx) != 0:
-            if isinstance(self.baz, float):
-                self.baz = 0.0
-            else:
-                self.baz[idx] = 0.0
-        idx = np.where(np.abs(self.baz) < .00001)[0]
-        if len(idx) != 0:
-            if isinstance(self.baz, float):
-                self.baz = 0.0
-            else:
-                self.baz[idx] = 0.0
+        delta = np.rad2deg(np.arctan2(cross_product_norm, dot_product))
+        baz = _normalize_azimuth(np.arctan2(east, north))
 
-        idx = np.where(np.abs(self.az - 360.) < .00001)[0]
-        if len(idx) != 0:
-            if isinstance(self.az, float):
-                self.az = 0.0
-            else:
-                self.az[idx] = 0.0
-        idx = np.where(np.abs(self.az) < .00001)[0]
-        if len(idx) != 0:
-            if isinstance(self.az, float):
-                self.az = 0.0
-            else:
-                self.az[idx] = 0.0
-        
-        la_idx = np.where(lat1 == lat2)[0]
-        lo_idx = np.where(lon1 == lon2)[0]
-        idx = np.intersect1d(la_idx, lo_idx)
-        if len(idx) != 0:
-            if isinstance(self.delta, float):
-                self.delta = 0.
-            else:
-                self.delta[idx] = 0.
-            if isinstance(self.az, float):
-                self.az = 0.
-            else:
-                self.az[idx] = 0.
-            if isinstance(self.baz, float):
-                self.baz = 0.
-            else:
-                self.baz[idx] = 0.
+        # Reverse bearing: point 2 to point 1. This is MATLAB's ``dazs`` and
+        # seispy's historical ``az`` attribute.
+        reverse_east = -cos_lat1 * sin_dlon
+        reverse_north = (
+            cos_lat2 * sin_lat1
+            - sin_lat2 * cos_lat1 * cos_dlon
+        )
+        az = _normalize_azimuth(np.arctan2(reverse_east, reverse_north))
+
+        # Longitudes differing by full rotations identify the same point.
+        # At either pole, longitude is immaterial. Bearings for coincident
+        # points are undefined, so retain distaz.m's established zero value.
+        same_latitude = lat1_array == lat2_array
+        same_longitude = np.remainder(longitude_difference, 360.0) == 0.0
+        same_pole = same_latitude & (np.abs(lat1_array) == 90.0)
+        coincident = same_latitude & (same_longitude | same_pole)
+
+        delta = np.where(coincident, 0.0, delta)
+        az = np.where(coincident, 0.0, az)
+        baz = np.where(coincident, 0.0, baz)
+
+        self.delta = _scalar_or_array(delta)
+        self.az = _scalar_or_array(az)
+        self.baz = _scalar_or_array(baz)
 
     def getDelta(self):
         return self.delta
@@ -193,13 +161,3 @@ class distaz:
 
     def degreesToKilometers(self):
         return self.delta * 111.19
-
-# distaz = DistAz(0, 0, 1,1)
-# print "%f  %f  %f" % (distaz.getDelta(), distaz.getAz(), distaz.getBaz())
-if __name__ == '__main__':
-    ela = 1
-    elo = 1
-    sla = 2
-    slo = 1
-    da = distaz(ela, elo, sla, slo)
-    print(da.baz)

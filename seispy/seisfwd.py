@@ -212,7 +212,7 @@ class SynSeis():
             self.filter(*pre_filt)
         rfstream = Stream()
         for i, _ in enumerate(self.rayp):
-            rftr = RFTrace.deconvolute(self.rstream[i], self.zstream[i], tshift=shift,
+            rftr = RFTrace.deconvolve(self.rstream[i], self.zstream[i], tshift=shift,
                                        f0=f0, **kwargs)
             rfstream.append(rftr)
         return rfstream

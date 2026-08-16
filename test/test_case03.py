@@ -28,6 +28,7 @@ def test_sub02():
     ccp = CCPProfile('ex-ccp/ccp.cfg')
     # para.stalist = 'ex-ccp/sta.lst'
     ccp.cpara.width = 40
+    ccp.cpara.boot_samples = 1000
     ccp.initial_profile()
     ccp.stack()
     ccp.save_stack_data(format='dat')

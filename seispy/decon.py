@@ -2,7 +2,8 @@
 import numpy as np
 import obspy
 from obspy.signal.util import next_pow_2
-from numpy.fft import fft, ifft
+from obspy.io.sac import SACTrace
+from scipy.fftpack import fft, ifft
 # from scipy.linalg import solve_toeplitz
 
 
@@ -162,7 +163,8 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
     maxlag = 0.5 * nfft
     # print('\tMax Spike Display is ' + str((maxlag) * dt))
 
-    while np.abs(d_error) > minderr and it < itmax:
+    # while np.abs(d_error) > minderr and it < itmax:
+    for it in range(itmax):
         rw = correl(r_flt, w_flt, nfft)
         rw = rw / np.sum(w_flt ** 2)
 
@@ -180,10 +182,10 @@ def deconit(uin, win, dt, nt=None, tshift=10, f0=2.0, itmax=400, minderr=0.001, 
         sumsq = np.sum(r_flt ** 2) / powerU
         rms[it] = sumsq
         d_error = 100 * (sumsq_i - sumsq)
-
         sumsq_i = sumsq
-
-        it = it + 1
+        if np.abs(d_error) < minderr:
+            break
+        # it = it + 1
 
     p_flt = gfilter(p0, nfft, gaussF, dt)
     p_flt = phaseshift(p_flt, nfft, dt, tshift)
@@ -273,12 +275,16 @@ def deconwater(uin, win, dt, tshift=10., wlevel=0.05, f0=2.0, normalize=False, p
     return rft, rms
 
 
-def deconvolute(uin, win, dt, method='iter', **kwargs):
-    """ Deconvolute receiver function from waveforms.
+def deconvolute(**kwargs):
+    raise ModuleNotFoundError("deconvolute is deprecated, use deconvolve instead.")
+
+
+def deconvolve(uin, win, dt, method='iter', **kwargs):
+    """ Deconvolve receiver function from waveforms.
     :param uin: R or Q component for the response function
-    :type uin: np.ndarray
+    :type uin: ``np.ndarray``
     :param win: Z or L component for the source function
-    :type win: np.ndarray
+    :type win: ``np.ndarray``
     :param dt: sample interval in second
     :type dt: float
     :param method: Method for deconvolution, defaults to 'iter'
@@ -304,16 +310,24 @@ class RFTrace(obspy.Trace):
         super().__init__(data=data, header=header)
 
     @classmethod
-    def deconvolute(cls, utr, wtr, method='iter', **kwargs):
+    def deconvolute(cls):
+        raise ModuleNotFoundError("deconvolute is deprecated, use deconvolve instead. ")
+
+    @classmethod
+    def deconvolve(cls, utr, wtr, method='iter', tshift=10, f0=2.0, **kwargs):
         """
-        Deconvolute receiver function from waveforms.
+        Deconvolve to extract receiver function from waveforms.
 
         :param utr: R or Q component for the response function
-        :type utr: obspy.Trace
+        :type utr: ``obspy.Trace``
         :param wtr: Z or L component for the source function
-        :type wtr: obspy.Trace
+        :type wtr: ``obspy.Trace``
         :param method: Method for deconvolution, defaults to 'iter'
         :type method: str, optional
+        :param tshift: Time shift before P arrival, defaults to 10.
+        :type tshift: float, optional
+        :param f0: Gaussian factor, defaults to 2.0
+        :type f0: float, optional
         :param kwargs: Parameters for deconvolution
         :type kwargs: dict
 
@@ -324,14 +338,34 @@ class RFTrace(obspy.Trace):
         for key, value in kwargs.items():
             header[key] = value
         if method.lower() == 'iter':
-            rf, rms, it = deconit(utr.data, wtr.data, utr.stats.delta, **kwargs)
+            rf, rms, it = deconit(utr.data, wtr.data, utr.stats.delta, tshift=tshift, f0=f0, **kwargs)
             header['rms'] = rms
             header['iter'] = it
         elif method.lower() == 'water':
-            rf, rms = deconwater(utr.data, wtr.data, utr.stats.delta, **kwargs)
+            rf, rms = deconwater(utr.data, wtr.data, utr.stats.delta, tshift=tshift, f0=f0, **kwargs)
             header['rms'] = rms
             header['iter'] = np.nan
         else:
             raise ValueError('method must be \'iter\' or \'water\'')
-        return cls(rf, header)
+        header['tshift'] = tshift
+        header['f0'] = f0
+        rftr = cls(rf, header)
+        return rftr
+
+    def write(self, filename, **kwargs):
+        """
+        Write the RF trace to a file.
+
+        :param filename: Output filename
+        :type filename: str
+        :param kwargs: Additional sac header arguments for writing
+        """
+        sac = SACTrace.from_obspy_trace(self)
+        sac.o = 0.0
+        sac.b = -self.stats.tshift
+        sac.user0 = self.stats.f0
+        for key, value in kwargs.items():
+            setattr(sac, key, value)
+        sac.write(filename)
+
         

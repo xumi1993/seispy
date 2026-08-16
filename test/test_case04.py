@@ -32,7 +32,6 @@ def test_sub01():
     for ff in rf.para.gauss:
         rf.para.rfpath = './F{:.1f}/{}.{}'.format(ff, rf.para.stainfo.network, rf.para.stainfo.station)
         rf.saverf(ff)
-    return rf
 
 
 if __name__ == '__main__':

@@ -1,5 +1,6 @@
 from os.path import expanduser, join, exists, dirname
 import os
+import warnings
 import obspy
 from obspy.io.sac import SACTrace
 import glob
@@ -95,8 +96,8 @@ class RFPara(object):
         self.rfpath = expanduser('~')
         self.catalogpath = join(dirname(__file__), 'data', 'EventCMT.dat')
         self.pjtpath = 'rfpjt.pkl'
-        self.cata_server = 'IRIS'
-        self.data_server = 'IRIS'
+        self.cata_server = 'USGS'
+        self.data_server = 'EARTHSCOPE'
         self.velmod = 'iasp91'
         self.offset = None
         self.tolerance = 210
@@ -172,6 +173,19 @@ class RFPara(object):
     
     @server.setter
     def server(self, value):
+        self.cata_server = value
+
+    # Deprecated. It will be removed after v1.3.13, please use cata_server instead
+    @property
+    def catalog_server(self):
+        warnings.warn('catalog_server is deprecated and will be removed after v1.3.13, please use cata_server instead',
+                      DeprecationWarning, stacklevel=2)
+        return self.cata_server
+
+    @catalog_server.setter
+    def catalog_server(self, value):
+        warnings.warn('catalog_server is deprecated and will be removed after v1.3.13, please use cata_server instead',
+                      DeprecationWarning, stacklevel=2)
         self.cata_server = value
 
     @property

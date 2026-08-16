@@ -274,11 +274,12 @@ def plot_r():
 def get_events():
     from obspy import UTCDateTime
     from seispy.io import Query
-    parser = argparse.ArgumentParser(description="Get seismic events from IRIS Web-Service")
+    parser = argparse.ArgumentParser(description="Get seismic events from USGS Web-Service")
+    parser.add_argument('-S', help='Server name, defaults to USGS', metavar='server', default='USGS')
     parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304',
                         metavar='datetime', default=None)
     parser.add_argument('-c', help='Catalog type',
-                        metavar='GCMT|NEIC PDE|ISC', default=None)
+                        default=None, metavar="catalog")
     parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
                         metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
     parser.add_argument('-e', help='End time, e.g., 20210101, 20210101020304',
@@ -289,6 +290,8 @@ def get_events():
                         metavar='<lat>/<lon>/<minradius>/<maxradius>', default=None)
     parser.add_argument('-p', help='Focal depth, optional for max depth', 
                         metavar='<mindepth>[/<maxdepth>]', default=None)
+    parser.add_argument('-o', help='Output filename, defaults to stdout', metavar='filename', default=None)
+    parser.add_argument('-f', help='Output format, QUAKEML or CSV, defaults to CSV', metavar='QUAKEML', default='QUAKEML')
     arg = parser.parse_args()
     args = {}
     if arg.c is not None:
@@ -356,19 +359,21 @@ def get_events():
     if args == {}:
         parser.print_usage()
         sys.exit(1)
-    query = Query()
+    query = Query(server=arg.S)
     query.get_events(**args)
     for _, row in query.events.iterrows():
         print('{} {:.2f} {:.2f} {:.2f} {:.1f} {}'.format(
               row.date.isoformat(), row.evla, row.evlo,
               row.evdp, row.mag, row.magtype)
         )
+    if arg.o is not None:
+        query.write_events(arg.o, format=arg.f)
 
 def get_stations():
     from obspy import UTCDateTime
     from seispy.io import Query
-    parser = argparse.ArgumentParser(description="Get stations from IRIS Web-Service")
-    parser.add_argument('-S', help='Server name, defaults to IRIS', metavar='server', default='IRIS')
+    parser = argparse.ArgumentParser(description="Get stations from EARTHSCOPE Web-Service")
+    parser.add_argument('-S', help='Server name, defaults to EARTHSCOPE', metavar='server', default='EARTHSCOPE')
     parser.add_argument('-b', help='Start time, e.g., 20210101, 20210101020304', metavar='datetime', default=None)
     parser.add_argument('-c', help='Channel, wildcard is available like *,?,[EB]...', metavar='channel', default=None)
     parser.add_argument('-d', help='Radial geographic constraints with center point and distance range',
@@ -430,3 +435,25 @@ def get_stations():
             print('{} {} {:.6f} {:.6f} {:.4f} {} {}'.format(net.code, sta.code,
                   sta.latitude, sta.longitude, sta.elevation, sta.start_date, sta.end_date,
                   sta.restricted_status))
+            
+
+def pickrf_viewer():
+    parser = argparse.ArgumentParser(description="User interface for picking PRFs")
+    parser.add_argument('rf_path', type=str, help='Path to PRFs')
+    parser.add_argument('-a', dest='order', default='baz', metavar='baz|dis|date',
+                        help="Arrangement of RFs, defaults to 'baz'")
+    parser.add_argument('-e', help='Backend of UI engine, defaults to \'qt\'', metavar='tk|qt', default='qt')
+    parser.add_argument('-r', dest='only_r', action='store_true', 
+                        help="Only plot R component")
+    parser.add_argument('-x', dest='xlim', default=None, type=float,
+                        help="Set x-axis max limit; defaults to 30s for RT, 85s for R.")
+    args = parser.parse_args()
+
+    if args.e.lower() == 'tk':
+        from seispy.pickrf.pickui_tk import pickviewer_tk
+        pickviewer_tk(args)
+    elif args.e.lower() == 'qt':
+        from seispy.pickrf.pickui import pickviewer_qt
+        pickviewer_qt(args)
+    else:
+        raise ValueError("Invalid UI engine specified. Use 'tk' or 'qt'.")

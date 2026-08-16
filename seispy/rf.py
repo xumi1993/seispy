@@ -647,7 +647,7 @@ class RF(object):
         for i, row in self.eqs.iterrows():
             count += 1
             try:
-                row['data'].deconvolute(shift, time_after, method=self.para.decon_method, f0=self.para.gauss,
+                row['data'].deconvolve(shift, time_after, method=self.para.decon_method, f0=self.para.gauss,
                                         only_r=self.para.only_r, itmax=self.para.itmax, minderr=self.para.minderr,
                                         wlevel=self.para.wlevel, target_dt=self.para.target_dt)
                 if self.para.decon_method == 'iter':

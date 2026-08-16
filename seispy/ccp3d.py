@@ -3,7 +3,7 @@ from seispy.geo import km2deg, extrema, skm2srad, rad2deg
 from seispy import distaz
 from seispy.core.depmodel import DepModel
 from seispy.setuplog import SetupLog
-from scikits.bootstrap import ci
+from scipy.stats import bootstrap
 from seispy.ccppara import ccppara, CCPPara
 from seispy.signal import smooth
 from seispy.utils import check_stack_val, read_rfdep
@@ -71,13 +71,15 @@ def bin_shape(cpara):
     return fzone
 
 
-def boot_bin_stack(data_bin, n_samples=3000):
+def boot_bin_stack(data_bin, n_samples=3000, confidence_level=0.95):
     """Stack data with bootstrap method.
 
     :param data_bin: Data falling within a bin.
     :type data_bin: 1-D ndarray of floats
     :param n_samples: Number of bootstrap samples, defaults to 3000
     :type n_samples: int, optional
+    :param confidence_level: Confidence level for the bootstrap confidence interval, defaults to 0.95
+    :type confidence_level: float, optional
     :return: Mean, confidence interval and number of data falling within a bin.
     :rtype: tuple of floats and int
     """
@@ -86,7 +88,8 @@ def boot_bin_stack(data_bin, n_samples=3000):
     count = data_bin.shape[0]
     if count > 1:
         if n_samples is not None:
-            cci = ci(data_bin, n_samples=n_samples)
+            res = bootstrap((data_bin,), np.mean, n_resamples=n_samples, confidence_level=confidence_level)
+            cci = np.array([res.confidence_interval.low, res.confidence_interval.high])
         else:
             cci = np.array([np.nan, np.nan])
         mu = np.nanmean(data_bin)

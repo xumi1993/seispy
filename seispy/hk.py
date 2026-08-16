@@ -107,14 +107,14 @@ def plot(stack, allstack, h, kappa, besth, bestk, cvalue, cmap=load_cyan_map(), 
     if title is not None:
         f.suptitle(title, fontsize='large')
     ax1.imshow(stack[:, :, 0], cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
-    ax1.set_ylabel('$V_P/V_S$')
+    ax1.set_ylabel(r'$V_P/V_S$')
     ax1.set_title('Ps')
     ax2.imshow(stack[:, :, 1], cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
     ax2.set_title('PpPs')
     ax3.imshow(stack[:, :, 2], cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
     ax3.set_title('PsPs+PpSs')
     ax3.set_xlabel('Moho depth (km)')
-    ax3.set_ylabel('$V_P/V_S$')
+    ax3.set_ylabel(r'$V_P/V_S$')
     im = ax4.imshow(allstack, cmap=cmap, extent=[xlim[0], xlim[1], ylim[0], ylim[1]], aspect='auto', origin='lower')
     ax4.plot(besth, bestk, color='red', marker='s', markerfacecolor='none')
     ax4.contour(allstack, [cvalue, 1], colors='k', extent=[xlim[0], xlim[1], ylim[0], ylim[1]], origin='lower')
@@ -177,7 +177,7 @@ def hksta(hpara:HKPara, isplot=False, isdisplay=False):
     with open(hpara.hklist, 'a') as f:
         f.write('{}\t{:.3f}\t{:.3f}\t{:.1f}\t{:.2f}\t{:.2f}\t{:.3f}\n'.format(stadata.staname, stadata.stla, stadata.stlo,
                                                                               besth, maxhsig, bestk, maxksig))
-    title = '{}\nMoho depth = ${:.1f}\pm{:.2f}$ km\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(stadata.staname, besth,
+    title = r'{}\nMoho depth = ${:.1f}\pm{:.2f}$ km\n$V_P/V_S$ = ${:.2f}\pm{:.3f}$'.format(stadata.staname, besth,
                                                                                      maxhsig, bestk, maxksig)
     if isdisplay:
         print_result(besth, bestk, maxhsig, maxksig, print_comment=True)

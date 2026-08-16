@@ -404,8 +404,11 @@ class EQ(object):
             return self.st.copy().trim(t1, t2)
         else:
             self.st.trim(t1, t2)
+    
+    def deconvolute(self, **kwargs):
+        raise ModuleNotFoundError("deconvolute is deprecated, use deconvolve instead.")
 
-    def deconvolute(self, shift, time_after, f0=2.0, method='iter', only_r=False,
+    def deconvolve(self, shift, time_after, f0=2.0, method='iter', only_r=False,
                     itmax=400, minderr=0.001, wlevel=0.05, target_dt=None):
         """Deconvolution
 
@@ -483,7 +486,7 @@ class EQ(object):
                 uin = self.st.select(channel='*T')[0]
             else:
                 uin = self.st.select(channel='*R')[0]
-        uout = RFTrace.deconvolute(uin, win, phase='P', tshift=tshift, **kwargs)
+        uout = RFTrace.deconvolve(uin, win, phase='P', tshift=tshift, **kwargs)
         self.rf.append(uout)
 
     def decon_s(self, tshift, **kwargs):
@@ -500,7 +503,7 @@ class EQ(object):
             uin = self.st.select(channel='*Z')[0]
             win.data *= -1
         # win.data[0:int((tshift-4)/win.stats.delta)] = 0
-        uout = RFTrace.deconvolute(uin, win, phase='S', tshift=tshift, **kwargs)
+        uout = RFTrace.deconvolve(uin, win, phase='S', tshift=tshift, **kwargs)
         uout.data = np.flip(uout.data)
         self.rf.append(uout)
 
@@ -613,12 +616,9 @@ class EQ(object):
             ValueError('No such gauss factor of {} in calculated RFs'.format(gauss))
         
         # All points are NaN
-        if np.isnan(trrf.data).all():
+        if np.isnan(trrf.data).all() or np.isinf(trrf.data).any():
             return False
-        
-        if np.isinf(trrf.data).any():
-            return False
-        
+                
         # Final RMS
         if rmsgate is not None:
             if self.method == 'iter':

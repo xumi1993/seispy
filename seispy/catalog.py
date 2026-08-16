@@ -4,12 +4,12 @@ from seispy.io import Query
 import sys
 import pandas as pd
 
-def download_catalog(fname, server='IRIS', format='seispy', **kwargs):
+def download_catalog(fname, server='USGS', format='seispy', **kwargs):
     """
     Download catalog to local file
     :param fname: file name
     :type fname: str
-    :param server: service provider, defaults to IRIS
+    :param server: service provider, defaults to USGS
     :type server: str
     :param format: file format, defaults to seispy
     :type format: str
@@ -74,8 +74,8 @@ def main():
     parser.add_argument('-m', help='Magnitude <minmagnitude>[/<maxmagnitude>]',
                         metavar='<minmagnitude>[/<maxmagnitude>]', default=None)
     parser.add_argument('-p', help='Focal depth <mindepth>[/<maxdepth>]', metavar='<mindepth>[/<maxdepth>]', default=None)
-    parser.add_argument('-s', help='Service provider, defaults to IRIS', metavar='server', default='IRIS')
-    parser.add_argument('-c', help='Catalog name, defaults to GCMT', metavar='catalog', default='GCMT')
+    parser.add_argument('-s', help='Service provider, defaults to USGS', metavar='server', default='USGS')
+    parser.add_argument('-c', help='Catalog name, defaults to None', metavar='catalog', default=None)
     arg = parser.parse_args()
     args = {}
     if arg.c is not None:

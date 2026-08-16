@@ -9,6 +9,7 @@ import sys
 import glob
 from collections import namedtuple
 from logging import Logger
+import warnings
 
 import numpy as np
 
@@ -242,9 +243,11 @@ def rf2depth():
         velmod3d = arg.d
         modfolder1d = None
     elif arg.d == '' and arg.r != '' and arg.m == '':
-        #### do 3d raytraying
+        raise DeprecationWarning("The '-r' option for 3D ray tracing should be used instead of '-d' for moveout correction."
+                      " Please use '-r' for 3D ray tracing.")
         raytracing3d = True
-        velmod3d = arg.d
+        velmod3d = arg.r
+        modfolder1d = None
         modfolder1d = None
     elif arg.d == '' and arg.r == '' and arg.m != '':
         #### use multiple 1d velmod for time2depth convertion

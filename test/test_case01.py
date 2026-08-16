@@ -1,30 +1,54 @@
+import glob
+import inspect
 import os
-from seispy.rf import RF, read_catalog
-from seispy.recalrf import ReRF
+from os.path import basename, join
+from pathlib import Path
+from shutil import copyfileobj
+from tarfile import open as open_tar
+from urllib.request import Request, urlopen
+
+import pytest
+from obspy import UTCDateTime
+from obspy.io.sac import SACTrace
+
+from seispy.catalog import download_catalog
 from seispy.hk import hksta
 from seispy.hkpara import HKPara
-from seispy.catalog import download_catalog
-from subprocess import Popen
-import pytest
-from os.path import exists, join, basename
-import glob
-from obspy.io.sac import SACTrace
-from obspy import UTCDateTime
+from seispy.recalrf import ReRF
+from seispy.rf import RF, read_catalog
+
+
+EX_PRF_URL = 'https://osf.io/dxcfz/download'
+EX_PRF_ARCHIVE = Path('ex-prf.tar.gz')
+EX_PRF_CONFIG = Path('ex-prf/rf.cfg')
 
 
 def test_download():
-    if exists('ex-prf.tar.gz'):
+    if EX_PRF_CONFIG.is_file():
         pytest.skip('Data are downloaded.')
-    s = 'wget https://osf.io/dxcfz/download -O ex-prf.tar.gz\n'
-    s += 'tar -xzf ex-prf.tar.gz\n'
-    proc = Popen(s, shell=True)
-    proc.communicate()
+
+    request = Request(EX_PRF_URL, headers={'User-Agent': 'seispy-ci'})
+    with urlopen(request, timeout=120) as response:
+        with EX_PRF_ARCHIVE.open('wb') as archive_file:
+            copyfileobj(response, archive_file)
+
+    with open_tar(EX_PRF_ARCHIVE, 'r:gz') as archive:
+        extract_options = {}
+        if 'filter' in inspect.signature(archive.extractall).parameters:
+            extract_options['filter'] = 'data'
+        archive.extractall('.', **extract_options)
+
+    assert EX_PRF_CONFIG.is_file(), (
+        'The ex-prf archive was downloaded but did not contain '
+        f'{EX_PRF_CONFIG}.'
+    )
 
 def init_RF():
     rf = RF(cfg_file='ex-prf/rf.cfg')
     rf.para.phase = 'P'
     rf.para.datapath = 'ex-prf/Data.CB.NJ2'
     rf.para.rfpath = 'ex-prf/RFresult/CB.NJ2'
+    rf.para.cata_server = 'USGS'
     rf.load_stainfo()
     rf.search_eq()
     rf.match_eq()

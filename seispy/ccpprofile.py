@@ -7,7 +7,6 @@ from seispy.distaz import distaz
 from seispy.core.depmodel import DepModel
 from seispy.rf2depth_makedata import Station
 from seispy.ccppara import ccppara, CCPPara
-from scikits.bootstrap import ci
 from seispy.ccp3d import boot_bin_stack
 from seispy.utils import check_stack_val, read_rfdep
 from scipy.interpolate import interp1d
