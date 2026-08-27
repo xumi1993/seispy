@@ -28,7 +28,7 @@ def gaussFilter(dt, nft, f0):
 
     gauss = np.zeros([nft, 1])
     gauss1 = np.exp(-0.25 * (w / f0) ** 2) / dt
-    gauss1.shape = (len(gauss1), 1)
+    gauss1 = gauss1.reshape(-1, 1)
     gauss[0:int(nft21)] = gauss1
     gauss[int(nft21):] = np.flipud(gauss[1:int(nft21) - 1])
     gauss = gauss[:, 0]

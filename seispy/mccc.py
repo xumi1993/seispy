@@ -11,7 +11,7 @@ def mccc(data, dt, twin=0):
     fft_conj = fft_all.conj()
 
     if twin != 0:
-        itw = np.fix(twin/(2*dt))
+        itw = int(np.trunc(twin / (2 * dt)))
         mask = np.zeros(nt)
         mask[0:itw] = 1.0
         mask[nt-itw-1:nt] = 1.0

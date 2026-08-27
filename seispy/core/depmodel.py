@@ -483,8 +483,7 @@ class DepModel(object):
                 mod = _load_mod(kwargs.pop("modfolder", "./"), kwargs.pop("staname", None))
             except:
                 mod = "iasp91"
-            finally:
-                return cls(dep_range, mod, elevation, layerd)
+            return cls(dep_range, mod, elevation, layerd)
         else:
             mod = kwargs.pop("mod", "iasp91")
             return cls(dep_range,mod, elevation, layerd)
