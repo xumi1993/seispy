@@ -1,0 +1,697 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="../../">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../genindex.html" /><link rel="search" title="Search" href="../../search.html" />
+        <link rel="canonical" href="seispy.xumijian.me/_modules/seispy/get_cpt.html" />
+
+    <link rel="shortcut icon" href="../../_static/seispy_100.png"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>seispy.get_cpt - Seispy v1.3.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #0080C4;
+  --color-brand-content: #0080C4;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="../../index.html"><div class="brand">Seispy v1.3.9 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon no-toc" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="../../index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="../../_static/seispy-long.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Seispy v1.3.9 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="../../search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../usage/index.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/PRF_Process.html">Calculate a P-wave Receiver Function (PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/rf-sta.html">Calculate PRFs for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/rf-from-ws.html">Fetch seismic data from web-service and calculate RF automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/srf.html">Calculate S wave Receiver Functions (SRF) for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/pickrf.html">Visual check PRFs with an user interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/ps-depth.html">Relationship between time difference and depth in 1D velocity model.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/ccp.html">Stack PRFs with Common Conversion points (CCP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../usage/pickdepths.html">Visually pick depth of the discontinuities after CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-prf.html">PRFs calculation and H-k stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-ccp.html">Batch calculation and CCP stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-ccp3d.html">3-D CCP stacking for mantle transition zone structure under the Tibet.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-rfani.html">Crustal anisotropic estimation with a single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../examples/ex-harmo.html">Harmonic decomposition</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../notes/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Configurations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/rf_cfg.html">RF calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/hk_cfg.html">Hk stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../notes/ccp_cfg.html">CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../modules.html">Module Index</a><input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Module Index</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../rf.html">RF package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../post.html">Post-processing package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../ccp.html">CCP package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/xumi1993/seispy">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitlab.com/xumi1993/seispy">GitLab</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://anaconda.org/conda-forge/seispy">Anaconda</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/python-seispy/">PyPI</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon no-toc" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <h1>Source code for seispy.get_cpt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">--------------------------------------------------------------------------------</span>
+<span class="sd">Name:        get_cpt matplotlib colormap utility</span>
+<span class="sd">Purpose:     an easy way to fetch .cpt colormap files, based on pycpt</span>
+
+<span class="sd">Created:     2020.03</span>
+<span class="sd">Copyright:   (c) Dimitrios Bouziotas (bouziot)</span>
+<span class="sd">Licence:     GGNU General Public License v3 (GPL-3)</span>
+<span class="sd">-You may freely copy, distribute and modify the software, in accordance with the provided license.</span>
+<span class="sd">-You may not sublicense or hold the original author liable. This software comes with no warranty at all.</span>
+<span class="sd">-Active contributions, forks and redevelopments are welcome.</span>
+<span class="sd">-If you would like to include this software in your work, please reference it using the zenodo or github link. Please</span>
+<span class="sd">also reference the original pycpt package (https://github.com/j08lue/pycpt)</span>
+<span class="sd">--------------------------------------------------------------------------------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s1">&#39;0.1.0&#39;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;(c) 2020 Dimitrios Bouziotas&quot;&quot;&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="s2">&quot;GGNU General Public License v3 (GPL-3)&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.colors</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">mcolors</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">urllib.request</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlopen</span>
+
+<span class="n">basedir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;cpt&#39;</span><span class="p">)</span> <span class="c1"># base path from where cpt files are fetched</span>
+
+<div class="viewcode-block" id="get_cmap">
+<a class="viewcode-back" href="../../seispy.html#seispy.get_cpt.get_cmap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_cmap</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cdict&#39;</span><span class="p">,</span> <span class="n">ret_cmap_type</span><span class="o">=</span><span class="s1">&#39;LinearSegmented&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the cpt colormap as a LinearSegmented colormap. Utilizes the gmtColormap_openfile parser.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cpt_path : str, with one of the following options:</span>
+<span class="sd">        - the full dir path to a .cpt file</span>
+<span class="sd">        - the filename of a .cpt file that is in the local repo (check get_cpt.basedir)</span>
+<span class="sd">        - a url.</span>
+
+<span class="sd">    name : str, optional</span>
+<span class="sd">        colormap name</span>
+<span class="sd">        if not provided, the name will be derived automatically using _getname()</span>
+
+<span class="sd">    method: str, optional</span>
+<span class="sd">        Choose between &#39;cdict&#39; and &#39;list&#39;. The first one fetches all info from the .cpt file. The latter</span>
+<span class="sd">        allows you to control the number of colors to sample from. Check gmtColormap_openfile for more info.</span>
+
+<span class="sd">    N: int, optional</span>
+<span class="sd">        the number of colors in the colormap to be returned. Can define the granularity of the returned colormap.</span>
+<span class="sd">        Only useful when method=&#39;list&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># first get name</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_getname</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">)</span>
+    <span class="c1"># case URL</span>
+    <span class="k">if</span> <span class="s1">&#39;http://&#39;</span> <span class="ow">in</span> <span class="n">cpt_path</span> <span class="ow">or</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="n">cpt_path</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">gmtColormap_openfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">ret_cmap_type</span><span class="o">=</span><span class="n">ret_cmap_type</span><span class="p">)</span>
+    <span class="c1"># case FULLPATH OR NAME</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">gmtColormap_openfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">ret_cmap_type</span><span class="o">=</span><span class="n">ret_cmap_type</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_listed_cmap">
+<a class="viewcode-back" href="../../seispy.html#seispy.get_cpt.get_listed_cmap">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_listed_cmap</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the cpt colormap as a ListedColormap. Utilizes the gmtColormap_openfile parser.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cpt_path : str, with one of the following options:</span>
+<span class="sd">        - the full dir path to a .cpt file</span>
+<span class="sd">        - the filename of a .cpt file that is in the local repo (check get_cpt.basedir)</span>
+<span class="sd">        - a url</span>
+
+<span class="sd">    name : str, optional</span>
+<span class="sd">        colormap name</span>
+<span class="sd">        if not provided, the name will be derived automatically using _getname()</span>
+
+<span class="sd">    N: int, optional</span>
+<span class="sd">        the number of colors in the colormap to be returned. Leave None to derive the colors from the .cpt file.</span>
+<span class="sd">        If you use a number less than the colors included in that file, a subset of colors will be returned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># first get name</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_getname</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">)</span>
+    <span class="c1"># case URL</span>
+    <span class="k">if</span> <span class="s1">&#39;http://&#39;</span> <span class="ow">in</span> <span class="n">cpt_path</span> <span class="ow">or</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="n">cpt_path</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">gmtColormap_openfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">ret_cmap_type</span><span class="o">=</span><span class="s1">&#39;Listed&#39;</span><span class="p">)</span>
+    <span class="c1"># case FULLPATH OR NAME</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">gmtColormap_openfile</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">,</span> <span class="n">ret_cmap_type</span><span class="o">=</span><span class="s1">&#39;Listed&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_getname</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Internal function, fetches the name from a cpt filepath or url.</span>
+<span class="sd">    Templates:</span>
+<span class="sd">    &#39;my.mby.cpt&#39; -&gt; &#39;my_mby&#39; # NAME</span>
+<span class="sd">    r&#39;D:\matplotlib colormaps - cpt-city\cpt\mby.cpt&#39; -&gt; &#39;mby&#39;  # FULLPATH</span>
+<span class="sd">    &#39;http://soliton.vm.bytemark.co.uk/pub/cpt-city/cmocean/haline.cpt&#39;  -&gt; &#39;haline&#39; # URL</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s1">&#39;http://&#39;</span> <span class="ow">in</span> <span class="n">cpt_path</span> <span class="ow">or</span> <span class="s1">&#39;https://&#39;</span> <span class="ow">in</span> <span class="n">cpt_path</span><span class="p">:</span>  <span class="c1"># CASE URL</span>
+        <span class="k">return</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cpt_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">cpt_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;CPT file </span><span class="si">{}</span><span class="s2"> not found&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">))</span>
+
+<div class="viewcode-block" id="gmtColormap_openfile">
+<a class="viewcode-back" href="../../seispy.html#seispy.get_cpt.gmtColormap_openfile">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">gmtColormap_openfile</span><span class="p">(</span><span class="n">cptf</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;cdict&#39;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ret_cmap_type</span><span class="o">=</span><span class="s1">&#39;LinearSegmented&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Read a GMT color map from an OPEN cpt file</span>
+<span class="sd">    Edited by: bouziot, 2020.03</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cptf : str, open file or url handle</span>
+<span class="sd">        path to .cpt file</span>
+
+<span class="sd">    name : str, optional</span>
+<span class="sd">        name for color map</span>
+<span class="sd">        if not provided, the file name will be used</span>
+
+<span class="sd">    method : str, suggests the method to use.</span>
+<span class="sd">    If method = &#39;cdict&#39;, generates the LinearSegmentedColormap using a color dictionary (cdict), disregarding any value in N.</span>
+<span class="sd">    If method = &#39;list&#39;, generates the LinearSegmentedColor using the .from_list() method, passing a list of (value, (r,g,b)) tuples obtained from the cpt file. This allows the selection of colormap resolution by the user, using the N parameter</span>
+
+<span class="sd">    N : int, the number of colors in the colormap. Only useful when method=&#39;list&#39;.</span>
+
+<span class="sd">    ret_cmap_type: str, the type of matplotlib cmap object to be returned. Accepts either &#39;LinearSegmented&#39;, which returns a matplotlib.colors.LinearSegmentedColormap, or &#39;Listed&#39;, which returns a ListedColormap</span>
+<span class="sd">    In case &#39;Listed&#39; is selected, the method argument from the user is ignored and method is set to &#39;list&#39; (&#39;Linear&#39; doesn&#39;t work with &#39;cdict&#39;).</span>
+<span class="sd">    N is then passed to matplotlib.colors.ListedColormap().</span>
+<span class="sd">    - If N is set to None: all colors of the cpt file will be returned as a list.</span>
+<span class="sd">    - In case of a user-defined N, colors will be truncated or extended by repetition (see matplotlib.colors.ListedColormap).</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    a matplotlib colormap object (matplotlib.colors.LinearSegmentedColormap or matplotlib.colors.ListedColormap)</span>
+
+<span class="sd">    Credits</span>
+<span class="sd">    -------</span>
+<span class="sd">    This function originally appears in pycpt, extensive edits from bouziot, 2020.03</span>
+<span class="sd">    Original work in: https://github.com/j08lue/pycpt</span>
+<span class="sd">    LOG OF EDITS (2020.03):</span>
+<span class="sd">        - Fixed bug when parsing non-split &#39;#&#39; lines in .cpt files</span>
+<span class="sd">        - Fixed bug - not identifying the colorModel &#39;#&#39; line correctly</span>
+<span class="sd">        - Fixed binary comparison performance (introduced in python 3)</span>
+<span class="sd">        - Added functionality to return ListedColormaps and cmaps with custom colors (method, ret_cmap_type args)</span>
+<span class="sd">        - Added global name handling externally (_getname() func)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">methodnames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cdict&#39;</span><span class="p">,</span> <span class="s1">&#39;list&#39;</span><span class="p">]</span> <span class="c1"># accepted method arguments</span>
+    <span class="n">ret_cmap_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LinearSegmented&#39;</span><span class="p">,</span> <span class="s1">&#39;Listed&#39;</span><span class="p">,</span> <span class="s1">&#39;raw&#39;</span><span class="p">]</span> <span class="c1"># accepted return matplotlib colormap types</span>
+
+    <span class="c1"># generate cmap name</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_getname</span><span class="p">(</span><span class="n">cptf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="c1">#    name = &#39;_&#39;.join(os.path.basename(cptf.name).split(&#39;.&#39;)[:-1])</span>
+
+    <span class="c1"># process file</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lastls</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">cptf</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+        <span class="n">ls</span> <span class="o">=</span> <span class="n">l</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="c1"># skip empty lines</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ls</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># parse header info</span>
+        <span class="c1"># this leads to mistakes in some files...</span>
+        <span class="c1"># if ls[0] in [&quot;#&quot;, b&quot;#&quot;]:  # &#39;#&#39; is not always separated from other letters in some cases...</span>
+        <span class="c1">#    if ls[-1] in [&quot;HSV&quot;, b&quot;HSV&quot;]:</span>
+        <span class="c1">#        colorModel = &quot;HSV&quot;</span>
+        <span class="c1">#    else:</span>
+        <span class="c1">#        colorModel = &quot;RGB&quot;</span>
+        <span class="c1">#    continue</span>
+
+        <span class="c1"># byte comparison is not feasible in python 3</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="n">l</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;#&quot;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">l</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;#&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;#&quot;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">ls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;HSV&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;HSV&quot;</span><span class="p">]:</span>
+                <span class="n">colorModel</span> <span class="o">=</span> <span class="s2">&quot;HSV&quot;</span>
+                <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">ls</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;RGB&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;RGB&quot;</span><span class="p">]:</span>
+                <span class="n">colorModel</span> <span class="o">=</span> <span class="s2">&quot;RGB&quot;</span>
+                <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span> <span class="c1"># case rogue comment, ignore</span>
+                <span class="k">continue</span>
+
+
+        <span class="c1"># skip BFN info</span>
+        <span class="k">if</span> <span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;B&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&quot;N&quot;</span><span class="p">]:</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># parse color vectors</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">ls</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span>
+
+        <span class="c1"># save last row</span>
+        <span class="n">lastls</span> <span class="o">=</span> <span class="n">ls</span>
+
+    <span class="c1"># check if last endrow has the same color, if not, append</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span> <span class="o">==</span> <span class="n">r</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span> <span class="o">==</span> <span class="n">g</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span> <span class="o">==</span> <span class="n">b</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span>
+        <span class="n">r</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">5</span><span class="p">]))</span>
+        <span class="n">g</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">6</span><span class="p">]))</span>
+        <span class="n">b</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">lastls</span><span class="p">[</span><span class="mi">7</span><span class="p">]))</span>
+
+    <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">colorModel</span> <span class="o">==</span> <span class="s2">&quot;HSV&quot;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="c1"># convert HSV to RGB</span>
+            <span class="n">rr</span><span class="p">,</span><span class="n">gg</span><span class="p">,</span><span class="n">bb</span> <span class="o">=</span> <span class="n">colorsys</span><span class="o">.</span><span class="n">hsv_to_rgb</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="mf">360.</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">rr</span> <span class="p">;</span> <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">gg</span> <span class="p">;</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">bb</span>
+    <span class="k">elif</span> <span class="n">colorModel</span> <span class="o">==</span> <span class="s2">&quot;RGB&quot;</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">/=</span> <span class="mf">255.</span>
+        <span class="n">g</span> <span class="o">/=</span> <span class="mf">255.</span>
+        <span class="n">b</span> <span class="o">/=</span> <span class="mf">255.</span>
+
+    <span class="n">red</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">blue</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">green</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">xNorm</span> <span class="o">=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># return colormap</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;cdict&#39;</span> <span class="ow">and</span> <span class="n">ret_cmap_type</span> <span class="o">==</span> <span class="s1">&#39;LinearSegmented&#39;</span><span class="p">:</span>
+        <span class="c1"># generate cdict</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">red</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">xNorm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="n">green</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">xNorm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="n">blue</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">xNorm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]])</span>
+        <span class="n">cdict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">red</span><span class="o">=</span><span class="n">red</span><span class="p">,</span><span class="n">green</span><span class="o">=</span><span class="n">green</span><span class="p">,</span><span class="n">blue</span><span class="o">=</span><span class="n">blue</span><span class="p">)</span>
+        <span class="c1">#return cdict</span>
+        <span class="k">return</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span><span class="n">segmentdata</span><span class="o">=</span><span class="n">cdict</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;list&#39;</span> <span class="ow">and</span> <span class="n">ret_cmap_type</span> <span class="o">==</span> <span class="s1">&#39;LinearSegmented&#39;</span><span class="p">:</span>
+        <span class="c1"># generate list of values in the form of (value, c)</span>
+        <span class="n">outlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">tup</span> <span class="o">=</span> <span class="p">(</span><span class="n">xNorm</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+            <span class="n">outlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tup</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">N</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1">#return outlist</span>
+            <span class="k">return</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">LinearSegmentedColormap</span><span class="o">.</span><span class="n">from_list</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">outlist</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Using the method &#39;list&#39; requires you to set a number of colors N.&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">ret_cmap_type</span> <span class="o">==</span> <span class="s1">&#39;Listed&#39;</span><span class="p">:</span>
+        <span class="c1"># generate list of values and return it as ListedColormap</span>
+        <span class="c1"># returns both colors and the normalized positions (pos) where colors change, in the form of two outputs pos, colors</span>
+        <span class="n">pos_out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">colors_out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">pos_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xNorm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># list of positions</span>
+            <span class="n">colors_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mcolors</span><span class="o">.</span><span class="n">to_hex</span><span class="p">(</span> <span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">])))</span> <span class="c1"># list of colors</span>
+        <span class="c1"># return pos, color pairs</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">colors_out</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">N</span> <span class="ow">and</span> <span class="nb">type</span><span class="p">(</span><span class="n">N</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span> <span class="ow">and</span> <span class="n">N</span><span class="o">&lt;=</span><span class="nb">len</span><span class="p">(</span><span class="n">colors_out</span><span class="p">):</span>
+            <span class="n">pos_out</span> <span class="o">=</span> <span class="n">pos_out</span><span class="p">[:</span><span class="n">N</span><span class="p">]</span> <span class="c1">#truncate positions to N</span>
+            <span class="k">return</span> <span class="n">pos_out</span><span class="p">,</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">colors_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="n">N</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">N</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pos_out</span><span class="p">,</span> <span class="n">mcolors</span><span class="o">.</span><span class="n">ListedColormap</span><span class="p">(</span><span class="n">colors_out</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;N has to be a number of colors that is less than the actual colors found in the .cpt file (&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">colors_out</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; colors found).&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">ret_cmap_type</span> <span class="o">==</span> <span class="s1">&#39;raw&#39;</span><span class="p">:</span>
+        <span class="n">pos_out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">colors_out</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+            <span class="n">pos_out</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xNorm</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="c1"># list of positions</span>
+            <span class="n">colors_out</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">r</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">255</span><span class="p">,</span> <span class="n">g</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">255</span><span class="p">,</span> <span class="n">b</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="mi">255</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pos_out</span><span class="p">,</span> <span class="n">colors_out</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;method has to be one of the arguments: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">methodnames</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot; and ret_cmap_type has to be one of the arguments: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ret_cmap_types</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="plot_cmaps">
+<a class="viewcode-back" href="../../seispy.html#seispy.get_cpt.plot_cmaps">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">plot_cmaps</span><span class="p">(</span><span class="n">cmap_list</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">cmap_height</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">axes_off</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Plot a colormap or list of colormaps with their names.</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    -------</span>
+<span class="sd">    cmap_list (str, cmap object or list of cmap objects anr strings): a list of colormaps to plot, either as cmap objects OR as preinstalled matplotlib colormap strings</span>
+<span class="sd">    width (float): width of plot</span>
+<span class="sd">    cmap_height (float): height of each colormap in plot</span>
+<span class="sd">    axes_off (bool): boolean to erase axes</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    a matplotlib figure object (matplotlib.figure.Figure)</span>
+
+<span class="sd">    Credits</span>
+<span class="sd">    -------</span>
+<span class="sd">    This function originally appears in pycpt, slight edits from bouziot, 2020.03</span>
+<span class="sd">    https://github.com/j08lue/pycpt</span>
+<span class="sd">    http://matplotlib.org/examples/color/colormaps_reference.html</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmap_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">cmap_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">cmap_list</span><span class="p">]</span> <span class="c1"># make subscriptable</span>
+
+    <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">256</span><span class="p">)</span>
+    <span class="n">gradient</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">gradient</span><span class="p">,</span> <span class="n">gradient</span><span class="p">))</span>
+
+    <span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">nrows</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">cmap_list</span><span class="p">),</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="n">width</span><span class="p">,</span><span class="n">cmap_height</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">cmap_list</span><span class="p">)))</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">top</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cmap_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">cmap</span> <span class="o">=</span> <span class="n">cmap_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># CASE ONE CMAP</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+        <span class="n">axes</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">gradient</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+        <span class="n">pos</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+        <span class="n">x_text</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.02</span>
+        <span class="n">y_text</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pos</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_text</span><span class="p">,</span> <span class="n">y_text</span><span class="p">,</span> <span class="n">cmap</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">axes_off</span><span class="p">:</span>
+            <span class="n">axes</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># CASE MULTIPLE CMAPS</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cmap</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cmap_list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cmap</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">cmap</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">gradient</span><span class="p">,</span> <span class="n">aspect</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_position</span><span class="p">()</span><span class="o">.</span><span class="n">bounds</span><span class="p">)</span>
+            <span class="n">x_text</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">pos</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="mf">0.02</span>
+            <span class="n">y_text</span> <span class="o">=</span> <span class="n">pos</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">pos</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">/</span><span class="mf">2.</span>
+            <span class="n">fig</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">x_text</span><span class="p">,</span> <span class="n">y_text</span><span class="p">,</span> <span class="n">cmap</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">va</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="c1"># Turn off *all* ticks &amp; spines, not just the ones with colormaps.</span>
+        <span class="k">if</span> <span class="n">axes_off</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">axes</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_axis_off</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fig</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1">#tests</span>
+    <span class="c1"># test 1: FULL PATH, LinearSegmented, method cdict</span>
+    <span class="n">cpt_path</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;D:\Users\bouzidi\Desktop\matplotlib colormaps - cpt-city\cpt&#39;</span>
+    <span class="n">cpt_fullpath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cpt_path</span><span class="p">,</span> <span class="s1">&#39;mby.cpt&#39;</span><span class="p">)</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">get_cmap</span><span class="p">(</span><span class="n">cpt_fullpath</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="c1"># test 2: LOCAL FILE, CHANGE BASEDIR</span>
+    <span class="n">basedir</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;D:\Users\bouzidi\Desktop\matplotlib colormaps - cpt-city\test\new_ctp&#39;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">basedir</span><span class="p">)</span>
+    <span class="n">myctp2</span> <span class="o">=</span> <span class="s1">&#39;purple-orange-d15.cpt&#39;</span>
+    <span class="n">pos</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">get_listed_cmap</span><span class="p">(</span><span class="n">myctp2</span><span class="p">)</span>
+
+    <span class="c1"># test 3: url</span>
+    <span class="n">myurl</span> <span class="o">=</span> <span class="s1">&#39;http://soliton.vm.bytemark.co.uk/pub/cpt-city/km/purple-orange-d15.cpt&#39;</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="n">get_cmap</span><span class="p">(</span><span class="n">myurl</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">c</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># test 4: plots</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plot_cmaps</span><span class="p">([</span><span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          
+          
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2020, Mijian Xu
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer no-toc">
+      
+      
+      
+    </aside>
+  </div>
+</div><script src="../../_static/documentation_options.js?v=6376b1ea"></script>
+    <script src="../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>

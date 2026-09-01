@@ -1,0 +1,1389 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="./">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Post-processing package" href="post.html" /><link rel="prev" title="Module Index" href="modules.html" />
+        <link rel="canonical" href="seispy.xumijian.me/rf.html" />
+
+    <link rel="shortcut icon" href="_static/seispy_100.png"/><!-- Generated with Sphinx 8.1.3 and Furo 2024.08.06 -->
+        <title>RF package - Seispy v1.3.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=8f2a1f02" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?v=354aac6f" />
+    <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?v=302659d7" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #f8f8f8;
+  --color-code-foreground: black;
+  --color-brand-primary: #0080C4;
+  --color-brand-content: #0080C4;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #202020;
+  --color-code-foreground: #d0d0d0;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-with-moon" viewBox="0 0 24 24">
+    <title>Auto light/dark, in light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path style="opacity: 50%" d="M 5.411 14.504 C 5.471 14.504 5.532 14.504 5.591 14.504 C 3.639 16.319 4.383 19.569 6.931 20.352 C 7.693 20.586 8.512 20.551 9.25 20.252 C 8.023 23.207 4.056 23.725 2.11 21.184 C 0.166 18.642 1.702 14.949 4.874 14.536 C 5.051 14.512 5.231 14.5 5.411 14.5 L 5.411 14.504 Z"/>
+      <line x1="14.5" y1="3.25" x2="14.5" y2="1.25"/>
+      <line x1="14.5" y1="15.85" x2="14.5" y2="17.85"/>
+      <line x1="10.044" y1="5.094" x2="8.63" y2="3.68"/>
+      <line x1="19" y1="14.05" x2="20.414" y2="15.464"/>
+      <line x1="8.2" y1="9.55" x2="6.2" y2="9.55"/>
+      <line x1="20.8" y1="9.55" x2="22.8" y2="9.55"/>
+      <line x1="10.044" y1="14.006" x2="8.63" y2="15.42"/>
+      <line x1="19" y1="5.05" x2="20.414" y2="3.636"/>
+      <circle cx="14.5" cy="9.55" r="3.6"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon-with-sun" viewBox="0 0 24 24">
+    <title>Auto light/dark, in dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round"
+      class="icon-custom-derived-from-feather-sun-and-tabler-moon">
+      <path d="M 8.282 7.007 C 8.385 7.007 8.494 7.007 8.595 7.007 C 5.18 10.184 6.481 15.869 10.942 17.24 C 12.275 17.648 13.706 17.589 15 17.066 C 12.851 22.236 5.91 23.143 2.505 18.696 C -0.897 14.249 1.791 7.786 7.342 7.063 C 7.652 7.021 7.965 7 8.282 7 L 8.282 7.007 Z"/>
+      <line style="opacity: 50%" x1="18" y1="3.705" x2="18" y2="2.5"/>
+      <line style="opacity: 50%" x1="18" y1="11.295" x2="18" y2="12.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="4.816" x2="14.464" y2="3.964"/>
+      <line style="opacity: 50%" x1="20.711" y1="10.212" x2="21.563" y2="11.063"/>
+      <line style="opacity: 50%" x1="14.205" y1="7.5" x2="13.001" y2="7.5"/>
+      <line style="opacity: 50%" x1="21.795" y1="7.5" x2="23" y2="7.5"/>
+      <line style="opacity: 50%" x1="15.316" y1="10.184" x2="14.464" y2="11.036"/>
+      <line style="opacity: 50%" x1="20.711" y1="4.789" x2="21.563" y2="3.937"/>
+      <circle style="opacity: 50%" cx="18" cy="7.5" r="2.169"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-pencil" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-pencil-code">
+      <path d="M4 20h4l10.5 -10.5a2.828 2.828 0 1 0 -4 -4l-10.5 10.5v4" />
+      <path d="M13.5 6.5l4 4" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+  <symbol id="svg-eye" viewBox="0 0 24 24">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-eye-code">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" />
+      <path
+        d="M11.11 17.958c-3.209 -.307 -5.91 -2.293 -8.11 -5.958c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6c-.21 .352 -.427 .688 -.647 1.008" />
+      <path d="M20 21l2 -2l-2 -2" />
+      <path d="M17 17l-2 2l2 2" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+<a class="skip-to-content muted-link" href="#furo-main-content">Skip to content</a>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">Seispy v1.3.10 documentation</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+          <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/seispy-long.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">Seispy v1.3.10 documentation</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="usage/index.html">Getting Started</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Getting Started</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage/PRF_Process.html">Calculate a P-wave Receiver Function (PRF)</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/rf-sta.html">Calculate PRFs for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/rf-from-ws.html">Fetch seismic data from web-service and calculate RF automatically</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/srf.html">Calculate S wave Receiver Functions (SRF) for single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/pickrf.html">Visual check PRFs with an user interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/ps-depth.html">Relationship between time difference and depth in 1D velocity model.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/ccp.html">Stack PRFs with Common Conversion points (CCP) method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="usage/pickdepths.html">Visually pick depth of the discontinuities after CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="examples/index.html">Examples</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" role="switch" type="checkbox"/><label for="toctree-checkbox-2"><div class="visually-hidden">Toggle navigation of Examples</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-prf.html">PRFs calculation and H-k stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-ccp.html">Batch calculation and CCP stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-ccp3d.html">3-D CCP stacking for mantle transition zone structure under the Tibet.</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-rfani.html">Crustal anisotropic estimation with a single station</a></li>
+<li class="toctree-l2"><a class="reference internal" href="examples/ex-harmo.html">Harmonic decomposition</a></li>
+</ul>
+</li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="notes/index.html">Configurations</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" role="switch" type="checkbox"/><label for="toctree-checkbox-3"><div class="visually-hidden">Toggle navigation of Configurations</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="notes/rf_cfg.html">RF calculation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes/hk_cfg.html">Hk stacking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="notes/ccp_cfg.html">CCP stacking</a></li>
+</ul>
+</li>
+<li class="toctree-l1 current has-children"><a class="reference internal" href="modules.html">Module Index</a><input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" role="switch" type="checkbox"/><label for="toctree-checkbox-4"><div class="visually-hidden">Toggle navigation of Module Index</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul class="current">
+<li class="toctree-l2 current current-page"><a class="current reference internal" href="#">RF package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="post.html">Post-processing package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccp.html">CCP package</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Project Links</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference external" href="https://github.com/xumi1993/seispy">GitHub</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://gitlab.com/xumi1993/seispy">GitLab</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://anaconda.org/conda-forge/seispy">Anaconda</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://pypi.org/project/python-seispy/">PyPI</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          <div class="view-this-page">
+  <a class="muted-link" href="_sources/rf.rst.txt" title="View this page">
+    <svg><use href="#svg-eye"></use></svg>
+    <span class="visually-hidden">View this page</span>
+  </a>
+</div>
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto-light"><use href="#svg-sun-with-moon"></use></svg>
+              <svg class="theme-icon-when-auto-dark"><use href="#svg-moon-with-sun"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main" id="furo-main-content">
+          <section id="rf-package">
+<h1>RF package<a class="headerlink" href="#rf-package" title="Link to this heading">¶</a></h1>
+<section id="module-seispy.eq">
+<span id="seispy-eq-module"></span><h2>seispy.eq module<a class="headerlink" href="#module-seispy.eq" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.eq.EQ">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.eq.</span></span><span class="sig-name descname"><span class="pre">EQ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datestr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SAC'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.arr_correct" title="seispy.eq.EQ.arr_correct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">arr_correct</span></code></a>([write_to_sac])</p></td>
+<td><p>offset = sac.b - real o</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.channel_correct" title="seispy.eq.EQ.channel_correct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channel_correct</span></code></a>([switchEN, reverseE, reverseN])</p></td>
+<td><p>Correct channel name for R, E, N components</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.decon_p" title="seispy.eq.EQ.decon_p"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decon_p</span></code></a>(tshift[, tcomp])</p></td>
+<td><p>Deconvolution for P wave</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.decon_s" title="seispy.eq.EQ.decon_s"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decon_s</span></code></a>(tshift, **kwargs)</p></td>
+<td><p>Deconvolution for S wave</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.deconvolute" title="seispy.eq.EQ.deconvolute"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deconvolute</span></code></a>(shift, time_after[, f0, method, ...])</p></td>
+<td><p>Deconvolution</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.detrend" title="seispy.eq.EQ.detrend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detrend</span></code></a>()</p></td>
+<td><p>Detrend and demean</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.filter" title="seispy.eq.EQ.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a>([freqmin, freqmax, order])</p></td>
+<td><p>Bandpass filter</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.fix_channel_name" title="seispy.eq.EQ.fix_channel_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fix_channel_name</span></code></a>()</p></td>
+<td><p>Fix channel name for Z, E, N components</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.from_stream" title="seispy.eq.EQ.from_stream"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_stream</span></code></a>(stream)</p></td>
+<td><p>Create EQ object from obspy stream</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.get_arrival" title="seispy.eq.EQ.get_arrival"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_arrival</span></code></a>(model, evdp, dis[, phase])</p></td>
+<td><p>Get arrival time, ray parameter and incident angle from TauP model</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.get_time_offset" title="seispy.eq.EQ.get_time_offset"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_time_offset</span></code></a>([event_time])</p></td>
+<td><p>Get time offset from SAC header</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.judge_rf" title="seispy.eq.EQ.judge_rf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">judge_rf</span></code></a>(gauss, shift, npts[, criterion, ...])</p></td>
+<td><p>Judge whether receiver function is valid</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.phase_trigger" title="seispy.eq.EQ.phase_trigger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">phase_trigger</span></code></a>(time_before, time_after[, ...])</p></td>
+<td><p>Trigger P or S phase</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.readstream" title="seispy.eq.EQ.readstream"><code class="xref py py-obj docutils literal notranslate"><span class="pre">readstream</span></code></a>()</p></td>
+<td><p>Read SAC files to stream</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.rotate" title="seispy.eq.EQ.rotate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate</span></code></a>(baz[, inc, method, search_inc, baz_shift])</p></td>
+<td><p>Rotate to radial and transverse components</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.saverf" title="seispy.eq.EQ.saverf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">saverf</span></code></a>(path[, evtstr, shift, evla, evlo, ...])</p></td>
+<td><p>Save receiver function to SAC file</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.search_baz" title="seispy.eq.EQ.search_baz"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_baz</span></code></a>(bazi[, time_b, time_e, offset])</p></td>
+<td><p>Search back azimuth for P wave</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.search_inc" title="seispy.eq.EQ.search_inc"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_inc</span></code></a>(bazi)</p></td>
+<td><p>Search incident angle for S wave</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.set_comp" title="seispy.eq.EQ.set_comp"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_comp</span></code></a>()</p></td>
+<td><p>Set component name</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.snr" title="seispy.eq.EQ.snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">snr</span></code></a>([length])</p></td>
+<td><p>Calculate SNR</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.trim" title="seispy.eq.EQ.trim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trim</span></code></a>(time_before, time_after[, isreturn])</p></td>
+<td><p>offset = sac.b - real o</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.eq.EQ.write" title="seispy.eq.EQ.write"><code class="xref py py-obj docutils literal notranslate"><span class="pre">write</span></code></a>(path, evt_datetime)</p></td>
+<td><p>Write raw stream to SAC files</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.arr_correct">
+<span class="sig-name descname"><span class="pre">arr_correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">write_to_sac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.arr_correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.arr_correct" title="Link to this definition">¶</a></dt>
+<dd><p>offset = sac.b - real o</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.channel_correct">
+<span class="sig-name descname"><span class="pre">channel_correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">switchEN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverseE</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverseN</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.channel_correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.channel_correct" title="Link to this definition">¶</a></dt>
+<dd><p>Correct channel name for R, E, N components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>switchEN</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, defaults to False</p></li>
+<li><p><strong>reverseE</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, defaults to False</p></li>
+<li><p><strong>reverseN</strong> (<em>bool</em><em>, </em><em>optional</em>) – _description_, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.decon_p">
+<span class="sig-name descname"><span class="pre">decon_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tshift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tcomp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.decon_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.decon_p" title="Link to this definition">¶</a></dt>
+<dd><p>Deconvolution for P wave</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tshift</strong> (<em>float</em>) – Time shift before P arrival</p></li>
+<li><p><strong>tcomp</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether calculate transverse component, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.decon_s">
+<span class="sig-name descname"><span class="pre">decon_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tshift</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.decon_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.decon_s" title="Link to this definition">¶</a></dt>
+<dd><p>Deconvolution for S wave</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tshift</strong> (<em>float</em>) – Time shift before P arrival</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.deconvolute">
+<span class="sig-name descname"><span class="pre">deconvolute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'iter'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">itmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">400</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minderr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wlevel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_dt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.deconvolute"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.deconvolute" title="Link to this definition">¶</a></dt>
+<dd><p>Deconvolution</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>shift</strong><span class="classifier">float</span></dt><dd><p>Time shift before P arrival</p>
+</dd>
+<dt><strong>time_after</strong><span class="classifier">float</span></dt><dd><p>Time length after P arrival</p>
+</dd>
+<dt><strong>f0</strong><span class="classifier">float or list, optional</span></dt><dd><p>Gaussian factors, by default 2.0</p>
+</dd>
+<dt><strong>method</strong><span class="classifier">str, optional</span></dt><dd><p>method for deconvolution in <code class="docutils literal notranslate"><span class="pre">iter</span></code> or <code class="docutils literal notranslate"><span class="pre">water</span></code>, by default <code class="docutils literal notranslate"><span class="pre">iter</span></code></p>
+</dd>
+<dt><strong>only_r</strong><span class="classifier">bool, optional</span></dt><dd><p>Whether only calculate RF in prime component, by default False</p>
+</dd>
+<dt><strong>itmax</strong><span class="classifier">int, optional</span></dt><dd><p>Maximum iterative number, valid for method of <code class="docutils literal notranslate"><span class="pre">iter</span></code>, by default 400</p>
+</dd>
+<dt><strong>minderr</strong><span class="classifier">float, optional</span></dt><dd><p>Minium residual error, valid for method of <code class="docutils literal notranslate"><span class="pre">iter</span></code>, by default 0.001</p>
+</dd>
+<dt><strong>wlevel</strong><span class="classifier">float, optional</span></dt><dd><p>Water level, valid for method of <code class="docutils literal notranslate"><span class="pre">water</span></code>, by default 0.05</p>
+</dd>
+<dt><strong>target_dt</strong><span class="classifier">None or float, optional</span></dt><dd><p>Time delta for resampling, by default None</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.detrend">
+<span class="sig-name descname"><span class="pre">detrend</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.detrend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.detrend" title="Link to this definition">¶</a></dt>
+<dd><p>Detrend and demean</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.filter" title="Link to this definition">¶</a></dt>
+<dd><p>Bandpass filter</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freqmin</strong> (<em>float</em><em>, </em><em>optional</em>) – minimum frequency, defaults to 0.05</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum frequency, defaults to 1</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – filter order, defaults to 4</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.fix_channel_name">
+<span class="sig-name descname"><span class="pre">fix_channel_name</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.fix_channel_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.fix_channel_name" title="Link to this definition">¶</a></dt>
+<dd><p>Fix channel name for Z, E, N components</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.from_stream">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_stream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.from_stream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.from_stream" title="Link to this definition">¶</a></dt>
+<dd><p>Create EQ object from obspy stream</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stream</strong> (<em>obspy.Stream</em>) – obspy stream</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>EQ object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="seispy.html#seispy.eq.EQ" title="seispy.eq.EQ">EQ</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.get_arrival">
+<span class="sig-name descname"><span class="pre">get_arrival</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evdp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dis</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'P'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.get_arrival"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.get_arrival" title="Link to this definition">¶</a></dt>
+<dd><p>Get arrival time, ray parameter and incident angle from TauP model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>TauPyModel</em>) – TauP model</p></li>
+<li><p><strong>evdp</strong> (<em>float</em>) – focal depth</p></li>
+<li><p><strong>dis</strong> (<em>float</em>) – epicentral distance</p></li>
+<li><p><strong>phase</strong> (<em>str</em><em>, </em><em>optional</em>) – phase name, defaults to ‘P’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.get_time_offset">
+<span class="sig-name descname"><span class="pre">get_time_offset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.get_time_offset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.get_time_offset" title="Link to this definition">¶</a></dt>
+<dd><p>Get time offset from SAC header</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>event_time</strong> (<em>obspy.core.utcdatetime.UTCDateTime</em><em>, </em><em>optional</em>) – event time, defaults to None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.judge_rf">
+<span class="sig-name descname"><span class="pre">judge_rf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gauss</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">npts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'crust'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rmsgate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.judge_rf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.judge_rf" title="Link to this definition">¶</a></dt>
+<dd><p>Judge whether receiver function is valid</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gauss</strong> (<em>float</em>) – Gaussian factor</p></li>
+<li><p><strong>shift</strong> (<em>float</em>) – time shift before P arrival</p></li>
+<li><p><strong>npts</strong> (<em>int</em>) – number of points for RF</p></li>
+<li><p><strong>criterion</strong> (<em>str</em><em>, </em><em>optional</em>) – criterion for judging, defaults to ‘crust’</p></li>
+<li><p><strong>rmsgate</strong> (<em>float</em><em>, </em><em>optional</em>) – RMS gate, defaults to None</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>whether RF is valid</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.phase_trigger">
+<span class="sig-name descname"><span class="pre">phase_trigger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_before</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prepick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ltl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.phase_trigger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.phase_trigger" title="Link to this definition">¶</a></dt>
+<dd><p>Trigger P or S phase</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_before</strong> (<em>float</em>) – time before P or S arrival</p></li>
+<li><p><strong>time_after</strong> (<em>float</em>) – time after P or S arrival</p></li>
+<li><p><strong>prepick</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether use prepick, defaults to True</p></li>
+<li><p><strong>stl</strong> (<em>int</em><em>, </em><em>optional</em>) – short time length for STA/LTA, defaults to 5</p></li>
+<li><p><strong>ltl</strong> (<em>int</em><em>, </em><em>optional</em>) – long time length for STA/LTA, defaults to 10</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.readstream">
+<span class="sig-name descname"><span class="pre">readstream</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.readstream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.readstream" title="Link to this definition">¶</a></dt>
+<dd><p>Read SAC files to stream</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">baz</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NE-&gt;RT'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">search_inc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baz_shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.rotate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.rotate" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate to radial and transverse components</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>baz</strong> (<em>float</em>) – back azimuth</p></li>
+<li><p><strong>inc</strong> (<em>float</em><em>, </em><em>optional</em>) – incident angle, defaults to None</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – method for rotation, defaults to ‘NE-&gt;RT’</p></li>
+<li><p><strong>search_inc</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether search incident angle, defaults to False</p></li>
+<li><p><strong>baz_shift</strong> (<em>int</em><em>, </em><em>optional</em>) – shift back azimuth, defaults to 0</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.saverf">
+<span class="sig-name descname"><span class="pre">saverf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evtstr</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evla</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-12345.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evlo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-12345.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evdp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-12345.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-12345.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-12345.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gcarc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-12345.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_r</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.saverf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.saverf" title="Link to this definition">¶</a></dt>
+<dd><p>Save receiver function to SAC file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – path to save SAC file</p></li>
+<li><p><strong>evtstr</strong> (<em>str</em><em>, </em><em>optional</em>) – event string, defaults to None</p></li>
+<li><p><strong>shift</strong> (<em>int</em><em>, </em><em>optional</em>) – time shift before P arrival, defaults to 0</p></li>
+<li><p><strong>evla</strong> (<em>float</em><em>, </em><em>optional</em>) – event latitude, defaults to -12345.</p></li>
+<li><p><strong>evlo</strong> (<em>float</em><em>, </em><em>optional</em>) – event longitude, defaults to -12345.</p></li>
+<li><p><strong>evdp</strong> (<em>float</em><em>, </em><em>optional</em>) – event depth, defaults to -12345.</p></li>
+<li><p><strong>mag</strong> (<em>float</em><em>, </em><em>optional</em>) – event magnitude, defaults to -12345.</p></li>
+<li><p><strong>gauss</strong> (<em>float</em><em>, </em><em>optional</em>) – Gaussian factor, defaults to 0</p></li>
+<li><p><strong>baz</strong> (<em>float</em><em>, </em><em>optional</em>) – back azimuth, defaults to -12345.</p></li>
+<li><p><strong>gcarc</strong> (<em>float</em><em>, </em><em>optional</em>) – epicentral distance, defaults to -12345.</p></li>
+<li><p><strong>only_r</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether only save R component, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.search_baz">
+<span class="sig-name descname"><span class="pre">search_baz</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bazi</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.search_baz"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.search_baz" title="Link to this definition">¶</a></dt>
+<dd><p>Search back azimuth for P wave</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>bazi</strong> (<em>float</em>) – back azimuth</p></li>
+<li><p><strong>time_b</strong> (<em>int</em><em>, </em><em>optional</em>) – time before P arrival, defaults to 10</p></li>
+<li><p><strong>time_e</strong> (<em>int</em><em>, </em><em>optional</em>) – time after P arrival, defaults to 20</p></li>
+<li><p><strong>offset</strong> (<em>int</em><em>, </em><em>optional</em>) – offset for searching, defaults to 90</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>back azimuth and amplitude</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(float, np.ndarray)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.search_inc">
+<span class="sig-name descname"><span class="pre">search_inc</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bazi</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.search_inc"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.search_inc" title="Link to this definition">¶</a></dt>
+<dd><p>Search incident angle for S wave</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bazi</strong> (<em>float</em>) – back azimuth</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>incident angle</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.set_comp">
+<span class="sig-name descname"><span class="pre">set_comp</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.set_comp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.set_comp" title="Link to this definition">¶</a></dt>
+<dd><p>Set component name</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.snr">
+<span class="sig-name descname"><span class="pre">snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.snr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.snr" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate SNR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>length</strong> (<em>int</em><em>, </em><em>optional</em>) – length for noise, defaults to 50</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SNR of E, N, Z components</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>(float, float, float)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.trim">
+<span class="sig-name descname"><span class="pre">trim</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_before</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_after</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isreturn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.trim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.trim" title="Link to this definition">¶</a></dt>
+<dd><p>offset = sac.b - real o</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.eq.EQ.write">
+<span class="sig-name descname"><span class="pre">write</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evt_datetime</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#EQ.write"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.EQ.write" title="Link to this definition">¶</a></dt>
+<dd><p>Write raw stream to SAC files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – path to save SAC files</p></li>
+<li><p><strong>evt_datetime</strong> (<em>obspy.core.utcdatetime.UTCDateTime</em>) – event datetime</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="seispy.eq.NotEnoughComponent">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.eq.</span></span><span class="sig-name descname"><span class="pre">NotEnoughComponent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matchkey</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#NotEnoughComponent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.NotEnoughComponent" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="seispy.eq.TooMoreComponents">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.eq.</span></span><span class="sig-name descname"><span class="pre">TooMoreComponents</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matchkey</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#TooMoreComponents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.TooMoreComponents" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.eq.rotateZNE">
+<span class="sig-prename descclassname"><span class="pre">seispy.eq.</span></span><span class="sig-name descname"><span class="pre">rotateZNE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">st</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/eq.html#rotateZNE"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.eq.rotateZNE" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate non-standard components (e.g., 1, 2, Z) to N, E, Z components
+and reorder the components to ensure that the final <a href="#id1"><span class="problematic" id="id2">*</span></a>.BHZ.SAC files have correct cmpaz (=0) and cmpinc (=0) headers.</p>
+</dd></dl>
+
+</section>
+<section id="module-seispy.rf">
+<span id="seispy-rf-module"></span><h2>seispy.rf module<a class="headerlink" href="#module-seispy.rf" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.CfgModify">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">CfgModify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#CfgModify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.CfgModify" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.rf.RF">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">RF</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>date_begin</strong></dt><dd></dd>
+<dt><strong>date_end</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.baz_correct" title="seispy.rf.RF.baz_correct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">baz_correct</span></code></a>([time_b, time_e, offset, ...])</p></td>
+<td><p>Correct back-azimuth for all data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.cal_phase" title="seispy.rf.RF.cal_phase"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cal_phase</span></code></a>()</p></td>
+<td><p>Calculate arrivals and ray parameters for all data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.channel_correct" title="seispy.rf.RF.channel_correct"><code class="xref py py-obj docutils literal notranslate"><span class="pre">channel_correct</span></code></a>()</p></td>
+<td><p>Correct channel components</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.deconv" title="seispy.rf.RF.deconv"><code class="xref py py-obj docutils literal notranslate"><span class="pre">deconv</span></code></a>()</p></td>
+<td><p>Deconvolution for all data</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.detrend" title="seispy.rf.RF.detrend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">detrend</span></code></a>()</p></td>
+<td><p>Detrend all data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.drop_eq_snr" title="seispy.rf.RF.drop_eq_snr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">drop_eq_snr</span></code></a>([length, z_only])</p></td>
+<td><p>Drop earthquakes with low SNR</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.filter" title="seispy.rf.RF.filter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filter</span></code></a>([freqmin, freqmax, order])</p></td>
+<td><p>Filter all data</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.load_stainfo" title="seispy.rf.RF.load_stainfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_stainfo</span></code></a>([use_date_range])</p></td>
+<td><p>Load station information from local file or remote web-service</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.loadpjt" title="seispy.rf.RF.loadpjt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">loadpjt</span></code></a>(path)</p></td>
+<td><p>Load project from local disk</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.match_eq" title="seispy.rf.RF.match_eq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">match_eq</span></code></a>()</p></td>
+<td><p>Assosiate earthquakes with local data file or online data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.pick" title="seispy.rf.RF.pick"><code class="xref py py-obj docutils literal notranslate"><span class="pre">pick</span></code></a>([prepick, stl, ltl])</p></td>
+<td><p>Pick phase arrival</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.rotate" title="seispy.rf.RF.rotate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rotate</span></code></a>([search_inc])</p></td>
+<td><p>Rotate all data to ZNE or RTZ</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.save_raw_data" title="seispy.rf.RF.save_raw_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_raw_data</span></code></a>()</p></td>
+<td><p>Save raw data to local disk</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.savepjt" title="seispy.rf.RF.savepjt"><code class="xref py py-obj docutils literal notranslate"><span class="pre">savepjt</span></code></a>()</p></td>
+<td><p>Save project to local disk</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.saverf" title="seispy.rf.RF.saverf"><code class="xref py py-obj docutils literal notranslate"><span class="pre">saverf</span></code></a>([gauss])</p></td>
+<td><p>Save receiver functions to local disk</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.search_eq" title="seispy.rf.RF.search_eq"><code class="xref py py-obj docutils literal notranslate"><span class="pre">search_eq</span></code></a>([local, catalog])</p></td>
+<td><p>Search earthquakes from local or online data server</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.rf.RF.trim" title="seispy.rf.RF.trim"><code class="xref py py-obj docutils literal notranslate"><span class="pre">trim</span></code></a>()</p></td>
+<td><p>Trim waveforms from start to end</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.baz_correct">
+<span class="sig-name descname"><span class="pre">baz_correct</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">time_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_e</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">correct_angle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.baz_correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.baz_correct" title="Link to this definition">¶</a></dt>
+<dd><p>Correct back-azimuth for all data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>time_b</strong> (<em>int</em><em>, </em><em>optional</em>) – Begin time of searching, defaults to 10</p></li>
+<li><p><strong>time_e</strong> (<em>int</em><em>, </em><em>optional</em>) – End time of searching, defaults to 20</p></li>
+<li><p><strong>offset</strong> (<em>int</em><em>, </em><em>optional</em>) – Offset of searching, defaults to 90</p></li>
+<li><p><strong>correct_angle</strong> (<em>float</em><em>, </em><em>optional</em>) – Correct angle, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.cal_phase">
+<span class="sig-name descname"><span class="pre">cal_phase</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.cal_phase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.cal_phase" title="Link to this definition">¶</a></dt>
+<dd><p>Calculate arrivals and ray parameters for all data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.channel_correct">
+<span class="sig-name descname"><span class="pre">channel_correct</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.channel_correct"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.channel_correct" title="Link to this definition">¶</a></dt>
+<dd><p>Correct channel components</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.rf.RF.date_begin">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">date_begin</span></span><a class="headerlink" href="#seispy.rf.RF.date_begin" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.rf.RF.date_end">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">date_end</span></span><a class="headerlink" href="#seispy.rf.RF.date_end" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.deconv">
+<span class="sig-name descname"><span class="pre">deconv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.deconv"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.deconv" title="Link to this definition">¶</a></dt>
+<dd><p>Deconvolution for all data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.detrend">
+<span class="sig-name descname"><span class="pre">detrend</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.detrend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.detrend" title="Link to this definition">¶</a></dt>
+<dd><p>Detrend all data</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.drop_eq_snr">
+<span class="sig-name descname"><span class="pre">drop_eq_snr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">z_only</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.drop_eq_snr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.drop_eq_snr" title="Link to this definition">¶</a></dt>
+<dd><p>Drop earthquakes with low SNR</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>length</strong> (<em>int</em><em>, </em><em>optional</em>) – Length of data, defaults to None</p></li>
+<li><p><strong>z_only</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use Z component only, defaults to False</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.filter">
+<span class="sig-name descname"><span class="pre">filter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">freqmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">freqmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">order</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.filter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.filter" title="Link to this definition">¶</a></dt>
+<dd><p>Filter all data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>freqmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum frequency, defaults to self.para.freqmin</p></li>
+<li><p><strong>freqmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum frequency, defaults to self.para.freqmax</p></li>
+<li><p><strong>order</strong> (<em>int</em><em>, </em><em>optional</em>) – Order of filter, defaults to 4</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.load_stainfo">
+<span class="sig-name descname"><span class="pre">load_stainfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_date_range</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.load_stainfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.load_stainfo" title="Link to this definition">¶</a></dt>
+<dd><p>Load station information from local file or remote web-service</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>use_date_range</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use date range to search station information, defaults to True</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.loadpjt">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">loadpjt</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.loadpjt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.loadpjt" title="Link to this definition">¶</a></dt>
+<dd><p>Load project from local disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to project file</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Project object</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="seispy.html#seispy.rf.RF" title="seispy.rf.RF">seispy.rf.RF</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.match_eq">
+<span class="sig-name descname"><span class="pre">match_eq</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.match_eq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.match_eq" title="Link to this definition">¶</a></dt>
+<dd><p>Assosiate earthquakes with local data file or online data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.pick">
+<span class="sig-name descname"><span class="pre">pick</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prepick</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ltl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.pick"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.pick" title="Link to this definition">¶</a></dt>
+<dd><p>Pick phase arrival</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prepick</strong> (<em>bool</em><em>, </em><em>optional</em>) – Use STA/LTA method, defaults to True</p></li>
+<li><p><strong>stl</strong> (<em>int</em><em>, </em><em>optional</em>) – Short time length, defaults to 5</p></li>
+<li><p><strong>ltl</strong> (<em>int</em><em>, </em><em>optional</em>) – Long time length, defaults to 10</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.rotate">
+<span class="sig-name descname"><span class="pre">rotate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">search_inc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.rotate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.rotate" title="Link to this definition">¶</a></dt>
+<dd><p>Rotate all data to ZNE or RTZ</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>search_inc</strong> (<em>bool</em><em>, </em><em>optional</em>) – Search incidence angle, defaults to False</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.save_raw_data">
+<span class="sig-name descname"><span class="pre">save_raw_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.save_raw_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.save_raw_data" title="Link to this definition">¶</a></dt>
+<dd><p>Save raw data to local disk</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.savepjt">
+<span class="sig-name descname"><span class="pre">savepjt</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.savepjt"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.savepjt" title="Link to this definition">¶</a></dt>
+<dd><p>Save project to local disk</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.saverf">
+<span class="sig-name descname"><span class="pre">saverf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gauss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.saverf"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.saverf" title="Link to this definition">¶</a></dt>
+<dd><p>Save receiver functions to local disk</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>gauss</strong> (<em>float</em><em>, </em><em>optional</em>) – Gaussian width, defaults to self.para.gauss</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.search_eq">
+<span class="sig-name descname"><span class="pre">search_eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">catalog</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.search_eq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.search_eq" title="Link to this definition">¶</a></dt>
+<dd><p>Search earthquakes from local or online data server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local</strong> (<em>bool</em><em>, </em><em>optional</em>) – Search from local data, defaults to False</p></li>
+<li><p><strong>catalog</strong> (<em>str</em><em>, </em><em>optional</em>) – Catalog type, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.rf.RF.trim">
+<span class="sig-name descname"><span class="pre">trim</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#RF.trim"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.RF.trim" title="Link to this definition">¶</a></dt>
+<dd><p>Trim waveforms from start to end</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py exception">
+<dt class="sig sig-object py" id="seispy.rf.SACFileNotFoundError">
+<em class="property"><span class="pre">exception</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">SACFileNotFoundError</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">matchkey</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#SACFileNotFoundError"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.SACFileNotFoundError" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.datestr2regex">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">datestr2regex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datestr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#datestr2regex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.datestr2regex" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.fetch_waveform">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">fetch_waveform</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eq_lst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">para</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#fetch_waveform"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.fetch_waveform" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch waveforms from remote data server</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eq_lst</strong> (<em>pandas.DataFrame</em>) – Earthquake list</p></li>
+<li><p><strong>para</strong> (<a class="reference internal" href="seispy.html#seispy.para.RFPara" title="seispy.para.RFPara"><em>seispy.para.RFPara</em></a>) – RFPara object</p></li>
+<li><p><strong>model</strong> (<em>obspy.taup.TauPyModel</em>) – TauPyModel object</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="seispy.html#seispy.setuplog.SetupLog" title="seispy.setuplog.SetupLog"><em>seispy.setuplog.SetupLog</em></a>) – Logger</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Earthquake list with fetched waveforms</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.match_eq">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">match_eq</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eq_lst</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stla</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stlo</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_comp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Z'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'SAC'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">210</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dateformat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%Y.%j.%H.%M.%S'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#match_eq"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.match_eq" title="Link to this definition">¶</a></dt>
+<dd><p>Match earthquakes with local SAC files</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>eq_lst</strong> (<em>pandas.DataFrame</em>) – Earthquake list</p></li>
+<li><p><strong>pathname</strong> (<em>str</em>) – Path to SAC files</p></li>
+<li><p><strong>stla</strong> (<em>float</em>) – Station latitude</p></li>
+<li><p><strong>stlo</strong> (<em>float</em>) – Station longitude</p></li>
+<li><p><strong>logger</strong> (<a class="reference internal" href="seispy.html#seispy.setuplog.SetupLog" title="seispy.setuplog.SetupLog"><em>seispy.setuplog.SetupLog</em></a>) – Logger</p></li>
+<li><p><strong>ref_comp</strong> (<em>str</em><em>, </em><em>optional</em>) – Reference component, defaults to ‘Z’</p></li>
+<li><p><strong>suffix</strong> (<em>str</em><em>, </em><em>optional</em>) – Suffix of SAC files, defaults to ‘SAC’</p></li>
+<li><p><strong>offset</strong> (<em>float</em><em>, </em><em>optional</em>) – Time offset between SAC files and earthquakes, defaults to None</p></li>
+<li><p><strong>tolerance</strong> (<em>int</em><em>, </em><em>optional</em>) – Tolerance of time offset, defaults to 210</p></li>
+<li><p><strong>dateformat</strong> (<em>str</em><em>, </em><em>optional</em>) – Date format of SAC files, defaults to ‘%Y.%j.%H.%M.%S’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Earthquake list with matched SAC files</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.pickphase">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">pickphase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">eqs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">para</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#pickphase"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.pickphase" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.read_catalog">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">read_catalog</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">logpath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">e_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stla</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stlo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dismin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dismax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">90.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depthmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">800</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#read_catalog"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.read_catalog" title="Link to this definition">¶</a></dt>
+<dd><p>Read local catalog with seispy or QUAKEML format</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>logpath</strong> (<em>str</em>) – Path to catalogs</p></li>
+<li><p><strong>b_time</strong> (<em>obspy.UTCDateTime</em>) – Start time</p></li>
+<li><p><strong>e_time</strong> (<em>obspy.UTCDateTime</em>) – End time</p></li>
+<li><p><strong>stla</strong> (<em>float</em>) – Station latitude</p></li>
+<li><p><strong>stlo</strong> (<em>float</em>) – Station longitude</p></li>
+<li><p><strong>magmin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum magnitude, defaults to 5.5</p></li>
+<li><p><strong>magmax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum magnitude, defaults to 10</p></li>
+<li><p><strong>dismin</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum distance, defaults to 30</p></li>
+<li><p><strong>dismax</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum distance, defaults to 90</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>list of earthquakes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pandas.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="seispy.rf.setpar">
+<span class="sig-prename descclassname"><span class="pre">seispy.rf.</span></span><span class="sig-name descname"><span class="pre">setpar</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/rf.html#setpar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.rf.setpar" title="Link to this definition">¶</a></dt>
+<dd><p>Set parameters to configure file</p>
+</dd></dl>
+
+</section>
+<section id="module-seispy.para">
+<span id="seispy-para-module"></span><h2>seispy.para module<a class="headerlink" href="#module-seispy.para" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.para.RFPara">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.para.</span></span><span class="sig-name descname"><span class="pre">RFPara</span></span><a class="reference internal" href="_modules/seispy/para.html#RFPara"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.RFPara" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="field-list simple">
+<dt class="field-odd">Attributes<span class="colon">:</span></dt>
+<dd class="field-odd"><dl class="simple">
+<dt><strong>catalogpath</strong></dt><dd></dd>
+<dt><strong>criterion</strong></dt><dd></dd>
+<dt><strong>datapath</strong></dt><dd></dd>
+<dt><strong>decon_method</strong></dt><dd></dd>
+<dt><strong>rfpath</strong></dt><dd></dd>
+<dt><strong>server</strong></dt><dd></dd>
+</dl>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.para.RFPara.read_para" title="seispy.para.RFPara.read_para"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_para</span></code></a>(cfg_file)</p></td>
+<td><p>Read parameters from configure file :param cfg_file: Path to configure file :type cfg_file: str</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><strong>get_para</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.para.RFPara.catalogpath">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">catalogpath</span></span><a class="headerlink" href="#seispy.para.RFPara.catalogpath" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.para.RFPara.criterion">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#seispy.para.RFPara.criterion" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.para.RFPara.datapath">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">datapath</span></span><a class="headerlink" href="#seispy.para.RFPara.datapath" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.para.RFPara.decon_method">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decon_method</span></span><a class="headerlink" href="#seispy.para.RFPara.decon_method" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.para.RFPara.get_para">
+<span class="sig-name descname"><span class="pre">get_para</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/para.html#RFPara.get_para"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.RFPara.get_para" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.para.RFPara.read_para">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read_para</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg_file</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/para.html#RFPara.read_para"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.RFPara.read_para" title="Link to this definition">¶</a></dt>
+<dd><p>Read parameters from configure file
+:param cfg_file: Path to configure file
+:type cfg_file: str</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.para.RFPara.rfpath">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rfpath</span></span><a class="headerlink" href="#seispy.para.RFPara.rfpath" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="seispy.para.RFPara.server">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">server</span></span><a class="headerlink" href="#seispy.para.RFPara.server" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="seispy.para.StaInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">seispy.para.</span></span><span class="sig-name descname"><span class="pre">StaInfo</span></span><a class="reference internal" href="_modules/seispy/para.html#StaInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.StaInfo" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p class="rubric">Methods</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.para.StaInfo.get_stainfo" title="seispy.para.StaInfo.get_stainfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_stainfo</span></code></a>()</p></td>
+<td><p>Get station information</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.para.StaInfo.get_station_from_ws" title="seispy.para.StaInfo.get_station_from_ws"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_station_from_ws</span></code></a>(**kwargs)</p></td>
+<td><p>Get station information from web-service with given network and station or other optional condition.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="seispy.html#seispy.para.StaInfo.link_server" title="seispy.para.StaInfo.link_server"><code class="xref py py-obj docutils literal notranslate"><span class="pre">link_server</span></code></a>(server[, user, password])</p></td>
+<td><p>_summary_</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="seispy.html#seispy.para.StaInfo.load_stainfo" title="seispy.para.StaInfo.load_stainfo"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_stainfo</span></code></a>(pathname, ref_comp, suffix)</p></td>
+<td><p>Load station information from SAC file</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.para.StaInfo.get_stainfo">
+<span class="sig-name descname"><span class="pre">get_stainfo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/para.html#StaInfo.get_stainfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.StaInfo.get_stainfo" title="Link to this definition">¶</a></dt>
+<dd><p>Get station information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Station information</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.para.StaInfo.get_station_from_ws">
+<span class="sig-name descname"><span class="pre">get_station_from_ws</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/para.html#StaInfo.get_station_from_ws"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.StaInfo.get_station_from_ws" title="Link to this definition">¶</a></dt>
+<dd><p>Get station information from web-service with given network and station or other optional condition.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.para.StaInfo.link_server">
+<span class="sig-name descname"><span class="pre">link_server</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/para.html#StaInfo.link_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.StaInfo.link_server" title="Link to this definition">¶</a></dt>
+<dd><p>_summary_</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>server</strong> (<em>str</em>) – Sever name of FDSN web-service, by default ‘IRIS’</p></li>
+<li><p><strong>user</strong> (<em>str</em><em>, </em><em>optional</em>) – username, defaults to None</p></li>
+<li><p><strong>password</strong> (<em>str</em><em>, </em><em>optional</em>) – password, defaults to None</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="seispy.para.StaInfo.load_stainfo">
+<span class="sig-name descname"><span class="pre">load_stainfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pathname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ref_comp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/seispy/para.html#StaInfo.load_stainfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#seispy.para.StaInfo.load_stainfo" title="Link to this definition">¶</a></dt>
+<dd><p>Load station information from SAC file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pathname</strong> (<em>str</em>) – Path to SAC file</p></li>
+<li><p><strong>ref_comp</strong> (<em>str</em>) – Reference component</p></li>
+<li><p><strong>suffix</strong> (<em>str</em>) – Suffix of SAC file</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="post.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Post-processing package</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="modules.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Module Index</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2020, Mijian Xu
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">RF package</a><ul>
+<li><a class="reference internal" href="#module-seispy.eq">seispy.eq module</a><ul>
+<li><a class="reference internal" href="#seispy.eq.EQ"><code class="docutils literal notranslate"><span class="pre">EQ</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.eq.EQ.arr_correct"><code class="docutils literal notranslate"><span class="pre">EQ.arr_correct()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.channel_correct"><code class="docutils literal notranslate"><span class="pre">EQ.channel_correct()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.decon_p"><code class="docutils literal notranslate"><span class="pre">EQ.decon_p()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.decon_s"><code class="docutils literal notranslate"><span class="pre">EQ.decon_s()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.deconvolute"><code class="docutils literal notranslate"><span class="pre">EQ.deconvolute()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.detrend"><code class="docutils literal notranslate"><span class="pre">EQ.detrend()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.filter"><code class="docutils literal notranslate"><span class="pre">EQ.filter()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.fix_channel_name"><code class="docutils literal notranslate"><span class="pre">EQ.fix_channel_name()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.from_stream"><code class="docutils literal notranslate"><span class="pre">EQ.from_stream()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.get_arrival"><code class="docutils literal notranslate"><span class="pre">EQ.get_arrival()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.get_time_offset"><code class="docutils literal notranslate"><span class="pre">EQ.get_time_offset()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.judge_rf"><code class="docutils literal notranslate"><span class="pre">EQ.judge_rf()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.phase_trigger"><code class="docutils literal notranslate"><span class="pre">EQ.phase_trigger()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.readstream"><code class="docutils literal notranslate"><span class="pre">EQ.readstream()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.rotate"><code class="docutils literal notranslate"><span class="pre">EQ.rotate()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.saverf"><code class="docutils literal notranslate"><span class="pre">EQ.saverf()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.search_baz"><code class="docutils literal notranslate"><span class="pre">EQ.search_baz()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.search_inc"><code class="docutils literal notranslate"><span class="pre">EQ.search_inc()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.set_comp"><code class="docutils literal notranslate"><span class="pre">EQ.set_comp()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.snr"><code class="docutils literal notranslate"><span class="pre">EQ.snr()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.trim"><code class="docutils literal notranslate"><span class="pre">EQ.trim()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.EQ.write"><code class="docutils literal notranslate"><span class="pre">EQ.write()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy.eq.NotEnoughComponent"><code class="docutils literal notranslate"><span class="pre">NotEnoughComponent</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.TooMoreComponents"><code class="docutils literal notranslate"><span class="pre">TooMoreComponents</span></code></a></li>
+<li><a class="reference internal" href="#seispy.eq.rotateZNE"><code class="docutils literal notranslate"><span class="pre">rotateZNE()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-seispy.rf">seispy.rf module</a><ul>
+<li><a class="reference internal" href="#seispy.rf.CfgModify"><code class="docutils literal notranslate"><span class="pre">CfgModify()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF"><code class="docutils literal notranslate"><span class="pre">RF</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.rf.RF.baz_correct"><code class="docutils literal notranslate"><span class="pre">RF.baz_correct()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.cal_phase"><code class="docutils literal notranslate"><span class="pre">RF.cal_phase()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.channel_correct"><code class="docutils literal notranslate"><span class="pre">RF.channel_correct()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.date_begin"><code class="docutils literal notranslate"><span class="pre">RF.date_begin</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.date_end"><code class="docutils literal notranslate"><span class="pre">RF.date_end</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.deconv"><code class="docutils literal notranslate"><span class="pre">RF.deconv()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.detrend"><code class="docutils literal notranslate"><span class="pre">RF.detrend()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.drop_eq_snr"><code class="docutils literal notranslate"><span class="pre">RF.drop_eq_snr()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.filter"><code class="docutils literal notranslate"><span class="pre">RF.filter()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.load_stainfo"><code class="docutils literal notranslate"><span class="pre">RF.load_stainfo()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.loadpjt"><code class="docutils literal notranslate"><span class="pre">RF.loadpjt()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.match_eq"><code class="docutils literal notranslate"><span class="pre">RF.match_eq()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.pick"><code class="docutils literal notranslate"><span class="pre">RF.pick()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.rotate"><code class="docutils literal notranslate"><span class="pre">RF.rotate()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.save_raw_data"><code class="docutils literal notranslate"><span class="pre">RF.save_raw_data()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.savepjt"><code class="docutils literal notranslate"><span class="pre">RF.savepjt()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.saverf"><code class="docutils literal notranslate"><span class="pre">RF.saverf()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.search_eq"><code class="docutils literal notranslate"><span class="pre">RF.search_eq()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.RF.trim"><code class="docutils literal notranslate"><span class="pre">RF.trim()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy.rf.SACFileNotFoundError"><code class="docutils literal notranslate"><span class="pre">SACFileNotFoundError</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.datestr2regex"><code class="docutils literal notranslate"><span class="pre">datestr2regex()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.fetch_waveform"><code class="docutils literal notranslate"><span class="pre">fetch_waveform()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.match_eq"><code class="docutils literal notranslate"><span class="pre">match_eq()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.pickphase"><code class="docutils literal notranslate"><span class="pre">pickphase()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.read_catalog"><code class="docutils literal notranslate"><span class="pre">read_catalog()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.rf.setpar"><code class="docutils literal notranslate"><span class="pre">setpar()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-seispy.para">seispy.para module</a><ul>
+<li><a class="reference internal" href="#seispy.para.RFPara"><code class="docutils literal notranslate"><span class="pre">RFPara</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.para.RFPara.catalogpath"><code class="docutils literal notranslate"><span class="pre">RFPara.catalogpath</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.criterion"><code class="docutils literal notranslate"><span class="pre">RFPara.criterion</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.datapath"><code class="docutils literal notranslate"><span class="pre">RFPara.datapath</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.decon_method"><code class="docutils literal notranslate"><span class="pre">RFPara.decon_method</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.get_para"><code class="docutils literal notranslate"><span class="pre">RFPara.get_para()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.read_para"><code class="docutils literal notranslate"><span class="pre">RFPara.read_para()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.rfpath"><code class="docutils literal notranslate"><span class="pre">RFPara.rfpath</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.RFPara.server"><code class="docutils literal notranslate"><span class="pre">RFPara.server</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#seispy.para.StaInfo"><code class="docutils literal notranslate"><span class="pre">StaInfo</span></code></a><ul>
+<li><a class="reference internal" href="#seispy.para.StaInfo.get_stainfo"><code class="docutils literal notranslate"><span class="pre">StaInfo.get_stainfo()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.StaInfo.get_station_from_ws"><code class="docutils literal notranslate"><span class="pre">StaInfo.get_station_from_ws()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.StaInfo.link_server"><code class="docutils literal notranslate"><span class="pre">StaInfo.link_server()</span></code></a></li>
+<li><a class="reference internal" href="#seispy.para.StaInfo.load_stainfo"><code class="docutils literal notranslate"><span class="pre">StaInfo.load_stainfo()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script src="_static/documentation_options.js?v=ab1ebb28"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/furo.js?v=5fa4622c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/design-tabs.js?v=f930bc37"></script>
+    </body>
+</html>
