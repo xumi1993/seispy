@@ -70,7 +70,7 @@ class Query():
         else:
             self.events_raw.write(filename, format=format)
 
-    def get_stations(self, includerestricted=False, **kwargs):
-        self.stations = self.client.get_stations(includerestricted=includerestricted, **kwargs)
+    def get_stations(self, **kwargs):
+        self.stations = self.client.get_stations(**kwargs)
 
 
