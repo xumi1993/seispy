@@ -196,9 +196,30 @@ class DepModel(object):
         if rho is not None:
             mod.isrho = True
         mod._elevation()
-        mod.model_array = _from_layer_model(mod.depths, h, vp, vs, rho=rho)
+        mod.model_array = _from_layer_model(mod.depths, h, vs=vs, vp=vp, rho=rho)
         mod.vp, mod.vs, mod.rho = _layer2grid(mod.depths, mod.model_array)
         return mod
+
+    def vsapp_kernel(self, rayp, periods_s, *, method='iter', **kwargs):
+        """Compute apparent Vs and its analytic derivative for this model.
+
+        :param rayp: P-wave ray parameter in s/km.
+        :param periods_s: Increasing positive half-widths of the cosine-squared
+            measurement window, in seconds.
+        :param method: ``'iter'`` or ``'water'`` deconvolution.
+        :param kwargs: Sampling, deconvolution and optional local Vp/rho slopes;
+            see :func:`seispy.vsapp_kernel.vsapp_kernel`.
+        :return: Kernel result with one Jacobian column per entry in ``self.vs``,
+            including the final half-space. Vp, density and interfaces are held
+            fixed unless local Vp/rho slopes are supplied explicitly.
+
+        A model built with :meth:`read_layer_model` is sampled onto its depth
+        grid. Kernel columns describe that sampled model, not the original
+        input layers. The calculation does not modify the model.
+        """
+        from seispy.vsapp_kernel import vsapp_kernel
+
+        return vsapp_kernel(self, rayp, periods_s, method=method, **kwargs)
 
     def _elevation(self):
         """

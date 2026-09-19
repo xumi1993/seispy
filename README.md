@@ -64,6 +64,8 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
 - `seispy.rfcorrect`: Subsequent process of RFs including moveout correction and time to depth conversion (1D and 3D) (see [Xu et al., 2018 EPSL](https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub))
 - `seispy.ccpprofile`: CCP stacking along a profile.
 - `seispy.ccp3d`: 3-D CCP stacking with extracting depth D410 and D660.
+- `seispy.vsapp`: Apparent shear-wave velocity from radial receiver functions, with an `RFStation.compute_vsapp` interface and automatic iterative reference construction.
+- `seispy.vsapp_kernel`: Analytic RF and apparent-Vs derivatives for `DepModel` and `SynSeis`, using iterative or water-level deconvolution.
 
   [lithospheric seismology program at USC]: http://www.seis.sc.edu/software/distaz/
   [iwbailey/processRFmatlab]: https://github.com/iwbailey/processRFmatlab
@@ -90,4 +92,3 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
  * `downlod_catalog`: Download catalogs from FDSN web-service.
  * `gen_rayp_lib`: Generate a rap-parameter library with depth of source and epicentral distance.
  * `setpar`: Set up the values in configure files.
-

@@ -178,12 +178,58 @@ class RFStation(object):
             except:
                 rfsta.f0[i] = tr.stats.sac.user1
             rfsta.data_prime[i] = tr.data
+        # Only native iterative RFTrace timing can recover phaseshift's
+        # integer truncation exactly; SAC headers have rounded dt and b.
+        from seispy.decon import RFTrace
+
+        if all(isinstance(tr, RFTrace) and scalar_instance(tr.stats.get('iter'))
+               and np.isfinite(tr.stats.iter)
+               and tr.stats.get('tshift') == rfsta.shift
+               and tr.stats.delta == rfsta.sampling
+               and tr.stats.npts == rfsta.rflength for tr in stream):
+            rfsta._vsapp_iter_timing = (
+                rfsta.sampling, rfsta.shift, int(rfsta.shift / rfsta.sampling),
+            )
         if stream_t is not None:
             rfsta.datat = np.zeros([rfsta.ev_num, rfsta.rflength])
             for i, tr in enumerate(stream_t):
                 rfsta.datat[i] = tr.data
         exec('rfsta.data{} = rfsta.data_prime'.format(rfsta.comp.lower()))
         return rfsta
+
+    def compute_vsapp(self, periods_s, *, reference='seispy-iter',
+                      deconvolution_npts=None, deconvolution_shift_samples=None,
+                      denominator_rtol=1e-10):
+        """Measure Vsapp for each radial P RF in the current event order.
+
+        Reads radial RFs, ray parameters and Gaussian factors from this
+        station; no Z/Z input is needed. The default ``reference='seispy-iter'``
+        constructs the discrete reference for original, unresampled RFs
+        without subsequent filtering or independent radial normalization.
+        For a tail-truncated RF, ``deconvolution_npts`` is its original input length.
+        These processing conditions cannot be inferred from SAC headers.
+
+        Native iterative RFTrace input preserves its original discrete
+        shift. For SAC input the default is nominal P alignment; if the
+        original ``int(tshift / dt)`` differed, provide that integer as
+        ``deconvolution_shift_samples``. Do not
+        calculate the original index from rounded SAC timing headers.
+
+        Events use their individual slownesses; do not first stack RFs or
+        replace their slownesses by a mean. The station is not modified.
+
+        See :func:`seispy.vsapp.compute_station_vsapp` for reference choices.
+        Returns :class:`seispy.vsapp.StationVsAppResult` with velocities in
+        km/s, periods in seconds, and slownesses in s/km.
+        """
+        from seispy.vsapp import compute_station_vsapp
+
+        return compute_station_vsapp(
+            self, periods_s, reference=reference,
+            deconvolution_npts=deconvolution_npts,
+            deconvolution_shift_samples=deconvolution_shift_samples,
+            denominator_rtol=denominator_rtol,
+        )
 
     def bin_stack(self, key='bazi', lim=[0, 360], val=10):
         """Stack RFs by bins of ``key`` with interval of ``val``
@@ -923,4 +969,3 @@ if __name__ == '__main__':
     rfsta = SACStation('/Users/xumijian/Codes/seispy-example/ex-ccp/RFresult/ZX.212')
     rfsta.jointani(2, 7, weight=[0.9, 0.1, 0.0])
     rfsta.ani.plot_polar()
-
