@@ -118,8 +118,21 @@ class TestRadialVsApp(unittest.TestCase):
                     times, radial, vertical, rayp=0.06, periods_s=[0.22, 0.25],
                 )
                 self.assert_curve_equal(actual, expected)
-        with self.assertRaises(VsAppError):
-            compute_vsapp(times, radial, rayp=0.06, periods_s=[0.22], f0=2.0)
+
+    def test_default_shift_rounds_non_grid_arrivals_without_changing_input(self):
+        # Test both sides of a sample and offsets exceeding the old 1e-5 tolerance.
+        for shift, index in ((5.00002, 100), (5.019, 100), (5.031, 101)):
+            with self.subTest(shift=shift):
+                times, radial, _ = self.native_pair(dt=0.05, shift=shift)
+                original_times, original_radial = times.copy(), radial.copy()
+                actual = compute_vsapp(times, radial, rayp=0.06,
+                                       periods_s=[0.11, 0.7, 2.0], f0=2.0)
+                expected = compute_vsapp(times, radial, rayp=0.06,
+                                         periods_s=[0.11, 0.7, 2.0], f0=2.0,
+                                         deconvolution_shift_samples=index)
+                self.assert_curve_equal(actual, expected)
+                np.testing.assert_array_equal(times, original_times)
+                np.testing.assert_array_equal(radial, original_radial)
 
     def test_inputs_are_not_mutated_and_result_arrays_are_owned(self):
         times, radial, _ = self.native_pair()

@@ -200,18 +200,24 @@ class DepModel(object):
         mod.vp, mod.vs, mod.rho = _layer2grid(mod.depths, mod.model_array)
         return mod
 
-    def vsapp_kernel(self, rayp, periods_s, *, method='iter', **kwargs):
+    def vsapp_kernel(self, rayp, periods_s, f0, *, method='iter', zero_halfspace=False,
+                     **kwargs):
         """Compute apparent Vs and its analytic derivative for this model.
 
         :param rayp: P-wave ray parameter in s/km.
         :param periods_s: Increasing positive half-widths of the cosine-squared
             measurement window, in seconds.
+        :param f0: Central frequency of the measurement window, in Hz.
         :param method: ``'iter'`` or ``'water'`` deconvolution.
+        :param zero_halfspace: Zero the last column of all returned Vs derivatives
+            for inversion, retaining the full forward response, defaults to False
+        :type zero_halfspace: bool, optional
         :param kwargs: Sampling, deconvolution and optional local Vp/rho slopes;
             see :func:`seispy.vsapp_kernel.vsapp_kernel`.
         :return: Kernel result with one Jacobian column per entry in ``self.vs``,
             including the final half-space. Vp, density and interfaces are held
             fixed unless local Vp/rho slopes are supplied explicitly.
+        :rtype: seispy.vsapp_kernel.VsappKernelResult
 
         A model built with :meth:`read_layer_model` is sampled onto its depth
         grid. Kernel columns describe that sampled model, not the original
@@ -219,7 +225,8 @@ class DepModel(object):
         """
         from seispy.vsapp_kernel import vsapp_kernel
 
-        return vsapp_kernel(self, rayp, periods_s, method=method, **kwargs)
+        return vsapp_kernel(self, rayp, periods_s, f0=f0, method=method,
+                            zero_halfspace=zero_halfspace, **kwargs)
 
     def _elevation(self):
         """

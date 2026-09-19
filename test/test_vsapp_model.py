@@ -43,9 +43,10 @@ class ModelVsAppTests(unittest.TestCase):
         model = layer_model()
         periods = np.array([.2, .5])
         with mock.patch('seispy.vsapp_kernel.vsapp_kernel') as wrapped:
-            result = model.vsapp_kernel(.06, periods, method='water', wlevel=.01)
+            result = model.vsapp_kernel(.06, periods, f0=2., method='water', wlevel=.01)
         self.assertIs(result, wrapped.return_value)
-        wrapped.assert_called_once_with(model, .06, periods, method='water', wlevel=.01)
+        wrapped.assert_called_once_with(model, .06, periods, f0=2., method='water',
+                                        zero_halfspace=False, wlevel=.01)
 
     def test_synthetic_curves_match_native_deconvolution(self):
         periods = np.array([.2, .5, 1.])
@@ -120,7 +121,7 @@ class ModelVsAppTests(unittest.TestCase):
         model = DepModel.read_layer_model(
             np.arange(4.), [2., 0.], [4., 7.], [2., 3.5], rho=[2.3, 2.8],
         )
-        kernel = model.vsapp_kernel(.06, [.2, .5], dt=.05, npts=512, shift=5.)
+        kernel = model.vsapp_kernel(.06, [.2, .5], f0=2., dt=.05, npts=512, shift=5.)
         self.assertEqual(kernel.jacobian.shape, (2, len(model.vs)))
         self.assertEqual(kernel.jacobian.shape[1], 4)
 

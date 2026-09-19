@@ -271,7 +271,7 @@ class SynSeis():
         return tuple(curves)
 
     def vsapp_kernel(self, periods_s, *, method='iter', shift=10., f0=2.,
-                     pre_filt=None, **kwargs):
+                     pre_filt=None, zero_halfspace=False, **kwargs):
         """Return analytic apparent-Vs kernels for the stored ray parameters.
 
         Arguments match :meth:`compute_vsapp`; ``vp_vs_derivative`` and
@@ -282,11 +282,17 @@ class SynSeis():
         column per sampled model layer, including the half-space. Iterative
         gradients are local to the selected spikes and stopping iteration.
         Existing model arrays and synthetic streams are unchanged.
+
+        :param zero_halfspace: Zero the last column of all returned Vs derivatives
+            for inversion, retaining the full forward response, defaults to False
+        :type zero_halfspace: bool, optional
+        :return: One plottable VsappKernelResult per stored ray parameter
+        :rtype: tuple[seispy.vsapp_kernel.VsappKernelResult]
         """
         self._check_vsapp_options(method, kwargs, kernel=True)
         return tuple(self.depmod.vsapp_kernel(
             rayp, periods_s, method=method, dt=self.dt, npts=self.npts,
-            shift=shift, f0=f0, pre_filt=pre_filt, **kwargs,
+            shift=shift, f0=f0, pre_filt=pre_filt, zero_halfspace=zero_halfspace, **kwargs,
         ) for rayp in self.rayp)
 
     def _check_vsapp_options(self, method, kwargs, kernel=False):

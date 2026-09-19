@@ -29,7 +29,7 @@ from seispy.vsapp import _compute_vsapp_from_components
 
 __all__ = [
     "vsapp_kernel",
-    "KernelResult",
+    "VsappKernelResult",
     "IterDeconResult",
     "forward_and_jacobian_iter",
     "forward_and_jacobian",
@@ -38,7 +38,20 @@ __all__ = [
 
 
 @dataclass(frozen=True)
-class KernelResult:
+class VsappKernelResult:
+    """Synthetic RFs, apparent Vs and its layer sensitivities.
+
+    ``jacobian[i, j]`` is dVsapp(T_i)/dVs_j, with shape (periods, layers)
+    and units (km/s)/(km/s). Columns include the final half-space. These
+    are derivatives with respect to whole-layer velocities, not sensitivity
+    per unit depth. ``periods_s`` and ``thickness_km`` retain independent
+    copies of the forward model's window half-widths and layer thicknesses.
+    The last thickness is zero and denotes the infinite half-space.
+    With ``diagnostics['zero_halfspace']`` enabled, the last columns of
+    ``jacobian``, ``dradial_dvs`` and ``dvertical_dvs`` are zeroed for inversion.
+    The synthetic RFs and apparent velocities retain the full model response.
+    """
+
     times: np.ndarray
     radial: np.ndarray
     vertical: np.ndarray
@@ -47,6 +60,99 @@ class KernelResult:
     dvertical_dvs: np.ndarray
     jacobian: np.ndarray
     diagnostics: dict
+    periods_s: np.ndarray
+    thickness_km: np.ndarray
+
+    def plot(self, ax=None, *, cmap='RdBu_r', vmax=None, max_depth=None,
+             colorbar=True, title=None, show=False):
+        """Plot the Vsapp sensitivity colormap against period and depth.
+
+        Depth increases downward from the top of the forward model. Each
+        cell shows the unscaled derivative for a whole model layer; values
+        are not divided by layer thickness or normalized by period. Period
+        cell edges are midpoints between the supplied window half-widths.
+        The color scale is symmetric about zero.
+
+        The final half-space is shown down to max_depth and labelled as
+        such. Its displayed extent is only a plotting convention, not an
+        additional finite model layer. By default it occupies the thickness
+        of the preceding layer, or 1 km for a homogeneous half-space.
+
+        :param ax: Axes to draw on. Create a new figure if None, defaults to None
+        :type ax: matplotlib.axes.Axes, optional
+        :param cmap: Matplotlib colormap, defaults to 'RdBu_r'
+        :type cmap: str or matplotlib.colors.Colormap, optional
+        :param vmax: Positive absolute color limit. None uses the largest
+            absolute sensitivity; colors span [-vmax, vmax], defaults to None
+        :type vmax: float, optional
+        :param max_depth: Maximum displayed depth in km below the model top.
+            None includes all finite layers and a half-space band, defaults to None
+        :type max_depth: float, optional
+        :param colorbar: Add a labelled colorbar, defaults to True
+        :type colorbar: bool, optional
+        :param title: Plot title, defaults to None
+        :type title: str, optional
+        :param show: Show the figure after drawing, defaults to False
+        :type show: bool, optional
+        :return: Figure and axes for further styling or saving with fig.savefig
+        :rtype: (matplotlib.figure.Figure, matplotlib.axes.Axes)
+        :raises ValueError: If coordinates, sensitivities or plot limits are invalid
+        """
+        import matplotlib.pyplot as plt
+
+        periods = _array(self.periods_s, 'periods_s')
+        thickness = _array(self.thickness_km, 'thickness_km')
+        if np.any(periods <= 0) or np.any(np.diff(periods) <= 0):
+            raise ValueError('periods_s must be positive and strictly increasing')
+        if np.any(thickness[:-1] <= 0) or thickness[-1] != 0:
+            raise ValueError('Finite layers need positive thickness; '
+                             'half-space thickness must be zero')
+        values = np.asarray(self.jacobian, dtype=float)
+        if values.shape != (periods.size, thickness.size) or not np.isfinite(values).all():
+            raise ValueError('jacobian must be finite with shape (periods, layers)')
+        limit = float(np.max(np.abs(values))) or 1.0
+        if vmax is not None:
+            limit = float(vmax)
+        if not np.isfinite(limit) or limit <= 0:
+            raise ValueError('vmax must be finite and positive')
+
+        layer_tops = np.r_[0., np.cumsum(thickness[:-1])]
+        halfspace_top = layer_tops[-1]
+        default_bottom = halfspace_top + (thickness[-2] if thickness.size > 1 else 1.)
+        bottom = default_bottom if max_depth is None else float(max_depth)
+        if not np.isfinite(bottom) or bottom <= 0:
+            raise ValueError('max_depth must be finite and positive')
+        depth_edges = np.r_[layer_tops, max(bottom, default_bottom)]
+        if periods.size == 1:
+            period_edges = np.array([periods[0] / 2, periods[0] * 1.5])
+        else:
+            period_edges = np.r_[max(0., periods[0] - (periods[1] - periods[0]) / 2),
+                                 (periods[:-1] + periods[1:]) / 2,
+                                 periods[-1] + (periods[-1] - periods[-2]) / 2]
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(7, 4.5), constrained_layout=True)
+        else:
+            fig = ax.figure
+        mesh = ax.pcolormesh(period_edges, depth_edges, values.T, shading='flat',
+                             cmap=cmap, vmin=-limit, vmax=limit, rasterized=True)
+        ax.set_xlabel('Period (s)')
+        ax.set_ylabel('Depth below model top (km)')
+        ax.set_xlim(period_edges[0], period_edges[-1])
+        ax.set_ylim(bottom, 0.)
+        if bottom > halfspace_top:
+            if halfspace_top > 0:
+                ax.axhline(halfspace_top, color='0.35', linewidth=0.7, linestyle='--')
+            ax.text(.98, (halfspace_top + bottom) / 2, 'Half-space',
+                    transform=ax.get_yaxis_transform(), ha='right', va='center',
+                    fontsize='small', bbox=dict(facecolor='white', alpha=.8, edgecolor='none'))
+        if colorbar:
+            fig.colorbar(mesh, ax=ax, label=r'$\partial V_{S,\mathrm{app}}/\partial V_{S,j}$')
+        if title is not None:
+            ax.set_title(title)
+        if show:
+            plt.show()
+        return fig, ax
 
 
 @njit(cache=True)
@@ -251,7 +357,7 @@ def _array(value, name, length=None):
 def forward_and_jacobian(
     vp, vs, rho, thickness, *, p=0.06, dt=0.05, npts=1024, shift=10.0,
     f0=2.0, wlevel=0.05, periods=None, vp_vs_derivative=None, rho_vs_derivative=None,
-    pre_filt=None,
+    pre_filt=None, zero_halfspace=False,
 ):
     """Return a water-level synthetic RF, Vsapp, and exact local Vs Jacobians.
 
@@ -263,7 +369,13 @@ def forward_and_jacobian(
     Times are relative to P; the actual length follows SeisPy's next_pow_2.
     The derivative is valid on the selected water-level/max branches; inspect
     diagnostics['branch_warning'] before interpreting it at a branch boundary.
+
+    :param zero_halfspace: Zero the half-space column of all returned Vs
+        derivatives without changing the forward response, defaults to False
+    :type zero_halfspace: bool, optional
     """
+    if not isinstance(zero_halfspace, (bool, np.bool_)):
+        raise TypeError('zero_halfspace must be a bool')
     vs = _array(vs, "vs")
     nl = len(vs)
     vp, rho, h = (_array(a, name, nl) for a, name in
@@ -322,8 +434,13 @@ def forward_and_jacobian(
                         "derivative_method": "analytic matrix derivatives and product rule",
                         "deconvolution": "water",
                         "prefilter": None if pre_filt is None else list(pre_filt)})
-    return KernelResult(times, radial, vertical, curve.vs_km_s, d_radial, d_vertical,
-                        jacobian, diagnostics)
+    diagnostics['zero_halfspace'] = bool(zero_halfspace)
+    if zero_halfspace:
+        jacobian[:, -1] = 0.
+        d_radial[:, -1] = 0.
+        d_vertical[:, -1] = 0.
+    return VsappKernelResult(times, radial, vertical, curve.vs_km_s, d_radial, d_vertical,
+                             jacobian, diagnostics, periods.copy(), h.copy())
 
 
 @dataclass(frozen=True)
@@ -490,7 +607,7 @@ def deconit_tangent(
 def forward_and_jacobian_iter(
     vp, vs, rho, thickness, *, p=0.06, dt=0.05, npts=1024, shift=10.0, f0=2.0,
     itmax=400, minderr=0.001, periods=None, vp_vs_derivative=None, rho_vs_derivative=None,
-    pre_filt=None,
+    pre_filt=None, zero_halfspace=False,
 ):
     """Synthetic iterative P-RFs and local fixed-branch Vsapp Jacobian.
 
@@ -499,7 +616,13 @@ def forward_and_jacobian_iter(
     Layers/p/filter/iteration tolerances are fixed. Optional pre_filt uses
     the same second-order zero-phase bandpass as SynSeis.filter.
     Diagnostic path stability MUST be checked when interpreting finite changes.
+
+    :param zero_halfspace: Zero the half-space column of all returned Vs
+        derivatives without changing the forward response, defaults to False
+    :type zero_halfspace: bool, optional
     """
+    if not isinstance(zero_halfspace, (bool, np.bool_)):
+        raise TypeError('zero_halfspace must be a bool')
     vs = _array(vs, "vs")
     nl = len(vs)
     vp, rho, h = (_array(a, name, nl) for a, name in
@@ -562,8 +685,14 @@ def forward_and_jacobian_iter(
             f"{name}_stop_margins": result.stop_margins.tolist(),
             f"{name}_degenerate_tangent_iterations": result.degenerate_tangent_iterations,
         })
-    return KernelResult(times, radial.rf, vertical.rf, curve.vs_km_s,
-                        radial.jacobian, vertical.jacobian, jacobian, diagnostics)
+    diagnostics['zero_halfspace'] = bool(zero_halfspace)
+    if zero_halfspace:
+        jacobian[:, -1] = 0.
+        radial.jacobian[:, -1] = 0.
+        vertical.jacobian[:, -1] = 0.
+    return VsappKernelResult(times, radial.rf, vertical.rf, curve.vs_km_s,
+                             radial.jacobian, vertical.jacobian, jacobian, diagnostics,
+                             periods.copy(), h.copy())
 
 def _prefilter_waveforms(r, z, dr, dz, dt, pre_filt):
     """Apply the fixed SynSeis.filter bandpass to primal and tangent arrays."""
@@ -585,7 +714,7 @@ def _prefilter_waveforms(r, z, dr, dz, dt, pre_filt):
             np.column_stack([apply(column) for column in dz.T]))
 
 
-def vsapp_kernel(depmod, rayp, periods_s, *, method="iter", **kwargs):
+def vsapp_kernel(depmod, rayp, periods_s, *, method="iter", zero_halfspace=False, **kwargs):
     """Return RFs, Vsapp and all Vs derivatives for an existing DepModel.
 
     rayp is in s/km; periods_s are cosine-squared window half-widths in s.
@@ -594,6 +723,12 @@ def vsapp_kernel(depmod, rayp, periods_s, *, method="iter", **kwargs):
     method-specific settings). pre_filt=None means no front-end bandpass.
     Kernel columns correspond to depmod.vs, including any grid resampling
     performed by DepModel.read_layer_model. The model is never modified.
+
+    :param zero_halfspace: Set the last columns of jacobian, dradial_dvs and
+        dvertical_dvs to zero. Forward responses are unchanged, defaults to False
+    :type zero_halfspace: bool, optional
+    :return: Synthetic RFs, apparent Vs and a plottable sensitivity matrix
+    :rtype: seispy.vsapp_kernel.VsappKernelResult
     """
     from seispy.core.depmodel import DepModel
 
@@ -603,7 +738,7 @@ def vsapp_kernel(depmod, rayp, periods_s, *, method="iter", **kwargs):
         raise ValueError("method must be 'iter' or 'water'")
     function = forward_and_jacobian_iter if method == "iter" else forward_and_jacobian
     result = function(depmod.vp, depmod.vs, depmod.rho, depmod.thickness,
-                      p=rayp, periods=periods_s, **kwargs)
+                      p=rayp, periods=periods_s, zero_halfspace=zero_halfspace, **kwargs)
     result.diagnostics.update({
         "rayp_s_km": float(rayp),
         "periods_s": np.asarray(periods_s, dtype=float).tolist(),

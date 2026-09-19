@@ -107,14 +107,15 @@ def seispy_iter_vertical(
     that implementation. npts defaults to the saved trace length. If the
     deconvolution input had another length, supply it explicitly.
 
-    Without ``deconvolution_shift_samples``, reconstruct the nominal P-aligned
-    sample. To reproduce native ``phaseshift`` at a floating-point boundary,
+    Without ``deconvolution_shift_samples``, round the nominal P arrival to
+    the nearest sample, including arrivals between samples. The input time
+    axis and RF are unchanged. To reproduce native ``phaseshift`` at a
+    floating-point boundary,
     supply ``int(original_tshift / original_dt)`` instead. For example,
     ``int(0.3 / 0.1)`` is 2, although the nominal aligned sample is 3.
     SAC headers round their timing values; do not infer the original index
-    with ``int`` from SAC's approximate delta. An explicit index also allows
-    a non-grid-aligned nominal P arrival. The RF and reference retain the
-    original discrete shift; no additional alignment is applied.
+    with ``int`` from SAC's approximate delta. An explicit index overrides
+    automatic rounding and retains the original discrete shift.
     """
     times = time_axis(time_s)
     factor = positive(gaussian_factor, "gaussian_factor")
@@ -126,9 +127,6 @@ def seispy_iter_vertical(
     if deconvolution_shift_samples is None:
         shift_samples = -times[0] / dt
         shift = int(round(shift_samples))
-        if not np.isclose(shift_samples, shift, atol=1e-5, rtol=0):
-            raise VsAppError('SeisPy iterative reference requires P aligned to a sample '
-                             'or an explicit deconvolution_shift_samples')
     else:
         if (isinstance(deconvolution_shift_samples, (bool, np.bool_))
                 or not isinstance(deconvolution_shift_samples, (int, np.integer))
@@ -190,8 +188,8 @@ def compute_vsapp(
     the original input length as ``deconvolution_npts``. An explicit
     ``deconvolution_shift_samples=int(original_tshift / original_dt)`` retains
     SeisPy's integer truncation at floating-point sample boundaries; otherwise
-    the nominal P-aligned sample is used. Do not infer that index by truncating
-    rounded SAC timing headers.
+    the nominal P arrival is rounded to the nearest sample. Do not infer that
+    index by truncating rounded SAC timing headers.
 
     ``'gaussian-area'`` and ``'gaussian-peak'`` select ideal unit-area and
     unit-peak references, respectively. For the latter, R must have been
@@ -307,6 +305,60 @@ class StationVsAppResult:
     vs0_status: tuple[str, ...]
     reference: str
 
+    def plot(self, ax=None, *, title: str | None = None, show: bool = False):
+        """Plot one station's mean Vsapp(T) and its event-to-event scatter.
+
+        The red curve is the arithmetic mean over events at each T; the gray
+        band is mean +/- one population standard deviation (ddof=0), as in
+        Yao et al. (2022), Figure 2. An event contributes only if its values
+        are finite and its status is ``'ok'`` at every requested period.
+        If any period fails, the entire event is excluded from the plot so
+        all periods use the same set of events. One accepted event gives a
+        zero-width band. Stored measurements and QC statuses are preserved.
+        No horizontal reference line is drawn. This is event scatter, not
+        the standard error of the mean.
+
+        :param ax: Axes to draw on. Create a new figure if None, defaults to None
+        :type ax: matplotlib.axes.Axes, optional
+        :param title: Plot title, for example the station name, defaults to None
+        :type title: str, optional
+        :param show: Show the figure after drawing, defaults to False
+        :type show: bool, optional
+        :return: Figure and axes for further styling or saving with ``fig.savefig(...)``
+        :rtype: (matplotlib.figure.Figure, matplotlib.axes.Axes)
+        :raises VsAppError: If no event is valid at every requested period
+
+        Example::
+
+            result = station.compute_vsapp(periods)
+            fig, ax = result.plot(title=station.staname)
+            fig.savefig('station_vsapp.png', dpi=300, bbox_inches='tight')
+        """
+        import matplotlib.pyplot as plt
+
+        valid_events = np.all((self.status == 'ok') & np.isfinite(self.vs_km_s), axis=1)
+        if not np.any(valid_events):
+            raise VsAppError('No event is valid at every requested period for the Vsapp plot')
+        values = self.vs_km_s[valid_events]
+        mean = values.mean(axis=0)
+        std = values.std(axis=0, ddof=0)
+
+        if ax is None:
+            fig, ax = plt.subplots(figsize=(6, 4), constrained_layout=True)
+        else:
+            fig = ax.figure
+        ax.fill_between(self.periods_s, mean - std, mean + std,
+                        color='0.75', linewidth=0, label=r'$\pm 1\sigma$', zorder=1)
+        ax.plot(self.periods_s, mean, color='red', linewidth=1.5, label='Mean', zorder=2)
+        ax.set_xlabel('Period (s)')
+        ax.set_ylabel(r'$V_{S,\mathrm{app}}$ (km/s)')
+        ax.set_xlim(0, self.periods_s[-1])
+        if title is not None:
+            ax.set_title(title)
+        if show:
+            plt.show()
+        return fig, ax
+
 
 def compute_station_vsapp(
     station,
@@ -341,8 +393,8 @@ def compute_station_vsapp(
 
     Native iterative RFTrace streams preserve their discrete shift while
     station sampling and shift are unchanged. SAC input has no such timing
-    provenance and defaults to nominal P alignment. If the original
-    ``int(tshift / dt)`` differs from the nominal aligned sample, supply it
+    provenance and rounds the nominal P arrival to the nearest sample. If the
+    original ``int(tshift / dt)`` differs from the nominal aligned sample, supply it
     as ``deconvolution_shift_samples``. Use the
     original deconvolution timing, not rounded SAC headers, for that index.
     """

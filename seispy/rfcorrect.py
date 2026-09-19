@@ -210,8 +210,9 @@ class RFStation(object):
         These processing conditions cannot be inferred from SAC headers.
 
         Native iterative RFTrace input preserves its original discrete
-        shift. For SAC input the default is nominal P alignment; if the
-        original ``int(tshift / dt)`` differed, provide that integer as
+        shift. For SAC input the nominal P arrival is automatically rounded
+        to the nearest sample; if the original ``int(tshift / dt)`` differed,
+        provide that integer as
         ``deconvolution_shift_samples``. Do not
         calculate the original index from rounded SAC timing headers.
 

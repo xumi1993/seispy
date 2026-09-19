@@ -73,6 +73,60 @@ See [Seispy documentation](https://seispy.xumijian.me/installation.html) in deta
   [Xu et al., 2018 EPSL]: https://www.sciencedirect.com/science/article/pii/S0012821X17306921?via%3Dihub
 
 
+## Plot apparent Vs for one station
+
+```python
+result = station.compute_vsapp(periods)
+fig, ax = result.plot(title=station.staname)
+fig.savefig('station_vsapp.png', dpi=300, bbox_inches='tight')
+```
+
+The red curve shows the mean across valid events at each smoothing half-window
+`T` (`Period` on the horizontal axis); the gray band shows +/- one standard
+deviation (`ddof=0`), following Figure 2 of Yao et al. (2022). No reference line
+is drawn. An event is excluded from the entire plot if any requested T has a
+nonfinite value or a status other than `"ok"`. All periods therefore use the
+same accepted events. A single accepted event gives a zero-width band; if none
+remain, plotting raises `VsAppError`.
+Use `result.plot(ax=ax)` to draw on an existing axes, or `show=True` to display
+the figure explicitly. The stored measurements remain unchanged.
+
+## Plot apparent-Vs sensitivity kernels
+
+```python
+kernel = model.vsapp_kernel(rayp=0.06, periods_s=periods, f0=3.5)
+fig, ax = kernel.plot(title='Vsapp sensitivity', max_depth=20)
+fig.savefig('vsapp_kernel.png', dpi=300, bbox_inches='tight')
+```
+
+Kernel calculations return `seispy.vsapp_kernel.VsappKernelResult` (renamed from
+`KernelResult`). Its `plot()` method shows period horizontally and depth below
+the model top vertically, increasing downward. The red-blue color scale is
+centered on zero and displays `jacobian.T`: the derivative of Vsapp with respect
+to each whole-layer Vs, without thickness or per-period normalization.
+`periods_s` and `thickness_km` store independent copies of the calculation's
+coordinates, including the final zero-thickness half-space.
+
+The labelled half-space band extends to `max_depth` for display only. Without
+`max_depth`, its displayed thickness matches the preceding layer (1 km for a
+homogeneous half-space). Use `vmax` to set a common symmetric color range across
+plots, `cmap` to choose another colormap, `colorbar=False` to omit the colorbar,
+or `ax=ax` to draw on existing axes. Display is opt-in with `show=True`.
+
+To exclude half-space sensitivity from inversion and the colormap, pass
+`zero_halfspace=True` when calculating the kernel:
+
+```python
+kernel = model.vsapp_kernel(0.06, periods, f0=3.5, zero_halfspace=True)
+fig, ax = kernel.plot()
+```
+
+This sets the last column of `jacobian`, `dradial_dvs` and `dvertical_dvs`
+to zero, preserving their shapes and all finite-layer derivatives. The model,
+synthetic RFs and Vsapp values are unchanged. The option defaults to `False`
+and is also accepted by `SynSeis.vsapp_kernel` and both array-level forward
+functions. The result records the choice in `diagnostics['zero_halfspace']`.
+
 ## Commands
 ### Receiver Functions
  * `prf`: Calculate PRFs for a station.

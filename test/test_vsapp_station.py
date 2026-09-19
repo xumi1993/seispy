@@ -168,13 +168,43 @@ class TestStationVsApp(unittest.TestCase):
     def test_explicit_shift_index_accepts_non_grid_arrival(self):
         radial, vertical = self.native_iterative_pair(0.1, 0.35)
         times = np.arange(len(radial)) * 0.1 - 0.35
-        with self.assertRaises(VsAppError):
-            seispy_iter_vertical(times, 2.0)
+        rounded = int(round(-times[0] / np.median(np.diff(times))))
+        np.testing.assert_array_equal(
+            seispy_iter_vertical(times, 2.0),
+            seispy_iter_vertical(times, 2.0, deconvolution_shift_samples=rounded),
+        )
         reconstructed = seispy_iter_vertical(times, 2.0, deconvolution_shift_samples=3)
         np.testing.assert_allclose(reconstructed, vertical.data, rtol=2e-12, atol=2e-12)
         for invalid in (-1, 512, True, np.bool_(False), 1.5):
             with self.subTest(index=invalid), self.assertRaises(VsAppError):
                 seispy_iter_vertical(times, 2.0, deconvolution_shift_samples=invalid)
+
+    def test_sac_station_automatically_rounds_non_grid_arrivals(self):
+        for shift, index in ((5.00002, 100), (5.019, 100), (5.031, 101)):
+            with self.subTest(shift=shift), TemporaryDirectory() as directory:
+                path = Path(directory)
+                radial, _ = self.native_iterative_pair(0.05, shift)
+                SACTrace(
+                    data=radial.data.astype(np.float32), delta=0.05, b=-shift,
+                    knetwk='XX', kstnm='TEST', stla=0.0, stlo=0.0, stel=0.0,
+                    user0=0.06, user1=2.0,
+                ).write(str(path / 'EVENT_P_R.sac'))
+                (path / 'XX.TESTfinallist.dat').write_text(
+                    'EVENT P 0 0 10 60 20 0.06 6 2.0\n'
+                )
+                station = RFStation(str(path), only_r=True)
+                self.assertFalse(hasattr(station, '_vsapp_iter_timing'))
+                before_time = station.time_axis.copy()
+                before_data = station.data_prime.copy()
+                actual = station.compute_vsapp([0.11, 0.7, 2.0])
+                expected = station.compute_vsapp(
+                    [0.11, 0.7, 2.0], deconvolution_shift_samples=index,
+                )
+                np.testing.assert_array_equal(actual.vs_km_s, expected.vs_km_s)
+                np.testing.assert_array_equal(actual.vs0_km_s, expected.vs0_km_s)
+                self.assertTrue(np.all(actual.status == 'ok'))
+                np.testing.assert_array_equal(station.time_axis, before_time)
+                np.testing.assert_array_equal(station.data_prime, before_data)
 
     def test_sac_station_nominal_and_explicit_original_shift(self):
         for dt, shift, periods, index in (
