@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def smooth(x, half_len=5, window='flat'):
+def smooth(x, half_len=5, window='flat', sigma=None):
     """smooth the data using a window with requested size.
 
     This method is based on the convolution of a scaled window with the signal.
@@ -11,9 +11,12 @@ def smooth(x, half_len=5, window='flat'):
 
     input:
         x: the input signal
-        helf_len: the half dimension of the smoothing window; should be an odd integer
-        window: the type of window from 'flat', 'hanning', 'hamming', 'bartlett', 'blackman'
+        half_len: nonnegative integer half-width; the window has 2*half_len+1 samples
+        window: 'flat', 'hanning', 'hamming', 'bartlett', 'blackman', or 'gaussian'
             flat window will produce a moving average smoothing.
+        sigma: positive Gaussian standard deviation in samples; required only
+            for window='gaussian'. Gaussian smoothing uses reflected boundaries
+            and also supports a window longer than the input.
 
     output:
         the smoothed signal
@@ -38,6 +41,19 @@ def smooth(x, half_len=5, window='flat'):
     if x.ndim != 1:
         raise ValueError("smooth only accepts 1 dimension arrays.")
 
+    if window == 'gaussian':
+        if (isinstance(half_len, (bool, np.bool_))
+                or not isinstance(half_len, (int, np.integer)) or half_len < 0):
+            raise ValueError('half_len must be a nonnegative integer')
+        if sigma is None or not np.isfinite(sigma) or sigma <= 0:
+            raise ValueError('Gaussian sigma must be finite and positive')
+        if x.size == 0:
+            raise ValueError('Input vector must not be empty')
+        offsets = np.arange(-half_len, half_len + 1) / sigma
+        weights = np.exp(-0.5 * offsets**2)
+        padded = np.pad(x, half_len, mode='reflect')
+        return np.convolve(padded, weights / weights.sum(), mode='valid')
+
     if x.size < window_len:
         raise ValueError("Input vector needs to be bigger than window size.")
 
@@ -46,7 +62,7 @@ def smooth(x, half_len=5, window='flat'):
 
     if window not in ['flat', 'hanning', 'hamming', 'bartlett', 'blackman']:
         raise ValueError("Window is on of 'flat', 'hanning', 'hamming',"
-                         "'bartlett', 'blackman'")
+                         "'bartlett', 'blackman', 'gaussian'")
     s = np.r_[x[window_len-1:0:-1], x, x[-1:-window_len:-1]]
     if window == 'flat':
         w = np.ones(window_len, 'd')  # moving average
