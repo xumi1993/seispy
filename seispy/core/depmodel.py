@@ -446,7 +446,7 @@ class DepModel(object):
             radius = self.R
         else:
             radius = 6371.
-        raylen = (self.dz * radius) / (np.sqrt(((radius / self.vs) ** 2) - (rayp ** 2)) * vel)
+        raylen = (self.dz * radius) / (np.sqrt(((radius / vel) ** 2) - (rayp ** 2)) * vel)
         return raylen
 
     @classmethod
