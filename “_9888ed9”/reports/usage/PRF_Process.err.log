@@ -1,0 +1,63 @@
+Traceback (most recent call last):
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/jupyter_core/utils/__init__.py", line 154, in wrapped
+    asyncio.get_running_loop()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+RuntimeError: no running event loop
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/jupyter_cache/executors/utils.py", line 58, in single_nb_execution
+    executenb(
+    ~~~~~~~~~^
+        nb,
+        ^^^
+    ...<4 lines>...
+        **kwargs,
+        ^^^^^^^^^
+    )
+    ^
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/nbclient/client.py", line 1319, in execute
+    return NotebookClient(nb=nb, resources=resources, km=km, **kwargs).execute()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/jupyter_core/utils/__init__.py", line 158, in wrapped
+    return loop.run_until_complete(inner)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+        cell, index, execution_count=self.code_cells_executed + 1
+    )
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/usr/share/miniconda/envs/docs/lib/python3.13/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+f0 = 2.0
+itmax = 400
+minderr = 0.001
+
+rf = RFTrace.deconvolute(st_TRZ[1], st_TRZ[2], method='iter',
+                         tshift=shift, f0=f0, itmax=itmax, minderr=minderr)
+rf.plot(show=False, type='relative',
+        starttime=rf.stats.starttime+shift,
+        endtime=rf.stats.starttime+shift+30)
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mTypeError[39m                                 Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[8][39m[32m, line 5[39m
+[32m      2[39m itmax = [32m400[39m
+[32m      3[39m minderr = [32m0.001[39m
+[32m----> [39m[32m5[39m rf = [43mRFTrace[49m[43m.[49m[43mdeconvolute[49m[43m([49m[43mst_TRZ[49m[43m[[49m[32;43m1[39;49m[43m][49m[43m,[49m[43m [49m[43mst_TRZ[49m[43m[[49m[32;43m2[39;49m[43m][49m[43m,[49m[43m [49m[43mmethod[49m[43m=[49m[33;43m'[39;49m[33;43miter[39;49m[33;43m'[39;49m[43m,[49m
+[32m      6[39m [43m                         [49m[43mtshift[49m[43m=[49m[43mshift[49m[43m,[49m[43m [49m[43mf0[49m[43m=[49m[43mf0[49m[43m,[49m[43m [49m[43mitmax[49m[43m=[49m[43mitmax[49m[43m,[49m[43m [49m[43mminderr[49m[43m=[49m[43mminderr[49m[43m)[49m
+[32m      7[39m rf.plot(show=[38;5;28;01mFalse[39;00m, [38;5;28mtype[39m=[33m'[39m[33mrelative[39m[33m'[39m,
+[32m      8[39m         starttime=rf.stats.starttime+shift,
+[32m      9[39m         endtime=rf.stats.starttime+shift+[32m30[39m)
+
+[31mTypeError[39m: RFTrace.deconvolute() got an unexpected keyword argument 'method'
+
